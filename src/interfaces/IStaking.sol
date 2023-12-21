@@ -9,7 +9,12 @@ interface IStaking {
      * @param pauseAccount Address who can pause/unpause the Staking contract.
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
      */
-    function initialize(address pauseAccount, address oracleAccount) external;
+    function initialize(
+        address pauseAccount,
+        address oracleAccount,
+        address chips,
+        address token
+    ) external;
 
     /**
      * @notice Pauses interaction with the Staking contract.
@@ -28,9 +33,15 @@ interface IStaking {
     /**
      * @notice Create a node named `name` with reward address `rewardAddress`.
      * @param name Human-readable name.
+     * @param description Description of node.
      * @param rewardAddress Address which receives rewards for this operator.
+     * @return nodeId The new created node id.
      */
-    function createNode(string calldata name, address rewardAddress) external;
+    function createNode(
+        string calldata name,
+        string calldata description,
+        address rewardAddress
+    ) external returns (uint256 nodeId);
 
     /**
      * @notice Delete a node`.
@@ -87,6 +98,20 @@ interface IStaking {
      * @dev periodically called.
      */
     function distributeRewards() external;
+
+    /**
+     * @notice Gets node info by node id.
+     * @param nodeId Node id to query.
+     * @return DataTypes.Node Node info.
+     */
+    function getNodeById(uint256 nodeId) external view returns (DataTypes.Node memory);
+
+    /**
+     * @notice Gets node info by node address.
+     * @param addr Node address to query.
+     * @return DataTypes.Node Node info.
+     */
+    function getNodeByAddr(address addr) external view returns (DataTypes.Node memory);
 
     /**
      * @notice Gets all nodes info.

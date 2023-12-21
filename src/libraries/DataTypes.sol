@@ -7,8 +7,10 @@ pragma solidity 0.8.18;
  */
 library DataTypes {
     struct Node {
+        uint256 id;
         address account;
         string name;
+        string description;
         address rewardAddress;
     }
 }
