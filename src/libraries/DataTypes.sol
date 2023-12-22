@@ -11,6 +11,10 @@ library DataTypes {
         uint256 id;
         /// @notice address of the node operator
         address account;
+        /// @notice whether the node is public good or not
+        bool publicGood;
+        /// @notice tax percentage measured in basis points.
+        uint40 taxFraction;
         /// @notice name of the node
         string name;
         /// @notice description of the node
@@ -32,7 +36,7 @@ library DataTypes {
     struct UnstakeRequest {
         /// @notice address that can claim request
         address owner;
-        /// @notice flag if the request was claimed
+        /// @notice flag indicating if the request was claimed
         bool claimed;
         /// @notice block.timestamp when the request was created
         uint40 timestamp;
@@ -43,7 +47,7 @@ library DataTypes {
     struct UndelegateRequest {
         /// @notice address that can claim request
         address owner;
-        /// @notice flag if the request was claimed
+        /// @notice flag indicating if the request was claimed
         bool claimed;
         /// @notice block.timestamp when the request was created
         uint40 timestamp;

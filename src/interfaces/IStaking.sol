@@ -40,12 +40,16 @@ interface IStaking {
      * @notice Create a node named `name` with reward address `rewardAddress`.
      * @param name Human-readable name.
      * @param description Description of node.
+     * @param publicGood Whether the node is public good or not
+     * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
      * @param rewardAddress Address which receives rewards for this operator.
      * @return nodeId The new created node id.
      */
     function createNode(
         string calldata name,
         string calldata description,
+        bool publicGood,
+        uint40 taxFraction,
         address rewardAddress
     ) external returns (uint256 nodeId);
 
@@ -60,7 +64,14 @@ interface IStaking {
      * @param nodeAddr The address of node to change.
      * @param rewardAddress The new rewardAddress to set.
      */
-    function setNodeOperatorRewardAddress(address nodeAddr, address rewardAddress) external;
+    function setNodeRewardAddress(address nodeAddr, address rewardAddress) external;
+
+    /**
+     * @notice Change tax fraction of the node.
+     * @param nodeAddr The address of node to change.
+     * @param taxFraction The tax fraction to set.
+     */
+    function setNodeTax(address nodeAddr, uint40 taxFraction) external;
 
     /**
      * @notice Deposit tokens for node operator.

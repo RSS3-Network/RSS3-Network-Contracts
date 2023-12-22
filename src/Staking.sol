@@ -88,6 +88,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function createNode(
         string calldata name,
         string calldata description,
+        bool publicGood,
+        uint40 taxFraction,
         address rewardAddress
     ) external override returns (uint256 nodeId) {
         nodeId = _nodeAddrToId[msg.sender];
@@ -103,6 +105,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         node.account = msg.sender;
         node.name = name;
         node.description = description;
+        node.publicGood = publicGood;
+        node.taxFraction = taxFraction;
         node.rewardAddress = rewardAddress;
     }
 
@@ -126,15 +130,25 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function setNodeOperatorRewardAddress(
-        address nodeAddr,
-        address rewardAddress
-    ) external override {
+    function setNodeRewardAddress(address nodeAddr, address rewardAddress) external override {
         // can't update a node not owned
         if (msg.sender != nodeAddr) revert ErrCallerNotNodeOwner();
 
         uint256 nodeId = _nodeAddrToId[nodeAddr];
+        if (nodeId == 0) revert ErrNodeNotExists();
+
         _nodes[nodeId].rewardAddress = rewardAddress;
+    }
+
+    /// @inheritdoc IStaking
+    function setNodeTax(address nodeAddr, uint40 taxFraction) external override {
+        // can't update a node not owned
+        if (msg.sender != nodeAddr) revert ErrCallerNotNodeOwner();
+
+        uint256 nodeId = _nodeAddrToId[nodeAddr];
+        if (nodeId == 0) revert ErrNodeNotExists();
+
+        _nodes[nodeId].taxFraction = taxFraction;
     }
 
     /// @inheritdoc IStaking
@@ -262,5 +276,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             res[i] = _nodes[nodeId];
         }
         return res;
+    }
+
+    /**
+     * @dev The denominator with which to interpret the tax as a fraction. Defaults to 10000 so tax is expressed in basis points.
+     */
+    function _taxDenominator() internal pure virtual returns (uint96) {
+        return 10000;
     }
 }
