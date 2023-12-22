@@ -8,12 +8,18 @@ interface IStaking {
      * @notice Initializes the Staking contract.
      * @param pauseAccount Address who can pause/unpause the Staking contract.
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
+     * @param chips Chips contract.
+     * @param token Staking token contract.
+     * @param stakeUnbondingPeriod Time in seconds a node needs to wait to withdraw its stake
+     * @param delegateUnbondingPeriod Time in seconds a user needs to wait to withdraw its stake
      */
     function initialize(
         address pauseAccount,
         address oracleAccount,
         address chips,
-        address token
+        address token,
+        uint256 stakeUnbondingPeriod,
+        uint256 delegateUnbondingPeriod
     ) external;
 
     /**
@@ -65,8 +71,9 @@ interface IStaking {
     /**
      * @notice Request unstake tokens from node operator.
      * @param amount Amount of tokens to unstake.
+     * @return requestId The created unstake request id
      */
-    function requestUnstake(uint256 amount) external;
+    function requestUnstake(uint256 amount) external returns (uint256 requestId);
 
     /**
      * @notice Claim a batch of unstake requests.
@@ -77,16 +84,24 @@ interface IStaking {
      * @notice Delegate tokens to a node operator.
      * @param nodeAddr The address of node to delegate.
      * @param amount Amount of tokens to delegate.
-     * @return uint256 The new minted chips token id and amount.
+     * @return fromTokenId The start of new minted chips token ids.
+     * @return toTokenId The end of new minted chips token ids.
      */
-    function delegate(address nodeAddr, uint256 amount) external returns (uint256, uint256);
+    function delegate(
+        address nodeAddr,
+        uint256 amount
+    ) external returns (uint256 fromTokenId, uint256 toTokenId);
 
     /**
-     * @notice Request undelegate tokens from a node operator.
-     * @param chipsId The token id of chips NFT.
-     * @param amount Amount of chips NFT to undelegate.
+     * @notice Request undelegating tokens from a node operator.
+     * @param fromTokenId The start of chips token ids for undelegating.
+     * @param toTokenId The end of chips token ids for undelegating.
+     * @return requestId The created undelegate request id.
      */
-    function requestUndelegate(uint256 chipsId, uint256 amount) external returns (uint256);
+    function requestUndelegate(
+        uint256 fromTokenId,
+        uint256 toTokenId
+    ) external returns (uint256 requestId);
 
     /**
      * @notice Claim a batch of undelegate requests.
@@ -97,7 +112,11 @@ interface IStaking {
      * @notice Updates accounting stats and distribute rewards.
      * @dev periodically called.
      */
-    function distributeRewards() external;
+    function distributeRewards(
+        uint256[] calldata nodeIds,
+        uint256[] calldata operatorPoolRewards,
+        uint256[] calldata rewardPoolRewards
+    ) external;
 
     /**
      * @notice Gets node info by node id.
