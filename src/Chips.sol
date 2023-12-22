@@ -2,11 +2,13 @@
 pragma solidity 0.8.18;
 
 import {ErrCallerNotStaking} from "./libraries/Error.sol";
-
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {
+    ERC721Consecutive
+} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Consecutive.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-contract Chips is Initializable, ERC1155URIStorage {
+contract Chips is Initializable, ERC721Consecutive {
     address internal _staking;
 
     modifier onlyStaking() {
@@ -14,7 +16,7 @@ contract Chips is Initializable, ERC1155URIStorage {
         _;
     }
 
-    constructor() ERC1155("") {
+    constructor() ERC721("RSS3 Chips", "Chips") {
         _disableInitializers();
     }
 
@@ -22,29 +24,15 @@ contract Chips is Initializable, ERC1155URIStorage {
         _staking = staking_;
     }
 
-    function setURI(uint256 tokenId, string memory tokenURI) public onlyStaking {
-        _setURI(tokenId, tokenURI);
+    function mint(address account, uint256 id) public onlyStaking {
+        _mint(account, id);
     }
 
-    function mint(
-        address account,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) public onlyStaking {
-        _mint(account, id, amount, data);
+    function mintBatch(address to, uint96 batchSize) public onlyStaking returns (uint256) {
+        return _mintConsecutive(to, batchSize);
     }
 
-    function mintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) public onlyStaking {
-        _mintBatch(to, ids, amounts, data);
-    }
-
-    function uri(uint256 tokenId) public view override returns (string memory) {
-        return super.uri(tokenId);
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        return super.tokenURI(tokenId);
     }
 }
