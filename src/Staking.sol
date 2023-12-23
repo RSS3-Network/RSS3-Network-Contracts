@@ -178,12 +178,35 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.UnstakeRequest storage request = _unstakeQueue[requestId];
         request.timestamp = uint40(block.timestamp);
         request.owner = msg.sender;
-        request.rewards = _getOperatorPoolRewards(nodeId);
+        request.unstakedAmount = amount;
+
+        // withdraw operator pool rewards
+        _withdrawOperatorPoolRewards(nodeId);
+    }
+
+    /// @inheritdoc IStaking
+    function withdrawOperatorPoolRewards(address nodeAddr) external override {
+        uint256 nodeId = _nodeAddrToId[nodeAddr];
+        if (nodeId == 0) revert ErrNodeNotExists();
+
+        _withdrawOperatorPoolRewards(nodeId);
+    }
+
+    function _withdrawOperatorPoolRewards(uint256 nodeId) internal {
+        // get rewards
+        uint256 rewards = _getOperatorPoolRewards(nodeId);
+
+        // update claimed rewards
+        DataTypes.Node storage node = _nodes[nodeId];
+        node.claimedOperatorPoollRewards = node.operatorPoolTotalRewards;
+
+        // transfer rewards
+        IERC20(_token).safeTransfer(node.rewardAddress, rewards);
     }
 
     function _getOperatorPoolRewards(uint256 nodeId) internal returns (uint256) {
         // TODO: how to calculate operator pool rewards ?
-        return 0;
+        return _nodes[nodeId].operatorPoolTotalRewards - _nodes[nodeId].claimedOperatorPoollRewards;
     }
 
     /// @inheritdoc IStaking
@@ -198,8 +221,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             // set claimed status
             request.claimed = true;
 
-            // transfer rewards
-            IERC20(_token).safeTransfer(request.owner, request.rewards);
+            // transfer staked tokens
+            IERC20(_token).safeTransfer(request.owner, request.unstakedAmount);
         }
     }
 
@@ -231,7 +254,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             // set claimed status
             request.claimed = true;
 
-            // transfer rewards
+            // transfer
+            IERC20(_token).safeTransfer(request.owner, request.undelegatedAmount);
             IERC20(_token).safeTransfer(request.owner, request.rewards);
         }
     }

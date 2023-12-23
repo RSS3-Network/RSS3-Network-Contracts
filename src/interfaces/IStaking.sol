@@ -87,6 +87,12 @@ interface IStaking {
     function requestUnstake(uint256 amount) external returns (uint256 requestId);
 
     /**
+     * @notice Withdraw operator pool rewards.
+     * @param nodeAddr Address of node operator.
+     */
+    function withdrawOperatorPoolRewards(address nodeAddr) external;
+
+    /**
      * @notice Claim a batch of unstake requests.
      */
     function claimUnstake(uint256[] calldata requestIds) external;

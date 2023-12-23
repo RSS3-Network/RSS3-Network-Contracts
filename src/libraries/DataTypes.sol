@@ -27,6 +27,8 @@ library DataTypes {
         uint256 delegatedAmount;
         /// @notice total rewards of operator pool
         uint256 operatorPoolTotalRewards;
+        /// @notice claimed rewards of operator pool
+        uint256 claimedOperatorPoollRewards;
         /// @notice total rewards of reward pool
         uint256 rewardPoolTotalRewards;
         /// @notice total shares of the pool
@@ -40,8 +42,8 @@ library DataTypes {
         bool claimed;
         /// @notice block.timestamp when the request was created
         uint40 timestamp;
-        /// @notice total rewards to claim
-        uint256 rewards;
+        /// @notice amount of tokens to unstake
+        uint256 unstakedAmount;
     }
 
     struct UndelegateRequest {
@@ -51,6 +53,8 @@ library DataTypes {
         bool claimed;
         /// @notice block.timestamp when the request was created
         uint40 timestamp;
+        /// @notice amount of tokens to undelegate
+        uint256 undelegatedAmount;
         /// @notice total rewards to claim
         uint256 rewards;
     }
