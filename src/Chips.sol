@@ -1,38 +1,45 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.20;
 
 import {ErrCallerNotStaking} from "./libraries/Error.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {
-    ERC721Consecutive
-} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Consecutive.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "erc721a-upgradeable/contracts/ERC721AUpgradeable.sol";
 
-contract Chips is Initializable, ERC721AUpgradeable {
+/* solhint-disable comprehensive-interface */
+
+contract Chips is Initializable, ERC721 {
     address internal _staking;
+
+    uint256 internal _counter;
 
     modifier onlyStaking() {
         if (msg.sender != _staking) revert ErrCallerNotStaking();
         _;
     }
 
-    constructor() {
-        _disableInitializers();
+    constructor() ERC721("RSS3 Chips", "Chips") {}
+
+    function initialize(address staking_) external initializer {
+        _staking = staking_;
     }
 
-    function initialize(
-        address staking,
-        string calldata name,
-        string calldata symbol
-    ) external initializerERC721A initializer {
-        _staking = staking;
-
-        __ERC721A_init(name, symbol);
+    function mint(address account) public onlyStaking returns (uint256 tokenId) {
+        tokenId = ++_counter;
+        _mint(account, tokenId);
     }
 
-    function mintBatch(address to, uint256 quantity) public onlyStaking {
-        _mint(to, quantity);
+    function mintBatch(
+        address to,
+        uint96 batchSize
+    ) public onlyStaking returns (uint256 startTokenId, uint256 endTokenId) {
+        startTokenId = _counter + 1;
+
+        uint256 tokenId = startTokenId;
+        for (uint256 i = 0; i < batchSize; i++) {
+            _mint(to, tokenId++);
+        }
+        _counter = tokenId - 1;
+        endTokenId = tokenId - 1;
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {

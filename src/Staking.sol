@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.20;
 
 import {IStaking} from "./interfaces/IStaking.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
@@ -12,11 +12,14 @@ import {
     ErrAlreadyClaimed,
     ErrClaimTimeNotReady,
     ErrNodeStakedOrDelegated,
-    ErrAmountTooSmall
+    ErrAmountTooSmall,
+    ErrNotChipsOwner
 } from "./libraries/Error.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
-import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
+import {
+    AccessControlEnumerable
+} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -70,8 +73,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         _stakeUnbondingPeriod = stakeUnbondingPeriod;
         _delegateUnbondingPeriod = delegateUnbondingPeriod;
 
-        _setupRole(PAUSE_ROLE, pauseAccount);
-        _setupRole(ORACLE_ROLE, oracleAccount);
+        _grantRole(PAUSE_ROLE, pauseAccount);
+        _grantRole(ORACLE_ROLE, oracleAccount);
     }
 
     /// @inheritdoc IStaking
@@ -192,23 +195,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         _withdrawOperatorPoolRewards(nodeId);
     }
 
-    function _withdrawOperatorPoolRewards(uint256 nodeId) internal {
-        // get rewards
-        uint256 rewards = _getOperatorPoolRewards(nodeId);
-
-        // update claimed rewards
-        DataTypes.Node storage node = _nodes[nodeId];
-        node.claimedOperatorPoollRewards = node.operatorPoolTotalRewards;
-
-        // transfer rewards
-        IERC20(_token).safeTransfer(node.rewardAddress, rewards);
-    }
-
-    function _getOperatorPoolRewards(uint256 nodeId) internal returns (uint256) {
-        // TODO: how to calculate operator pool rewards ?
-        return _nodes[nodeId].operatorPoolTotalRewards - _nodes[nodeId].claimedOperatorPoollRewards;
-    }
-
     /// @inheritdoc IStaking
     function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused {
         for (uint256 i = 0; i < requestIds.length; i++) {
@@ -231,14 +217,30 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         address nodeAddr,
         uint256 amount
     ) external override returns (uint256 fromTokenId, uint256 toTokenId) {
+        uint256 nodeId = _nodeAddrToId[nodeAddr];
+        if (nodeId == 0) revert ErrNodeNotExists();
+
+        // update reward pool
+
+        // mint chips
+
+        // transfer tokens
+        IERC20(_token).safeTransferFrom(msg.sender, address(this), amount);
+
         return (0, 0);
     }
 
     /// @inheritdoc IStaking
     function requestUndelegate(
-        uint256 fromTokenId,
-        uint256 toTokenId
+        uint256[] calldata chipsIds
     ) external override returns (uint256 requestId) {
+        for (uint256 i = 0; i < chipsIds.length; i++) {
+            uint256 tokenId = chipsIds[i];
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert ErrNotChipsOwner();
+            // burn chips
+            // update rewards
+            // update undelegate queue
+        }
         requestId = 0;
     }
 
@@ -302,8 +304,26 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         return res;
     }
 
+    function _withdrawOperatorPoolRewards(uint256 nodeId) internal {
+        // get rewards
+        uint256 rewards = _getOperatorPoolRewards(nodeId);
+
+        // update claimed rewards
+        DataTypes.Node storage node = _nodes[nodeId];
+        node.claimedOperatorPoollRewards = node.operatorPoolTotalRewards;
+
+        // transfer rewards
+        IERC20(_token).safeTransfer(node.rewardAddress, rewards);
+    }
+
+    function _getOperatorPoolRewards(uint256 nodeId) internal returns (uint256) {
+        // TODO: how to calculate operator pool rewards ?
+        return _nodes[nodeId].operatorPoolTotalRewards - _nodes[nodeId].claimedOperatorPoollRewards;
+    }
+
     /**
-     * @dev The denominator with which to interpret the tax as a fraction. Defaults to 10000 so tax is expressed in basis points.
+     * @dev The denominator with which to interpret the tax as a fraction.
+     * Defaults to 10000 so tax is expressed in basis points.
      */
     function _taxDenominator() internal pure virtual returns (uint96) {
         return 10000;

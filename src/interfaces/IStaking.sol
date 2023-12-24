@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+pragma solidity 0.8.20;
 
 import {DataTypes} from "../libraries/DataTypes.sol";
 
@@ -111,14 +111,10 @@ interface IStaking {
 
     /**
      * @notice Request undelegating tokens from a node operator.
-     * @param fromTokenId The start of chips token ids for undelegating.
-     * @param toTokenId The end of chips token ids for undelegating.
+     * @param chipsIds The chips token ids for undelegating.
      * @return requestId The created undelegate request id.
      */
-    function requestUndelegate(
-        uint256 fromTokenId,
-        uint256 toTokenId
-    ) external returns (uint256 requestId);
+    function requestUndelegate(uint256[] calldata chipsIds) external returns (uint256 requestId);
 
     /**
      * @notice Claim a batch of undelegate requests.
