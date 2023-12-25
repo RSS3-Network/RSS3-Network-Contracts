@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/b5845398722bef80aef867e3cf93a57daa5f50de/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/8135e7e9bd6a0aade4646235b5a4ecf6e0d0b76f/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -296,8 +296,22 @@
 <tr><td><code>user</code></td><td><code>address</code></td><td>Address of user who delegated tokens.</td></tr>
 <tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to delegate.</td></tr>
 <tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to delegate.</td></tr>
-<tr><td><code>startTokenId</code></td><td><code>uint256</code></td><td></td></tr>
-<tr><td><code>endTokenId</code></td><td><code>uint256</code></td><td></td></tr>
+<tr><td><code>startTokenId</code></td><td><code>uint256</code></td><td>The start of new minted chips token ids.</td></tr>
+<tr><td><code>endTokenId</code></td><td><code>uint256</code></td><td>The end of new minted chips token ids.</td></tr>
+</tbody></table>
+</div>
+<h3 id="undelegaterequested"><a class="header" href="#undelegaterequested">UndelegateRequested</a></h3>
+<p><em>Emitted on requestUndelegate()</em></p>
+<pre><code class="language-solidity">event UndelegateRequested(
+    address indexed user, address indexed nodeAddr, uint256 indexed requestId, uint256[] chipsIds
+);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>user</code></td><td><code>address</code></td><td>Address of user who undelegated tokens.</td></tr>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to delegate.</td></tr>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The created undelegate request id.</td></tr>
+<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids to undelegate.</td></tr>
 </tbody></table>
 </div>
 <h3 id="undelegateclaimed"><a class="header" href="#undelegateclaimed">UndelegateClaimed</a></h3>
