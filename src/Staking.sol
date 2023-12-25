@@ -24,23 +24,32 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     uint256 public constant firstStakingAmount = 10000e18;
     uint256 public constant minDelegateAmount = 1000e18;
 
+    /// @dev The period of time that a node can't withdraw staked tokens
     uint256 internal _stakeUnbondingPeriod;
+    /// @dev The period of time that a node can't withdraw delegated tokens
     uint256 internal _delegateUnbondingPeriod;
 
+    /// @dev all node addresses
     EnumerableSet.AddressSet internal _nodeAddrs;
+    /// @dev all node info
     mapping(address nodeAddr => DataTypes.Node) internal _nodes;
 
+    /// @dev unstake request queue counter
     uint256 internal _unstakeRequestCounter;
+    /// @dev unstake request queue
     mapping(uint256 requestId => DataTypes.UnstakeRequest) internal _unstakeQueue;
 
+    /// @dev undelegate request queue counter
     uint256 internal _undelegateRequestCounter;
+    /// @dev undelegate request queue
     mapping(uint256 requestId => DataTypes.UndelegateRequest) internal _undelegateQueue;
 
-    // The chips contract
+    /// @dev the chips contract
     address internal _chips;
-    // The staking token contract
+    /// @dev the staking token contract
     address internal _token;
 
+    /// @dev the issuers of chips
     mapping(uint256 tokenId => address nodeAddr) internal _issuers;
 
     /// ACL
@@ -248,9 +257,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         requestId = ++_undelegateRequestCounter;
 
         // update rewards
-        // TODO: calculate rewards
-        uint256 rewards = 0;
-        uint256 undelegatedAmount = 0;
+        uint256 shares = sharesPerChips * chipsIds.length;
+        uint256 rewards = (shares * node.rewardPoolTotalRewards) / node.totalShares;
+        uint256 undelegatedAmount = (shares * node.delegatedAmount) / node.totalShares;
 
         // add to request queue
         DataTypes.UndelegateRequest storage request = _undelegateQueue[requestId];
@@ -258,6 +267,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         request.owner = msg.sender;
         request.rewards = rewards;
         request.undelegatedAmount = undelegatedAmount;
+
+        emit Events.UndelegateRequested(msg.sender, nodeAddr, requestId, chipsIds);
     }
 
     /// @inheritdoc IStaking
@@ -302,6 +313,18 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
+    function minTokensToDelegate(address nodeAddr) external view override returns (uint256) {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (node.account == address(0)) {
+            return minDelegateAmount;
+        }
+
+        return
+            (sharesPerChips * (node.rewardPoolTotalRewards + node.delegatedAmount)) /
+            node.totalShares;
+    }
+
+    /// @inheritdoc IStaking
     function getChipsInfo(
         uint256 tokenId
     ) external view override returns (address nodeAddr, uint256 tokens) {
@@ -331,6 +354,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         return res;
     }
 
+    /// @dev claim undelegate request
     function _claimUndelegate(uint256 requestId) internal {
         DataTypes.UndelegateRequest storage request = _undelegateQueue[requestId];
 
@@ -348,6 +372,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         emit Events.UndelegateClaimed(requestId);
     }
 
+    /// @dev claim unstake request
     function _claimUnstake(uint256 requestId) internal {
         DataTypes.UnstakeRequest storage request = _unstakeQueue[requestId];
 
@@ -364,6 +389,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         emit Events.UnstakeClaimed(requestId);
     }
 
+    /// @dev withdraw operator pool rewards
     function _withdrawOperatorPoolRewards(DataTypes.Node storage node) internal {
         // get rewards
         uint256 rewards = _getOperatorPoolRewards(node);
@@ -377,6 +403,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         emit Events.OperatorPoolRewardsWithdrawn(node.account, node.rewardAddress, rewards);
     }
 
+    /// @dev get operator pool rewards
     function _getOperatorPoolRewards(DataTypes.Node storage node) internal view returns (uint256) {
         // TODO: how to calculate operator pool rewards ?
         return node.operatorPoolTotalRewards - node.claimedOperatorPoollRewards;

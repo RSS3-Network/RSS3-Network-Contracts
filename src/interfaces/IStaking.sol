@@ -25,19 +25,19 @@ interface IStaking {
     /**
      * @notice Pauses interaction with the Staking contract.
      * Requirements:
-     * - The caller must have the PAUSE_ROLE.
+     * - The caller must have the `PAUSE_ROLE`.
      */
     function pause() external;
 
     /**
      * @notice Resumes interaction with the Staking contract.
      * Requirements:
-     * - The caller must have the PAUSE_ROLE.
+     * - The caller must have the `PAUSE_ROLE`.
      */
     function unpause() external;
 
     /**
-     * @notice Create a node named `name` with reward address `rewardAddress`.
+     * @notice Creates a node named `name` with reward address `rewardAddress`.
      * @param name Human-readable name.
      * @param description Description of node.
      * @param publicGood Whether the node is public good or not
@@ -53,51 +53,51 @@ interface IStaking {
     ) external;
 
     /**
-     * @notice Delete a node`.
+     * @notice Deletes a node`.
      * @param addr The address of node.
      */
     function deleteNode(address addr) external;
 
     /**
-     * @notice Change reward address of the node.
+     * @notice Changes reward address of the node.
      * @param nodeAddr The address of node to change.
      * @param rewardAddress The new rewardAddress to set.
      */
     function setNodeRewardAddress(address nodeAddr, address rewardAddress) external;
 
     /**
-     * @notice Change tax fraction of the node.
+     * @notice Changes tax fraction of the node.
      * @param nodeAddr The address of node to change.
      * @param taxFraction The tax fraction to set.
      */
     function setNodeTaxFraction(address nodeAddr, uint40 taxFraction) external;
 
     /**
-     * @notice Deposit tokens for node operator.
+     * @notice Deposits tokens for node operator.
      * @param amount Amount of tokens to stake.
      */
     function stake(uint256 amount) external;
 
     /**
-     * @notice Request unstake tokens from node operator.
+     * @notice Requests unstake tokens from node operator.
      * @param amount Amount of tokens to unstake.
      * @return requestId The created unstake request id
      */
     function requestUnstake(uint256 amount) external returns (uint256 requestId);
 
     /**
-     * @notice Withdraw operator pool rewards.
+     * @notice Withdraws operator pool rewards.
      * @param nodeAddr Address of node operator.
      */
     function withdrawOperatorPoolRewards(address nodeAddr) external;
 
     /**
-     * @notice Claim a batch of unstake requests.
+     * @notice Claims a batch of unstake requests.
      */
     function claimUnstake(uint256[] calldata requestIds) external;
 
     /**
-     * @notice Delegate tokens to a node operator.
+     * @notice Delegates tokens to a node operator.
      * @param nodeAddr The address of node to delegate.
      * @param amount Amount of tokens to delegate.
      * @return fromTokenId The start of new minted chips token ids.
@@ -109,10 +109,11 @@ interface IStaking {
     ) external returns (uint256 fromTokenId, uint256 toTokenId);
 
     /**
-     * @notice Request undelegating tokens from a node operator.
+     * @notice Requests undelegating tokens from a node operator.
+     * @dev This will burn the chips tokens.
      * @param nodeAddr Address of node operator to undelegate.
-     * @param chipsIds The chips token ids for undelegating.
-     * @return requestId The created undelegate request id.
+     * @param chipsIds The chips token ids for undelegate.
+     * @return requestId THe created undelegate request id.
      */
     function requestUndelegate(
         address nodeAddr,
@@ -120,13 +121,16 @@ interface IStaking {
     ) external returns (uint256 requestId);
 
     /**
-     * @notice Claim a batch of undelegate requests.
+     * @notice Claims a batch of undelegate requests.
+     * @param requestIds The undelegate request ids to claim.
      */
     function claimUndelegate(uint256[] calldata requestIds) external;
 
     /**
      * @notice Updates accounting stats and distribute rewards.
      * @dev periodically called.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
      * @param epoch The current epoch number.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param operatorPoolRewards Amount of rewards to operator pool.
@@ -138,6 +142,13 @@ interface IStaking {
         uint256[] calldata operatorPoolRewards,
         uint256[] calldata rewardPoolRewards
     ) external;
+
+    /**
+     * @notice Returns the minimal tokens to delegate for a node.
+     * @param nodeAddr Address of node operator to stake.
+     * @return uint256 The minimal mount of tokens to stake for a node .
+     */
+    function minTokensToDelegate(address nodeAddr) external view returns (uint256);
 
     /**
      * @notice Gets chips info by `tokenId`.
@@ -155,7 +166,7 @@ interface IStaking {
     function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
 
     /**
-     * @notice Gets all nodes info.
+     * @notice Gets all nodes.
      */
     function getNodes() external view returns (DataTypes.Node[] memory);
 }

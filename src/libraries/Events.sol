@@ -97,8 +97,8 @@ library Events {
      * @param user Address of user who delegated tokens.
      * @param nodeAddr The address of node to delegate.
      * @param amount Amount of tokens to delegate.
-     * @return fromTokenId The start of new minted chips token ids.
-     * @return toTokenId The end of new minted chips token ids.
+     * @param startTokenId The start of new minted chips token ids.
+     * @param endTokenId The end of new minted chips token ids.
      */
     event Delegated(
         address indexed user,
@@ -106,6 +106,20 @@ library Events {
         uint256 indexed amount,
         uint256 startTokenId,
         uint256 endTokenId
+    );
+
+    /**
+     * @dev Emitted on requestUndelegate()
+     * @param user Address of user who undelegated tokens.
+     * @param nodeAddr The address of node to delegate.
+     * @param requestId The created undelegate request id.
+     * @param chipsIds The chips token ids to undelegate.
+     */
+    event UndelegateRequested(
+        address indexed user,
+        address indexed nodeAddr,
+        uint256 indexed requestId,
+        uint256[] chipsIds
     );
 
     /**

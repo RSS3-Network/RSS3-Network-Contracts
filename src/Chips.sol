@@ -22,11 +22,11 @@ contract Chips is IChips, Initializable, ERC721 {
     constructor() ERC721("RSS3 Chips", "Chips") {}
 
     /// @inheritdoc IChips
-
     function initialize(address staking_) external override initializer {
         _staking = staking_;
     }
 
+    /// @inheritdoc IChips
     function mint(address account) external override onlyStaking returns (uint256 tokenId) {
         tokenId = ++_counter;
         _mint(account, tokenId);
