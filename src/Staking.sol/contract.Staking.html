@@ -1,0 +1,511 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Staking</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../book.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item "><a href="../../index.html">Home</a></li><li class="chapter-item affix "><li class="part-title">src</li><li class="chapter-item "><a href="../../src/interfaces/index.html">❱ interfaces</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../src/interfaces/IChips.sol/interface.IChips.html">IChips</a></li><li class="chapter-item "><a href="../../src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li></ol></li><li class="chapter-item "><a href="../../src/libraries/index.html">❱ libraries</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../src/libraries/DataTypes.sol/library.DataTypes.html">DataTypes</a></li><li class="chapter-item "><a href="../../src/libraries/Errors.sol/library.Errors.html">Errors</a></li><li class="chapter-item "><a href="../../src/libraries/Events.sol/library.Events.html">Events</a></li></ol></li><li class="chapter-item "><a href="../../src/mocks/index.html">❱ mocks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li></ol></li><li class="chapter-item "><a href="../../src/upgradeability/index.html">❱ upgradeability</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../src/upgradeability/TransparentUpgradeableProxy.sol/interface.ITransparentUpgradeableProxy.html">ITransparentUpgradeableProxy</a></li><li class="chapter-item "><a href="../../src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li></ol></li><li class="chapter-item "><a href="../../src/Chips.sol/contract.Chips.html">Chips</a></li><li class="chapter-item expanded "><a href="../../src/Staking.sol/contract.Staking.html" class="active">Staking</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/7a3ae7be0e04047d7352d18b9abb5fdcefc56afc/src/Staking.sol">Git Source</a></p>
+<p><strong>Inherits:</strong>
+<a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
+<h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
+<h3 id="sharesperchips"><a class="header" href="#sharesperchips">sharesPerChips</a></h3>
+<pre><code class="language-solidity">uint256 public constant sharesPerChips = 5000e18;
+</code></pre>
+<h3 id="firststakingamount"><a class="header" href="#firststakingamount">firstStakingAmount</a></h3>
+<pre><code class="language-solidity">uint256 public constant firstStakingAmount = 10000e18;
+</code></pre>
+<h3 id="mindelegateamount"><a class="header" href="#mindelegateamount">minDelegateAmount</a></h3>
+<pre><code class="language-solidity">uint256 public constant minDelegateAmount = 1000e18;
+</code></pre>
+<h3 id="_stakeunbondingperiod"><a class="header" href="#_stakeunbondingperiod">_stakeUnbondingPeriod</a></h3>
+<pre><code class="language-solidity">uint256 internal _stakeUnbondingPeriod;
+</code></pre>
+<h3 id="_delegateunbondingperiod"><a class="header" href="#_delegateunbondingperiod">_delegateUnbondingPeriod</a></h3>
+<pre><code class="language-solidity">uint256 internal _delegateUnbondingPeriod;
+</code></pre>
+<h3 id="_nodeaddrs"><a class="header" href="#_nodeaddrs">_nodeAddrs</a></h3>
+<pre><code class="language-solidity">EnumerableSet.AddressSet internal _nodeAddrs;
+</code></pre>
+<h3 id="_nodes"><a class="header" href="#_nodes">_nodes</a></h3>
+<pre><code class="language-solidity">mapping(address nodeAddr =&gt; DataTypes.Node) internal _nodes;
+</code></pre>
+<h3 id="_unstakerequestcounter"><a class="header" href="#_unstakerequestcounter">_unstakeRequestCounter</a></h3>
+<pre><code class="language-solidity">uint256 internal _unstakeRequestCounter;
+</code></pre>
+<h3 id="_unstakequeue"><a class="header" href="#_unstakequeue">_unstakeQueue</a></h3>
+<pre><code class="language-solidity">mapping(uint256 requestId =&gt; DataTypes.UnstakeRequest) internal _unstakeQueue;
+</code></pre>
+<h3 id="_undelegaterequestcounter"><a class="header" href="#_undelegaterequestcounter">_undelegateRequestCounter</a></h3>
+<pre><code class="language-solidity">uint256 internal _undelegateRequestCounter;
+</code></pre>
+<h3 id="_undelegatequeue"><a class="header" href="#_undelegatequeue">_undelegateQueue</a></h3>
+<pre><code class="language-solidity">mapping(uint256 requestId =&gt; DataTypes.UndelegateRequest) internal _undelegateQueue;
+</code></pre>
+<h3 id="_chips"><a class="header" href="#_chips">_chips</a></h3>
+<pre><code class="language-solidity">address internal _chips;
+</code></pre>
+<h3 id="_token"><a class="header" href="#_token">_token</a></h3>
+<pre><code class="language-solidity">address internal _token;
+</code></pre>
+<h3 id="_issuers"><a class="header" href="#_issuers">_issuers</a></h3>
+<pre><code class="language-solidity">mapping(uint256 tokenId =&gt; address nodeAddr) internal _issuers;
+</code></pre>
+<h3 id="pause_role"><a class="header" href="#pause_role">PAUSE_ROLE</a></h3>
+<p>ACL</p>
+<pre><code class="language-solidity">bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
+</code></pre>
+<h3 id="oracle_role"><a class="header" href="#oracle_role">ORACLE_ROLE</a></h3>
+<pre><code class="language-solidity">bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+</code></pre>
+<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
+<p>Initializes the Staking contract.</p>
+<pre><code class="language-solidity">function initialize(
+    address pauseAccount,
+    address oracleAccount,
+    address chips,
+    address token,
+    uint256 stakeUnbondingPeriod,
+    uint256 delegateUnbondingPeriod
+) external override initializer;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>pauseAccount</code></td><td><code>address</code></td><td>Address who can pause/unpause the Staking contract.</td></tr>
+<tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who can distribute rewards to the Staking contract.</td></tr>
+<tr><td><code>chips</code></td><td><code>address</code></td><td>Chips contract.</td></tr>
+<tr><td><code>token</code></td><td><code>address</code></td><td>Staking token contract.</td></tr>
+<tr><td><code>stakeUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds a node needs to wait to withdraw its stake</td></tr>
+<tr><td><code>delegateUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds a user needs to wait to withdraw its stake</td></tr>
+</tbody></table>
+</div>
+<h3 id="pause"><a class="header" href="#pause">pause</a></h3>
+<p>Pauses interaction with the Staking contract.
+Requirements:</p>
+<ul>
+<li>The caller must have the PAUSE_ROLE.</li>
+</ul>
+<pre><code class="language-solidity">function pause() external override whenNotPaused onlyRole(PAUSE_ROLE);
+</code></pre>
+<h3 id="unpause"><a class="header" href="#unpause">unpause</a></h3>
+<p>Resumes interaction with the Staking contract.
+Requirements:</p>
+<ul>
+<li>The caller must have the PAUSE_ROLE.</li>
+</ul>
+<pre><code class="language-solidity">function unpause() external override whenPaused onlyRole(PAUSE_ROLE);
+</code></pre>
+<h3 id="createnode"><a class="header" href="#createnode">createNode</a></h3>
+<p>Create a node named <code>name</code> with reward address <code>rewardAddress</code>.</p>
+<pre><code class="language-solidity">function createNode(
+    string calldata name,
+    string calldata description,
+    bool publicGood,
+    uint40 taxFraction,
+    address rewardAddress
+) external override;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>name</code></td><td><code>string</code></td><td>Human-readable name.</td></tr>
+<tr><td><code>description</code></td><td><code>string</code></td><td>Description of node.</td></tr>
+<tr><td><code>publicGood</code></td><td><code>bool</code></td><td>Whether the node is public good or not</td></tr>
+<tr><td><code>taxFraction</code></td><td><code>uint40</code></td><td>Tax percentage measured in basis points. Each basis point represents 0.01%.</td></tr>
+<tr><td><code>rewardAddress</code></td><td><code>address</code></td><td>Address which receives rewards for this operator.</td></tr>
+</tbody></table>
+</div>
+<h3 id="deletenode"><a class="header" href="#deletenode">deleteNode</a></h3>
+<p>Delete a node`.</p>
+<pre><code class="language-solidity">function deleteNode(address nodeAddr) external override;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="setnoderewardaddress"><a class="header" href="#setnoderewardaddress">setNodeRewardAddress</a></h3>
+<p>Change reward address of the node.</p>
+<pre><code class="language-solidity">function setNodeRewardAddress(address nodeAddr, address rewardAddress) external override;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to change.</td></tr>
+<tr><td><code>rewardAddress</code></td><td><code>address</code></td><td>The new rewardAddress to set.</td></tr>
+</tbody></table>
+</div>
+<h3 id="setnodetaxfraction"><a class="header" href="#setnodetaxfraction">setNodeTaxFraction</a></h3>
+<p>Change tax fraction of the node.</p>
+<pre><code class="language-solidity">function setNodeTaxFraction(address nodeAddr, uint40 taxFraction) external override;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to change.</td></tr>
+<tr><td><code>taxFraction</code></td><td><code>uint40</code></td><td>The tax fraction to set.</td></tr>
+</tbody></table>
+</div>
+<h3 id="stake"><a class="header" href="#stake">stake</a></h3>
+<p>Deposit tokens for node operator.</p>
+<pre><code class="language-solidity">function stake(uint256 amount) external override;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to stake.</td></tr>
+</tbody></table>
+</div>
+<h3 id="requestunstake"><a class="header" href="#requestunstake">requestUnstake</a></h3>
+<p>Request unstake tokens from node operator.</p>
+<pre><code class="language-solidity">function requestUnstake(uint256 amount) external override returns (uint256 requestId);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to unstake.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The created unstake request id</td></tr>
+</tbody></table>
+</div>
+<h3 id="withdrawoperatorpoolrewards"><a class="header" href="#withdrawoperatorpoolrewards">withdrawOperatorPoolRewards</a></h3>
+<p>Withdraw operator pool rewards.</p>
+<pre><code class="language-solidity">function withdrawOperatorPoolRewards(address nodeAddr) external override;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator.</td></tr>
+</tbody></table>
+</div>
+<h3 id="claimunstake"><a class="header" href="#claimunstake">claimUnstake</a></h3>
+<p>Claim a batch of unstake requests.</p>
+<pre><code class="language-solidity">function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused;
+</code></pre>
+<h3 id="delegate"><a class="header" href="#delegate">delegate</a></h3>
+<p>Delegate tokens to a node operator.</p>
+<pre><code class="language-solidity">function delegate(address nodeAddr, uint256 amount)
+    external
+    override
+    returns (uint256 startTokenId, uint256 endTokenId);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to delegate.</td></tr>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to delegate.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>startTokenId</code></td><td><code>uint256</code></td><td>fromTokenId The start of new minted chips token ids.</td></tr>
+<tr><td><code>endTokenId</code></td><td><code>uint256</code></td><td>toTokenId The end of new minted chips token ids.</td></tr>
+</tbody></table>
+</div>
+<h3 id="requestundelegate"><a class="header" href="#requestundelegate">requestUndelegate</a></h3>
+<p>Request undelegating tokens from a node operator.</p>
+<pre><code class="language-solidity">function requestUndelegate(address nodeAddr, uint256[] calldata chipsIds)
+    external
+    override
+    returns (uint256 requestId);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator to undelegate.</td></tr>
+<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids for undelegating.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The created undelegate request id.</td></tr>
+</tbody></table>
+</div>
+<h3 id="claimundelegate"><a class="header" href="#claimundelegate">claimUndelegate</a></h3>
+<p>Claim a batch of undelegate requests.</p>
+<pre><code class="language-solidity">function claimUndelegate(uint256[] calldata requestIds) external override whenNotPaused;
+</code></pre>
+<h3 id="distributerewards"><a class="header" href="#distributerewards">distributeRewards</a></h3>
+<p>Updates accounting stats and distribute rewards.</p>
+<p><em>periodically called.</em></p>
+<pre><code class="language-solidity">function distributeRewards(
+    uint256 epoch,
+    address[] calldata nodeAddrs,
+    uint256[] calldata operatorPoolRewards,
+    uint256[] calldata rewardPoolRewards
+) external override onlyRole(ORACLE_ROLE);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
+<tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
+<tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
+<tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
+</tbody></table>
+</div>
+<h3 id="getchipsinfo"><a class="header" href="#getchipsinfo">getChipsInfo</a></h3>
+<p>Gets chips info by <code>tokenId</code>.</p>
+<pre><code class="language-solidity">function getChipsInfo(uint256 tokenId) external view override returns (address nodeAddr, uint256 tokens);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>tokenId</code></td><td><code>uint256</code></td><td>ID of Chip token.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator who issues the Chip.</td></tr>
+<tr><td><code>tokens</code></td><td><code>uint256</code></td><td>Amount of tokens the chip is equivalent to .</td></tr>
+</tbody></table>
+</div>
+<h3 id="getnode"><a class="header" href="#getnode">getNode</a></h3>
+<p>Gets node info by node address.</p>
+<pre><code class="language-solidity">function getNode(address nodeAddr) external view override returns (DataTypes.Node memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Node address to query.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>DataTypes.Node</code></td><td>DataTypes.Node Node info.</td></tr>
+</tbody></table>
+</div>
+<h3 id="getnodes"><a class="header" href="#getnodes">getNodes</a></h3>
+<p>Gets all nodes info.</p>
+<pre><code class="language-solidity">function getNodes() external view override returns (DataTypes.Node[] memory);
+</code></pre>
+<h3 id="_claimundelegate"><a class="header" href="#_claimundelegate">_claimUndelegate</a></h3>
+<pre><code class="language-solidity">function _claimUndelegate(uint256 requestId) internal;
+</code></pre>
+<h3 id="_claimunstake"><a class="header" href="#_claimunstake">_claimUnstake</a></h3>
+<pre><code class="language-solidity">function _claimUnstake(uint256 requestId) internal;
+</code></pre>
+<h3 id="_withdrawoperatorpoolrewards"><a class="header" href="#_withdrawoperatorpoolrewards">_withdrawOperatorPoolRewards</a></h3>
+<pre><code class="language-solidity">function _withdrawOperatorPoolRewards(DataTypes.Node storage node) internal;
+</code></pre>
+<h3 id="_getoperatorpoolrewards"><a class="header" href="#_getoperatorpoolrewards">_getOperatorPoolRewards</a></h3>
+<pre><code class="language-solidity">function _getOperatorPoolRewards(DataTypes.Node storage node) internal view returns (uint256);
+</code></pre>
+<h3 id="_taxdenominator"><a class="header" href="#_taxdenominator">_taxDenominator</a></h3>
+<p><em>The denominator with which to interpret the tax as a fraction.
+Defaults to 10000 so tax is expressed in basis points.</em></p>
+<pre><code class="language-solidity">function _taxDenominator() internal pure virtual returns (uint96);
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../src/Chips.sol/contract.Chips.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../src/Chips.sol/contract.Chips.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../solidity.min.js"></script>
+
+
+    </div>
+    </body>
+</html>
