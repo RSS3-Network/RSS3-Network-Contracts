@@ -140,6 +140,14 @@ interface IStaking {
     ) external;
 
     /**
+     * @notice Gets chips info by `tokenId`.
+     * @param tokenId ID of Chip token.
+     * @return nodeAddr Address of node operator who issues the Chip.
+     * @return tokens Amount of tokens the chip is equivalent to .
+     */
+    function getChipsInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens);
+
+    /**
      * @notice Gets node info by node address.
      * @param nodeAddr Node address to query.
      * @return DataTypes.Node Node info.

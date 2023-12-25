@@ -312,6 +312,20 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
+    function getChipsInfo(
+        uint256 tokenId
+    ) external view override returns (address nodeAddr, uint256 tokens) {
+        nodeAddr = _issuers[tokenId];
+
+        if (nodeAddr != address(0)) {
+            DataTypes.Node storage node = _nodes[nodeAddr];
+            tokens =
+                ((node.rewardPoolTotalRewards + node.delegatedAmount) / node.totalShares) *
+                sharesPerChips;
+        }
+    }
+
+    /// @inheritdoc IStaking
     function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
         return _nodes[nodeAddr];
     }
