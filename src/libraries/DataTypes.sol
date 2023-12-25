@@ -7,8 +7,6 @@ pragma solidity 0.8.20;
  */
 library DataTypes {
     struct Node {
-        /// @notice identifier of the node
-        uint256 id;
         /// @notice address of the node operator
         address account;
         /// @notice whether the node is public good or not

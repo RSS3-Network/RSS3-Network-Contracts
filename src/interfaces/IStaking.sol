@@ -126,17 +126,11 @@ interface IStaking {
      * @dev periodically called.
      */
     function distributeRewards(
-        uint256[] calldata nodeIds,
+        uint256 epoch,
+        address[] calldata nodeAddrs,
         uint256[] calldata operatorPoolRewards,
         uint256[] calldata rewardPoolRewards
     ) external;
-
-    /**
-     * @notice Gets node info by node id.
-     * @param nodeId Node id to query.
-     * @return DataTypes.Node Node info.
-     */
-    function getNodeById(uint256 nodeId) external view returns (DataTypes.Node memory);
 
     /**
      * @notice Gets node info by node address.

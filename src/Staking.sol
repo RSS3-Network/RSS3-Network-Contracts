@@ -21,10 +21,12 @@ import {
     AccessControlEnumerable
 } from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
-    using EnumerableSet for EnumerableSet.UintSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
 
     uint256 public constant minStakeAmount = 10000e18;
@@ -33,10 +35,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     uint256 internal _stakeUnbondingPeriod;
     uint256 internal _delegateUnbondingPeriod;
 
-    EnumerableSet.UintSet internal _nodeIds;
-    mapping(uint256 nodeId => address nodeAddr) internal _nodeIdToAddr;
-    mapping(address nodeAddr => uint256 nodeId) internal _nodeAddrToId;
-    mapping(uint256 nodeId => DataTypes.Node) internal _nodes;
+    EnumerableSet.AddressSet internal _nodeAddrs;
+    mapping(address nodeAddr => DataTypes.Node) internal _nodes;
 
     uint256 internal _unstakeRequestCounter;
     mapping(uint256 requestId => DataTypes.UnstakeRequest) internal _unstakeQueue;
@@ -48,7 +48,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     address internal _chips;
     // The staking token contract
     address internal _token;
-    uint256 internal _nodeIdCounter;
 
     /// ACL
     bytes32 public constant PAUSE_ROLE =
@@ -95,16 +94,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint40 taxFraction,
         address rewardAddress
     ) external override returns (uint256 nodeId) {
-        nodeId = _nodeAddrToId[msg.sender];
-        if (nodeId != 0) revert ErrNodeExists();
+        DataTypes.Node storage node = _nodes[msg.sender];
+        // can't delete a non-exist node
+        if (address(0) != node.account) revert ErrNodeExists();
 
-        nodeId = ++_nodeIdCounter;
-
-        _nodeAddrToId[msg.sender] = nodeId;
-        _nodeIdToAddr[nodeId] = msg.sender;
-
-        DataTypes.Node storage node = _nodes[nodeId];
-        node.id = nodeId;
         node.account = msg.sender;
         node.name = name;
         node.description = description;
@@ -115,51 +108,39 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc IStaking
     function deleteNode(address nodeAddr) external override {
-        // can't delete a node not owned
-        if (msg.sender != nodeAddr) revert ErrCallerNotNodeOwner();
-
-        uint256 nodeId = _nodeAddrToId[nodeAddr];
+        DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
-        if (nodeId == 0) revert ErrNodeNotExists();
+        if (msg.sender != node.account) revert ErrCallerNotNodeOwner();
 
         // can't delete a node with staked or delegated tokens
-        if (_nodes[nodeId].delegatedAmount > 0 || _nodes[nodeId].selfStakedAmount > 0)
+        if (node.delegatedAmount > 0 || node.selfStakedAmount > 0)
             revert ErrNodeStakedOrDelegated();
 
-        delete _nodeAddrToId[nodeAddr];
-        delete _nodeIdToAddr[nodeId];
-        delete _nodes[nodeId];
-        _nodeIds.remove(nodeId);
+        delete _nodes[nodeAddr];
+        _nodeAddrs.remove(nodeAddr);
     }
 
     /// @inheritdoc IStaking
     function setNodeRewardAddress(address nodeAddr, address rewardAddress) external override {
-        // can't update a node not owned
-        if (msg.sender != nodeAddr) revert ErrCallerNotNodeOwner();
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        // can't delete a non-exist node
+        if (node.account != msg.sender) revert ErrCallerNotNodeOwner();
 
-        uint256 nodeId = _nodeAddrToId[nodeAddr];
-        if (nodeId == 0) revert ErrNodeNotExists();
-
-        _nodes[nodeId].rewardAddress = rewardAddress;
+        node.rewardAddress = rewardAddress;
     }
 
     /// @inheritdoc IStaking
     function setNodeTax(address nodeAddr, uint40 taxFraction) external override {
-        // can't update a node not owned
-        if (msg.sender != nodeAddr) revert ErrCallerNotNodeOwner();
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (msg.sender != node.account) revert ErrCallerNotNodeOwner();
 
-        uint256 nodeId = _nodeAddrToId[nodeAddr];
-        if (nodeId == 0) revert ErrNodeNotExists();
-
-        _nodes[nodeId].taxFraction = taxFraction;
+        node.taxFraction = taxFraction;
     }
 
     /// @inheritdoc IStaking
     function stake(uint256 amount) external override {
-        uint256 nodeId = _nodeAddrToId[msg.sender];
-        if (nodeId == 0) revert ErrNodeNotExists();
-
-        DataTypes.Node storage node = _nodes[nodeId];
+        DataTypes.Node storage node = _nodes[msg.sender];
+        if (node.account == address(0)) revert ErrNodeNotExists();
         // update operator pool
         if (node.selfStakedAmount == 0 && amount < minStakeAmount) revert ErrAmountTooSmall();
         node.selfStakedAmount = node.selfStakedAmount + amount;
@@ -170,10 +151,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc IStaking
     function requestUnstake(uint256 amount) external override returns (uint256 requestId) {
-        uint256 nodeId = _nodeAddrToId[msg.sender];
-        if (nodeId == 0) revert ErrNodeNotExists();
+        DataTypes.Node storage node = _nodes[msg.sender];
+        if (node.account == address(0)) revert ErrNodeNotExists();
 
-        DataTypes.Node storage node = _nodes[nodeId];
         node.selfStakedAmount = node.selfStakedAmount - amount;
 
         requestId = ++_unstakeRequestCounter;
@@ -184,15 +164,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         request.unstakedAmount = amount;
 
         // withdraw operator pool rewards
-        _withdrawOperatorPoolRewards(nodeId);
+        _withdrawOperatorPoolRewards(msg.sender);
     }
 
     /// @inheritdoc IStaking
     function withdrawOperatorPoolRewards(address nodeAddr) external override {
-        uint256 nodeId = _nodeAddrToId[nodeAddr];
-        if (nodeId == 0) revert ErrNodeNotExists();
+        DataTypes.Node storage node = _nodes[msg.sender];
+        if (node.account == address(0)) revert ErrNodeNotExists();
 
-        _withdrawOperatorPoolRewards(nodeId);
+        _withdrawOperatorPoolRewards(nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -217,8 +197,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         address nodeAddr,
         uint256 amount
     ) external override returns (uint256 fromTokenId, uint256 toTokenId) {
-        uint256 nodeId = _nodeAddrToId[nodeAddr];
-        if (nodeId == 0) revert ErrNodeNotExists();
+        DataTypes.Node storage node = _nodes[msg.sender];
+        if (node.account == address(0)) revert ErrNodeNotExists();
 
         // update reward pool
 
@@ -264,61 +244,58 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc IStaking
     function distributeRewards(
-        uint256[] calldata nodeIds,
+        uint256 epoch,
+        address[] calldata nodeAddrs,
         uint256[] calldata operatorPoolRewards,
         uint256[] calldata rewardPoolRewards
     ) external override onlyRole(ORACLE_ROLE) {
         if (
-            nodeIds.length != operatorPoolRewards.length ||
-            nodeIds.length != rewardPoolRewards.length
+            nodeAddrs.length != operatorPoolRewards.length ||
+            nodeAddrs.length != rewardPoolRewards.length
         ) revert ErrInvalidArrayLength();
 
         // update node rewards
-        for (uint256 i = 0; i < nodeIds.length; i++) {
-            uint256 nodeId = nodeIds[i];
-            DataTypes.Node storage node = _nodes[nodeId];
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            address nodeAddr = nodeAddrs[i];
+            DataTypes.Node storage node = _nodes[nodeAddr];
             node.operatorPoolTotalRewards = node.operatorPoolTotalRewards + operatorPoolRewards[i];
             node.rewardPoolTotalRewards = node.rewardPoolTotalRewards + rewardPoolRewards[i];
         }
     }
 
     /// @inheritdoc IStaking
-    function getNodeById(uint256 nodeId) external view override returns (DataTypes.Node memory) {
-        return _nodes[nodeId];
-    }
-
-    /// @inheritdoc IStaking
     function getNodeByAddr(address addr) external view override returns (DataTypes.Node memory) {
-        uint256 nodeId = _nodeAddrToId[addr];
-        return _nodes[nodeId];
+        return _nodes[addr];
     }
 
     /// @inheritdoc IStaking
     function getNodes() external view override returns (DataTypes.Node[] memory) {
-        uint256 len = _nodeIds.length();
+        uint256 len = _nodeAddrs.length();
         DataTypes.Node[] memory res = new DataTypes.Node[](len);
         for (uint256 i = 0; i < len; i++) {
-            uint256 nodeId = _nodeIds.at(i);
-            res[i] = _nodes[nodeId];
+            address nodeAddr = _nodeAddrs.at(i);
+            res[i] = _nodes[nodeAddr];
         }
         return res;
     }
 
-    function _withdrawOperatorPoolRewards(uint256 nodeId) internal {
+    function _withdrawOperatorPoolRewards(address nodeAddr) internal {
         // get rewards
-        uint256 rewards = _getOperatorPoolRewards(nodeId);
+        uint256 rewards = _getOperatorPoolRewards(nodeAddr);
 
         // update claimed rewards
-        DataTypes.Node storage node = _nodes[nodeId];
+        DataTypes.Node storage node = _nodes[nodeAddr];
         node.claimedOperatorPoollRewards = node.operatorPoolTotalRewards;
 
         // transfer rewards
         IERC20(_token).safeTransfer(node.rewardAddress, rewards);
     }
 
-    function _getOperatorPoolRewards(uint256 nodeId) internal returns (uint256) {
+    function _getOperatorPoolRewards(address nodeAddr) internal returns (uint256) {
         // TODO: how to calculate operator pool rewards ?
-        return _nodes[nodeId].operatorPoolTotalRewards - _nodes[nodeId].claimedOperatorPoollRewards;
+        return
+            _nodes[nodeAddr].operatorPoolTotalRewards -
+            _nodes[nodeAddr].claimedOperatorPoollRewards;
     }
 
     /**
