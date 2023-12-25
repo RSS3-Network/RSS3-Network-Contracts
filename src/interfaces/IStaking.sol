@@ -43,7 +43,6 @@ interface IStaking {
      * @param publicGood Whether the node is public good or not
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
      * @param rewardAddress Address which receives rewards for this operator.
-     * @return nodeId The new created node id.
      */
     function createNode(
         string calldata name,
@@ -51,7 +50,7 @@ interface IStaking {
         bool publicGood,
         uint40 taxFraction,
         address rewardAddress
-    ) external returns (uint256 nodeId);
+    ) external;
 
     /**
      * @notice Delete a node`.
@@ -71,7 +70,7 @@ interface IStaking {
      * @param nodeAddr The address of node to change.
      * @param taxFraction The tax fraction to set.
      */
-    function setNodeTax(address nodeAddr, uint40 taxFraction) external;
+    function setNodeTaxFraction(address nodeAddr, uint40 taxFraction) external;
 
     /**
      * @notice Deposit tokens for node operator.
@@ -111,10 +110,14 @@ interface IStaking {
 
     /**
      * @notice Request undelegating tokens from a node operator.
+     * @param nodeAddr Address of node operator to undelegate.
      * @param chipsIds The chips token ids for undelegating.
      * @return requestId The created undelegate request id.
      */
-    function requestUndelegate(uint256[] calldata chipsIds) external returns (uint256 requestId);
+    function requestUndelegate(
+        address nodeAddr,
+        uint256[] calldata chipsIds
+    ) external returns (uint256 requestId);
 
     /**
      * @notice Claim a batch of undelegate requests.
@@ -124,6 +127,10 @@ interface IStaking {
     /**
      * @notice Updates accounting stats and distribute rewards.
      * @dev periodically called.
+     * @param epoch The current epoch number.
+     * @param nodeAddrs Addresses of node operator to receive the rewards.
+     * @param operatorPoolRewards Amount of rewards to operator pool.
+     * @param rewardPoolRewards Amount of rewards to reward pool.
      */
     function distributeRewards(
         uint256 epoch,
@@ -134,10 +141,10 @@ interface IStaking {
 
     /**
      * @notice Gets node info by node address.
-     * @param addr Node address to query.
+     * @param nodeAddr Node address to query.
      * @return DataTypes.Node Node info.
      */
-    function getNodeByAddr(address addr) external view returns (DataTypes.Node memory);
+    function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
 
     /**
      * @notice Gets all nodes info.

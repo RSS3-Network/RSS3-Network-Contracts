@@ -31,3 +31,6 @@ error ErrAmountTooSmall();
 
 /// @dev Not chips owner
 error ErrNotChipsOwner();
+
+/// @dev Token is not issued by node
+error ErrNotTokenIssuer(uint256 tokenId, address nodeAddr);

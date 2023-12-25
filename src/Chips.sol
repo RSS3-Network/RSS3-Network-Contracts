@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
+import {IChips} from "./interfaces/IChips.sol";
 import {ErrCallerNotStaking} from "./libraries/Error.sol";
+import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 /* solhint-disable comprehensive-interface */
 
-contract Chips is Initializable, ERC721 {
+contract Chips is IChips, Initializable, ERC721 {
     address internal _staking;
 
     uint256 internal _counter;
@@ -19,19 +21,22 @@ contract Chips is Initializable, ERC721 {
 
     constructor() ERC721("RSS3 Chips", "Chips") {}
 
-    function initialize(address staking_) external initializer {
+    /// @inheritdoc IChips
+
+    function initialize(address staking_) external override initializer {
         _staking = staking_;
     }
 
-    function mint(address account) public onlyStaking returns (uint256 tokenId) {
+    function mint(address account) external override onlyStaking returns (uint256 tokenId) {
         tokenId = ++_counter;
         _mint(account, tokenId);
     }
 
+    /// @inheritdoc IChips
     function mintBatch(
         address to,
-        uint96 batchSize
-    ) public onlyStaking returns (uint256 startTokenId, uint256 endTokenId) {
+        uint256 batchSize
+    ) external override onlyStaking returns (uint256 startTokenId, uint256 endTokenId) {
         startTokenId = _counter + 1;
 
         uint256 tokenId = startTokenId;
@@ -42,6 +47,12 @@ contract Chips is Initializable, ERC721 {
         endTokenId = tokenId - 1;
     }
 
+    /// @inheritdoc IChips
+    function burn(uint256 tokenId) external override onlyStaking {
+        _burn(tokenId);
+    }
+
+    /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         return super.tokenURI(tokenId);
     }
