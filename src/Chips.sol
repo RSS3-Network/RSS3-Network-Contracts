@@ -7,11 +7,11 @@ import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/I
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-/* solhint-disable comprehensive-interface */
-
 contract Chips is IChips, Initializable, ERC721 {
+    /// @dev Staking contract address.
     address internal _staking;
 
+    /// @dev Token counter for minting.
     uint256 internal _counter;
 
     modifier onlyStaking() {
