@@ -4,18 +4,7 @@ pragma solidity 0.8.20;
 import {IStaking} from "./interfaces/IStaking.sol";
 import {IChips} from "./interfaces/IChips.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
-import {
-    ErrNodeExists,
-    ErrCallerNotNodeOwner,
-    ErrNodeNotExists,
-    ErrInvalidArrayLength,
-    ErrAlreadyClaimed,
-    ErrClaimTimeNotReady,
-    ErrNodeStakedOrDelegated,
-    ErrAmountTooSmall,
-    ErrNotChipsOwner,
-    ErrNotTokenIssuer
-} from "./libraries/Error.sol";
+import {Errors} from "./libraries/Errors.sol";
 import {Events} from "./libraries/Events.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
@@ -99,7 +88,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     ) external override {
         DataTypes.Node storage node = _nodes[msg.sender];
         // can't delete a non-exist node
-        if (address(0) != node.account) revert ErrNodeExists();
+        if (address(0) != node.account) revert Errors.NodeExists();
 
         node.account = msg.sender;
         node.name = name;
@@ -122,11 +111,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function deleteNode(address nodeAddr) external override {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
-        if (msg.sender != node.account) revert ErrCallerNotNodeOwner();
+        if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
 
         // can't delete a node with staked or delegated tokens
         if (node.delegatedAmount > 0 || node.selfStakedAmount > 0)
-            revert ErrNodeStakedOrDelegated();
+            revert Errors.NodeStakedOrDelegated();
 
         delete _nodes[nodeAddr];
         _nodeAddrs.remove(nodeAddr);
@@ -138,7 +127,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function setNodeRewardAddress(address nodeAddr, address rewardAddress) external override {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
-        if (node.account != msg.sender) revert ErrCallerNotNodeOwner();
+        if (node.account != msg.sender) revert Errors.CallerNotNodeOwner();
 
         node.rewardAddress = rewardAddress;
 
@@ -148,7 +137,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @inheritdoc IStaking
     function setNodeTaxFraction(address nodeAddr, uint40 taxFraction) external override {
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (msg.sender != node.account) revert ErrCallerNotNodeOwner();
+        if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
 
         node.taxFraction = taxFraction;
 
@@ -158,9 +147,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @inheritdoc IStaking
     function stake(uint256 amount) external override {
         DataTypes.Node storage node = _nodes[msg.sender];
-        if (node.account == address(0)) revert ErrNodeNotExists();
+        if (node.account == address(0)) revert Errors.NodeNotExists();
         // update operator pool
-        if (node.selfStakedAmount == 0 && amount < firstStakingAmount) revert ErrAmountTooSmall();
+        if (node.selfStakedAmount == 0 && amount < firstStakingAmount)
+            revert Errors.AmountTooSmall();
         node.selfStakedAmount = node.selfStakedAmount + amount;
         // TODO: update shares by staking amount
         // transfer tokens
@@ -172,7 +162,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @inheritdoc IStaking
     function requestUnstake(uint256 amount) external override returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
-        if (node.account == address(0)) revert ErrNodeNotExists();
+        if (node.account == address(0)) revert Errors.NodeNotExists();
 
         node.selfStakedAmount = node.selfStakedAmount - amount;
 
@@ -192,7 +182,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @inheritdoc IStaking
     function withdrawOperatorPoolRewards(address nodeAddr) external override {
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.account == address(0)) revert ErrNodeNotExists();
+        if (node.account == address(0)) revert Errors.NodeNotExists();
 
         _withdrawOperatorPoolRewards(node);
     }
@@ -210,12 +200,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256 amount
     ) external override returns (uint256 startTokenId, uint256 endTokenId) {
         DataTypes.Node storage node = _nodes[msg.sender];
-        if (node.account == address(0)) revert ErrNodeNotExists();
+        if (node.account == address(0)) revert Errors.NodeNotExists();
 
         uint256 shares = (amount * (node.rewardPoolTotalRewards + node.delegatedAmount)) /
             node.totalShares;
         uint256 chipsCount = shares / sharesPerChips;
-        if (chipsCount == 0) revert ErrAmountTooSmall();
+        if (chipsCount == 0) revert Errors.AmountTooSmall();
 
         // mint chips
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
@@ -243,14 +233,14 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256[] calldata chipsIds
     ) external override returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.account == address(0)) revert ErrNodeNotExists();
+        if (node.account == address(0)) revert Errors.NodeNotExists();
 
         // check and burn chips
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert ErrNotChipsOwner();
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner();
 
-            if (_issuers[tokenId] != nodeAddr) revert ErrNotTokenIssuer(tokenId, nodeAddr);
+            if (_issuers[tokenId] != nodeAddr) revert Errors.NotTokenIssuer(tokenId, nodeAddr);
 
             IChips(_chips).burn(tokenId);
         }
@@ -275,9 +265,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         for (uint256 i = 0; i < requestIds.length; i++) {
             DataTypes.UndelegateRequest storage request = _undelegateQueue[requestIds[i]];
 
-            if (request.claimed) revert ErrAlreadyClaimed();
+            if (request.claimed) revert Errors.AlreadyClaimed();
             if (block.timestamp - request.timestamp < _stakeUnbondingPeriod)
-                revert ErrClaimTimeNotReady();
+                revert Errors.ClaimTimeNotReady();
 
             // set claimed status
             request.claimed = true;
@@ -298,7 +288,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         if (
             nodeAddrs.length != operatorPoolRewards.length ||
             nodeAddrs.length != rewardPoolRewards.length
-        ) revert ErrInvalidArrayLength();
+        ) revert Errors.InvalidArrayLength();
 
         // update node rewards
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
@@ -344,9 +334,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function _claimUndelegate(uint256 requestId) internal {
         DataTypes.UndelegateRequest storage request = _undelegateQueue[requestId];
 
-        if (request.claimed) revert ErrAlreadyClaimed();
+        if (request.claimed) revert Errors.AlreadyClaimed();
         if (block.timestamp - request.timestamp < _stakeUnbondingPeriod)
-            revert ErrClaimTimeNotReady();
+            revert Errors.ClaimTimeNotReady();
 
         // set claimed status
         request.claimed = true;
@@ -361,9 +351,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function _claimUnstake(uint256 requestId) internal {
         DataTypes.UnstakeRequest storage request = _unstakeQueue[requestId];
 
-        if (request.claimed) revert ErrAlreadyClaimed();
+        if (request.claimed) revert Errors.AlreadyClaimed();
         if (block.timestamp - request.timestamp < _stakeUnbondingPeriod)
-            revert ErrClaimTimeNotReady();
+            revert Errors.ClaimTimeNotReady();
 
         // set claimed status
         request.claimed = true;

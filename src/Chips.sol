@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IChips} from "./interfaces/IChips.sol";
-import {ErrCallerNotStaking} from "./libraries/Error.sol";
+import {Errors} from "./libraries/Errors.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
@@ -15,7 +15,7 @@ contract Chips is IChips, Initializable, ERC721 {
     uint256 internal _counter;
 
     modifier onlyStaking() {
-        if (msg.sender != _staking) revert ErrCallerNotStaking();
+        if (msg.sender != _staking) revert Errors.CallerNotStaking();
         _;
     }
 
