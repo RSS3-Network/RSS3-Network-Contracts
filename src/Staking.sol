@@ -273,6 +273,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @inheritdoc IStaking
     function distributeRewards(
         uint256 epoch,
+        uint256 startTimestamp,
+        uint256 endTimestamp,
         address[] calldata nodeAddrs,
         uint256[] calldata operatorPoolRewards,
         uint256[] calldata rewardPoolRewards
@@ -290,7 +292,14 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             node.rewardPoolTotalRewards = node.rewardPoolTotalRewards + rewardPoolRewards[i];
         }
 
-        emit Events.RewardDistributed(epoch, nodeAddrs, operatorPoolRewards, rewardPoolRewards);
+        emit Events.RewardDistributed(
+            epoch,
+            startTimestamp,
+            endTimestamp,
+            nodeAddrs,
+            operatorPoolRewards,
+            rewardPoolRewards
+        );
     }
 
     /// @inheritdoc IStaking

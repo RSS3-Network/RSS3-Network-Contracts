@@ -8,6 +8,7 @@ import {Utils} from "test/helpers/Utils.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
 import {Chips} from "../src/Chips.sol";
+import {AccountOracle} from "../src/AccountOracle.sol";
 import {RSS3Token} from "../src/mocks/RSS3Token.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {TransparentUpgradeableProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
@@ -30,12 +31,15 @@ contract StakingTest is Utils {
     RSS3Token internal _rss3;
     Staking internal _staking;
     Chips internal _chips;
+    AccountOracle internal _accountOracle;
 
     function setUp() public {
         // deploy rss3 token
         _rss3 = new RSS3Token(address(this));
         // deploy chips token
         _chips = new Chips();
+        // deploy account oracle
+        _accountOracle = new AccountOracle();
 
         // deploy and init Staking contract
         Staking stakingImpl = new Staking();
@@ -45,7 +49,7 @@ contract StakingTest is Utils {
             abi.encodeWithSignature(
                 "initialize(address,address,address,address,uint256,uint256)",
                 pauseAccount,
-                oracleAccount,
+                address(_accountOracle),
                 address(_chips),
                 address(_rss3),
                 stakeUnbondingPeriod,
@@ -56,6 +60,8 @@ contract StakingTest is Utils {
 
         // init chips token
         _chips.initialize(address(_staking));
+        // init account oracle
+        _accountOracle.initialize(address(_staking), oracleAccount);
     }
 
     function testCreateNode(uint256 taxFraction) public {

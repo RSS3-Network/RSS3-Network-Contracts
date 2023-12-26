@@ -124,12 +124,16 @@ interface IStaking {
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @param epoch The current epoch number.
+     * @param startTimestamp The startTimestamp of the epoch.
+     * @param endTimestamp The endTimestamp of the epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param operatorPoolRewards Amount of rewards to operator pool.
      * @param rewardPoolRewards Amount of rewards to reward pool.
      */
     function distributeRewards(
         uint256 epoch,
+        uint256 startTimestamp,
+        uint256 endTimestamp,
         address[] calldata nodeAddrs,
         uint256[] calldata operatorPoolRewards,
         uint256[] calldata rewardPoolRewards
