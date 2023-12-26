@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/aec77f3a573e6f606822e8294b94638d1894fc82/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/f9b329e2ca2be442173f343180d10c3764475222/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -208,10 +208,12 @@
 <h3 id="undelegaterequest"><a class="header" href="#undelegaterequest">UndelegateRequest</a></h3>
 <pre><code class="language-solidity">struct UndelegateRequest {
     address owner;
+    address nodeAddr;
     bool claimed;
     uint256 timestamp;
     uint256 undelegatedAmount;
     uint256 rewards;
+    uint256 tax;
 }
 </code></pre>
 
