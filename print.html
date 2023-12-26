@@ -90,7 +90,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="index.html">Home</a></li><li class="chapter-item affix "><li class="part-title">src</li><li class="chapter-item "><a href="src/interfaces/index.html">❱ interfaces</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/interfaces/IChips.sol/interface.IChips.html">IChips</a></li><li class="chapter-item "><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li></ol></li><li class="chapter-item "><a href="src/libraries/index.html">❱ libraries</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/libraries/DataTypes.sol/library.DataTypes.html">DataTypes</a></li><li class="chapter-item "><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li><li class="chapter-item "><a href="src/libraries/Events.sol/library.Events.html">Events</a></li></ol></li><li class="chapter-item "><a href="src/mocks/index.html">❱ mocks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li></ol></li><li class="chapter-item "><a href="src/upgradeability/index.html">❱ upgradeability</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/upgradeability/TransparentUpgradeableProxy.sol/interface.ITransparentUpgradeableProxy.html">ITransparentUpgradeableProxy</a></li><li class="chapter-item "><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li></ol></li><li class="chapter-item "><a href="src/Chips.sol/contract.Chips.html">Chips</a></li><li class="chapter-item "><a href="src/Staking.sol/contract.Staking.html">Staking</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="index.html">Home</a></li><li class="chapter-item affix "><li class="part-title">src</li><li class="chapter-item "><a href="src/interfaces/index.html">❱ interfaces</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a></li><li class="chapter-item "><a href="src/interfaces/IChips.sol/interface.IChips.html">IChips</a></li><li class="chapter-item "><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li></ol></li><li class="chapter-item "><a href="src/libraries/index.html">❱ libraries</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/libraries/DataTypes.sol/library.DataTypes.html">DataTypes</a></li><li class="chapter-item "><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li><li class="chapter-item "><a href="src/libraries/Events.sol/library.Events.html">Events</a></li></ol></li><li class="chapter-item "><a href="src/mocks/index.html">❱ mocks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li></ol></li><li class="chapter-item "><a href="src/upgradeability/index.html">❱ upgradeability</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/upgradeability/TransparentUpgradeableProxy.sol/interface.ITransparentUpgradeableProxy.html">ITransparentUpgradeableProxy</a></li><li class="chapter-item "><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li></ol></li><li class="chapter-item "><a href="src/AccountOracle.sol/contract.AccountOracle.html">AccountOracle</a></li><li class="chapter-item "><a href="src/Chips.sol/contract.Chips.html">Chips</a></li><li class="chapter-item "><a href="src/Staking.sol/contract.Staking.html">Staking</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -181,13 +181,48 @@
                         <h1 id="rss3-network-contracts"><a class="header" href="#rss3-network-contracts">RSS3-Network-Contracts</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="contents"><a class="header" href="#contents">Contents</a></h1>
 <ul>
+<li><a href="src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a></li>
 <li><a href="src/interfaces/IChips.sol/interface.IChips.html">IChips</a></li>
 <li><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="ichips"><a class="header" href="#ichips">IChips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/interfaces/IChips.sol">Git Source</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="iaccountoracle"><a class="header" href="#iaccountoracle">IAccountOracle</a></h1>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/interfaces/IAccountOracle.sol">Git Source</a></p>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
+<p>Initializes the AccountOracle contract.</p>
+<pre><code class="language-solidity">function initialize(address staking_, address oracleAccount) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>staking_</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
+<tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who can distribute rewards to the Staking contract.</td></tr>
+</tbody></table>
+</div>
+<h3 id="distributerewards"><a class="header" href="#distributerewards">distributeRewards</a></h3>
+<p>Updates accounting stats and distribute rewards.</p>
+<p><em>periodically called.</em></p>
+<pre><code class="language-solidity">function distributeRewards(
+    uint256 epoch,
+    uint256 startTimestamp,
+    uint256 endTimestamp,
+    address[] calldata nodeAddrs,
+    uint256[] calldata operatorPoolRewards,
+    uint256[] calldata rewardPoolRewards
+) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
+<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
+<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
+<tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
+<tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
+<tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="ichips"><a class="header" href="#ichips">IChips</a></h1>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/interfaces/IChips.sol">Git Source</a></p>
+<h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
+<h3 id="initialize-1"><a class="header" href="#initialize-1">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
 <pre><code class="language-solidity">function initialize(address staking_) external;
 </code></pre>
@@ -235,9 +270,9 @@
 <tr><td><code>tokenId</code></td><td><code>uint256</code></td><td>ID of token to burn.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/interfaces/IStaking.sol">Git Source</a></p>
-<h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
-<h3 id="initialize-1"><a class="header" href="#initialize-1">initialize</a></h3>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/interfaces/IStaking.sol">Git Source</a></p>
+<h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
+<h3 id="initialize-2"><a class="header" href="#initialize-2">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
 <pre><code class="language-solidity">function initialize(
     address pauseAccount,
@@ -383,7 +418,7 @@ Requirements:</p>
 <tr><td><code>requestIds</code></td><td><code>uint256[]</code></td><td>The undelegate request ids to claim.</td></tr>
 </tbody></table>
 </div>
-<h3 id="distributerewards"><a class="header" href="#distributerewards">distributeRewards</a></h3>
+<h3 id="distributerewards-1"><a class="header" href="#distributerewards-1">distributeRewards</a></h3>
 <p>Updates accounting stats and distribute rewards.</p>
 <p>*periodically called.
 Requirements:</p>
@@ -392,6 +427,8 @@ Requirements:</p>
 </ul>
 <pre><code class="language-solidity">function distributeRewards(
     uint256 epoch,
+    uint256 startTimestamp,
+    uint256 endTimestamp,
     address[] calldata nodeAddrs,
     uint256[] calldata operatorPoolRewards,
     uint256[] calldata rewardPoolRewards
@@ -400,6 +437,8 @@ Requirements:</p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
+<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
+<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
 <tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
@@ -459,7 +498,7 @@ Requirements:</p>
 <li><a href="src/libraries/Events.sol/library.Events.html">Events</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -496,7 +535,7 @@ Requirements:</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/libraries/Errors.sol">Git Source</a></p>
 <h2 id="errors-1"><a class="header" href="#errors-1">Errors</a></h2>
 <h3 id="callernotstaking"><a class="header" href="#callernotstaking">CallerNotStaking</a></h3>
 <p><em>Caller is not staking contract</em></p>
@@ -547,7 +586,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error StakingTokensSlashedAll();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -626,12 +665,19 @@ Requirements:</p>
 <h3 id="rewarddistributed"><a class="header" href="#rewarddistributed">RewardDistributed</a></h3>
 <p><em>Emitted on distributeRewards()</em></p>
 <pre><code class="language-solidity">event RewardDistributed(
-    uint256 indexed epoch, address[] nodeAddrs, uint256[] operatorPoolRewards, uint256[] rewardPoolRewards
+    uint256 indexed epoch,
+    uint256 indexed startTimestamp,
+    uint256 indexed endTimestamp,
+    address[] nodeAddrs,
+    uint256[] operatorPoolRewards,
+    uint256[] rewardPoolRewards
 );
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
+<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
+<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
 <tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
@@ -688,10 +734,10 @@ Requirements:</p>
 <li><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rss3token"><a class="header" href="#rss3token">RSS3Token</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/mocks/RSS3Token.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/mocks/RSS3Token.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC20</p>
-<h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
+<h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
 <pre><code class="language-solidity">constructor(address initialAccount) ERC20(&quot;RSS3&quot;, &quot;RSS3&quot;);
 </code></pre>
@@ -701,19 +747,19 @@ ERC20</p>
 <li><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="itransparentupgradeableproxy"><a class="header" href="#itransparentupgradeableproxy">ITransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 IERC1967</p>
 <p><em>Interface for {TransparentUpgradeableProxy}. In order to implement transparency, {TransparentUpgradeableProxy}
 does not implement this interface directly, and its upgradeability mechanism is implemented by an internal dispatch
 mechanism. The compiler is unaware that these functions are implemented by {TransparentUpgradeableProxy} and will not
 include them in the ABI so this interface must be used to interact with it.</em></p>
-<h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
+<h2 id="functions-4"><a class="header" href="#functions-4">Functions</a></h2>
 <h3 id="upgradetoandcall"><a class="header" href="#upgradetoandcall">upgradeToAndCall</a></h3>
 <pre><code class="language-solidity">function upgradeToAndCall(address, bytes calldata) external payable;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transparentupgradeableproxy"><a class="header" href="#transparentupgradeableproxy">TransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC1967Proxy</p>
 <p>*This contract implements a proxy that is upgradeable through an associated {ProxyAdmin} instance.
@@ -752,7 +798,7 @@ could render the <code>upgradeToAndCall</code> function inaccessible, preventing
 <h3 id="_admin"><a class="header" href="#_admin">_admin</a></h3>
 <pre><code class="language-solidity">address private immutable _admin;
 </code></pre>
-<h2 id="functions-4"><a class="header" href="#functions-4">Functions</a></h2>
+<h2 id="functions-5"><a class="header" href="#functions-5">Functions</a></h2>
 <h3 id="constructor-1"><a class="header" href="#constructor-1">constructor</a></h3>
 <p><em>Initializes an upgradeable proxy managed by an instance of a {ProxyAdmin} with an <code>initialOwner</code>,
 backed by the implementation at <code>_logic</code>, and optionally initialized with <code>_data</code> as explained in
@@ -780,12 +826,56 @@ Requirements:</p>
 <p><em>The proxy caller is the current admin, and can't fallback to the proxy target.</em></p>
 <pre><code class="language-solidity">error ProxyDeniedAdminAccess();
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/Chips.sol">Git Source</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="accountoracle"><a class="header" href="#accountoracle">AccountOracle</a></h1>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/AccountOracle.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
-<a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, Initializable, ERC721</p>
+<a href="src/AccountOracle.sol//src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-1"><a class="header" href="#state-variables-1">State Variables</a></h2>
 <h3 id="_staking"><a class="header" href="#_staking">_staking</a></h3>
+<p><em>Staking contract address.</em></p>
+<pre><code class="language-solidity">address internal _staking;
+</code></pre>
+<h3 id="oracle_role"><a class="header" href="#oracle_role">ORACLE_ROLE</a></h3>
+<pre><code class="language-solidity">bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+</code></pre>
+<h2 id="functions-6"><a class="header" href="#functions-6">Functions</a></h2>
+<h3 id="initialize-3"><a class="header" href="#initialize-3">initialize</a></h3>
+<p>Initializes the AccountOracle contract.</p>
+<pre><code class="language-solidity">function initialize(address staking_, address oracleAccount) external override initializer;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>staking_</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
+<tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who can distribute rewards to the Staking contract.</td></tr>
+</tbody></table>
+</div>
+<h3 id="distributerewards-2"><a class="header" href="#distributerewards-2">distributeRewards</a></h3>
+<p>Updates accounting stats and distribute rewards.</p>
+<p><em>periodically called.</em></p>
+<pre><code class="language-solidity">function distributeRewards(
+    uint256 epoch,
+    uint256 startTimestamp,
+    uint256 endTimestamp,
+    address[] calldata nodeAddrs,
+    uint256[] calldata operatorPoolRewards,
+    uint256[] calldata rewardPoolRewards
+) external override onlyRole(ORACLE_ROLE);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
+<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
+<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
+<tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
+<tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
+<tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/Chips.sol">Git Source</a></p>
+<p><strong>Inherits:</strong>
+<a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, Initializable, ERC721</p>
+<h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
+<h3 id="_staking-1"><a class="header" href="#_staking-1">_staking</a></h3>
 <p><em>Staking contract address.</em></p>
 <pre><code class="language-solidity">address internal _staking;
 </code></pre>
@@ -793,14 +883,14 @@ Requirements:</p>
 <p><em>Token counter for minting.</em></p>
 <pre><code class="language-solidity">uint256 internal _counter;
 </code></pre>
-<h2 id="functions-5"><a class="header" href="#functions-5">Functions</a></h2>
+<h2 id="functions-7"><a class="header" href="#functions-7">Functions</a></h2>
 <h3 id="onlystaking"><a class="header" href="#onlystaking">onlyStaking</a></h3>
 <pre><code class="language-solidity">modifier onlyStaking();
 </code></pre>
 <h3 id="constructor-2"><a class="header" href="#constructor-2">constructor</a></h3>
 <pre><code class="language-solidity">constructor() ERC721(&quot;RSS3 Chips&quot;, &quot;Chips&quot;);
 </code></pre>
-<h3 id="initialize-2"><a class="header" href="#initialize-2">initialize</a></h3>
+<h3 id="initialize-4"><a class="header" href="#initialize-4">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
 <pre><code class="language-solidity">function initialize(address staking_) external override initializer;
 </code></pre>
@@ -860,10 +950,10 @@ Metadata JSON Schema&quot;.</em></p>
 <pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view override returns (string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c179557bc986fbeacd6d555b5d096216e96e81e2/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/21ea65eba2a7ceb75abf090906ceb5ff77cca036/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Staking.sol//src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
-<h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
+<h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
 <h3 id="sharesperchips"><a class="header" href="#sharesperchips">sharesPerChips</a></h3>
 <pre><code class="language-solidity">uint256 public constant sharesPerChips = 5000e18;
 </code></pre>
@@ -921,11 +1011,11 @@ Metadata JSON Schema&quot;.</em></p>
 <p>ACL</p>
 <pre><code class="language-solidity">bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
 </code></pre>
-<h3 id="oracle_role"><a class="header" href="#oracle_role">ORACLE_ROLE</a></h3>
+<h3 id="oracle_role-1"><a class="header" href="#oracle_role-1">ORACLE_ROLE</a></h3>
 <pre><code class="language-solidity">bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 </code></pre>
-<h2 id="functions-6"><a class="header" href="#functions-6">Functions</a></h2>
-<h3 id="initialize-3"><a class="header" href="#initialize-3">initialize</a></h3>
+<h2 id="functions-8"><a class="header" href="#functions-8">Functions</a></h2>
+<h3 id="initialize-5"><a class="header" href="#initialize-5">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
 <pre><code class="language-solidity">function initialize(
     address pauseAccount,
@@ -1078,7 +1168,7 @@ Requirements:</p>
 <tr><td><code>requestIds</code></td><td><code>uint256[]</code></td><td>The undelegate request ids to claim.</td></tr>
 </tbody></table>
 </div>
-<h3 id="distributerewards-1"><a class="header" href="#distributerewards-1">distributeRewards</a></h3>
+<h3 id="distributerewards-3"><a class="header" href="#distributerewards-3">distributeRewards</a></h3>
 <p>Updates accounting stats and distribute rewards.</p>
 <p>*periodically called.
 Requirements:</p>
@@ -1087,6 +1177,8 @@ Requirements:</p>
 </ul>
 <pre><code class="language-solidity">function distributeRewards(
     uint256 epoch,
+    uint256 startTimestamp,
+    uint256 endTimestamp,
     address[] calldata nodeAddrs,
     uint256[] calldata operatorPoolRewards,
     uint256[] calldata rewardPoolRewards
@@ -1095,6 +1187,8 @@ Requirements:</p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
+<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
+<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
 <tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
