@@ -20,9 +20,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
 
-    uint256 public constant sharesPerChips = 5000e18;
-    uint256 public constant firstStakingAmount = 10000e18;
-    uint256 public constant minDelegateAmount = 1000e18;
+    uint256 public constant sharesPerChips = 500 * 10 ** 18;
+    uint256 public constant firstStakingAmount = 10000 * 10 ** 18;
 
     /// @dev The period of time that a node can't withdraw staked tokens
     uint256 internal _stakeUnbondingPeriod;
@@ -194,7 +193,13 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
-        uint256 shares = (amount * _getPoolTokens(node)) / node.totalShares;
+        uint256 shares;
+        if (node.delegatedAmount == 0) {
+            shares = sharesPerChips;
+        } else {
+            shares = (amount * _getPoolTokens(node)) / node.totalShares;
+        }
+
         uint256 chipsCount = shares / sharesPerChips;
         if (chipsCount == 0) revert Errors.AmountTooSmall();
 
@@ -306,7 +311,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function minTokensToDelegate(address nodeAddr) external view override returns (uint256) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.totalShares == 0) {
-            return minDelegateAmount;
+            return sharesPerChips;
         }
 
         return (sharesPerChips * _getPoolTokens(node)) / node.totalShares;
