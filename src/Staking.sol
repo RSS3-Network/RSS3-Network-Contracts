@@ -153,6 +153,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
+        //  staking tokens has been slashed completely
+        if (amount > _getRealSelfStakedAmount(node)) revert Errors.StakingTokensSlashedAll();
+
         node.selfStakedAmount = node.selfStakedAmount - amount;
 
         requestId = ++_unstakeRequestCounter;
@@ -191,8 +194,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
-        uint256 shares = (amount * (node.rewardPoolTotalRewards + node.delegatedAmount)) /
-            node.totalShares;
+        uint256 shares = (amount * _getPoolTokens(node)) / node.totalShares;
         uint256 chipsCount = shares / sharesPerChips;
         if (chipsCount == 0) revert Errors.AmountTooSmall();
 
@@ -202,8 +204,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             _issuers[i] = nodeAddr;
         }
 
-        uint256 remainder = (shares % sharesPerChips) *
-            ((node.rewardPoolTotalRewards + node.delegatedAmount) / node.totalShares);
+        uint256 remainder = (shares % sharesPerChips) * (_getPoolTokens(node) / node.totalShares);
         uint256 delegatedAmount = amount - remainder;
         // update reward pool
         node.delegatedAmount = node.delegatedAmount + delegatedAmount;
@@ -239,7 +240,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // update rewards
         uint256 shares = sharesPerChips * chipsIds.length;
         uint256 rewards = (shares * node.rewardPoolTotalRewards) / node.totalShares;
-        uint256 undelegatedAmount = (shares * node.delegatedAmount) / node.totalShares;
+        uint256 undelegatedAmount = (shares * _getRealDelegatedAmount(node)) / node.totalShares;
 
         // add to request queue
         DataTypes.UndelegateRequest storage request = _undelegateQueue[requestId];
@@ -295,13 +296,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @inheritdoc IStaking
     function minTokensToDelegate(address nodeAddr) external view override returns (uint256) {
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.account == address(0)) {
+        if (node.totalShares == 0) {
             return minDelegateAmount;
         }
 
-        return
-            (sharesPerChips * (node.rewardPoolTotalRewards + node.delegatedAmount)) /
-            node.totalShares;
+        return (sharesPerChips * _getPoolTokens(node)) / node.totalShares;
     }
 
     /// @inheritdoc IStaking
@@ -312,9 +311,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         if (nodeAddr != address(0)) {
             DataTypes.Node storage node = _nodes[nodeAddr];
-            tokens =
-                ((node.rewardPoolTotalRewards + node.delegatedAmount) / node.totalShares) *
-                sharesPerChips;
+            tokens = (_getPoolTokens(node) / node.totalShares) * sharesPerChips;
         }
     }
 
@@ -381,6 +378,22 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         IERC20(_token).safeTransfer(node.account, rewards);
 
         emit Events.OperatorPoolRewardsWithdrawn(node.account, node.account, rewards);
+    }
+
+    function _getPoolTokens(DataTypes.Node storage node) internal view returns (uint256) {
+        return node.rewardPoolTotalRewards + node.delegatedAmount - node.slashedAmount;
+    }
+
+    function _getRealDelegatedAmount(DataTypes.Node storage node) internal view returns (uint256) {
+        uint256 slashedAmount = (node.slashedAmount * node.delegatedAmount) /
+            (node.delegatedAmount + node.selfStakedAmount);
+        return node.delegatedAmount - slashedAmount;
+    }
+
+    function _getRealSelfStakedAmount(DataTypes.Node storage node) internal view returns (uint256) {
+        uint256 slashedAmount = (node.slashedAmount * node.selfStakedAmount) /
+            (node.delegatedAmount + node.selfStakedAmount);
+        return node.selfStakedAmount - slashedAmount;
     }
 
     /// @dev get operator pool rewards

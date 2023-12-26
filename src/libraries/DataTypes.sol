@@ -29,6 +29,8 @@ library DataTypes {
         uint256 rewardPoolTotalRewards;
         /// @notice total shares of the pool
         uint256 totalShares;
+        /// @notice total amount of slashed tokens
+        uint256 slashedAmount;
     }
 
     struct UnstakeRequest {
