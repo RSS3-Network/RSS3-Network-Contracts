@@ -91,9 +91,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function createNode(
         string calldata name,
         string calldata description,
-        bool publicGood,
-        uint40 taxFraction,
-        address rewardAddress
+        uint256 taxFraction,
+        string calldata endpoint
     ) external override {
         DataTypes.Node storage node = _nodes[msg.sender];
         // can't delete a non-exist node
@@ -102,18 +101,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         node.account = msg.sender;
         node.name = name;
         node.description = description;
-        node.publicGood = publicGood;
         node.taxFraction = taxFraction;
-        node.rewardAddress = rewardAddress;
+        node.endpoint = endpoint;
 
-        emit Events.NodeCreated(
-            msg.sender,
-            name,
-            description,
-            publicGood,
-            taxFraction,
-            rewardAddress
-        );
+        emit Events.NodeCreated(msg.sender, name, description, taxFraction, endpoint);
     }
 
     /// @inheritdoc IStaking
@@ -133,18 +124,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function setNodeRewardAddress(address nodeAddr, address rewardAddress) external override {
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        // can't delete a non-exist node
-        if (node.account != msg.sender) revert Errors.CallerNotNodeOwner();
-
-        node.rewardAddress = rewardAddress;
-
-        emit Events.NodeRewardAddressSet(nodeAddr, rewardAddress);
-    }
-
-    /// @inheritdoc IStaking
-    function setNodeTaxFraction(address nodeAddr, uint40 taxFraction) external override {
+    function setNodeTaxFraction(address nodeAddr, uint256 taxFraction) external override {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
 
@@ -263,7 +243,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         // add to request queue
         DataTypes.UndelegateRequest storage request = _undelegateQueue[requestId];
-        request.timestamp = uint40(block.timestamp);
+        request.timestamp = block.timestamp;
         request.owner = msg.sender;
         request.rewards = rewards;
         request.undelegatedAmount = undelegatedAmount;
@@ -398,9 +378,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         node.claimedOperatorPoollRewards = node.operatorPoolTotalRewards;
 
         // transfer rewards
-        IERC20(_token).safeTransfer(node.rewardAddress, rewards);
+        IERC20(_token).safeTransfer(node.account, rewards);
 
-        emit Events.OperatorPoolRewardsWithdrawn(node.account, node.rewardAddress, rewards);
+        emit Events.OperatorPoolRewardsWithdrawn(node.account, node.account, rewards);
     }
 
     /// @dev get operator pool rewards

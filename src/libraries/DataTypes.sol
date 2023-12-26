@@ -9,16 +9,14 @@ library DataTypes {
     struct Node {
         /// @notice address of the node operator
         address account;
-        /// @notice whether the node is public good or not
-        bool publicGood;
         /// @notice tax percentage measured in basis points.
-        uint40 taxFraction;
+        uint256 taxFraction;
         /// @notice name of the node
         string name;
         /// @notice description of the node
         string description;
-        /// @notice reward address of the node
-        address rewardAddress;
+        /// @notice API endpoint of the node
+        string endpoint;
         /// @notice amount of tokens staked by node itself
         uint256 selfStakedAmount;
         /// @notice amount of tokens delegated by users
@@ -50,7 +48,7 @@ library DataTypes {
         /// @notice flag indicating if the request was claimed
         bool claimed;
         /// @notice block.timestamp when the request was created
-        uint40 timestamp;
+        uint256 timestamp;
         /// @notice amount of tokens to undelegate
         uint256 undelegatedAmount;
         /// @notice total rewards to claim

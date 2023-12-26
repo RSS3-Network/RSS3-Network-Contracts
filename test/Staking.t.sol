@@ -5,6 +5,7 @@ pragma solidity 0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {console2 as console} from "forge-std/console2.sol";
 import {Utils} from "test/helpers/Utils.sol";
+import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
 import {Chips} from "../src/Chips.sol";
 import {RSS3Token} from "../src/mocks/RSS3Token.sol";
@@ -57,24 +58,22 @@ contract StakingTest is Utils {
         _chips.initialize(address(_staking));
     }
 
-    function testCreateNode(uint40 taxFraction) public {
+    function testCreateNode(uint256 taxFraction) public {
         vm.assume(taxFraction <= 10000);
 
         string memory name = "Alice";
         string memory description = "Alice's node";
-        bool publicGood = false;
-        address rewardAddress = address(0x123243);
+        string memory endpoint = "https://alice.com";
 
         expectEmit();
-        emit Events.NodeCreated(alice, name, description, publicGood, taxFraction, rewardAddress);
+        emit Events.NodeCreated(alice, name, description, taxFraction, endpoint);
         vm.prank(alice);
-        _staking.createNode(name, description, publicGood, taxFraction, rewardAddress);
+        _staking.createNode(name, description, taxFraction, endpoint);
 
         DataTypes.Node memory node = _staking.getNode(alice);
-        vm.assertEq(node.name, name);
-        vm.assertEq(node.description, description);
-        vm.assertEq(node.publicGood, publicGood);
-        vm.assertEq(node.taxFraction, taxFraction);
-        vm.assertEq(node.rewardAddress, rewardAddress);
+        assertEq(node.name, name);
+        assertEq(node.description, description);
+        assertEq(node.taxFraction, taxFraction);
+        assertEq(node.endpoint, endpoint);
     }
 }

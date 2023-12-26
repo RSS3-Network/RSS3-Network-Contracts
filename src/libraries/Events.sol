@@ -8,17 +8,15 @@ library Events {
      * @param nodeAddr Address of node operator.
      * @param name Human-readable name.
      * @param description Description of node.
-     * @param publicGood Whether the node is public good or not
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
-     * @param rewardAddress Address which receives rewards for this node operator.
+     * @param endpoint API endpoint of node.
      */
     event NodeCreated(
         address indexed nodeAddr,
         string name,
         string description,
-        bool publicGood,
-        uint40 taxFraction,
-        address rewardAddress
+        uint256 taxFraction,
+        string endpoint
     );
 
     /**
@@ -39,7 +37,7 @@ library Events {
      * @param nodeAddr Address of node operator.
      * @param taxFraction The new tax fraction of node operator.
      */
-    event NodeTaxFractionSet(address indexed nodeAddr, uint40 indexed taxFraction);
+    event NodeTaxFractionSet(address indexed nodeAddr, uint256 indexed taxFraction);
 
     /**
      * @dev Emitted on stake()
