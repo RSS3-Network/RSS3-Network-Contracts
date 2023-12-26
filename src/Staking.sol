@@ -20,7 +20,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
 
-    uint256 public constant sharesPerChips = 500 * 10 ** 18;
+    uint256 public constant sharesPerChip = 500 * 10 ** 18;
     uint256 public constant firstStakingAmount = 10000 * 10 ** 18;
 
     uint256 public constant delegationRatio = 25;
@@ -199,12 +199,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         uint256 shares;
         if (node.delegatedAmount == 0) {
-            shares = sharesPerChips;
+            shares = sharesPerChip;
         } else {
             shares = (amount * _getPoolTokens(node)) / node.totalShares;
         }
 
-        uint256 chipsCount = shares / sharesPerChips;
+        uint256 chipsCount = shares / sharesPerChip;
         if (chipsCount == 0) revert Errors.AmountTooSmall();
 
         // mint chips
@@ -213,7 +213,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             _issuers[i] = nodeAddr;
         }
 
-        uint256 remainder = (shares % sharesPerChips) * (_getPoolTokens(node) / node.totalShares);
+        uint256 remainder = (shares % sharesPerChip) * (_getPoolTokens(node) / node.totalShares);
         uint256 delegatedAmount = amount - remainder;
         // update reward pool
         node.delegatedAmount = node.delegatedAmount + delegatedAmount;
@@ -247,7 +247,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         requestId = ++_undelegateRequestCounter;
 
         // update rewards
-        uint256 shares = sharesPerChips * chipsIds.length;
+        uint256 shares = sharesPerChip * chipsIds.length;
         uint256 rewards = (shares * node.rewardPoolTotalRewards) / node.totalShares;
         uint256 tax = _getTaxAmount(node, rewards);
         uint256 undelegatedAmount = (shares * node.delegatedAmount) / node.totalShares;
@@ -304,7 +304,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function slashNode(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
+    function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) revert Errors.NodeNotExists();
@@ -320,10 +320,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function minTokensToDelegate(address nodeAddr) external view override returns (uint256) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.totalShares == 0) {
-            return sharesPerChips;
+            return sharesPerChip;
         }
 
-        return (sharesPerChips * _getPoolTokens(node)) / node.totalShares;
+        return (sharesPerChip * _getPoolTokens(node)) / node.totalShares;
     }
 
     /// @inheritdoc IStaking
@@ -334,7 +334,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         if (nodeAddr != address(0)) {
             DataTypes.Node storage node = _nodes[nodeAddr];
-            tokens = (_getPoolTokens(node) / node.totalShares) * sharesPerChips;
+            tokens = (_getPoolTokens(node) / node.totalShares) * sharesPerChip;
         }
     }
 

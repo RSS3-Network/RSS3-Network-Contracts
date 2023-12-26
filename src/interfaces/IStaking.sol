@@ -51,8 +51,8 @@ interface IStaking {
     ) external;
 
     /**
-     * @notice Deletes a node`.
-     * @param addr The address of node.
+     * @notice Deletes a node.
+     * @param addr The address of node to delete.
      */
     function deleteNode(address addr) external;
 
@@ -71,14 +71,14 @@ interface IStaking {
     function stake(uint256 amount) external;
 
     /**
-     * @notice Requests unstake tokens from node operator.
+     * @notice Requests unstake tokens for node operator.
      * @param amount Amount of tokens to unstake.
      * @return requestId The created unstake request id
      */
     function requestUnstake(uint256 amount) external returns (uint256 requestId);
 
     /**
-     * @notice Withdraws operator pool rewards.
+     * @notice Withdraws operator pool rewards for node operator.
      * @param nodeAddr Address of node operator.
      */
     function withdrawOperatorPoolRewards(address nodeAddr) external;
@@ -145,7 +145,7 @@ interface IStaking {
      * - The caller must have the `ORACLE_ROLE`.
      * @param nodeAddrs The addresses of nodes to slash.
      */
-    function slashNode(address[] calldata nodeAddrs) external;
+    function slashNodes(address[] calldata nodeAddrs) external;
 
     /**
      * @notice Returns the minimal tokens to delegate for a node.
