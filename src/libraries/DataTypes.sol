@@ -47,6 +47,8 @@ library DataTypes {
     struct UndelegateRequest {
         /// @notice address that can claim request
         address owner;
+        /// @notice Address of the node operator
+        address nodeAddr;
         /// @notice flag indicating if the request was claimed
         bool claimed;
         /// @notice block.timestamp when the request was created
@@ -55,5 +57,7 @@ library DataTypes {
         uint256 undelegatedAmount;
         /// @notice total rewards to claim
         uint256 rewards;
+        /// @notice amount of tokens to node as tax
+        uint256 tax;
     }
 }

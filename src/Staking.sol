@@ -23,6 +23,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     uint256 public constant sharesPerChips = 500 * 10 ** 18;
     uint256 public constant firstStakingAmount = 10000 * 10 ** 18;
 
+    uint256 public constant delegationRatio = 25;
+
     /// @dev The period of time that a node can't withdraw staked tokens
     uint256 internal _stakeUnbondingPeriod;
     /// @dev The period of time that a node can't withdraw delegated tokens
@@ -136,9 +138,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function stake(uint256 amount) external override {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert Errors.NodeNotExists();
-        // update operator pool
+
         if (node.selfStakedAmount == 0 && amount < firstStakingAmount)
             revert Errors.AmountTooSmall();
+
+        // update operator pool
         node.selfStakedAmount = node.selfStakedAmount + amount;
         // TODO: update shares by staking amount
         // transfer tokens
@@ -153,7 +157,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
         //  staking tokens has been slashed completely
-        if (amount > _getRealSelfStakedAmount(node)) revert Errors.StakingTokensSlashedAll();
+        if (amount > node.selfStakedAmount) revert Errors.StakingTokensSlashedAll();
 
         node.selfStakedAmount = node.selfStakedAmount - amount;
 
@@ -245,13 +249,16 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // update rewards
         uint256 shares = sharesPerChips * chipsIds.length;
         uint256 rewards = (shares * node.rewardPoolTotalRewards) / node.totalShares;
-        uint256 undelegatedAmount = (shares * _getRealDelegatedAmount(node)) / node.totalShares;
+        uint256 tax = _getTaxAmount(node, rewards);
+        uint256 undelegatedAmount = (shares * node.delegatedAmount) / node.totalShares;
 
         // add to request queue
         DataTypes.UndelegateRequest storage request = _undelegateQueue[requestId];
         request.timestamp = block.timestamp;
         request.owner = msg.sender;
-        request.rewards = rewards;
+        request.nodeAddr = nodeAddr;
+        request.rewards = rewards - tax;
+        request.tax = tax;
         request.undelegatedAmount = undelegatedAmount;
 
         emit Events.UndelegateRequested(msg.sender, nodeAddr, requestId, chipsIds);
@@ -260,18 +267,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @inheritdoc IStaking
     function claimUndelegate(uint256[] calldata requestIds) external override whenNotPaused {
         for (uint256 i = 0; i < requestIds.length; i++) {
-            DataTypes.UndelegateRequest storage request = _undelegateQueue[requestIds[i]];
-
-            if (request.claimed) revert Errors.AlreadyClaimed();
-            if (block.timestamp - request.timestamp < _stakeUnbondingPeriod)
-                revert Errors.ClaimTimeNotReady();
-
-            // set claimed status
-            request.claimed = true;
-
-            // transfer
-            IERC20(_token).safeTransfer(request.owner, request.undelegatedAmount);
-            IERC20(_token).safeTransfer(request.owner, request.rewards);
+            _claimUndelegate(requestIds[i]);
         }
     }
 
@@ -305,6 +301,19 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             operatorPoolRewards,
             rewardPoolRewards
         );
+    }
+
+    /// @inheritdoc IStaking
+    function slashNode(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            DataTypes.Node storage node = _nodes[nodeAddrs[i]];
+            if (node.account == address(0)) revert Errors.NodeNotExists();
+
+            // TODO: slash node
+            uint256 slashedAmount;
+
+            emit Events.NodeSlashed(nodeAddrs[i], slashedAmount);
+        }
     }
 
     /// @inheritdoc IStaking
@@ -357,10 +366,17 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         request.claimed = true;
 
         // transfer
-        IERC20(_token).safeTransfer(request.owner, request.undelegatedAmount);
-        IERC20(_token).safeTransfer(request.owner, request.rewards);
+        IERC20(_token).safeTransfer(request.owner, request.undelegatedAmount + request.rewards);
+        IERC20(_token).safeTransfer(request.nodeAddr, request.tax);
 
-        emit Events.UndelegateClaimed(requestId);
+        emit Events.UndelegateClaimed(
+            requestId,
+            request.nodeAddr,
+            request.owner,
+            request.undelegatedAmount,
+            request.rewards,
+            request.tax
+        );
     }
 
     /// @dev claim unstake request
@@ -398,22 +414,25 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         return node.rewardPoolTotalRewards + node.delegatedAmount - node.slashedAmount;
     }
 
-    function _getRealDelegatedAmount(DataTypes.Node storage node) internal view returns (uint256) {
-        uint256 slashedAmount = (node.slashedAmount * node.delegatedAmount) /
-            (node.delegatedAmount + node.selfStakedAmount);
-        return node.delegatedAmount - slashedAmount;
-    }
-
-    function _getRealSelfStakedAmount(DataTypes.Node storage node) internal view returns (uint256) {
-        uint256 slashedAmount = (node.slashedAmount * node.selfStakedAmount) /
-            (node.delegatedAmount + node.selfStakedAmount);
-        return node.selfStakedAmount - slashedAmount;
-    }
-
     /// @dev get operator pool rewards
     function _getOperatorPoolRewards(DataTypes.Node storage node) internal view returns (uint256) {
         // TODO: how to calculate operator pool rewards ?
         return node.operatorPoolTotalRewards - node.claimedOperatorPoollRewards;
+    }
+
+    function _getTaxAmount(
+        DataTypes.Node storage node,
+        uint256 rewards
+    ) internal view returns (uint256) {
+        uint256 delegationCapacity = node.selfStakedAmount * delegationRatio;
+        uint256 fullTaxAmount = (rewards * node.taxFraction) / _taxDenominator();
+
+        if (delegationCapacity <= node.delegatedAmount) {
+            // node will receive its full tax
+            return fullTaxAmount;
+        }
+
+        return (fullTaxAmount * delegationCapacity) / node.delegatedAmount;
     }
 
     /**

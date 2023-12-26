@@ -140,6 +140,14 @@ interface IStaking {
     ) external;
 
     /**
+     * @notice Slashes nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param nodeAddrs The addresses of nodes to slash.
+     */
+    function slashNode(address[] calldata nodeAddrs) external;
+
+    /**
      * @notice Returns the minimal tokens to delegate for a node.
      * @param nodeAddr Address of node operator to stake.
      * @return uint256 The minimal mount of tokens to stake for a node .

@@ -127,6 +127,25 @@ library Events {
     /**
      * @dev Emitted on claimUndelegate()
      * @param requestId The undelegate request id.
+     * @param nodeAddr The address of node to undelegate.
+     * @param user Address of user who undelegated tokens.
+     * @param undelegatedAmount Amount of tokens undelegated.
+     * @param rewards Amount of rewards claimed.
+     * @param tax Amount of tokens to node operator as tax.
      */
-    event UndelegateClaimed(uint256 indexed requestId);
+    event UndelegateClaimed(
+        uint256 indexed requestId,
+        address indexed nodeAddr,
+        address indexed user,
+        uint256 undelegatedAmount,
+        uint256 rewards,
+        uint256 tax
+    );
+
+    /**
+     * @dev Emitted on slashNode()
+     * @param nodeAddr The address of node to slash.
+     * @param slashedAmount Amount of tokens slashed.
+     */
+    event NodeSlashed(address indexed nodeAddr, uint256 indexed slashedAmount);
 }
