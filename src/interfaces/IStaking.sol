@@ -60,6 +60,7 @@ interface IStaking {
      * @notice Changes tax fraction of the node.
      * @param nodeAddr The address of node to change.
      * @param taxFraction The tax fraction to set.
+     * Tax percentage measured in basis points. Each basis point represents 0.01%.
      */
     function setNodeTaxFraction(address nodeAddr, uint256 taxFraction) external;
 
