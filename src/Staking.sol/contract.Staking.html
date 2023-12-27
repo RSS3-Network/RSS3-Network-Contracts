@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/90a4c4c86e4d6759295f092a4b83669e7b1d85f0/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/b2142e19dbd0a64283d8fa21994643aa5f8016ca/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -270,7 +270,7 @@ Requirements:</p>
 <ul>
 <li>The caller must have the <code>PAUSE_ROLE</code>.</li>
 </ul>
-<pre><code class="language-solidity">function pause() external override whenNotPaused onlyRole(PAUSE_ROLE);
+<pre><code class="language-solidity">function pause() external override onlyRole(PAUSE_ROLE);
 </code></pre>
 <h3 id="unpause"><a class="header" href="#unpause">unpause</a></h3>
 <p>Resumes interaction with the Staking contract.
@@ -288,7 +288,7 @@ Requirements:</p>
     uint256 taxFraction,
     string calldata endpoint,
     uint256 amount
-) external override;
+) external override whenNotPaused;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -334,7 +334,7 @@ Requirements:</p>
 </div>
 <h3 id="stake"><a class="header" href="#stake">stake</a></h3>
 <p>Deposits tokens for node operator.</p>
-<pre><code class="language-solidity">function stake(uint256 amount) external override;
+<pre><code class="language-solidity">function stake(uint256 amount) external override whenNotPaused;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -343,7 +343,7 @@ Requirements:</p>
 </div>
 <h3 id="requestunstake"><a class="header" href="#requestunstake">requestUnstake</a></h3>
 <p>Requests unstake tokens for node operator.</p>
-<pre><code class="language-solidity">function requestUnstake(uint256 amount) external override returns (uint256 requestId);
+<pre><code class="language-solidity">function requestUnstake(uint256 amount) external override whenNotPaused returns (uint256 requestId);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -357,7 +357,7 @@ Requirements:</p>
 </div>
 <h3 id="withdrawoperatorpoolrewards"><a class="header" href="#withdrawoperatorpoolrewards">withdrawOperatorPoolRewards</a></h3>
 <p>Withdraws operator pool rewards for node operator.</p>
-<pre><code class="language-solidity">function withdrawOperatorPoolRewards(address nodeAddr) external override;
+<pre><code class="language-solidity">function withdrawOperatorPoolRewards(address nodeAddr) external override whenNotPaused;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -366,7 +366,7 @@ Requirements:</p>
 </div>
 <h3 id="withdrawtax"><a class="header" href="#withdrawtax">withdrawTax</a></h3>
 <p>Withdraws tax for node operator.</p>
-<pre><code class="language-solidity">function withdrawTax(address nodeAddr) external override;
+<pre><code class="language-solidity">function withdrawTax(address nodeAddr) external override whenNotPaused;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -382,6 +382,7 @@ Requirements:</p>
 <pre><code class="language-solidity">function delegate(address nodeAddr, uint256 amount)
     external
     override
+    whenNotPaused
     returns (uint256 startTokenId, uint256 endTokenId);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -402,6 +403,7 @@ Requirements:</p>
 <pre><code class="language-solidity">function requestUndelegate(address nodeAddr, uint256[] calldata chipsIds)
     external
     override
+    whenNotPaused
     returns (uint256 requestId);
 </code></pre>
 <p><strong>Parameters</strong></p>
