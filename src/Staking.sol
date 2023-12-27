@@ -500,7 +500,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             // node will receive its full tax
             return (rewards * taxFraction) / _taxDenominator();
         }
-        return (delegationCapacity * taxFraction) / _taxDenominator();
+
+        uint256 delegationRewards = (rewards * delegationCapacity) / delegatedAmount;
+        return (delegationRewards * taxFraction) / _taxDenominator();
     }
 
     /**

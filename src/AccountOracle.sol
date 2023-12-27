@@ -53,27 +53,35 @@ contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable
         );
     }
 
+    /// @dev returns request bonuses
     function _getRequestBonuses(
         uint256 totalBonus,
         uint256[] memory requestCounts
     ) internal pure returns (uint256[] memory) {
-        uint256[] memory res = new uint256[](requestCounts.length);
+        uint256[] memory result = new uint256[](requestCounts.length);
 
+        /// @dev sum of log2 of each element in `requestCounts`
         uint256 sum;
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            res[i] = _log2(requestCounts[i]);
-            sum += res[i];
+            uint256 logValue = _log2(requestCounts[i]);
+
+            sum += logValue;
+            result[i] = logValue;
         }
 
+        uint256 bonusPerUnit = totalBonus / sum;
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            res[i] = (totalBonus * res[i]) / sum;
+            result[i] *= bonusPerUnit;
         }
 
-        return res;
+        return result;
     }
 
+    /// @dev returns log2(x)
     function _log2(uint256 x) internal pure returns (uint256 result) {
-        while (x > 1) {
+        if (x == 0) return 0;
+
+        while ((x & 1) == 0) {
             x >>= 1;
             result += 1;
         }
