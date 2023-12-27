@@ -92,7 +92,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function createNodeAndStake(
         string calldata name,
         string calldata description,
-        uint256 taxFraction,
+        uint64 taxFraction,
         string calldata endpoint,
         uint256 amount
     ) external override whenNotPaused {
@@ -104,7 +104,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function createNode(
         string calldata name,
         string calldata description,
-        uint256 taxFraction,
+        uint64 taxFraction,
         string calldata endpoint
     ) external override {
         _createNode(msg.sender, name, description, taxFraction, endpoint);
@@ -127,7 +127,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function setNodeTaxFraction(address nodeAddr, uint256 taxFraction) external override {
+    function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external override {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
 
@@ -302,6 +302,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
             // update staking rewards
             uint256 rewardsAfterTax = rewardPoolRewards[i] - tax;
+            // all after-tax rewards are sent to the reward pool
             node.rewardPoolTotalRewards = node.rewardPoolTotalRewards + rewardsAfterTax;
             stakingRewards[i] = rewardsAfterTax;
         }
@@ -373,7 +374,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         address nodeAddr,
         string calldata name,
         string calldata description,
-        uint256 taxFraction,
+        uint64 taxFraction,
         string calldata endpoint
     ) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
@@ -398,7 +399,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         // update operator pool
         node.selfStakedAmount = node.selfStakedAmount + amount;
-        // TODO: update shares by staking amount
         // transfer tokens
         IERC20(_token).safeTransferFrom(nodeAddr, address(this), amount);
 
@@ -481,7 +481,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         }
     }
 
-    /// @dev get tax amount
+    /**
+     * @dev get tax amount
+     *  For a node operator to receive its full tax,
+     * it needs to stake at least 1/25 of the tokens staked by external delegators,
+     * or the exceeding part of the tax will be sent to the reward pool.
+     */
     function _getTax(
         uint256 rewards,
         uint256 taxFraction,

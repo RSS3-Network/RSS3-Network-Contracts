@@ -10,7 +10,7 @@ library DataTypes {
         /// @notice address of the node operator
         address account;
         /// @notice tax percentage measured in basis points.
-        uint256 taxFraction;
+        uint64 taxFraction;
         /// @notice name of the node
         string name;
         /// @notice description of the node

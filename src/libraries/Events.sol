@@ -15,7 +15,7 @@ library Events {
         address indexed nodeAddr,
         string name,
         string description,
-        uint256 taxFraction,
+        uint64 taxFraction,
         string endpoint
     );
 
@@ -26,18 +26,11 @@ library Events {
     event NodeDeleted(address indexed nodeAddr);
 
     /**
-     * @dev Emitted on setNodeRewardAddress()
-     * @param nodeAddr Address of node operator.
-     * @param rewardAddress New reward address of node operator.
-     */
-    event NodeRewardAddressSet(address indexed nodeAddr, address indexed rewardAddress);
-
-    /**
      * @dev Emitted on setNodeTaxFraction()
      * @param nodeAddr Address of node operator.
      * @param taxFraction The new tax fraction of node operator.
      */
-    event NodeTaxFractionSet(address indexed nodeAddr, uint256 indexed taxFraction);
+    event NodeTaxFractionSet(address indexed nodeAddr, uint64 indexed taxFraction);
 
     /**
      * @dev Emitted on stake()

@@ -64,7 +64,7 @@ contract StakingTest is Utils {
         _accountOracle.initialize(address(_staking), oracleAccount);
     }
 
-    function testCreateNode(uint256 taxFraction) public {
+    function testCreateNode(uint64 taxFraction) public {
         vm.assume(taxFraction <= 10000);
 
         string memory name = "Alice";

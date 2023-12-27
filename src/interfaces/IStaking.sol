@@ -46,7 +46,7 @@ interface IStaking {
     function createNode(
         string calldata name,
         string calldata description,
-        uint256 taxFraction,
+        uint64 taxFraction,
         string calldata endpoint
     ) external;
 
@@ -67,7 +67,7 @@ interface IStaking {
     function createNodeAndStake(
         string calldata name,
         string calldata description,
-        uint256 taxFraction,
+        uint64 taxFraction,
         string calldata endpoint,
         uint256 amount
     ) external;
@@ -78,7 +78,7 @@ interface IStaking {
      * @param taxFraction The tax fraction to set.
      * Tax percentage measured in basis points. Each basis point represents 0.01%.
      */
-    function setNodeTaxFraction(address nodeAddr, uint256 taxFraction) external;
+    function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external;
 
     /**
      * @notice Deposits tokens for node operator.
