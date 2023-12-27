@@ -78,6 +78,7 @@ library Events {
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param operatorPoolRewards Amount of rewards to operator pool.
      * @param rewardPoolRewards Amount of rewards to reward pool.
+     * @param taxAmounts Amount of tax to node operator.
      */
     event RewardDistributed(
         uint256 indexed epoch,
@@ -85,7 +86,8 @@ library Events {
         uint256 indexed endTimestamp,
         address[] nodeAddrs,
         uint256[] operatorPoolRewards,
-        uint256[] rewardPoolRewards
+        uint256[] rewardPoolRewards,
+        uint256[] taxAmounts
     );
 
     /**
@@ -131,17 +133,20 @@ library Events {
      * @param user Address of user who undelegated tokens.
      * @param undelegatedAmount Amount of tokens undelegated.
      * @param rewards Amount of rewards claimed.
-     * @param tax Amount of tokens to node operator as tax.
      */
     event UndelegateClaimed(
         uint256 indexed requestId,
         address indexed nodeAddr,
         address indexed user,
         uint256 undelegatedAmount,
-        uint256 rewards,
-        uint256 tax
+        uint256 rewards
     );
-
+    /**
+     * @dev Emitted on withdrawTax()
+     * @param nodeAddr The address of node operator.
+     * @param tax Amount of tokens withdrawn.
+     */
+    event TaxWithdrawn(address indexed nodeAddr, uint256 indexed tax);
     /**
      * @dev Emitted on slashNode()
      * @param nodeAddr The address of node to slash.

@@ -27,6 +27,10 @@ library DataTypes {
         uint256 claimedOperatorPoollRewards;
         /// @notice total rewards of reward pool
         uint256 rewardPoolTotalRewards;
+        /// @notice tax of reward pool
+        uint256 tax;
+        /// @notice claimed tax of reward pool
+        uint256 claimedTax;
         /// @notice total shares of the pool
         uint256 totalShares;
         /// @notice total amount of slashed tokens
@@ -57,7 +61,5 @@ library DataTypes {
         uint256 undelegatedAmount;
         /// @notice total rewards to claim
         uint256 rewards;
-        /// @notice amount of tokens to node as tax
-        uint256 tax;
     }
 }

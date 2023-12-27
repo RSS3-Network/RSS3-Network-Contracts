@@ -23,7 +23,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     uint256 public constant sharesPerChip = 500 * 10 ** 18;
     uint256 public constant firstStakingAmount = 10000 * 10 ** 18;
 
-    uint256 public constant delegationRatio = 25;
+    uint256 public constant DELEGATION_RATIO = 25;
 
     /// @dev The period of time that a node can't withdraw staked tokens
     uint256 internal _stakeUnbondingPeriod;
@@ -89,23 +89,25 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
+    function createNodeAndStake(
+        string calldata name,
+        string calldata description,
+        uint256 taxFraction,
+        string calldata endpoint,
+        uint256 amount
+    ) external override {
+        _createNode(msg.sender, name, description, taxFraction, endpoint);
+        _stake(msg.sender, amount);
+    }
+
+    /// @inheritdoc IStaking
     function createNode(
         string calldata name,
         string calldata description,
         uint256 taxFraction,
         string calldata endpoint
     ) external override {
-        DataTypes.Node storage node = _nodes[msg.sender];
-        // can't delete a non-exist node
-        if (address(0) != node.account) revert Errors.NodeExists();
-
-        node.account = msg.sender;
-        node.name = name;
-        node.description = description;
-        node.taxFraction = taxFraction;
-        node.endpoint = endpoint;
-
-        emit Events.NodeCreated(msg.sender, name, description, taxFraction, endpoint);
+        _createNode(msg.sender, name, description, taxFraction, endpoint);
     }
 
     /// @inheritdoc IStaking
@@ -136,19 +138,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc IStaking
     function stake(uint256 amount) external override {
-        DataTypes.Node storage node = _nodes[msg.sender];
-        if (node.account == address(0)) revert Errors.NodeNotExists();
-
-        if (node.selfStakedAmount == 0 && amount < firstStakingAmount)
-            revert Errors.AmountTooSmall();
-
-        // update operator pool
-        node.selfStakedAmount = node.selfStakedAmount + amount;
-        // TODO: update shares by staking amount
-        // transfer tokens
-        IERC20(_token).safeTransferFrom(msg.sender, address(this), amount);
-
-        emit Events.Staked(msg.sender, amount);
+        _stake(msg.sender, amount);
     }
 
     /// @inheritdoc IStaking
@@ -183,6 +173,18 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
+    function withdrawTax(address nodeAddr) external override {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (node.account == address(0)) revert Errors.NodeNotExists();
+
+        uint256 claimableTax = node.tax - node.claimedTax;
+
+        IERC20(_token).safeTransfer(node.account, claimableTax);
+
+        emit Events.TaxWithdrawn(node.account, claimableTax);
+    }
+
+    /// @inheritdoc IStaking
     function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused {
         for (uint256 i = 0; i < requestIds.length; i++) {
             _claimUnstake(requestIds[i]);
@@ -197,13 +199,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
-        uint256 shares;
-        if (node.delegatedAmount == 0) {
-            shares = sharesPerChip;
-        } else {
-            shares = (amount * _getPoolTokens(node)) / node.totalShares;
-        }
-
+        uint256 shares = _getShares(node, amount);
         uint256 chipsCount = shares / sharesPerChip;
         if (chipsCount == 0) revert Errors.AmountTooSmall();
 
@@ -249,7 +245,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // update rewards
         uint256 shares = sharesPerChip * chipsIds.length;
         uint256 rewards = (shares * node.rewardPoolTotalRewards) / node.totalShares;
-        uint256 tax = _getTaxAmount(node, rewards);
         uint256 undelegatedAmount = (shares * node.delegatedAmount) / node.totalShares;
 
         // add to request queue
@@ -257,8 +252,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         request.timestamp = block.timestamp;
         request.owner = msg.sender;
         request.nodeAddr = nodeAddr;
-        request.rewards = rewards - tax;
-        request.tax = tax;
+        request.rewards = rewards;
         request.undelegatedAmount = undelegatedAmount;
 
         emit Events.UndelegateRequested(msg.sender, nodeAddr, requestId, chipsIds);
@@ -285,12 +279,29 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             nodeAddrs.length != rewardPoolRewards.length
         ) revert Errors.InvalidArrayLength();
 
+        uint256[] memory taxAmounts = new uint256[](nodeAddrs.length);
+        uint256[] memory stakingRewards = new uint256[](nodeAddrs.length);
+
         // update node rewards
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             address nodeAddr = nodeAddrs[i];
             DataTypes.Node storage node = _nodes[nodeAddr];
             node.operatorPoolTotalRewards = node.operatorPoolTotalRewards + operatorPoolRewards[i];
-            node.rewardPoolTotalRewards = node.rewardPoolTotalRewards + rewardPoolRewards[i];
+
+            // update tax
+            uint256 tax = _getTax(
+                rewardPoolRewards[i],
+                node.taxFraction,
+                node.selfStakedAmount,
+                node.delegatedAmount
+            );
+            node.tax = node.tax + tax;
+            taxAmounts[i] = tax;
+
+            // update staking rewards
+            uint256 rewardsAfterTax = rewardPoolRewards[i] - tax;
+            node.rewardPoolTotalRewards = node.rewardPoolTotalRewards + rewardsAfterTax;
+            stakingRewards[i] = rewardsAfterTax;
         }
 
         emit Events.RewardDistributed(
@@ -299,7 +310,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             endTimestamp,
             nodeAddrs,
             operatorPoolRewards,
-            rewardPoolRewards
+            stakingRewards,
+            taxAmounts
         );
     }
 
@@ -354,6 +366,43 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         return res;
     }
 
+    /// @dev create a node
+    function _createNode(
+        address nodeAddr,
+        string calldata name,
+        string calldata description,
+        uint256 taxFraction,
+        string calldata endpoint
+    ) internal {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        // can't delete a non-exist node
+        if (address(0) != node.account) revert Errors.NodeExists();
+
+        node.account = nodeAddr;
+        node.name = name;
+        node.description = description;
+        node.taxFraction = taxFraction;
+        node.endpoint = endpoint;
+
+        emit Events.NodeCreated(nodeAddr, name, description, taxFraction, endpoint);
+    }
+
+    function _stake(address nodeAddr, uint256 amount) internal {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (node.account == address(0)) revert Errors.NodeNotExists();
+
+        if (node.selfStakedAmount == 0 && amount < firstStakingAmount)
+            revert Errors.AmountTooSmall();
+
+        // update operator pool
+        node.selfStakedAmount = node.selfStakedAmount + amount;
+        // TODO: update shares by staking amount
+        // transfer tokens
+        IERC20(_token).safeTransferFrom(nodeAddr, address(this), amount);
+
+        emit Events.Staked(nodeAddr, amount);
+    }
+
     /// @dev claim undelegate request
     function _claimUndelegate(uint256 requestId) internal {
         DataTypes.UndelegateRequest storage request = _undelegateQueue[requestId];
@@ -366,16 +415,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         request.claimed = true;
 
         // transfer
-        IERC20(_token).safeTransfer(request.owner, request.undelegatedAmount + request.rewards);
-        IERC20(_token).safeTransfer(request.nodeAddr, request.tax);
+        IERC20(_token).safeTransfer(request.owner, request.undelegatedAmount);
+        IERC20(_token).safeTransfer(request.owner, request.rewards);
 
         emit Events.UndelegateClaimed(
             requestId,
             request.nodeAddr,
             request.owner,
             request.undelegatedAmount,
-            request.rewards,
-            request.tax
+            request.rewards
         );
     }
 
@@ -410,29 +458,40 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         emit Events.OperatorPoolRewardsWithdrawn(node.account, node.account, rewards);
     }
 
-    function _getPoolTokens(DataTypes.Node storage node) internal view returns (uint256) {
-        return node.rewardPoolTotalRewards + node.delegatedAmount - node.slashedAmount;
+    function _getPoolTokens(DataTypes.Node memory node) internal pure returns (uint256) {
+        return node.rewardPoolTotalRewards + node.delegatedAmount;
     }
 
     /// @dev get operator pool rewards
-    function _getOperatorPoolRewards(DataTypes.Node storage node) internal view returns (uint256) {
-        // TODO: how to calculate operator pool rewards ?
+    function _getOperatorPoolRewards(DataTypes.Node memory node) internal pure returns (uint256) {
         return node.operatorPoolTotalRewards - node.claimedOperatorPoollRewards;
     }
 
-    function _getTaxAmount(
-        DataTypes.Node storage node,
-        uint256 rewards
-    ) internal view returns (uint256) {
-        uint256 delegationCapacity = node.selfStakedAmount * delegationRatio;
-        uint256 fullTaxAmount = (rewards * node.taxFraction) / _taxDenominator();
-
-        if (delegationCapacity <= node.delegatedAmount) {
-            // node will receive its full tax
-            return fullTaxAmount;
+    /// @dev get shares amount
+    function _getShares(
+        DataTypes.Node memory node,
+        uint256 delegateAmount
+    ) internal pure returns (uint256 sharesAmount) {
+        if (node.totalShares == 0) {
+            sharesAmount = delegateAmount;
+        } else {
+            sharesAmount = (delegateAmount * _getPoolTokens(node)) / _getPoolTokens(node);
         }
+    }
 
-        return (fullTaxAmount * delegationCapacity) / node.delegatedAmount;
+    /// @dev get tax amount
+    function _getTax(
+        uint256 rewards,
+        uint256 taxFraction,
+        uint256 selfStakedAmount,
+        uint256 delegatedAmount
+    ) internal pure returns (uint256) {
+        uint256 delegationCapacity = selfStakedAmount * DELEGATION_RATIO;
+        if (delegatedAmount <= delegationCapacity) {
+            // node will receive its full tax
+            return (rewards * taxFraction) / _taxDenominator();
+        }
+        return (delegationCapacity * taxFraction) / _taxDenominator();
     }
 
     /**

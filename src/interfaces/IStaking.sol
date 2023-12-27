@@ -37,7 +37,7 @@ interface IStaking {
     function unpause() external;
 
     /**
-     * @notice Creates a node named `name` with reward address `rewardAddress`.
+     * @notice Creates a node.
      * @param name Human-readable name.
      * @param description Description of node.
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
@@ -55,6 +55,22 @@ interface IStaking {
      * @param addr The address of node to delete.
      */
     function deleteNode(address addr) external;
+
+    /**
+     * @notice Creates a node and stake tokens.
+     * @param name Human-readable name.
+     * @param description Description of node.
+     * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
+     * @param endpoint API endpoint of node.
+     * @param amount Amount of tokens to stake.
+     */
+    function createNodeAndStake(
+        string calldata name,
+        string calldata description,
+        uint256 taxFraction,
+        string calldata endpoint,
+        uint256 amount
+    ) external;
 
     /**
      * @notice Changes tax fraction of the node.
@@ -82,6 +98,12 @@ interface IStaking {
      * @param nodeAddr Address of node operator.
      */
     function withdrawOperatorPoolRewards(address nodeAddr) external;
+
+    /**
+     * @notice Withdraws tax for node operator.
+     * @param nodeAddr Address of node operator.
+     */
+    function withdrawTax(address nodeAddr) external;
 
     /**
      * @notice Claims a batch of unstake requests.
