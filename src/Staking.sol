@@ -79,7 +79,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function pause() external override whenNotPaused onlyRole(PAUSE_ROLE) {
+    function pause() external override onlyRole(PAUSE_ROLE) {
         _pause();
     }
 
@@ -95,7 +95,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256 taxFraction,
         string calldata endpoint,
         uint256 amount
-    ) external override {
+    ) external override whenNotPaused {
         _createNode(msg.sender, name, description, taxFraction, endpoint);
         _stake(msg.sender, amount);
     }
@@ -137,12 +137,14 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function stake(uint256 amount) external override {
+    function stake(uint256 amount) external override whenNotPaused {
         _stake(msg.sender, amount);
     }
 
     /// @inheritdoc IStaking
-    function requestUnstake(uint256 amount) external override returns (uint256 requestId) {
+    function requestUnstake(
+        uint256 amount
+    ) external override whenNotPaused returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
@@ -165,7 +167,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function withdrawOperatorPoolRewards(address nodeAddr) external override {
+    function withdrawOperatorPoolRewards(address nodeAddr) external override whenNotPaused {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
@@ -173,7 +175,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function withdrawTax(address nodeAddr) external override {
+    function withdrawTax(address nodeAddr) external override whenNotPaused {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
@@ -195,7 +197,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function delegate(
         address nodeAddr,
         uint256 amount
-    ) external override returns (uint256 startTokenId, uint256 endTokenId) {
+    ) external override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
@@ -226,7 +228,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function requestUndelegate(
         address nodeAddr,
         uint256[] calldata chipsIds
-    ) external override returns (uint256 requestId) {
+    ) external override whenNotPaused returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
