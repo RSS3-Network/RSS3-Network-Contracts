@@ -15,16 +15,20 @@ interface IAccountOracle {
      * @param epoch The current epoch number.
      * @param startTimestamp The startTimestamp of the epoch.
      * @param endTimestamp The endTimestamp of the epoch.
+     * @param totalRequestBonus The total amount of request bonus.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
-     * @param operatorPoolRewards Amount of rewards to operator pool.
-     * @param rewardPoolRewards Amount of rewards to reward pool.
+     * @param requestFees Amounts of request fees.
+     * @param requestCounts Amounts of requests handled by each node.
+     * @param stakingRewards Amount of staking rewards.
      */
     function distributeRewards(
         uint256 epoch,
         uint256 startTimestamp,
         uint256 endTimestamp,
+        uint256 totalRequestBonus,
         address[] calldata nodeAddrs,
-        uint256[] calldata operatorPoolRewards,
-        uint256[] calldata rewardPoolRewards
+        uint256[] calldata requestFees,
+        uint256[] calldata requestCounts,
+        uint256[] calldata stakingRewards
     ) external;
 }

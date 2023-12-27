@@ -246,7 +246,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         // update rewards
         uint256 shares = sharesPerChip * chipsIds.length;
-        uint256 rewards = (shares * node.rewardPoolTotalRewards) / node.totalShares;
+        uint256 rewards = (shares * node.rewardPoolRewards) / node.totalShares;
         uint256 undelegatedAmount = (shares * node.delegatedAmount) / node.totalShares;
 
         // add to request queue
@@ -273,38 +273,39 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256 startTimestamp,
         uint256 endTimestamp,
         address[] calldata nodeAddrs,
-        uint256[] calldata operatorPoolRewards,
-        uint256[] calldata rewardPoolRewards
+        uint256[] calldata requestFees,
+        uint256[] calldata requestBonuses,
+        uint256[] calldata stakingRewards
     ) external override onlyRole(ORACLE_ROLE) {
         if (
-            nodeAddrs.length != operatorPoolRewards.length ||
-            nodeAddrs.length != rewardPoolRewards.length
+            nodeAddrs.length != requestFees.length ||
+            nodeAddrs.length != requestBonuses.length ||
+            nodeAddrs.length != stakingRewards.length
         ) revert Errors.InvalidArrayLength();
 
         uint256[] memory taxAmounts = new uint256[](nodeAddrs.length);
-        uint256[] memory stakingRewards = new uint256[](nodeAddrs.length);
-
         // update node rewards
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            address nodeAddr = nodeAddrs[i];
-            DataTypes.Node storage node = _nodes[nodeAddr];
-            node.operatorPoolTotalRewards = node.operatorPoolTotalRewards + operatorPoolRewards[i];
+            DataTypes.Node storage node = _nodes[nodeAddrs[i]];
+            // request fee is send to operator pool
+            node.operatorPoolRewards += requestFees[i];
 
-            // update tax
+            // request bonus and staking rewards are sent to reward pool
+            uint256 rewardPoolRewards = requestBonuses[i] + stakingRewards[i];
+
+            // tax is sent to node operator
             uint256 tax = _getTax(
-                rewardPoolRewards[i],
+                rewardPoolRewards,
                 node.taxFraction,
                 node.selfStakedAmount,
                 node.delegatedAmount
             );
-            node.tax = node.tax + tax;
+            node.tax += tax;
             taxAmounts[i] = tax;
 
-            // update staking rewards
-            uint256 rewardsAfterTax = rewardPoolRewards[i] - tax;
-            // all after-tax rewards are sent to the reward pool
-            node.rewardPoolTotalRewards = node.rewardPoolTotalRewards + rewardsAfterTax;
-            stakingRewards[i] = rewardsAfterTax;
+            uint256 rewardsAfterTax = rewardPoolRewards - tax;
+            // all after-tax rewards and request bonus are sent to the reward pool
+            node.rewardPoolRewards += rewardsAfterTax;
         }
 
         emit Events.RewardDistributed(
@@ -312,7 +313,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             startTimestamp,
             endTimestamp,
             nodeAddrs,
-            operatorPoolRewards,
+            requestFees,
+            requestBonuses,
             stakingRewards,
             taxAmounts
         );
@@ -452,7 +454,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256 rewards = _getOperatorPoolRewards(node);
 
         // update claimed rewards
-        node.claimedOperatorPoollRewards = node.operatorPoolTotalRewards;
+        node.claimedOperatorPoollRewards = node.operatorPoolRewards;
 
         // transfer rewards
         IERC20(_token).safeTransfer(node.account, rewards);
@@ -461,12 +463,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     function _getPoolTokens(DataTypes.Node memory node) internal pure returns (uint256) {
-        return node.rewardPoolTotalRewards + node.delegatedAmount;
+        return node.rewardPoolRewards + node.delegatedAmount;
     }
 
     /// @dev get operator pool rewards
     function _getOperatorPoolRewards(DataTypes.Node memory node) internal pure returns (uint256) {
-        return node.operatorPoolTotalRewards - node.claimedOperatorPoollRewards;
+        return node.operatorPoolRewards - node.claimedOperatorPoollRewards;
     }
 
     /// @dev get shares amount

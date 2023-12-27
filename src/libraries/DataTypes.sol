@@ -22,11 +22,11 @@ library DataTypes {
         /// @notice amount of tokens delegated by users
         uint256 delegatedAmount;
         /// @notice total rewards of operator pool
-        uint256 operatorPoolTotalRewards;
+        uint256 operatorPoolRewards;
         /// @notice claimed rewards of operator pool
         uint256 claimedOperatorPoollRewards;
         /// @notice total rewards of reward pool
-        uint256 rewardPoolTotalRewards;
+        uint256 rewardPoolRewards;
         /// @notice tax of reward pool
         uint256 tax;
         /// @notice claimed tax of reward pool

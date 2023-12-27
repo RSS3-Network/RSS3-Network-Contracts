@@ -69,8 +69,9 @@ library Events {
      * @param startTimestamp The startTimestamp of the epoch.
      * @param endTimestamp The endTimestamp of the epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
-     * @param operatorPoolRewards Amount of rewards to operator pool.
-     * @param rewardPoolRewards Amount of rewards to reward pool.
+     * @param requestFees Amount of request fees to operator pool.
+     * @param requestBonuses Amount of bonuses to reward pool.
+     * @param stakingRewards Amount of rewards to reward pool.
      * @param taxAmounts Amount of tax to node operator.
      */
     event RewardDistributed(
@@ -78,8 +79,9 @@ library Events {
         uint256 indexed startTimestamp,
         uint256 indexed endTimestamp,
         address[] nodeAddrs,
-        uint256[] operatorPoolRewards,
-        uint256[] rewardPoolRewards,
+        uint256[] requestFees,
+        uint256[] requestBonuses,
+        uint256[] stakingRewards,
         uint256[] taxAmounts
     );
 
