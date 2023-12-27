@@ -186,7 +186,7 @@
 <li><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="iaccountoracle"><a class="header" href="#iaccountoracle">IAccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/interfaces/IAccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/interfaces/IAccountOracle.sol">Git Source</a></p>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the AccountOracle contract.</p>
@@ -205,9 +205,11 @@
     uint256 epoch,
     uint256 startTimestamp,
     uint256 endTimestamp,
+    uint256 totalRequestBonus,
     address[] calldata nodeAddrs,
-    uint256[] calldata operatorPoolRewards,
-    uint256[] calldata rewardPoolRewards
+    uint256[] calldata requestFees,
+    uint256[] calldata requestCounts,
+    uint256[] calldata stakingRewards
 ) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -215,12 +217,14 @@
 <tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
 <tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
 <tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
+<tr><td><code>totalRequestBonus</code></td><td><code>uint256</code></td><td>The total amount of request bonus.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
-<tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
-<tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
+<tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
+<tr><td><code>requestCounts</code></td><td><code>uint256[]</code></td><td>Amounts of requests handled by each node.</td></tr>
+<tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ichips"><a class="header" href="#ichips">IChips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/interfaces/IChips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/interfaces/IChips.sol">Git Source</a></p>
 <h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
 <h3 id="initialize-1"><a class="header" href="#initialize-1">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
@@ -270,7 +274,7 @@
 <tr><td><code>tokenId</code></td><td><code>uint256</code></td><td>ID of token to burn.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/interfaces/IStaking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/interfaces/IStaking.sol">Git Source</a></p>
 <h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
 <h3 id="initialize-2"><a class="header" href="#initialize-2">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
@@ -458,8 +462,9 @@ Requirements:</p>
     uint256 startTimestamp,
     uint256 endTimestamp,
     address[] calldata nodeAddrs,
-    uint256[] calldata operatorPoolRewards,
-    uint256[] calldata rewardPoolRewards
+    uint256[] calldata requestFees,
+    uint256[] calldata requestBonuses,
+    uint256[] calldata stakingRewards
 ) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -468,8 +473,9 @@ Requirements:</p>
 <tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
 <tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
-<tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
-<tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
+<tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
+<tr><td><code>requestBonuses</code></td><td><code>uint256[]</code></td><td>Amounts of request bonuses.</td></tr>
+<tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards to reward pool.</td></tr>
 </tbody></table>
 </div>
 <h3 id="slashnodes"><a class="header" href="#slashnodes">slashNodes</a></h3>
@@ -539,7 +545,7 @@ Requirements:</p>
 <li><a href="src/libraries/Events.sol/library.Events.html">Events</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -551,9 +557,9 @@ Requirements:</p>
     string endpoint;
     uint256 selfStakedAmount;
     uint256 delegatedAmount;
-    uint256 operatorPoolTotalRewards;
+    uint256 operatorPoolRewards;
     uint256 claimedOperatorPoollRewards;
-    uint256 rewardPoolTotalRewards;
+    uint256 rewardPoolRewards;
     uint256 tax;
     uint256 claimedTax;
     uint256 totalShares;
@@ -579,7 +585,7 @@ Requirements:</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/libraries/Errors.sol">Git Source</a></p>
 <h2 id="errors-1"><a class="header" href="#errors-1">Errors</a></h2>
 <h3 id="callernotstaking"><a class="header" href="#callernotstaking">CallerNotStaking</a></h3>
 <p><em>Caller is not staking contract</em></p>
@@ -630,7 +636,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error StakingTokensSlashedAll();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -703,8 +709,9 @@ Requirements:</p>
     uint256 indexed startTimestamp,
     uint256 indexed endTimestamp,
     address[] nodeAddrs,
-    uint256[] operatorPoolRewards,
-    uint256[] rewardPoolRewards,
+    uint256[] requestFees,
+    uint256[] requestBonuses,
+    uint256[] stakingRewards,
     uint256[] taxAmounts
 );
 </code></pre>
@@ -714,8 +721,9 @@ Requirements:</p>
 <tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
 <tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
-<tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
-<tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
+<tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amount of request fees to operator pool.</td></tr>
+<tr><td><code>requestBonuses</code></td><td><code>uint256[]</code></td><td>Amount of bonuses to reward pool.</td></tr>
+<tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
 <tr><td><code>taxAmounts</code></td><td><code>uint256[]</code></td><td>Amount of tax to node operator.</td></tr>
 </tbody></table>
 </div>
@@ -800,7 +808,7 @@ Requirements:</p>
 <li><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rss3token"><a class="header" href="#rss3token">RSS3Token</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/mocks/RSS3Token.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/mocks/RSS3Token.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC20</p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
@@ -813,7 +821,7 @@ ERC20</p>
 <li><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="itransparentupgradeableproxy"><a class="header" href="#itransparentupgradeableproxy">ITransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 IERC1967</p>
 <p><em>Interface for {TransparentUpgradeableProxy}. In order to implement transparency, {TransparentUpgradeableProxy}
@@ -825,7 +833,7 @@ include them in the ABI so this interface must be used to interact with it.</em>
 <pre><code class="language-solidity">function upgradeToAndCall(address, bytes calldata) external payable;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transparentupgradeableproxy"><a class="header" href="#transparentupgradeableproxy">TransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC1967Proxy</p>
 <p>*This contract implements a proxy that is upgradeable through an associated {ProxyAdmin} instance.
@@ -893,7 +901,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error ProxyDeniedAdminAccess();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="accountoracle"><a class="header" href="#accountoracle">AccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/AccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/AccountOracle.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/AccountOracle.sol//src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-1"><a class="header" href="#state-variables-1">State Variables</a></h2>
@@ -922,9 +930,11 @@ Requirements:</p>
     uint256 epoch,
     uint256 startTimestamp,
     uint256 endTimestamp,
+    uint256 totalRequestBonus,
     address[] calldata nodeAddrs,
-    uint256[] calldata operatorPoolRewards,
-    uint256[] calldata rewardPoolRewards
+    uint256[] calldata requestFees,
+    uint256[] calldata requestCounts,
+    uint256[] calldata stakingRewards
 ) external override onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -932,12 +942,24 @@ Requirements:</p>
 <tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
 <tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
 <tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
+<tr><td><code>totalRequestBonus</code></td><td><code>uint256</code></td><td>The total amount of request bonus.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
-<tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
-<tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
+<tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
+<tr><td><code>requestCounts</code></td><td><code>uint256[]</code></td><td>Amounts of requests handled by each node.</td></tr>
+<tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards.</td></tr>
 </tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/Chips.sol">Git Source</a></p>
+</div>
+<h3 id="_getrequestbonuses"><a class="header" href="#_getrequestbonuses">_getRequestBonuses</a></h3>
+<pre><code class="language-solidity">function _getRequestBonuses(uint256 totalBonus, uint256[] memory requestCounts)
+    internal
+    pure
+    returns (uint256[] memory);
+</code></pre>
+<h3 id="_log2"><a class="header" href="#_log2">_log2</a></h3>
+<pre><code class="language-solidity">function _log2(uint256 x) internal pure returns (uint256 result);
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/Chips.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, Initializable, ERC721</p>
 <h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
@@ -1016,7 +1038,7 @@ Metadata JSON Schema&quot;.</em></p>
 <pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view override returns (string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Staking.sol//src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
@@ -1276,8 +1298,9 @@ Requirements:</p>
     uint256 startTimestamp,
     uint256 endTimestamp,
     address[] calldata nodeAddrs,
-    uint256[] calldata operatorPoolRewards,
-    uint256[] calldata rewardPoolRewards
+    uint256[] calldata requestFees,
+    uint256[] calldata requestBonuses,
+    uint256[] calldata stakingRewards
 ) external override onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -1286,8 +1309,9 @@ Requirements:</p>
 <tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
 <tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
-<tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
-<tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
+<tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
+<tr><td><code>requestBonuses</code></td><td><code>uint256[]</code></td><td>Amounts of request bonuses.</td></tr>
+<tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards to reward pool.</td></tr>
 </tbody></table>
 </div>
 <h3 id="slashnodes-1"><a class="header" href="#slashnodes-1">slashNodes</a></h3>

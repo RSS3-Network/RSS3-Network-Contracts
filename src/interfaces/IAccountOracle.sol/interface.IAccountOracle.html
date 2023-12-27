@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="iaccountoracle"><a class="header" href="#iaccountoracle">IAccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fa0d4178b8dd9a441b368818946821c5279ee14b/src/interfaces/IAccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/51f2f19246e158dd7b70a164c1cad2c2ccff86e1/src/interfaces/IAccountOracle.sol">Git Source</a></p>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the AccountOracle contract.</p>
@@ -197,9 +197,11 @@
     uint256 epoch,
     uint256 startTimestamp,
     uint256 endTimestamp,
+    uint256 totalRequestBonus,
     address[] calldata nodeAddrs,
-    uint256[] calldata operatorPoolRewards,
-    uint256[] calldata rewardPoolRewards
+    uint256[] calldata requestFees,
+    uint256[] calldata requestCounts,
+    uint256[] calldata stakingRewards
 ) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -207,9 +209,11 @@
 <tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
 <tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
 <tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
+<tr><td><code>totalRequestBonus</code></td><td><code>uint256</code></td><td>The total amount of request bonus.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
-<tr><td><code>operatorPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to operator pool.</td></tr>
-<tr><td><code>rewardPoolRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
+<tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
+<tr><td><code>requestCounts</code></td><td><code>uint256[]</code></td><td>Amounts of requests handled by each node.</td></tr>
+<tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards.</td></tr>
 </tbody></table>
 </div>
                     </main>
