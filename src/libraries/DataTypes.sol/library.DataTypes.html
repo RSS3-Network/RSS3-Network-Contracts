@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/aafb450f611d1b1e00ff8d5d797ad2372fb8a418/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/90a4c4c86e4d6759295f092a4b83669e7b1d85f0/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -193,6 +193,8 @@
     uint256 operatorPoolTotalRewards;
     uint256 claimedOperatorPoollRewards;
     uint256 rewardPoolTotalRewards;
+    uint256 tax;
+    uint256 claimedTax;
     uint256 totalShares;
     uint256 slashedAmount;
 }
@@ -213,7 +215,6 @@
     uint256 timestamp;
     uint256 undelegatedAmount;
     uint256 rewards;
-    uint256 tax;
 }
 </code></pre>
 
