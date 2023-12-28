@@ -23,7 +23,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     using SafeERC20 for IERC20;
 
     uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
-    uint256 public constant firstStakingAmount = 10000 * 10 ** 18;
+    uint256 public constant firstDepositAmount = 10000 * 10 ** 18;
 
     uint256 public constant DELEGATION_RATIO = 25;
 
@@ -37,10 +37,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @dev all node info
     mapping(address nodeAddr => DataTypes.Node) internal _nodes;
 
-    /// @dev unstake request queue counter
-    uint256 internal _unstakeRequestCounter;
-    /// @dev unstake request queue
-    mapping(uint256 requestId => DataTypes.UnstakeRequest) internal _unstakeQueue;
+    /// @dev withdraw request queue counter
+    uint256 internal _withdrawalRequestCounter;
+    /// @dev withdraw request queue
+    mapping(uint256 requestId => DataTypes.WithdrawalRequest) internal _withdrawalQueue;
 
     /// @dev undelegate request queue counter
     uint256 internal _undelegateRequestCounter;
@@ -91,18 +91,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function createNodeAndStake(
-        string calldata name,
-        string calldata description,
-        uint64 taxFraction,
-        string calldata endpoint,
-        uint256 amount
-    ) external override whenNotPaused {
-        _createNode(msg.sender, name, description, taxFraction, endpoint);
-        _stake(msg.sender, amount);
-    }
-
-    /// @inheritdoc IStaking
     function createNode(
         string calldata name,
         string calldata description,
@@ -118,14 +106,26 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // can't delete a non-exist node
         if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
 
-        // can't delete a node with staked or delegated tokens
-        if (node.delegatedAmount > 0 || node.selfStakedAmount > 0)
+        // can't delete a node with staked or deposited tokens
+        if (node.delegatedAmount > 0 || node.depositAmount > 0)
             revert Errors.NodeStakedOrDelegated();
 
         delete _nodes[nodeAddr];
         _nodeAddrs.remove(nodeAddr);
 
         emit Events.NodeDeleted(nodeAddr);
+    }
+
+    /// @inheritdoc IStaking
+    function createNodeAndDeposit(
+        string calldata name,
+        string calldata description,
+        uint64 taxFraction,
+        string calldata endpoint,
+        uint256 amount
+    ) external override whenNotPaused {
+        _createNode(msg.sender, name, description, taxFraction, endpoint);
+        _deposit(msg.sender, amount);
     }
 
     /// @inheritdoc IStaking
@@ -139,33 +139,34 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function stake(uint256 amount) external override whenNotPaused {
-        _stake(msg.sender, amount);
+    function deposit(uint256 amount) external override whenNotPaused {
+        _deposit(msg.sender, amount);
     }
 
     /// @inheritdoc IStaking
-    function requestUnstake(
+    function requestWithdrawal(
         uint256 amount
     ) external override whenNotPaused returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
-        //  staking tokens has been slashed completely
-        if (amount > node.selfStakedAmount) revert Errors.StakingTokensSlashedAll();
+        //  deposited tokens has been slashed completely
+        if (amount > node.depositAmount) revert Errors.DepositedTokensSlashedAll();
 
-        node.selfStakedAmount = node.selfStakedAmount - amount;
+        node.depositAmount -= amount;
 
-        requestId = ++_unstakeRequestCounter;
+        requestId = ++_withdrawalRequestCounter;
 
-        DataTypes.UnstakeRequest storage request = _unstakeQueue[requestId];
-        request.timestamp = uint40(block.timestamp);
-        request.owner = msg.sender;
-        request.unstakedAmount = amount;
+        DataTypes.WithdrawalRequest storage req = _withdrawalQueue[requestId];
+        req.timestamp = uint40(block.timestamp);
+        req.owner = msg.sender;
+        req.amount = amount;
 
         // withdraw operator pool rewards
+        // TODO: 30 epoches later
         _withdrawOperatorPoolRewards(node);
 
-        emit Events.UnstakeRequested(msg.sender, amount, requestId);
+        emit Events.WithdrawRequested(msg.sender, amount, requestId);
     }
 
     /// @inheritdoc IStaking
@@ -189,9 +190,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused {
+    function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused {
         for (uint256 i = 0; i < requestIds.length; i++) {
-            _claimUnstake(requestIds[i]);
+            _claimWithdrawal(requestIds[i]);
         }
     }
 
@@ -299,7 +300,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             uint256 tax = _getTax(
                 rewardPoolRewards,
                 node.taxFraction,
-                node.selfStakedAmount,
+                node.depositAmount,
                 node.delegatedAmount
             );
             node.tax += tax;
@@ -394,19 +395,19 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         emit Events.NodeCreated(nodeAddr, name, description, taxFraction, endpoint);
     }
 
-    function _stake(address nodeAddr, uint256 amount) internal {
+    function _deposit(address nodeAddr, uint256 amount) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
-        if (node.selfStakedAmount == 0 && amount < firstStakingAmount)
-            revert Errors.AmountTooSmall();
+        if (node.depositAmount == 0 && amount < firstDepositAmount) revert Errors.AmountTooSmall();
 
         // update operator pool
-        node.selfStakedAmount = node.selfStakedAmount + amount;
+        node.depositAmount += amount;
+
         // transfer tokens
         IERC20(_token).safeTransferFrom(nodeAddr, address(this), amount);
 
-        emit Events.Staked(nodeAddr, amount);
+        emit Events.Deposited(nodeAddr, amount);
     }
 
     /// @dev claim undelegate request
@@ -433,21 +434,21 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         );
     }
 
-    /// @dev claim unstake request
-    function _claimUnstake(uint256 requestId) internal {
-        DataTypes.UnstakeRequest storage request = _unstakeQueue[requestId];
+    /// @dev claim withdrawal request
+    function _claimWithdrawal(uint256 requestId) internal {
+        DataTypes.WithdrawalRequest storage request = _withdrawalQueue[requestId];
 
-        if (request.claimed) revert Errors.AlreadyClaimed();
+        if (request.isClaimed) revert Errors.AlreadyClaimed();
         if (block.timestamp - request.timestamp < _stakeUnbondingPeriod)
             revert Errors.ClaimTimeNotReady();
 
         // set claimed status
-        request.claimed = true;
+        request.isClaimed = true;
 
         // transfer staked tokens
-        IERC20(_token).safeTransfer(request.owner, request.unstakedAmount);
+        IERC20(_token).safeTransfer(request.owner, request.amount);
 
-        emit Events.UnstakeClaimed(requestId);
+        emit Events.WithdrawalClaimed(requestId);
     }
 
     /// @dev withdraw operator pool rewards

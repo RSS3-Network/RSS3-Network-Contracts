@@ -33,19 +33,19 @@ library Events {
     event NodeTaxFractionSet(address indexed nodeAddr, uint64 indexed taxFraction);
 
     /**
-     * @dev Emitted on stake()
+     * @dev Emitted on deposit()
      * @param nodeAddr Address of node operator.
-     * @param amount Amount of tokens staked.
+     * @param amount Amount of tokens deposited by node operator.
      */
-    event Staked(address indexed nodeAddr, uint256 indexed amount);
+    event Deposited(address indexed nodeAddr, uint256 indexed amount);
 
     /**
-     * @dev Emitted on requestUnstake()
+     * @dev Emitted on requestWithdraw()
      * @param nodeAddr Address of node operator.
-     * @param amount Amount of tokens to unstake.
-     * @param requestId The created unstake request id.
+     * @param amount Amount of tokens to withdraw.
+     * @param requestId The created withdraw request id.
      */
-    event UnstakeRequested(
+    event WithdrawRequested(
         address indexed nodeAddr,
         uint256 indexed amount,
         uint256 indexed requestId
@@ -86,10 +86,10 @@ library Events {
     );
 
     /**
-     * @dev Emitted on claimUnstake()
-     * @param requestId The unstake request id.
+     * @dev Emitted on claimWithdrawal()
+     * @param requestId The withdrawal request id.
      */
-    event UnstakeClaimed(uint256 indexed requestId);
+    event WithdrawalClaimed(uint256 indexed requestId);
 
     /**
      * @dev Emitted on delegate()

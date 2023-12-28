@@ -57,14 +57,14 @@ interface IStaking {
     function deleteNode(address addr) external;
 
     /**
-     * @notice Creates a node and stake tokens.
+     * @notice Creates a node and deposits tokens.
      * @param name Human-readable name.
      * @param description Description of node.
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
      * @param endpoint API endpoint of node.
-     * @param amount Amount of tokens to stake.
+     * @param amount Amount of tokens to deposit.
      */
-    function createNodeAndStake(
+    function createNodeAndDeposit(
         string calldata name,
         string calldata description,
         uint64 taxFraction,
@@ -82,16 +82,16 @@ interface IStaking {
 
     /**
      * @notice Deposits tokens for node operator.
-     * @param amount Amount of tokens to stake.
+     * @param amount Amount of tokens to deposit.
      */
-    function stake(uint256 amount) external;
+    function deposit(uint256 amount) external;
 
     /**
-     * @notice Requests unstake tokens for node operator.
-     * @param amount Amount of tokens to unstake.
-     * @return requestId The created unstake request id
+     * @notice Requests withdraw tokens from operator pool for node operator.
+     * @param amount Amount of tokens to withdraw.
+     * @return requestId The created withdraw request id
      */
-    function requestUnstake(uint256 amount) external returns (uint256 requestId);
+    function requestWithdrawal(uint256 amount) external returns (uint256 requestId);
 
     /**
      * @notice Withdraws operator pool rewards for node operator.
@@ -106,9 +106,9 @@ interface IStaking {
     function withdrawTax(address nodeAddr) external;
 
     /**
-     * @notice Claims a batch of unstake requests.
+     * @notice Claims a batch of withdrawal requests.
      */
-    function claimUnstake(uint256[] calldata requestIds) external;
+    function claimWithdrawal(uint256[] calldata requestIds) external;
 
     /**
      * @notice Delegates tokens to a node operator.

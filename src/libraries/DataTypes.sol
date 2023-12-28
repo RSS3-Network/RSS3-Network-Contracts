@@ -17,8 +17,8 @@ library DataTypes {
         string description;
         /// @notice API endpoint of the node
         string endpoint;
-        /// @notice amount of tokens staked by node itself
-        uint256 selfStakedAmount;
+        /// @notice amount of tokens deposited by node operator
+        uint256 depositAmount;
         /// @notice amount of tokens delegated by users
         uint256 delegatedAmount;
         /// @notice total rewards of operator pool
@@ -37,15 +37,15 @@ library DataTypes {
         uint256 slashedAmount;
     }
 
-    struct UnstakeRequest {
+    struct WithdrawalRequest {
         /// @notice address that can claim request
         address owner;
         /// @notice flag indicating if the request was claimed
-        bool claimed;
+        bool isClaimed;
         /// @notice block.timestamp when the request was created
         uint40 timestamp;
-        /// @notice amount of tokens to unstake
-        uint256 unstakedAmount;
+        /// @notice amount of tokens to withdraw
+        uint256 amount;
     }
 
     struct UndelegateRequest {

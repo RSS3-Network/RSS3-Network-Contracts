@@ -36,6 +36,6 @@ library Errors {
     /// @dev Token is not issued by node
     error NotTokenIssuer(uint256 tokenId, address nodeAddr);
 
-    /// @dev Staking tokens was slashed completely
-    error StakingTokensSlashedAll();
+    /// @dev Deposited tokens was slashed completely
+    error DepositedTokensSlashedAll();
 }

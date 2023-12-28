@@ -105,8 +105,8 @@ contract StakingTest is Utils {
         expectEmit();
         emit Transfer(alice, address(_staking), amount);
         expectEmit();
-        emit Events.Staked(alice, amount);
-        _staking.stake(amount);
+        emit Events.Deposited(alice, amount);
+        _staking.deposit(amount);
         vm.stopPrank();
     }
 
@@ -121,7 +121,7 @@ contract StakingTest is Utils {
         // stake
         vm.startPrank(alice);
         _rss3.approve(address(_staking), 10000 ether);
-        _staking.stake(10000 ether);
+        _staking.deposit(10000 ether);
         vm.stopPrank();
 
         // delegate
