@@ -16,11 +16,13 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+//import {console2 as console} from "forge-std/console2.sol";
+
 contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
 
-    uint256 public constant sharesPerChip = 500 * 10 ** 18;
+    uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
     uint256 public constant firstStakingAmount = 10000 * 10 ** 18;
 
     uint256 public constant DELEGATION_RATIO = 25;
@@ -198,30 +200,30 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         address nodeAddr,
         uint256 amount
     ) external override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
-        DataTypes.Node storage node = _nodes[msg.sender];
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        // validate node
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
         uint256 shares = _getShares(node, amount);
-        uint256 chipsCount = shares / sharesPerChip;
+        uint256 chipsCount = shares / SHARES_PER_CHIP;
         if (chipsCount == 0) revert Errors.AmountTooSmall();
-
         // mint chips
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
+
+        // update issuers
         for (uint256 i = startTokenId; i <= endTokenId; i++) {
             _issuers[i] = nodeAddr;
         }
 
-        uint256 remainder = (shares % sharesPerChip) * (_getPoolTokens(node) / node.totalShares);
-        uint256 delegatedAmount = amount - remainder;
-        // update reward pool
-        node.delegatedAmount = node.delegatedAmount + delegatedAmount;
-
+        // update delegatedAmount
+        uint256 delegatedAmount = _sharesToTokens(node, chipsCount * SHARES_PER_CHIP);
+        node.delegatedAmount += delegatedAmount;
+        // update total shares
+        node.totalShares += (chipsCount * SHARES_PER_CHIP);
         // transfer tokens
         IERC20(_token).safeTransferFrom(msg.sender, address(this), delegatedAmount);
 
         emit Events.Delegated(msg.sender, nodeAddr, delegatedAmount, startTokenId, endTokenId);
-
-        return (startTokenId, endTokenId);
     }
 
     /// @inheritdoc IStaking
@@ -245,7 +247,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         requestId = ++_undelegateRequestCounter;
 
         // update rewards
-        uint256 shares = sharesPerChip * chipsIds.length;
+        uint256 shares = SHARES_PER_CHIP * chipsIds.length;
         uint256 rewards = (shares * node.rewardPoolRewards) / node.totalShares;
         uint256 undelegatedAmount = (shares * node.delegatedAmount) / node.totalShares;
 
@@ -337,10 +339,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function minTokensToDelegate(address nodeAddr) external view override returns (uint256) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.totalShares == 0) {
-            return sharesPerChip;
+            return SHARES_PER_CHIP;
         }
 
-        return (sharesPerChip * _getPoolTokens(node)) / node.totalShares;
+        return (SHARES_PER_CHIP * _getPoolTokens(node)) / node.totalShares;
     }
 
     /// @inheritdoc IStaking
@@ -351,7 +353,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         if (nodeAddr != address(0)) {
             DataTypes.Node storage node = _nodes[nodeAddr];
-            tokens = (_getPoolTokens(node) / node.totalShares) * sharesPerChip;
+            tokens = (_getPoolTokens(node) / node.totalShares) * SHARES_PER_CHIP;
         }
     }
 
@@ -462,6 +464,18 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         emit Events.OperatorPoolRewardsWithdrawn(node.account, node.account, rewards);
     }
 
+    function _sharesToTokens(
+        DataTypes.Node storage node,
+        uint256 shares
+    ) internal view returns (uint256) {
+        if (node.totalShares == 0) {
+            return shares;
+        }
+
+        return (shares * _getPoolTokens(node)) / node.totalShares;
+    }
+
+    /// @dev get pool tokens from a node operator, it includes: user delegated tokens and rewards
     function _getPoolTokens(DataTypes.Node memory node) internal pure returns (uint256) {
         return node.rewardPoolRewards + node.delegatedAmount;
     }
@@ -479,7 +493,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         if (node.totalShares == 0) {
             sharesAmount = delegateAmount;
         } else {
-            sharesAmount = (delegateAmount * _getPoolTokens(node)) / _getPoolTokens(node);
+            sharesAmount = (delegateAmount * _getPoolTokens(node)) / node.totalShares;
         }
     }
 
