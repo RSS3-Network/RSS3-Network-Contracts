@@ -254,12 +254,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256 unstakeAmount = (shares * node.stakedAmount) / node.totalShares;
 
         // add to request queue
-        DataTypes.UnstakeRequest storage request = _unstakeQueue[requestId];
-        request.timestamp = block.timestamp;
-        request.owner = msg.sender;
-        request.nodeAddr = nodeAddr;
-        request.rewards = rewards;
-        request.unstakeAmount = unstakeAmount;
+        DataTypes.UnstakeRequest storage req = _unstakeQueue[requestId];
+        req.timestamp = block.timestamp;
+        req.owner = msg.sender;
+        req.nodeAddr = nodeAddr;
+        req.rewards = rewards;
+        req.unstakeAmount = unstakeAmount;
 
         emit Events.UnstakeRequested(msg.sender, nodeAddr, requestId, chipsIds);
     }
@@ -449,17 +449,17 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @dev claim withdrawal request
     function _claimWithdrawal(uint256 requestId) internal {
-        DataTypes.WithdrawalRequest storage request = _withdrawalQueue[requestId];
+        DataTypes.WithdrawalRequest storage req = _withdrawalQueue[requestId];
 
-        if (request.isClaimed) revert Errors.AlreadyClaimed();
-        if (block.timestamp - request.timestamp < _depositUnbondingPeriod)
+        if (req.isClaimed) revert Errors.AlreadyClaimed();
+        if (block.timestamp - req.timestamp < _depositUnbondingPeriod)
             revert Errors.ClaimTimeNotReady();
 
         // set claimed status
-        request.isClaimed = true;
+        req.isClaimed = true;
 
         // transfer staked tokens
-        IERC20(_token).safeTransfer(request.owner, request.amount);
+        IERC20(_token).safeTransfer(req.owner, req.amount);
 
         emit Events.WithdrawalClaimed(requestId);
     }
