@@ -15,10 +15,12 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 //import {console2 as console} from "forge-std/console2.sol";
 
 contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
+    using Math for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
 
@@ -92,13 +94,14 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc IStaking
     function createNode(
+        address to,
         string calldata name,
         string calldata description,
         uint64 taxFraction,
         bool publicGood,
         string calldata endpoint
     ) external override {
-        _createNode(msg.sender, name, description, taxFraction, publicGood, endpoint);
+        _createNode(to, name, description, taxFraction, publicGood, endpoint);
     }
 
     /// @inheritdoc IStaking
@@ -117,6 +120,26 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
+    function updateNode(
+        address nodeAddr,
+        string calldata name,
+        string calldata description,
+        uint64 taxFraction,
+        string calldata endpoint
+    ) external override {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
+
+        node.account = nodeAddr;
+        node.name = name;
+        node.description = description;
+        node.taxFraction = taxFraction;
+        node.endpoint = endpoint;
+
+        emit Events.NodeUpdated(nodeAddr, name, description, taxFraction, endpoint);
+    }
+
+    /// @inheritdoc IStaking
     function createNodeAndDeposit(
         string calldata name,
         string calldata description,
@@ -127,16 +150,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     ) external override whenNotPaused {
         _createNode(msg.sender, name, description, taxFraction, publicGood, endpoint);
         _deposit(msg.sender, amount);
-    }
-
-    /// @inheritdoc IStaking
-    function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external override {
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
-
-        node.taxFraction = taxFraction;
-
-        emit Events.NodeTaxFractionSet(nodeAddr, taxFraction);
     }
 
     /// @inheritdoc IStaking
@@ -365,14 +378,25 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function getNodes() external view override returns (DataTypes.Node[] memory) {
-        uint256 len = _nodeAddrs.length();
-        DataTypes.Node[] memory res = new DataTypes.Node[](len);
-        for (uint256 i = 0; i < len; i++) {
+    function getTotalNodes() external view override returns (uint256) {
+        return _nodeAddrs.length();
+    }
+
+    /// @inheritdoc IStaking
+    function getNodes(
+        uint256 offset,
+        uint256 limit
+    ) external view override returns (DataTypes.Node[] memory nodes) {
+        uint256 totalNodes = _nodeAddrs.length();
+        uint256 len = (totalNodes - offset).min(limit);
+        nodes = new DataTypes.Node[](len);
+
+        if (offset >= totalNodes) return nodes;
+
+        for (uint256 i = offset; i < len + offset; i++) {
             address nodeAddr = _nodeAddrs.at(i);
-            res[i] = _nodes[nodeAddr];
+            nodes[i - offset] = _nodes[nodeAddr];
         }
-        return res;
     }
 
     /// @inheritdoc IStaking

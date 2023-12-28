@@ -38,6 +38,7 @@ interface IStaking {
 
     /**
      * @notice Creates a node.
+     * @param to Address of node operator.
      * @param name Human-readable name.
      * @param description Description of node.
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
@@ -45,6 +46,7 @@ interface IStaking {
      * @param endpoint API endpoint of node.
      */
     function createNode(
+        address to,
         string calldata name,
         string calldata description,
         uint64 taxFraction,
@@ -57,6 +59,22 @@ interface IStaking {
      * @param addr The address of node to delete.
      */
     function deleteNode(address addr) external;
+
+    /**
+     * @notice Updates a node.
+     * @param nodeAddr Address of node operator.
+     * @param name Human-readable name.
+     * @param description Description of node.
+     * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
+     * @param endpoint API endpoint of node.
+     */
+    function updateNode(
+        address nodeAddr,
+        string calldata name,
+        string calldata description,
+        uint64 taxFraction,
+        string calldata endpoint
+    ) external;
 
     /**
      * @notice Creates a node and deposits tokens.
@@ -75,14 +93,6 @@ interface IStaking {
         string calldata endpoint,
         uint256 amount
     ) external;
-
-    /**
-     * @notice Changes tax fraction of the node.
-     * @param nodeAddr The address of node to change.
-     * @param taxFraction The tax fraction to set.
-     * Tax percentage measured in basis points. Each basis point represents 0.01%.
-     */
-    function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external;
 
     /**
      * @notice Deposits tokens for node operator.
@@ -198,9 +208,20 @@ interface IStaking {
     function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
 
     /**
-     * @notice Gets all nodes.
+     * @notice Gets total count of nodes.
+     * @return uint256 Total count of nodes.
      */
-    function getNodes() external view returns (DataTypes.Node[] memory);
+    function getTotalNodes() external view returns (uint256);
+
+    /**
+     * @notice Gets nodes info by offset and limit.
+     * @param offset The offset of nodes to query.
+     * @param limit The limit of nodes to query.
+     */
+    function getNodes(
+        uint256 offset,
+        uint256 limit
+    ) external view returns (DataTypes.Node[] memory);
 
     /**
      * @notice Returns the address of the staking token contract.

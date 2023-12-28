@@ -85,7 +85,7 @@ contract StakingTest is Utils {
         expectEmit();
         emit Events.NodeCreated(alice, name, description, taxFraction, publicGood, endpoint);
         vm.prank(alice);
-        _staking.createNode(name, description, taxFraction, publicGood, endpoint);
+        _staking.createNode(alice, name, description, taxFraction, publicGood, endpoint);
 
         DataTypes.Node memory node = _staking.getNode(alice);
         assertEq(node.name, name);
@@ -143,6 +143,6 @@ contract StakingTest is Utils {
 
     function _createNode(address nodeAddr, uint64 taxFraction) internal {
         vm.prank(nodeAddr);
-        _staking.createNode("name", "description", taxFraction, false, "http://endpoint");
+        _staking.createNode(nodeAddr, "name", "description", taxFraction, false, "http://endpoint");
     }
 }
