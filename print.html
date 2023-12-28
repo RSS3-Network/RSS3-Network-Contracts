@@ -204,7 +204,7 @@ forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --priv
 <li><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="iaccountoracle"><a class="header" href="#iaccountoracle">IAccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/interfaces/IAccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/interfaces/IAccountOracle.sol">Git Source</a></p>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the AccountOracle contract.</p>
@@ -251,7 +251,7 @@ forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --priv
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ichips"><a class="header" href="#ichips">IChips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/interfaces/IChips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/interfaces/IChips.sol">Git Source</a></p>
 <h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
 <h3 id="initialize-1"><a class="header" href="#initialize-1">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
@@ -310,7 +310,7 @@ forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --priv
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/interfaces/IStaking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/interfaces/IStaking.sol">Git Source</a></p>
 <h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
 <h3 id="initialize-2"><a class="header" href="#initialize-2">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
@@ -352,6 +352,7 @@ Requirements:</p>
 <h3 id="createnode"><a class="header" href="#createnode">createNode</a></h3>
 <p>Creates a node.</p>
 <pre><code class="language-solidity">function createNode(
+    address to,
     string calldata name,
     string calldata description,
     uint64 taxFraction,
@@ -361,6 +362,7 @@ Requirements:</p>
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>to</code></td><td><code>address</code></td><td>Address of node operator.</td></tr>
 <tr><td><code>name</code></td><td><code>string</code></td><td>Human-readable name.</td></tr>
 <tr><td><code>description</code></td><td><code>string</code></td><td>Description of node.</td></tr>
 <tr><td><code>taxFraction</code></td><td><code>uint64</code></td><td>Tax percentage measured in basis points. Each basis point represents 0.01%.</td></tr>
@@ -375,6 +377,25 @@ Requirements:</p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>addr</code></td><td><code>address</code></td><td>The address of node to delete.</td></tr>
+</tbody></table>
+</div>
+<h3 id="updatenode"><a class="header" href="#updatenode">updateNode</a></h3>
+<p>Updates a node.</p>
+<pre><code class="language-solidity">function updateNode(
+    address nodeAddr,
+    string calldata name,
+    string calldata description,
+    uint64 taxFraction,
+    string calldata endpoint
+) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator.</td></tr>
+<tr><td><code>name</code></td><td><code>string</code></td><td>Human-readable name.</td></tr>
+<tr><td><code>description</code></td><td><code>string</code></td><td>Description of node.</td></tr>
+<tr><td><code>taxFraction</code></td><td><code>uint64</code></td><td>Tax percentage measured in basis points. Each basis point represents 0.01%.</td></tr>
+<tr><td><code>endpoint</code></td><td><code>string</code></td><td>API endpoint of node.</td></tr>
 </tbody></table>
 </div>
 <h3 id="createnodeanddeposit"><a class="header" href="#createnodeanddeposit">createNodeAndDeposit</a></h3>
@@ -396,16 +417,6 @@ Requirements:</p>
 <tr><td><code>publicGood</code></td><td><code>bool</code></td><td>Flag indicating if the node is a public good.</td></tr>
 <tr><td><code>endpoint</code></td><td><code>string</code></td><td>API endpoint of node.</td></tr>
 <tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to deposit.</td></tr>
-</tbody></table>
-</div>
-<h3 id="setnodetaxfraction"><a class="header" href="#setnodetaxfraction">setNodeTaxFraction</a></h3>
-<p>Changes tax fraction of the node.</p>
-<pre><code class="language-solidity">function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to change.</td></tr>
-<tr><td><code>taxFraction</code></td><td><code>uint64</code></td><td>The tax fraction to set. Tax percentage measured in basis points. Each basis point represents 0.01%.</td></tr>
 </tbody></table>
 </div>
 <h3 id="deposit"><a class="header" href="#deposit">deposit</a></h3>
@@ -578,10 +589,25 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>DataTypes.Node</code></td><td>DataTypes.Node Node info.</td></tr>
 </tbody></table>
 </div>
-<h3 id="getnodes"><a class="header" href="#getnodes">getNodes</a></h3>
-<p>Gets all nodes.</p>
-<pre><code class="language-solidity">function getNodes() external view returns (DataTypes.Node[] memory);
+<h3 id="gettotalnodes"><a class="header" href="#gettotalnodes">getTotalNodes</a></h3>
+<p>Gets total count of nodes.</p>
+<pre><code class="language-solidity">function getTotalNodes() external view returns (uint256);
 </code></pre>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>uint256 Total count of nodes.</td></tr>
+</tbody></table>
+</div>
+<h3 id="getnodes"><a class="header" href="#getnodes">getNodes</a></h3>
+<p>Gets nodes info by offset and limit.</p>
+<pre><code class="language-solidity">function getNodes(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>offset</code></td><td><code>uint256</code></td><td>The offset of nodes to query.</td></tr>
+<tr><td><code>limit</code></td><td><code>uint256</code></td><td>The limit of nodes to query.</td></tr>
+</tbody></table>
+</div>
 <h3 id="stakingtoken"><a class="header" href="#stakingtoken">stakingToken</a></h3>
 <p>Returns the address of the staking token contract.</p>
 <pre><code class="language-solidity">function stakingToken() external view returns (address);
@@ -606,7 +632,7 @@ Requirements:</p>
 <li><a href="src/libraries/Events.sol/library.Events.html">Events</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -647,7 +673,7 @@ Requirements:</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/libraries/Errors.sol">Git Source</a></p>
 <h2 id="errors-1"><a class="header" href="#errors-1">Errors</a></h2>
 <h3 id="callernotstaking"><a class="header" href="#callernotstaking">CallerNotStaking</a></h3>
 <p><em>Caller is not staking contract</em></p>
@@ -698,7 +724,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error DepositedTokensSlashedAll();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -725,14 +751,17 @@ Requirements:</p>
 <tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator deleted.</td></tr>
 </tbody></table>
 </div>
-<h3 id="nodetaxfractionset"><a class="header" href="#nodetaxfractionset">NodeTaxFractionSet</a></h3>
-<p><em>Emitted on setNodeTaxFraction()</em></p>
-<pre><code class="language-solidity">event NodeTaxFractionSet(address indexed nodeAddr, uint64 indexed taxFraction);
+<h3 id="nodeupdated"><a class="header" href="#nodeupdated">NodeUpdated</a></h3>
+<p><em>Emitted on updateNode()</em></p>
+<pre><code class="language-solidity">event NodeUpdated(address indexed nodeAddr, string name, string description, uint64 taxFraction, string endpoint);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator.</td></tr>
-<tr><td><code>taxFraction</code></td><td><code>uint64</code></td><td>The new tax fraction of node operator.</td></tr>
+<tr><td><code>name</code></td><td><code>string</code></td><td>Human-readable name.</td></tr>
+<tr><td><code>description</code></td><td><code>string</code></td><td>Description of node.</td></tr>
+<tr><td><code>taxFraction</code></td><td><code>uint64</code></td><td>Tax percentage measured in basis points. Each basis point represents 0.01%.</td></tr>
+<tr><td><code>endpoint</code></td><td><code>string</code></td><td>API endpoint of node.</td></tr>
 </tbody></table>
 </div>
 <h3 id="deposited"><a class="header" href="#deposited">Deposited</a></h3>
@@ -867,7 +896,7 @@ Requirements:</p>
 <li><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rss3token"><a class="header" href="#rss3token">RSS3Token</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/mocks/RSS3Token.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/mocks/RSS3Token.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC20</p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
@@ -881,7 +910,7 @@ ERC20</p>
 <li><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="proxyadmin"><a class="header" href="#proxyadmin">ProxyAdmin</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/upgradeability/ProxyAdmin.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/upgradeability/ProxyAdmin.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Ownable</p>
 <p><em>This is an auxiliary contract meant to be assigned as the admin of a {TransparentUpgradeableProxy}. For an
@@ -916,7 +945,7 @@ Requirements:</p>
     onlyOwner;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="itransparentupgradeableproxy"><a class="header" href="#itransparentupgradeableproxy">ITransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 IERC1967</p>
 <p><em>Interface for {TransparentUpgradeableProxy}. In order to implement transparency, {TransparentUpgradeableProxy}
@@ -928,7 +957,7 @@ include them in the ABI so this interface must be used to interact with it.</em>
 <pre><code class="language-solidity">function upgradeToAndCall(address, bytes calldata) external payable;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transparentupgradeableproxy"><a class="header" href="#transparentupgradeableproxy">TransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC1967Proxy</p>
 <p>*This contract implements a proxy that is upgradeable through an associated {ProxyAdmin} instance.
@@ -996,7 +1025,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error ProxyDeniedAdminAccess();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="accountoracle"><a class="header" href="#accountoracle">AccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/AccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/AccountOracle.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/AccountOracle.sol//src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
@@ -1066,7 +1095,7 @@ Requirements:</p>
 <pre><code class="language-solidity">function _log2(uint256 x) internal pure returns (uint256 result);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/Chips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/Chips.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, Initializable, ERC721</p>
 <h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
@@ -1154,7 +1183,7 @@ Metadata JSON Schema&quot;.</em></p>
 <pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view override returns (string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0fe04fa493bc240ccc0a09bd97fb8b642495fabf/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2aefeaa3d168aa1cbf7a71542bce09d7ee2e1a8d/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Staking.sol//src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-4"><a class="header" href="#state-variables-4">State Variables</a></h2>
@@ -1259,6 +1288,7 @@ Requirements:</p>
 <h3 id="createnode-1"><a class="header" href="#createnode-1">createNode</a></h3>
 <p>Creates a node.</p>
 <pre><code class="language-solidity">function createNode(
+    address to,
     string calldata name,
     string calldata description,
     uint64 taxFraction,
@@ -1268,6 +1298,7 @@ Requirements:</p>
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>to</code></td><td><code>address</code></td><td>Address of node operator.</td></tr>
 <tr><td><code>name</code></td><td><code>string</code></td><td>Human-readable name.</td></tr>
 <tr><td><code>description</code></td><td><code>string</code></td><td>Description of node.</td></tr>
 <tr><td><code>taxFraction</code></td><td><code>uint64</code></td><td>Tax percentage measured in basis points. Each basis point represents 0.01%.</td></tr>
@@ -1282,6 +1313,25 @@ Requirements:</p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>nodeAddr</code></td><td><code>address</code></td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="updatenode-1"><a class="header" href="#updatenode-1">updateNode</a></h3>
+<p>Updates a node.</p>
+<pre><code class="language-solidity">function updateNode(
+    address nodeAddr,
+    string calldata name,
+    string calldata description,
+    uint64 taxFraction,
+    string calldata endpoint
+) external override;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator.</td></tr>
+<tr><td><code>name</code></td><td><code>string</code></td><td>Human-readable name.</td></tr>
+<tr><td><code>description</code></td><td><code>string</code></td><td>Description of node.</td></tr>
+<tr><td><code>taxFraction</code></td><td><code>uint64</code></td><td>Tax percentage measured in basis points. Each basis point represents 0.01%.</td></tr>
+<tr><td><code>endpoint</code></td><td><code>string</code></td><td>API endpoint of node.</td></tr>
 </tbody></table>
 </div>
 <h3 id="createnodeanddeposit-1"><a class="header" href="#createnodeanddeposit-1">createNodeAndDeposit</a></h3>
@@ -1303,16 +1353,6 @@ Requirements:</p>
 <tr><td><code>publicGood</code></td><td><code>bool</code></td><td>Flag indicating if the node is a public good.</td></tr>
 <tr><td><code>endpoint</code></td><td><code>string</code></td><td>API endpoint of node.</td></tr>
 <tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to deposit.</td></tr>
-</tbody></table>
-</div>
-<h3 id="setnodetaxfraction-1"><a class="header" href="#setnodetaxfraction-1">setNodeTaxFraction</a></h3>
-<p>Changes tax fraction of the node.</p>
-<pre><code class="language-solidity">function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external override;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to change.</td></tr>
-<tr><td><code>taxFraction</code></td><td><code>uint64</code></td><td>The tax fraction to set. Tax percentage measured in basis points. Each basis point represents 0.01%.</td></tr>
 </tbody></table>
 </div>
 <h3 id="deposit-1"><a class="header" href="#deposit-1">deposit</a></h3>
@@ -1493,10 +1533,25 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>DataTypes.Node</code></td><td>DataTypes.Node Node info.</td></tr>
 </tbody></table>
 </div>
-<h3 id="getnodes-1"><a class="header" href="#getnodes-1">getNodes</a></h3>
-<p>Gets all nodes.</p>
-<pre><code class="language-solidity">function getNodes() external view override returns (DataTypes.Node[] memory);
+<h3 id="gettotalnodes-1"><a class="header" href="#gettotalnodes-1">getTotalNodes</a></h3>
+<p>Gets total count of nodes.</p>
+<pre><code class="language-solidity">function getTotalNodes() external view override returns (uint256);
 </code></pre>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>uint256 Total count of nodes.</td></tr>
+</tbody></table>
+</div>
+<h3 id="getnodes-1"><a class="header" href="#getnodes-1">getNodes</a></h3>
+<p>Gets nodes info by offset and limit.</p>
+<pre><code class="language-solidity">function getNodes(uint256 offset, uint256 limit) external view override returns (DataTypes.Node[] memory nodes);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>offset</code></td><td><code>uint256</code></td><td>The offset of nodes to query.</td></tr>
+<tr><td><code>limit</code></td><td><code>uint256</code></td><td>The limit of nodes to query.</td></tr>
+</tbody></table>
+</div>
 <h3 id="stakingtoken-1"><a class="header" href="#stakingtoken-1">stakingToken</a></h3>
 <p>Returns the address of the staking token contract.</p>
 <pre><code class="language-solidity">function stakingToken() external view override returns (address);
