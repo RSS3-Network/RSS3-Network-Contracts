@@ -11,6 +11,8 @@ library DataTypes {
         address account;
         /// @notice tax percentage measured in basis points.
         uint64 taxFraction;
+        /// @notice flag indicating if the node is a public good
+        bool publicGood;
         /// @notice name of the node
         string name;
         /// @notice description of the node

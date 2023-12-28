@@ -75,7 +75,7 @@ contract StakingTest is Utils {
         _rss3.transfer(bob, _initialAmount);
     }
 
-    function testCreateNode(uint64 taxFraction) public {
+    function testCreateNode(uint64 taxFraction, bool publicGood) public {
         vm.assume(taxFraction <= 10000);
 
         string memory name = "Alice";
@@ -83,14 +83,15 @@ contract StakingTest is Utils {
         string memory endpoint = "https://alice.com";
 
         expectEmit();
-        emit Events.NodeCreated(alice, name, description, taxFraction, endpoint);
+        emit Events.NodeCreated(alice, name, description, taxFraction, publicGood, endpoint);
         vm.prank(alice);
-        _staking.createNode(name, description, taxFraction, endpoint);
+        _staking.createNode(name, description, taxFraction, publicGood, endpoint);
 
         DataTypes.Node memory node = _staking.getNode(alice);
         assertEq(node.name, name);
         assertEq(node.description, description);
         assertEq(node.taxFraction, taxFraction);
+        assertEq(node.publicGood, publicGood);
         assertEq(node.endpoint, endpoint);
     }
 
@@ -142,6 +143,6 @@ contract StakingTest is Utils {
 
     function _createNode(address nodeAddr, uint64 taxFraction) internal {
         vm.prank(nodeAddr);
-        _staking.createNode("name", "description", taxFraction, "http://endpoint");
+        _staking.createNode("name", "description", taxFraction, false, "http://endpoint");
     }
 }

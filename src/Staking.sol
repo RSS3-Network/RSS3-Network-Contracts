@@ -95,9 +95,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         string calldata name,
         string calldata description,
         uint64 taxFraction,
+        bool publicGood,
         string calldata endpoint
     ) external override {
-        _createNode(msg.sender, name, description, taxFraction, endpoint);
+        _createNode(msg.sender, name, description, taxFraction, publicGood, endpoint);
     }
 
     /// @inheritdoc IStaking
@@ -121,10 +122,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         string calldata name,
         string calldata description,
         uint64 taxFraction,
+        bool publicGood,
         string calldata endpoint,
         uint256 amount
     ) external override whenNotPaused {
-        _createNode(msg.sender, name, description, taxFraction, endpoint);
+        _createNode(msg.sender, name, description, taxFraction, publicGood, endpoint);
         _deposit(msg.sender, amount);
     }
 
@@ -380,6 +382,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         string calldata name,
         string calldata description,
         uint64 taxFraction,
+        bool publicGood,
         string calldata endpoint
     ) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
@@ -390,9 +393,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         node.name = name;
         node.description = description;
         node.taxFraction = taxFraction;
+        node.publicGood = publicGood;
         node.endpoint = endpoint;
 
-        emit Events.NodeCreated(nodeAddr, name, description, taxFraction, endpoint);
+        emit Events.NodeCreated(nodeAddr, name, description, taxFraction, publicGood, endpoint);
     }
 
     function _deposit(address nodeAddr, uint256 amount) internal {
