@@ -201,4 +201,16 @@ interface IStaking {
      * @notice Gets all nodes.
      */
     function getNodes() external view returns (DataTypes.Node[] memory);
+
+    /**
+     * @notice Returns the address of the staking token contract.
+     * @return address The address of the staking token contract.
+     */
+    function stakingToken() external view returns (address);
+
+    /**
+     * @notice Returns the address of the chips contract.
+     * @return address The address of the chips contract.
+     */
+    function chipsContract() external view returns (address);
 }

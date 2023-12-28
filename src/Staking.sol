@@ -375,6 +375,16 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         return res;
     }
 
+    /// @inheritdoc IStaking
+    function stakingToken() external view override returns (address) {
+        return _token;
+    }
+
+    /// @inheritdoc IStaking
+    function chipsContract() external view override returns (address) {
+        return _chips;
+    }
+
     /// @dev create a node
     function _createNode(
         address nodeAddr,

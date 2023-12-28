@@ -32,4 +32,10 @@ interface IChips {
      * @param tokenId ID of token to burn.
      */
     function burn(uint256 tokenId) external;
+
+    /**
+     * @notice  Returns the address of the Staking contract.
+     * @return Address of the Staking contract.
+     */
+    function stakingContract() external view returns (address);
 }

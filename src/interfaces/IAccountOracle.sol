@@ -31,4 +31,10 @@ interface IAccountOracle {
         uint256[] calldata requestCounts,
         uint256[] calldata stakingRewards
     ) external;
+
+    /**
+     * @notice  Returns the address of the Staking contract.
+     * @return Address of the Staking contract.
+     */
+    function stakingContract() external view returns (address);
 }

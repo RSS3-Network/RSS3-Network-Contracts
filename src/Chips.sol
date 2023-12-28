@@ -52,6 +52,11 @@ contract Chips is IChips, Initializable, ERC721 {
         _burn(tokenId);
     }
 
+    /// @inheritdoc IChips
+    function stakingContract() external view override returns (address) {
+        return _staking;
+    }
+
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         return super.tokenURI(tokenId);

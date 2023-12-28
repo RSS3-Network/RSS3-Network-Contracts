@@ -53,6 +53,11 @@ contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable
         );
     }
 
+    /// @inheritdoc IAccountOracle
+    function stakingContract() external view override returns (address) {
+        return _staking;
+    }
+
     /// @dev returns request bonuses
     function _getRequestBonuses(
         uint256 totalBonus,

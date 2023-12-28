@@ -21,7 +21,7 @@ build  :; forge build
 foundry-test :; forge clean && forge test --optimize --optimizer-runs 200 -v
 
 # Run solhint
-solhint :; solhint -f table "{src,test,scripts}/**/*.sol"
+solhint :; solhint -f table "{src,test,script}/**/*.sol"
 
 # slither
 # to install slither, visit [https://github.com/crytic/slither]
@@ -47,7 +47,7 @@ storage-layout:
 	./tools/checkStorageLayout.sh
 
 # Lints
-lint :; npx prettier --plugin=prettier-plugin-solidity  --write "{src,test,scripts}/**/*.sol"
+lint :; npx prettier --plugin=prettier-plugin-solidity  --write "{src,test,script}/**/*.sol"
 
 # Generate Gas Snapshots
 snapshot :; forge clean && forge snapshot
