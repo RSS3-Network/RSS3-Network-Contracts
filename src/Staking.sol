@@ -519,8 +519,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             return (rewards * taxFraction) / _taxDenominator();
         }
 
-        uint256 stakeRewards = (rewards * stakeCapacity) / stakedAmount;
-        return (stakeRewards * taxFraction) / _taxDenominator();
+        uint256 stakingRewards = (rewards * stakeCapacity) / stakedAmount;
+        return (stakingRewards * taxFraction) / _taxDenominator();
     }
 
     /**
