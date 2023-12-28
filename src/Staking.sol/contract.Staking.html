@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/032ddf4a9240559ce06af31cb9430bd0399c8ee7/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fe01b7075cce9f1cc42b17ca0abce67e2ba8af46/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -188,16 +188,16 @@
 <h3 id="firstdepositamount"><a class="header" href="#firstdepositamount">firstDepositAmount</a></h3>
 <pre><code class="language-solidity">uint256 public constant firstDepositAmount = 10000 * 10 ** 18;
 </code></pre>
-<h3 id="delegation_ratio"><a class="header" href="#delegation_ratio">DELEGATION_RATIO</a></h3>
-<pre><code class="language-solidity">uint256 public constant DELEGATION_RATIO = 25;
+<h3 id="stake_ratio"><a class="header" href="#stake_ratio">STAKE_RATIO</a></h3>
+<pre><code class="language-solidity">uint256 public constant STAKE_RATIO = 25;
+</code></pre>
+<h3 id="_depositunbondingperiod"><a class="header" href="#_depositunbondingperiod">_depositUnbondingPeriod</a></h3>
+<p><em>The period of time that node operator can't withdraw staked tokens</em></p>
+<pre><code class="language-solidity">uint256 internal _depositUnbondingPeriod;
 </code></pre>
 <h3 id="_stakeunbondingperiod"><a class="header" href="#_stakeunbondingperiod">_stakeUnbondingPeriod</a></h3>
-<p><em>The period of time that a node can't withdraw staked tokens</em></p>
+<p><em>The period of time that user can't withdraw staked tokens</em></p>
 <pre><code class="language-solidity">uint256 internal _stakeUnbondingPeriod;
-</code></pre>
-<h3 id="_delegateunbondingperiod"><a class="header" href="#_delegateunbondingperiod">_delegateUnbondingPeriod</a></h3>
-<p><em>The period of time that a node can't withdraw delegated tokens</em></p>
-<pre><code class="language-solidity">uint256 internal _delegateUnbondingPeriod;
 </code></pre>
 <h3 id="_nodeaddrs"><a class="header" href="#_nodeaddrs">_nodeAddrs</a></h3>
 <p><em>all node addresses</em></p>
@@ -215,13 +215,13 @@
 <p><em>withdraw request queue</em></p>
 <pre><code class="language-solidity">mapping(uint256 requestId =&gt; DataTypes.WithdrawalRequest) internal _withdrawalQueue;
 </code></pre>
-<h3 id="_undelegaterequestcounter"><a class="header" href="#_undelegaterequestcounter">_undelegateRequestCounter</a></h3>
-<p><em>undelegate request queue counter</em></p>
-<pre><code class="language-solidity">uint256 internal _undelegateRequestCounter;
+<h3 id="_unstakerequestcounter"><a class="header" href="#_unstakerequestcounter">_unstakeRequestCounter</a></h3>
+<p><em>unstake request queue counter</em></p>
+<pre><code class="language-solidity">uint256 internal _unstakeRequestCounter;
 </code></pre>
-<h3 id="_undelegatequeue"><a class="header" href="#_undelegatequeue">_undelegateQueue</a></h3>
-<p><em>undelegate request queue</em></p>
-<pre><code class="language-solidity">mapping(uint256 requestId =&gt; DataTypes.UndelegateRequest) internal _undelegateQueue;
+<h3 id="_unstakequeue"><a class="header" href="#_unstakequeue">_unstakeQueue</a></h3>
+<p><em>unstake request queue</em></p>
+<pre><code class="language-solidity">mapping(uint256 requestId =&gt; DataTypes.UnstakeRequest) internal _unstakeQueue;
 </code></pre>
 <h3 id="_chips"><a class="header" href="#_chips">_chips</a></h3>
 <p><em>the chips contract</em></p>
@@ -251,7 +251,7 @@
     address chips,
     address token,
     uint256 stakeUnbondingPeriod,
-    uint256 delegateUnbondingPeriod
+    uint256 depositUnbondingPeriod
 ) external override initializer;
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -260,8 +260,8 @@
 <tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who can distribute rewards to the Staking contract.</td></tr>
 <tr><td><code>chips</code></td><td><code>address</code></td><td>Chips contract.</td></tr>
 <tr><td><code>token</code></td><td><code>address</code></td><td>Staking token contract.</td></tr>
-<tr><td><code>stakeUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds a node needs to wait to withdraw its stake</td></tr>
-<tr><td><code>delegateUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds a user needs to wait to withdraw its stake</td></tr>
+<tr><td><code>stakeUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds user need to wait to unstake its stake.</td></tr>
+<tr><td><code>depositUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds node operator need to wait to withdraw its deposit.</td></tr>
 </tbody></table>
 </div>
 <h3 id="pause"><a class="header" href="#pause">pause</a></h3>
@@ -384,9 +384,9 @@ Requirements:</p>
 <p>Claims a batch of withdrawal requests.</p>
 <pre><code class="language-solidity">function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused;
 </code></pre>
-<h3 id="delegate"><a class="header" href="#delegate">delegate</a></h3>
-<p>Delegates tokens to a node operator.</p>
-<pre><code class="language-solidity">function delegate(address nodeAddr, uint256 amount)
+<h3 id="stake"><a class="header" href="#stake">stake</a></h3>
+<p>Stakes tokens to a node operator.</p>
+<pre><code class="language-solidity">function stake(address nodeAddr, uint256 amount)
     external
     override
     whenNotPaused
@@ -394,8 +394,8 @@ Requirements:</p>
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to delegate.</td></tr>
-<tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to delegate.</td></tr>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to stake.</td></tr>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to stake.</td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
@@ -404,10 +404,10 @@ Requirements:</p>
 <tr><td><code>endTokenId</code></td><td><code>uint256</code></td><td>toTokenId The end of new minted chips token ids.</td></tr>
 </tbody></table>
 </div>
-<h3 id="requestundelegate"><a class="header" href="#requestundelegate">requestUndelegate</a></h3>
-<p>Requests undelegating tokens from a node operator.</p>
+<h3 id="requestunstake"><a class="header" href="#requestunstake">requestUnstake</a></h3>
+<p>Requests unstake tokens from a node operator.</p>
 <p><em>This will burn the chips tokens.</em></p>
-<pre><code class="language-solidity">function requestUndelegate(address nodeAddr, uint256[] calldata chipsIds)
+<pre><code class="language-solidity">function requestUnstake(address nodeAddr, uint256[] calldata chipsIds)
     external
     override
     whenNotPaused
@@ -415,22 +415,22 @@ Requirements:</p>
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator to undelegate.</td></tr>
-<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids for undelegate.</td></tr>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator to unstake.</td></tr>
+<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids for unstake.</td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>THe created undelegate request id.</td></tr>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>THe created unstake request id.</td></tr>
 </tbody></table>
 </div>
-<h3 id="claimundelegate"><a class="header" href="#claimundelegate">claimUndelegate</a></h3>
-<p>Claims a batch of undelegate requests.</p>
-<pre><code class="language-solidity">function claimUndelegate(uint256[] calldata requestIds) external override whenNotPaused;
+<h3 id="claimunstake"><a class="header" href="#claimunstake">claimUnstake</a></h3>
+<p>Claims a batch of unstake requests.</p>
+<pre><code class="language-solidity">function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>requestIds</code></td><td><code>uint256[]</code></td><td>The undelegate request ids to claim.</td></tr>
+<tr><td><code>requestIds</code></td><td><code>uint256[]</code></td><td>The unstake request ids to claim.</td></tr>
 </tbody></table>
 </div>
 <h3 id="distributerewards"><a class="header" href="#distributerewards">distributeRewards</a></h3>
@@ -474,9 +474,9 @@ Requirements:</p>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>The addresses of nodes to slash.</td></tr>
 </tbody></table>
 </div>
-<h3 id="mintokenstodelegate"><a class="header" href="#mintokenstodelegate">minTokensToDelegate</a></h3>
-<p>Returns the minimal tokens to delegate for a node.</p>
-<pre><code class="language-solidity">function minTokensToDelegate(address nodeAddr) external view override returns (uint256);
+<h3 id="mintokenstostake"><a class="header" href="#mintokenstostake">minTokensToStake</a></h3>
+<p>Returns the minimal tokens to stake for a node.</p>
+<pre><code class="language-solidity">function minTokensToStake(address nodeAddr) external view override returns (uint256);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -535,9 +535,9 @@ Requirements:</p>
 <h3 id="_deposit"><a class="header" href="#_deposit">_deposit</a></h3>
 <pre><code class="language-solidity">function _deposit(address nodeAddr, uint256 amount) internal;
 </code></pre>
-<h3 id="_claimundelegate"><a class="header" href="#_claimundelegate">_claimUndelegate</a></h3>
-<p><em>claim undelegate request</em></p>
-<pre><code class="language-solidity">function _claimUndelegate(uint256 requestId) internal;
+<h3 id="_claimunstake"><a class="header" href="#_claimunstake">_claimUnstake</a></h3>
+<p><em>claim unstake request</em></p>
+<pre><code class="language-solidity">function _claimUnstake(uint256 requestId) internal;
 </code></pre>
 <h3 id="_claimwithdrawal"><a class="header" href="#_claimwithdrawal">_claimWithdrawal</a></h3>
 <p><em>claim withdrawal request</em></p>
@@ -560,14 +560,14 @@ Requirements:</p>
 </code></pre>
 <h3 id="_getshares"><a class="header" href="#_getshares">_getShares</a></h3>
 <p><em>get shares amount</em></p>
-<pre><code class="language-solidity">function _getShares(DataTypes.Node memory node, uint256 delegateAmount) internal pure returns (uint256 sharesAmount);
+<pre><code class="language-solidity">function _getShares(DataTypes.Node memory node, uint256 stakeAmount) internal pure returns (uint256 sharesAmount);
 </code></pre>
 <h3 id="_gettax"><a class="header" href="#_gettax">_getTax</a></h3>
 <p><em>get tax amount
 For a node operator to receive its full tax,
 it needs to stake at least 1/25 of the tokens staked by external delegators,
 or the exceeding part of the tax will be sent to the reward pool.</em></p>
-<pre><code class="language-solidity">function _getTax(uint256 rewards, uint256 taxFraction, uint256 selfStakedAmount, uint256 delegatedAmount)
+<pre><code class="language-solidity">function _getTax(uint256 rewards, uint256 taxFraction, uint256 depositAmount, uint256 stakedAmount)
     internal
     pure
     returns (uint256);

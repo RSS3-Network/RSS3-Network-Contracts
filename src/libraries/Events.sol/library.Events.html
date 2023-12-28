@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/032ddf4a9240559ce06af31cb9430bd0399c8ee7/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/fe01b7075cce9f1cc42b17ca0abce67e2ba8af46/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -281,51 +281,45 @@
 <tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The withdrawal request id.</td></tr>
 </tbody></table>
 </div>
-<h3 id="delegated"><a class="header" href="#delegated">Delegated</a></h3>
-<p><em>Emitted on delegate()</em></p>
-<pre><code class="language-solidity">event Delegated(
+<h3 id="staked"><a class="header" href="#staked">Staked</a></h3>
+<p><em>Emitted on stake()</em></p>
+<pre><code class="language-solidity">event Staked(
     address indexed user, address indexed nodeAddr, uint256 indexed amount, uint256 startTokenId, uint256 endTokenId
 );
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>user</code></td><td><code>address</code></td><td>Address of user who delegated tokens.</td></tr>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to delegate.</td></tr>
-<tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to delegate.</td></tr>
+<tr><td><code>user</code></td><td><code>address</code></td><td>Address of user who stake tokens.</td></tr>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to stake.</td></tr>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to stake.</td></tr>
 <tr><td><code>startTokenId</code></td><td><code>uint256</code></td><td>The start of new minted chips token ids.</td></tr>
 <tr><td><code>endTokenId</code></td><td><code>uint256</code></td><td>The end of new minted chips token ids.</td></tr>
 </tbody></table>
 </div>
-<h3 id="undelegaterequested"><a class="header" href="#undelegaterequested">UndelegateRequested</a></h3>
-<p><em>Emitted on requestUndelegate()</em></p>
-<pre><code class="language-solidity">event UndelegateRequested(
-    address indexed user, address indexed nodeAddr, uint256 indexed requestId, uint256[] chipsIds
-);
+<h3 id="unstakerequested"><a class="header" href="#unstakerequested">UnstakeRequested</a></h3>
+<p><em>Emitted on requestUnstake()</em></p>
+<pre><code class="language-solidity">event UnstakeRequested(address indexed user, address indexed nodeAddr, uint256 indexed requestId, uint256[] chipsIds);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>user</code></td><td><code>address</code></td><td>Address of user who undelegated tokens.</td></tr>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to delegate.</td></tr>
-<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The created undelegate request id.</td></tr>
-<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids to undelegate.</td></tr>
+<tr><td><code>user</code></td><td><code>address</code></td><td>Address of user who unstake tokens.</td></tr>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to unstake.</td></tr>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The created unstake request id.</td></tr>
+<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids to unstake.</td></tr>
 </tbody></table>
 </div>
-<h3 id="undelegateclaimed"><a class="header" href="#undelegateclaimed">UndelegateClaimed</a></h3>
-<p><em>Emitted on claimUndelegate()</em></p>
-<pre><code class="language-solidity">event UndelegateClaimed(
-    uint256 indexed requestId,
-    address indexed nodeAddr,
-    address indexed user,
-    uint256 undelegatedAmount,
-    uint256 rewards
+<h3 id="unstakeclaimed"><a class="header" href="#unstakeclaimed">UnstakeClaimed</a></h3>
+<p><em>Emitted on claimUnstake()</em></p>
+<pre><code class="language-solidity">event UnstakeClaimed(
+    uint256 indexed requestId, address indexed nodeAddr, address indexed user, uint256 unstakeAmount, uint256 rewards
 );
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The undelegate request id.</td></tr>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to undelegate.</td></tr>
-<tr><td><code>user</code></td><td><code>address</code></td><td>Address of user who undelegated tokens.</td></tr>
-<tr><td><code>undelegatedAmount</code></td><td><code>uint256</code></td><td>Amount of tokens undelegated.</td></tr>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The unstake request id.</td></tr>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to unstake.</td></tr>
+<tr><td><code>user</code></td><td><code>address</code></td><td>Address of user who unstaked tokens.</td></tr>
+<tr><td><code>unstakeAmount</code></td><td><code>uint256</code></td><td>Amount of tokens unstaked.</td></tr>
 <tr><td><code>rewards</code></td><td><code>uint256</code></td><td>Amount of rewards claimed.</td></tr>
 </tbody></table>
 </div>
