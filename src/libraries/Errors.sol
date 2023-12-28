@@ -9,8 +9,8 @@ library Errors {
     /// @dev Node already exists
     error NodeExists();
 
-    /// @dev Node staked or delegated
-    error NodeStakedOrDelegated();
+    /// @dev Node staked or deposited
+    error NodeStakedOrDeposited();
 
     /// @dev Node not exists
     error NodeNotExists();

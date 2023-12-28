@@ -10,8 +10,8 @@ interface IStaking {
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
      * @param chips Chips contract.
      * @param token Staking token contract.
-     * @param stakeUnbondingPeriod Time in seconds a node needs to wait to withdraw its stake
-     * @param delegateUnbondingPeriod Time in seconds a user needs to wait to withdraw its stake
+     * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
+     * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its deposit.
      */
     function initialize(
         address pauseAccount,
@@ -19,7 +19,7 @@ interface IStaking {
         address chips,
         address token,
         uint256 stakeUnbondingPeriod,
-        uint256 delegateUnbondingPeriod
+        uint256 depositUnbondingPeriod
     ) external;
 
     /**
@@ -115,34 +115,34 @@ interface IStaking {
     function claimWithdrawal(uint256[] calldata requestIds) external;
 
     /**
-     * @notice Delegates tokens to a node operator.
-     * @param nodeAddr The address of node to delegate.
-     * @param amount Amount of tokens to delegate.
+     * @notice Stakes tokens to a node operator.
+     * @param nodeAddr The address of node to stake.
+     * @param amount Amount of tokens to stake.
      * @return fromTokenId The start of new minted chips token ids.
      * @return toTokenId The end of new minted chips token ids.
      */
-    function delegate(
+    function stake(
         address nodeAddr,
         uint256 amount
     ) external returns (uint256 fromTokenId, uint256 toTokenId);
 
     /**
-     * @notice Requests undelegating tokens from a node operator.
+     * @notice Requests unstake tokens from a node operator.
      * @dev This will burn the chips tokens.
-     * @param nodeAddr Address of node operator to undelegate.
-     * @param chipsIds The chips token ids for undelegate.
-     * @return requestId THe created undelegate request id.
+     * @param nodeAddr Address of node operator to unstake.
+     * @param chipsIds The chips token ids for unstake.
+     * @return requestId THe created unstake request id.
      */
-    function requestUndelegate(
+    function requestUnstake(
         address nodeAddr,
         uint256[] calldata chipsIds
     ) external returns (uint256 requestId);
 
     /**
-     * @notice Claims a batch of undelegate requests.
-     * @param requestIds The undelegate request ids to claim.
+     * @notice Claims a batch of unstake requests.
+     * @param requestIds The unstake request ids to claim.
      */
-    function claimUndelegate(uint256[] calldata requestIds) external;
+    function claimUnstake(uint256[] calldata requestIds) external;
 
     /**
      * @notice Updates accounting stats and distribute rewards.
@@ -176,11 +176,11 @@ interface IStaking {
     function slashNodes(address[] calldata nodeAddrs) external;
 
     /**
-     * @notice Returns the minimal tokens to delegate for a node.
+     * @notice Returns the minimal tokens to stake for a node.
      * @param nodeAddr Address of node operator to stake.
      * @return uint256 The minimal mount of tokens to stake for a node .
      */
-    function minTokensToDelegate(address nodeAddr) external view returns (uint256);
+    function minTokensToStake(address nodeAddr) external view returns (uint256);
 
     /**
      * @notice Gets chips info by `tokenId`.

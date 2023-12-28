@@ -21,8 +21,8 @@ library DataTypes {
         string endpoint;
         /// @notice amount of tokens deposited by node operator
         uint256 depositAmount;
-        /// @notice amount of tokens delegated by users
-        uint256 delegatedAmount;
+        /// @notice amount of tokens staked by users
+        uint256 stakedAmount;
         /// @notice total rewards of operator pool
         uint256 operatorPoolRewards;
         /// @notice claimed rewards of operator pool
@@ -50,17 +50,17 @@ library DataTypes {
         uint256 amount;
     }
 
-    struct UndelegateRequest {
+    struct UnstakeRequest {
         /// @notice address that can claim request
         address owner;
         /// @notice Address of the node operator
         address nodeAddr;
         /// @notice flag indicating if the request was claimed
-        bool claimed;
+        bool isClaimed;
         /// @notice block.timestamp when the request was created
         uint256 timestamp;
-        /// @notice amount of tokens to undelegate
-        uint256 undelegatedAmount;
+        /// @notice amount of tokens to unstake
+        uint256 unstakeAmount;
         /// @notice total rewards to claim
         uint256 rewards;
     }

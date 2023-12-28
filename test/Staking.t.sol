@@ -95,7 +95,7 @@ contract StakingTest is Utils {
         assertEq(node.endpoint, endpoint);
     }
 
-    function testStake(uint256 amount) public {
+    function testDeposit(uint256 amount) public {
         vm.assume(amount > 10000 ether && amount < _initialAmount);
 
         _createNode(alice, uint64(100));
@@ -111,11 +111,11 @@ contract StakingTest is Utils {
         vm.stopPrank();
     }
 
-    function testDelegate(uint256 amount) public {
+    function testStake(uint256 amount) public {
         vm.assume(amount > 500 ether && amount <= 1000000 ether);
 
         uint256 chipsCount = amount / _staking.SHARES_PER_CHIP();
-        uint256 expectedDelegatedAmount = chipsCount * _staking.SHARES_PER_CHIP();
+        uint256 expectedStakedAmount = chipsCount * _staking.SHARES_PER_CHIP();
 
         _createNode(alice, uint64(100));
 
@@ -134,10 +134,10 @@ contract StakingTest is Utils {
             emit TestEvents.Transfer(address(0), bob, i);
         }
         expectEmit();
-        emit Transfer(bob, address(_staking), expectedDelegatedAmount);
+        emit Transfer(bob, address(_staking), expectedStakedAmount);
         expectEmit();
-        emit Events.Delegated(bob, alice, expectedDelegatedAmount, 1, chipsCount);
-        _staking.delegate(alice, amount);
+        emit Events.Staked(bob, alice, expectedStakedAmount, 1, chipsCount);
+        _staking.stake(alice, amount);
         vm.stopPrank();
     }
 

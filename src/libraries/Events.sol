@@ -94,14 +94,14 @@ library Events {
     event WithdrawalClaimed(uint256 indexed requestId);
 
     /**
-     * @dev Emitted on delegate()
-     * @param user Address of user who delegated tokens.
-     * @param nodeAddr The address of node to delegate.
-     * @param amount Amount of tokens to delegate.
+     * @dev Emitted on stake()
+     * @param user Address of user who stake tokens.
+     * @param nodeAddr The address of node to stake.
+     * @param amount Amount of tokens to stake.
      * @param startTokenId The start of new minted chips token ids.
      * @param endTokenId The end of new minted chips token ids.
      */
-    event Delegated(
+    event Staked(
         address indexed user,
         address indexed nodeAddr,
         uint256 indexed amount,
@@ -110,13 +110,13 @@ library Events {
     );
 
     /**
-     * @dev Emitted on requestUndelegate()
-     * @param user Address of user who undelegated tokens.
-     * @param nodeAddr The address of node to delegate.
-     * @param requestId The created undelegate request id.
-     * @param chipsIds The chips token ids to undelegate.
+     * @dev Emitted on requestUnstake()
+     * @param user Address of user who unstake tokens.
+     * @param nodeAddr The address of node to unstake.
+     * @param requestId The created unstake request id.
+     * @param chipsIds The chips token ids to unstake.
      */
-    event UndelegateRequested(
+    event UnstakeRequested(
         address indexed user,
         address indexed nodeAddr,
         uint256 indexed requestId,
@@ -124,18 +124,18 @@ library Events {
     );
 
     /**
-     * @dev Emitted on claimUndelegate()
-     * @param requestId The undelegate request id.
-     * @param nodeAddr The address of node to undelegate.
-     * @param user Address of user who undelegated tokens.
-     * @param undelegatedAmount Amount of tokens undelegated.
+     * @dev Emitted on claimUnstake()
+     * @param requestId The unstake request id.
+     * @param nodeAddr The address of node to unstake.
+     * @param user Address of user who unstaked tokens.
+     * @param unstakeAmount Amount of tokens unstaked.
      * @param rewards Amount of rewards claimed.
      */
-    event UndelegateClaimed(
+    event UnstakeClaimed(
         uint256 indexed requestId,
         address indexed nodeAddr,
         address indexed user,
-        uint256 undelegatedAmount,
+        uint256 unstakeAmount,
         uint256 rewards
     );
     /**
