@@ -221,7 +221,7 @@ interface IStaking {
      * @notice Gets total count of nodes.
      * @return uint256 Total count of nodes.
      */
-    function getTotalNodes() external view returns (uint256);
+    function getTotalNodeCount() external view returns (uint256);
 
     /**
      * @notice Gets nodes info by offset and limit.

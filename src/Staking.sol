@@ -384,7 +384,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function getTotalNodes() external view override returns (uint256) {
+    function getTotalNodeCount() external view override returns (uint256) {
         return _nodeAddrs.length();
     }
 
