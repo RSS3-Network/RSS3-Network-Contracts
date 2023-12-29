@@ -440,6 +440,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
+    function getPublicPool() external view override returns (DataTypes.Node memory) {
+        return _publicPool;
+    }
+
+    /// @inheritdoc IStaking
     function getNodeCount() external view override returns (uint256) {
         return _nodeAddrs.length();
     }

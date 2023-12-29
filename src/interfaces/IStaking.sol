@@ -238,6 +238,12 @@ interface IStaking {
     function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
 
     /**
+     * @notice Gets public pool info.
+     * @return DataTypes.Node public pool info.
+     */
+    function getPublicPool() external view returns (DataTypes.Node memory);
+
+    /**
      * @notice Gets total count of nodes.
      * @return uint256 Total count of nodes.
      */
