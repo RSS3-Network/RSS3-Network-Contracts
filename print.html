@@ -204,7 +204,7 @@ forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --priv
 <li><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="iaccountoracle"><a class="header" href="#iaccountoracle">IAccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/interfaces/IAccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/interfaces/IAccountOracle.sol">Git Source</a></p>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the AccountOracle contract.</p>
@@ -264,7 +264,7 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ichips"><a class="header" href="#ichips">IChips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/interfaces/IChips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/interfaces/IChips.sol">Git Source</a></p>
 <h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
 <h3 id="initialize-1"><a class="header" href="#initialize-1">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
@@ -323,7 +323,7 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/interfaces/IStaking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/interfaces/IStaking.sol">Git Source</a></p>
 <h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
 <h3 id="initialize-2"><a class="header" href="#initialize-2">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
@@ -550,6 +550,34 @@ Requirements:</p>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>The addresses of nodes to slash.</td></tr>
 </tbody></table>
 </div>
+<h3 id="getpendingwithdrawal"><a class="header" href="#getpendingwithdrawal">getPendingWithdrawal</a></h3>
+<p>Returns the pending withdrawal request by <code>requestId</code>.</p>
+<pre><code class="language-solidity">function getPendingWithdrawal(uint256 requestId) external view returns (DataTypes.WithdrawalRequest memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The id of withdrawal request.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>DataTypes.WithdrawalRequest</code></td><td>DataTypes.WithdrawalRequest The pending withdrawal request.</td></tr>
+</tbody></table>
+</div>
+<h3 id="getpendingunstake"><a class="header" href="#getpendingunstake">getPendingUnstake</a></h3>
+<p>Returns the pending unstake request by <code>requestId</code>.</p>
+<pre><code class="language-solidity">function getPendingUnstake(uint256 requestId) external view returns (DataTypes.UnstakeRequest memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The id of unstake request.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>DataTypes.UnstakeRequest</code></td><td>DataTypes.UnstakeRequest The pending unstake request.</td></tr>
+</tbody></table>
+</div>
 <h3 id="mintokenstostake"><a class="header" href="#mintokenstostake">minTokensToStake</a></h3>
 <p>Returns the minimal tokens to stake for a node.</p>
 <pre><code class="language-solidity">function minTokensToStake(address nodeAddr) external view returns (uint256);
@@ -636,7 +664,7 @@ Requirements:</p>
 <li><a href="src/libraries/Events.sol/library.Events.html">Events</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -677,7 +705,7 @@ Requirements:</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/libraries/Errors.sol">Git Source</a></p>
 <h2 id="errors-1"><a class="header" href="#errors-1">Errors</a></h2>
 <h3 id="callernotstaking"><a class="header" href="#callernotstaking">CallerNotStaking</a></h3>
 <p><em>Caller is not staking contract</em></p>
@@ -732,7 +760,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error PublicGoodNotAllowed();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -901,7 +929,7 @@ Requirements:</p>
 <li><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rss3token"><a class="header" href="#rss3token">RSS3Token</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/mocks/RSS3Token.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/mocks/RSS3Token.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC20</p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
@@ -915,7 +943,7 @@ ERC20</p>
 <li><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="proxyadmin"><a class="header" href="#proxyadmin">ProxyAdmin</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/upgradeability/ProxyAdmin.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/upgradeability/ProxyAdmin.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Ownable</p>
 <p><em>This is an auxiliary contract meant to be assigned as the admin of a {TransparentUpgradeableProxy}. For an
@@ -950,7 +978,7 @@ Requirements:</p>
     onlyOwner;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="itransparentupgradeableproxy"><a class="header" href="#itransparentupgradeableproxy">ITransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 IERC1967</p>
 <p><em>Interface for {TransparentUpgradeableProxy}. In order to implement transparency, {TransparentUpgradeableProxy}
@@ -962,7 +990,7 @@ include them in the ABI so this interface must be used to interact with it.</em>
 <pre><code class="language-solidity">function upgradeToAndCall(address, bytes calldata) external payable;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transparentupgradeableproxy"><a class="header" href="#transparentupgradeableproxy">TransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC1967Proxy</p>
 <p>*This contract implements a proxy that is upgradeable through an associated {ProxyAdmin} instance.
@@ -1030,7 +1058,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error ProxyDeniedAdminAccess();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="accountoracle"><a class="header" href="#accountoracle">AccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/AccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/AccountOracle.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/AccountOracle.sol//src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
@@ -1113,7 +1141,7 @@ Requirements:</p>
 <pre><code class="language-solidity">function _log2(uint256 x) internal pure returns (uint256 result);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/Chips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/Chips.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, Initializable, ERC721</p>
 <h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
@@ -1201,7 +1229,7 @@ Metadata JSON Schema&quot;.</em></p>
 <pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view override returns (string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/259ab79b489b42516918eec94cc6f7ab4064db97/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/3be5b690b8a482a3743ad1237481296bd838a823/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Staking.sol//src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-4"><a class="header" href="#state-variables-4">State Variables</a></h2>
@@ -1230,21 +1258,21 @@ Metadata JSON Schema&quot;.</em></p>
 <p><em>all node info</em></p>
 <pre><code class="language-solidity">mapping(address nodeAddr =&gt; DataTypes.Node) internal _nodes;
 </code></pre>
-<h3 id="_withdrawalrequestcounter"><a class="header" href="#_withdrawalrequestcounter">_withdrawalRequestCounter</a></h3>
-<p><em>withdraw request queue counter</em></p>
-<pre><code class="language-solidity">uint256 internal _withdrawalRequestCounter;
+<h3 id="_pendingwithdrawalcounter"><a class="header" href="#_pendingwithdrawalcounter">_pendingWithdrawalCounter</a></h3>
+<p><em>pending withdrawal request counter</em></p>
+<pre><code class="language-solidity">uint256 internal _pendingWithdrawalCounter;
 </code></pre>
-<h3 id="_withdrawalqueue"><a class="header" href="#_withdrawalqueue">_withdrawalQueue</a></h3>
-<p><em>withdraw request queue</em></p>
-<pre><code class="language-solidity">mapping(uint256 requestId =&gt; DataTypes.WithdrawalRequest) internal _withdrawalQueue;
+<h3 id="_pendingwithdrawals"><a class="header" href="#_pendingwithdrawals">_pendingWithdrawals</a></h3>
+<p><em>pending withdrawal request</em></p>
+<pre><code class="language-solidity">mapping(uint256 requestId =&gt; DataTypes.WithdrawalRequest) internal _pendingWithdrawals;
 </code></pre>
-<h3 id="_unstakerequestcounter"><a class="header" href="#_unstakerequestcounter">_unstakeRequestCounter</a></h3>
+<h3 id="_pendingunstakecounter"><a class="header" href="#_pendingunstakecounter">_pendingUnstakeCounter</a></h3>
 <p><em>unstake request queue counter</em></p>
-<pre><code class="language-solidity">uint256 internal _unstakeRequestCounter;
+<pre><code class="language-solidity">uint256 internal _pendingUnstakeCounter;
 </code></pre>
-<h3 id="_unstakequeue"><a class="header" href="#_unstakequeue">_unstakeQueue</a></h3>
+<h3 id="_pendingunstake"><a class="header" href="#_pendingunstake">_pendingUnstake</a></h3>
 <p><em>unstake request queue</em></p>
-<pre><code class="language-solidity">mapping(uint256 requestId =&gt; DataTypes.UnstakeRequest) internal _unstakeQueue;
+<pre><code class="language-solidity">mapping(uint256 requestId =&gt; DataTypes.UnstakeRequest) internal _pendingUnstake;
 </code></pre>
 <h3 id="_chips"><a class="header" href="#_chips">_chips</a></h3>
 <p><em>the chips contract</em></p>
@@ -1497,6 +1525,34 @@ Requirements:</p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>The addresses of nodes to slash.</td></tr>
+</tbody></table>
+</div>
+<h3 id="getpendingwithdrawal-1"><a class="header" href="#getpendingwithdrawal-1">getPendingWithdrawal</a></h3>
+<p>Returns the pending withdrawal request by <code>requestId</code>.</p>
+<pre><code class="language-solidity">function getPendingWithdrawal(uint256 requestId) external view override returns (DataTypes.WithdrawalRequest memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The id of withdrawal request.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>DataTypes.WithdrawalRequest</code></td><td>DataTypes.WithdrawalRequest The pending withdrawal request.</td></tr>
+</tbody></table>
+</div>
+<h3 id="getpendingunstake-1"><a class="header" href="#getpendingunstake-1">getPendingUnstake</a></h3>
+<p>Returns the pending unstake request by <code>requestId</code>.</p>
+<pre><code class="language-solidity">function getPendingUnstake(uint256 requestId) external view override returns (DataTypes.UnstakeRequest memory);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>requestId</code></td><td><code>uint256</code></td><td>The id of unstake request.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>DataTypes.UnstakeRequest</code></td><td>DataTypes.UnstakeRequest The pending unstake request.</td></tr>
 </tbody></table>
 </div>
 <h3 id="mintokenstostake-1"><a class="header" href="#mintokenstostake-1">minTokensToStake</a></h3>
