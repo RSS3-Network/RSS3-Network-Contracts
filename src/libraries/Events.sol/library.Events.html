@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/635f4ce4854bf96b1bc4255469f88d205b4628f2/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/b0aed8c622a7a91ae686c8b94ab89236bfa7241c/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -238,12 +238,11 @@
 </div>
 <h3 id="operatorpoolrewardswithdrawn"><a class="header" href="#operatorpoolrewardswithdrawn">OperatorPoolRewardsWithdrawn</a></h3>
 <p><em>Emitted on withdrawOperatorPoolRewards()</em></p>
-<pre><code class="language-solidity">event OperatorPoolRewardsWithdrawn(address indexed nodeAddr, address indexed rewardAddress, uint256 indexed rewards);
+<pre><code class="language-solidity">event OperatorPoolRewardsWithdrawn(address indexed nodeAddr, uint256 indexed rewards);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator.</td></tr>
-<tr><td><code>rewardAddress</code></td><td><code>address</code></td><td>Reward address to receive the rewards.</td></tr>
 <tr><td><code>rewards</code></td><td><code>uint256</code></td><td>Amount of rewards withdrawn.</td></tr>
 </tbody></table>
 </div>
