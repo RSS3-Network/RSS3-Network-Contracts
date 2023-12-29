@@ -363,7 +363,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             return SHARES_PER_CHIP;
         }
 
-        return (SHARES_PER_CHIP * _getPoolTokens(node)) / node.totalShares;
+        return (SHARES_PER_CHIP * _getRewardPoolTokens(node)) / node.totalShares;
     }
 
     /// @inheritdoc IStaking
@@ -374,7 +374,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         if (nodeAddr != address(0)) {
             DataTypes.Node storage node = _nodes[nodeAddr];
-            tokens = (_getPoolTokens(node) / node.totalShares) * SHARES_PER_CHIP;
+            tokens = (_getRewardPoolTokens(node) / node.totalShares) * SHARES_PER_CHIP;
         }
     }
 
@@ -518,11 +518,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             return shares;
         }
 
-        return (shares * _getPoolTokens(node)) / node.totalShares;
+        return (shares * _getRewardPoolTokens(node)) / node.totalShares;
     }
 
-    /// @dev get pool tokens from a node operator, it includes: user delegated tokens and rewards
-    function _getPoolTokens(DataTypes.Node memory node) internal pure returns (uint256) {
+    /// @dev get reward pool tokens from a node operator, it includes: user delegated tokens and rewards
+    function _getRewardPoolTokens(DataTypes.Node memory node) internal pure returns (uint256) {
         return node.rewardPoolRewards + node.stakedAmount;
     }
 
@@ -539,7 +539,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         if (node.totalShares == 0) {
             sharesAmount = stakeAmount;
         } else {
-            sharesAmount = (stakeAmount * _getPoolTokens(node)) / node.totalShares;
+            sharesAmount = (stakeAmount * _getRewardPoolTokens(node)) / node.totalShares;
         }
     }
 
