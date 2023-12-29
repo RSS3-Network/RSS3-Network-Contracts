@@ -28,6 +28,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     uint256 public constant firstDepositAmount = 10000 * 10 ** 18;
 
     uint256 public constant slashFraction = 100;
+    uint256 public constant slashRewardFraction = 200;
 
     uint256 public constant STAKE_RATIO = 25;
 
@@ -337,15 +338,24 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) revert Errors.NodeNotExists();
 
+            // slash deposited tokens
+            uint256 slashedDepositAmount = (node.depositAmount * slashFraction) / _denominator();
+            node.depositAmount -= slashedDepositAmount;
+
             // slash staked tokens
-            uint256 slashedAmount = (node.stakedAmount * slashFraction) / _denominator();
-            node.stakedAmount -= slashedAmount;
+            uint256 slashedStakedAmount = (node.stakedAmount * slashFraction) / _denominator();
+            node.stakedAmount -= slashedStakedAmount;
 
             // slash reward pool rewards
-            uint256 slashRewards = (node.rewardPoolRewards * slashFraction) / _denominator();
+            uint256 slashRewards = (node.rewardPoolRewards * slashRewardFraction) / _denominator();
             node.rewardPoolRewards -= slashRewards;
 
-            emit Events.NodeSlashed(nodeAddrs[i], slashedAmount, slashRewards);
+            emit Events.NodeSlashed(
+                nodeAddrs[i],
+                slashedDepositAmount,
+                slashedStakedAmount,
+                slashRewards
+            );
         }
     }
 

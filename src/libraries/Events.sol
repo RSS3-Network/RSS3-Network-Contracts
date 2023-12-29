@@ -147,12 +147,14 @@ library Events {
     /**
      * @dev Emitted on slashNode()
      * @param nodeAddr The address of node to slash.
-     * @param slashedAmount Amount of staked tokens slashed.
+     * @param slashedDepositAmount Amount of deposit tokens slashed.
+     * @param slashedStakedAmount Amount of staked tokens slashed.
      * @param slashedRewards Amount of rewards slashed.
      */
     event NodeSlashed(
         address indexed nodeAddr,
-        uint256 indexed slashedAmount,
-        uint256 indexed slashedRewards
+        uint256 indexed slashedDepositAmount,
+        uint256 indexed slashedStakedAmount,
+        uint256 slashedRewards
     );
 }
