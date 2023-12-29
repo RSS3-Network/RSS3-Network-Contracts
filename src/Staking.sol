@@ -52,6 +52,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @dev unstake request queue
     mapping(uint256 requestId => DataTypes.UnstakeRequest) internal _pendingUnstake;
 
+    /// @dev public pool
+    DataTypes.Node internal _publicPool;
+
     /// @dev the chips contract
     address internal _chips;
     /// @dev the staking token contract
@@ -217,26 +220,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // validate node
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
-        uint256 shares = _getShares(node, amount);
-        uint256 chipsCount = shares / SHARES_PER_CHIP;
-        if (chipsCount == 0) revert Errors.AmountTooSmall();
-        // mint chips
-        (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
+        (startTokenId, endTokenId) = _stakeToNode(node, amount);
 
-        // update issuers
+        // update chips issuers
         for (uint256 i = startTokenId; i <= endTokenId; i++) {
             _issuers[i] = nodeAddr;
         }
-
-        // update stakedAmount
-        uint256 stakedAmount = _sharesToTokens(node, chipsCount * SHARES_PER_CHIP);
-        node.stakedAmount += stakedAmount;
-        // update total shares
-        node.totalShares += (chipsCount * SHARES_PER_CHIP);
-        // transfer tokens
-        IERC20(_token).safeTransferFrom(msg.sender, address(this), stakedAmount);
-
-        emit Events.Staked(msg.sender, nodeAddr, stakedAmount, startTokenId, endTokenId);
     }
 
     /// @inheritdoc IStaking
@@ -250,7 +239,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // check and burn chips
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner();
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender)
+                revert Errors.NotChipsOwner(tokenId);
 
             if (_issuers[tokenId] != nodeAddr) revert Errors.NotTokenIssuer(tokenId, nodeAddr);
 
@@ -333,6 +323,47 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             stakingRewards,
             taxAmounts
         );
+    }
+
+    /// @inheritdoc IStaking
+    function stakeToPublicPool(
+        uint256 amount
+    ) external override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
+        return _stakeToNode(_publicPool, amount);
+    }
+
+    /// @inheritdoc IStaking
+    function requestUnstakeFromPublicPool(
+        uint256[] calldata chipsIds
+    ) external override returns (uint256 requestId) {
+        // check and burn chips
+        for (uint256 i = 0; i < chipsIds.length; i++) {
+            uint256 tokenId = chipsIds[i];
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender)
+                revert Errors.NotChipsOwner(tokenId);
+
+            if (_issuers[tokenId] != address(0))
+                revert Errors.ChipsDelegatedOrNotPublicGood(tokenId);
+
+            IChips(_chips).burn(tokenId);
+        }
+
+        requestId = ++_pendingUnstakeCounter;
+
+        // update rewards
+        uint256 shares = SHARES_PER_CHIP * chipsIds.length;
+        uint256 rewards = (shares * _publicPool.rewardPoolRewards) / _publicPool.totalShares;
+        uint256 unstakeAmount = (shares * _publicPool.stakedAmount) / _publicPool.totalShares;
+
+        // add to request queue
+        DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
+        req.timestamp = block.timestamp;
+        req.owner = msg.sender;
+        req.nodeAddr = _publicPool.account;
+        req.rewards = rewards;
+        req.unstakeAmount = unstakeAmount;
+
+        emit Events.UnstakeRequested(msg.sender, _publicPool.account, requestId, chipsIds);
     }
 
     /// @inheritdoc IStaking
@@ -464,7 +495,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
-        if (node.depositAmount == 0 && amount < firstDepositAmount) revert Errors.AmountTooSmall();
+        if (node.depositAmount == 0 && amount < firstDepositAmount)
+            revert Errors.AmountTooSmall(amount);
 
         // update operator pool
         node.depositAmount += amount;
@@ -473,6 +505,28 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         IERC20(_token).safeTransferFrom(nodeAddr, address(this), amount);
 
         emit Events.Deposited(nodeAddr, amount);
+    }
+
+    /// @dev stakes tokens to a node
+    function _stakeToNode(
+        DataTypes.Node storage node,
+        uint256 amount
+    ) internal returns (uint256 startTokenId, uint256 endTokenId) {
+        uint256 shares = _getShares(node, amount);
+        uint256 chipsCount = shares / SHARES_PER_CHIP;
+        if (chipsCount == 0) revert Errors.AmountTooSmall(amount);
+        // mint chips
+        (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
+
+        // update stakedAmount
+        uint256 stakedAmount = _sharesToTokens(node, chipsCount * SHARES_PER_CHIP);
+        node.stakedAmount += stakedAmount;
+        // update total shares
+        node.totalShares += (chipsCount * SHARES_PER_CHIP);
+        // transfer tokens
+        IERC20(_token).safeTransferFrom(msg.sender, address(this), stakedAmount);
+
+        emit Events.Staked(msg.sender, node.account, stakedAmount, startTokenId, endTokenId);
     }
 
     /// @dev claim unstake request

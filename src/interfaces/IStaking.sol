@@ -120,13 +120,13 @@ interface IStaking {
      * @notice Stakes tokens to a node operator.
      * @param nodeAddr The address of node to stake.
      * @param amount Amount of tokens to stake.
-     * @return fromTokenId The start of new minted chips token ids.
-     * @return toTokenId The end of new minted chips token ids.
+     * @return startTokenId The start of new minted chips token ids.
+     * @return endTokenId The end of new minted chips token ids.
      */
     function stake(
         address nodeAddr,
         uint256 amount
-    ) external returns (uint256 fromTokenId, uint256 toTokenId);
+    ) external returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
      * @notice Requests unstake tokens from a node operator.
@@ -145,6 +145,26 @@ interface IStaking {
      * @param requestIds The unstake request ids to claim.
      */
     function claimUnstake(uint256[] calldata requestIds) external;
+
+    /**
+     * @notice Stakes tokens to public pool.
+     * @param amount Amount of tokens to stake.
+     * @return startTokenId The start of new minted chips token ids.
+     * @return endTokenId The end of new minted chips token ids.
+     */
+    function stakeToPublicPool(
+        uint256 amount
+    ) external returns (uint256 startTokenId, uint256 endTokenId);
+
+    /**
+     * @notice Requests unstake tokens from public pool.
+     * @dev This will burn the chips tokens.
+     * @param chipsIds The chips token ids for unstake.
+     * @return requestId THe created unstake request id.
+     */
+    function requestUnstakeFromPublicPool(
+        uint256[] calldata chipsIds
+    ) external returns (uint256 requestId);
 
     /**
      * @notice Updates accounting stats and distribute rewards.

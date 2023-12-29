@@ -28,10 +28,10 @@ library Errors {
     error ClaimTimeNotReady();
 
     /// @dev Staking amount too small
-    error AmountTooSmall();
+    error AmountTooSmall(uint256 amount);
 
     /// @dev Not chips owner
-    error NotChipsOwner();
+    error NotChipsOwner(uint256 tokenId);
 
     /// @dev Token is not issued by node
     error NotTokenIssuer(uint256 tokenId, address nodeAddr);
@@ -41,4 +41,7 @@ library Errors {
 
     /// @dev Deposit is not allowed for public good node.
     error PublicGoodNotAllowed();
+
+    /// @dev Chips are delegated or not public good.
+    error ChipsDelegatedOrNotPublicGood(uint256 tokenId);
 }
