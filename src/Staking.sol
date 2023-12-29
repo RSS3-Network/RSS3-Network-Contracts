@@ -275,8 +275,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @inheritdoc IStaking
     function distributeRewards(
         uint256 epoch,
-        uint256 startTimestamp,
-        uint256 endTimestamp,
+        uint256 startTime,
+        uint256 endTime,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
         uint256[] calldata requestBonuses,
@@ -303,7 +303,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             // request bonus and staking rewards are sent to reward pool
             uint256 rewardPoolRewards = requestBonuses[i] + stakingRewards[i];
 
-            // tax is sent to node operator
             uint256 tax = _getTax(
                 rewardPoolRewards,
                 node.taxFraction,
@@ -313,15 +312,14 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             node.tax += tax;
             taxAmounts[i] = tax;
 
-            uint256 rewardsAfterTax = rewardPoolRewards - tax;
             // all after-tax rewards and request bonus are sent to the reward pool
-            node.rewardPoolRewards += rewardsAfterTax;
+            node.rewardPoolRewards += rewardPoolRewards - tax;
         }
 
         emit Events.RewardDistributed(
             epoch,
-            startTimestamp,
-            endTimestamp,
+            startTime,
+            endTime,
             nodeAddrs,
             requestFees,
             requestBonuses,

@@ -28,10 +28,16 @@ interface IChips {
     ) external returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
-     * @notice  Destroys `tokenId`.
+     * @notice Destroys `tokenId`.
      * @param tokenId ID of token to burn.
      */
     function burn(uint256 tokenId) external;
+
+    /**
+     * @notice Returns total supply of tokens.
+     * @return Total supply of tokens.
+     */
+    function totalSupply() external view returns (uint256);
 
     /**
      * @notice  Returns the address of the Staking contract.

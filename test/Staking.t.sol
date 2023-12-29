@@ -2,73 +2,18 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {Test} from "forge-std/Test.sol";
-import {console2 as console} from "forge-std/console2.sol";
-import {Utils} from "test/helpers/Utils.sol";
+//import {console2 as console} from "forge-std/console2.sol";
+import {CommonTest} from "test/helpers/CommonTest.sol";
 import {TestEvents} from "test/helpers/TestEvents.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
-import {Staking} from "../src/Staking.sol";
-import {Chips} from "../src/Chips.sol";
-import {AccountOracle} from "../src/AccountOracle.sol";
-import {RSS3Token} from "../src/mocks/RSS3Token.sol";
 import {Events} from "../src/libraries/Events.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {TransparentUpgradeableProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 
-contract StakingTest is Utils {
-    address public constant alice = address(0x111);
-    address public constant bob = address(0x222);
-    address public constant carol = address(0x333);
-    address public constant dave = address(0x444);
-    address public constant eve = address(0x555);
-    address public constant frank = address(0x666);
-
-    address public constant proxyAdmin = address(0x777);
-    address public constant pauseAccount = address(0x888);
-    address public constant oracleAccount = address(0x999);
-
-    uint256 public constant stakeUnbondingPeriod = 22.5 days;
-    uint256 public constant delegateUnbondingPeriod = 30 days;
-
-    uint256 internal _initialAmount = 100000000 ether;
-
-    RSS3Token internal _rss3;
-    Staking internal _staking;
-    Chips internal _chips;
-    AccountOracle internal _accountOracle;
-
+contract StakingTest is CommonTest {
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     function setUp() public {
-        // deploy rss3 token
-        _rss3 = new RSS3Token(address(this));
-        // deploy chips token
-        _chips = new Chips();
-        // deploy account oracle
-        _accountOracle = new AccountOracle();
-
-        // deploy and init Staking contract
-        Staking stakingImpl = new Staking();
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-            address(stakingImpl),
-            proxyAdmin,
-            abi.encodeWithSignature(
-                "initialize(address,address,address,address,uint256,uint256)",
-                pauseAccount,
-                address(_accountOracle),
-                address(_chips),
-                address(_rss3),
-                stakeUnbondingPeriod,
-                delegateUnbondingPeriod
-            )
-        );
-        _staking = Staking(address(proxy));
-
-        // init chips token
-        _chips.initialize(address(_staking));
-        // init account oracle
-        _accountOracle.initialize(address(_staking), oracleAccount);
+        _setUp();
 
         // transfer tokens
         _rss3.transfer(alice, _initialAmount);

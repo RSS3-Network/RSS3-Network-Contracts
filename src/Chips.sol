@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import {IChips} from "./interfaces/IChips.sol";
+import {IStaking} from "./interfaces/IStaking.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -13,6 +14,8 @@ contract Chips is IChips, Initializable, ERC721 {
 
     /// @dev Token counter for minting.
     uint256 internal _counter;
+    /// @dev Total supply of tokens.
+    uint256 internal _totalSupply;
 
     modifier onlyStaking() {
         if (msg.sender != _staking) revert Errors.CallerNotStaking();
@@ -30,6 +33,9 @@ contract Chips is IChips, Initializable, ERC721 {
     function mint(address account) external override onlyStaking returns (uint256 tokenId) {
         tokenId = ++_counter;
         _mint(account, tokenId);
+
+        // update total supply
+        ++_totalSupply;
     }
 
     /// @inheritdoc IChips
@@ -45,6 +51,9 @@ contract Chips is IChips, Initializable, ERC721 {
         }
         _counter = tokenId - 1;
         endTokenId = tokenId - 1;
+
+        // update total supply
+        _totalSupply += batchSize;
     }
 
     /// @inheritdoc IChips
@@ -57,8 +66,18 @@ contract Chips is IChips, Initializable, ERC721 {
         return _staking;
     }
 
+    /// @inheritdoc IChips
+    function totalSupply() external view override returns (uint256) {
+        return _totalSupply;
+    }
+
     /// @inheritdoc IERC721Metadata
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        (address issuer, ) = IStaking(_staking).getChipsInfo(tokenId);
+        if (issuer == address(0)) {
+            // TODO: set a default token URI for chips minted from public pool
+            return "default token URI";
+        }
         return super.tokenURI(tokenId);
     }
 }
