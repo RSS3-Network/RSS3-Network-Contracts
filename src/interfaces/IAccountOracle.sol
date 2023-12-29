@@ -33,6 +33,14 @@ interface IAccountOracle {
     ) external;
 
     /**
+     * @notice Slashes nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param nodeAddrs The addresses of nodes to slash.
+     */
+    function slashNodes(address[] calldata nodeAddrs) external;
+
+    /**
      * @notice  Returns the address of the Staking contract.
      * @return Address of the Staking contract.
      */

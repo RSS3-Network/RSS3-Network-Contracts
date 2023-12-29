@@ -54,6 +54,11 @@ contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable
     }
 
     /// @inheritdoc IAccountOracle
+    function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).slashNodes(nodeAddrs);
+    }
+
+    /// @inheritdoc IAccountOracle
     function stakingContract() external view override returns (address) {
         return _staking;
     }
