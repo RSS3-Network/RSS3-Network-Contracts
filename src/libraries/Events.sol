@@ -117,6 +117,20 @@ library Events {
         uint256 indexed requestId,
         uint256[] chipsIds
     );
+    /**
+     * @dev Emitted on delegate()
+     * @param user Address of user who delegate Chips.
+     * @param nodeAddr The address of node to delegate.
+     * @param chipsIds The chips token ids to delegate.
+     */
+    event Delegated(address indexed user, address indexed nodeAddr, uint256[] chipsIds);
+    /**
+     * @dev Emitted on undelegate()
+     * @param user Address of user who undelegate tokens.
+     * @param nodeAddr The address of node to undelegate.
+     * @param chipsIds The chips token ids to undelegate.
+     */
+    event Undelegated(address indexed user, address indexed nodeAddr, uint256[] chipsIds);
 
     /**
      * @dev Emitted on claimUnstake()

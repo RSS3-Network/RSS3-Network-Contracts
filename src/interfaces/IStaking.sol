@@ -167,6 +167,18 @@ interface IStaking {
     ) external returns (uint256 requestId);
 
     /**
+     * @notice Delegates chips to a public good node.
+     * @param chipsIds The chips token ids for delegate.
+     */
+    function delegate(address nodeAddr, uint256[] calldata chipsIds) external;
+
+    /**
+     * @notice Undelegates chips from a public good node.
+     * @param chipsIds The chips token ids for undelegate.
+     */
+    function undelegate(address nodeAddr, uint256[] calldata chipsIds) external;
+
+    /**
      * @notice Updates accounting stats and distribute rewards.
      * @dev periodically called.
      * Requirements:

@@ -370,6 +370,37 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
+    function delegate(address nodeAddr, uint256[] calldata chipsIds) external override {
+        for (uint256 i = 0; i < chipsIds.length; i++) {
+            uint256 tokenId = chipsIds[i];
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender)
+                revert Errors.NotChipsOwner(tokenId);
+
+            if (_issuers[tokenId] != address(0))
+                revert Errors.ChipsDelegatedOrNotPublicGood(tokenId);
+
+            _issuers[tokenId] = nodeAddr;
+        }
+
+        emit Events.Delegated(msg.sender, nodeAddr, chipsIds);
+    }
+
+    /// @inheritdoc IStaking
+    function undelegate(address nodeAddr, uint256[] calldata chipsIds) external override {
+        for (uint256 i = 0; i < chipsIds.length; i++) {
+            uint256 tokenId = chipsIds[i];
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender)
+                revert Errors.NotChipsOwner(tokenId);
+
+            if (_issuers[tokenId] != nodeAddr) revert Errors.NotTokenIssuer(tokenId, nodeAddr);
+
+            delete _issuers[tokenId];
+        }
+
+        emit Events.Undelegated(msg.sender, nodeAddr, chipsIds);
+    }
+
+    /// @inheritdoc IStaking
     function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
