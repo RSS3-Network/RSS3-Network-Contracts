@@ -7,9 +7,7 @@ import {Staking} from "../../src/Staking.sol";
 import {Chips} from "../../src/Chips.sol";
 import {AccountOracle} from "../../src/AccountOracle.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
-import {
-    TransparentUpgradeableProxy
-} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
+import {TransparentUpgradeableProxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
 
 contract CommonTest is Utils {
     address public constant alice = address(0x111);

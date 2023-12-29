@@ -69,14 +69,7 @@ contract StakingTest is CommonTest {
 
         vm.startPrank(alice);
         _rss3.approve(address(_staking), amount);
-        _staking.createNodeAndDeposit(
-            "Alice",
-            "Alice's node",
-            uint64(100),
-            false,
-            "https://alice.com",
-            amount
-        );
+        _staking.createNodeAndDeposit("Alice", "Alice's node", uint64(100), false, "https://alice.com", amount);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
         vm.stopPrank();
