@@ -44,4 +44,7 @@ library Errors {
 
     /// @dev Chips are delegated or not public good.
     error ChipsDelegatedOrNotPublicGood(uint256 tokenId);
+
+    /// @dev Tax fraction too large
+    error TaxFractionTooLarge();
 }

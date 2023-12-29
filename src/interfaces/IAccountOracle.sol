@@ -33,6 +33,15 @@ interface IAccountOracle {
     ) external;
 
     /**
+     * @notice Sets tax fraction for public pool.
+     * @dev The tax fraction of public pool will be set as the average of tax fractions of active nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param nodeAddrs The addresses of active nodes.
+     */
+    function setTaxFraction4PublicPool(address[] calldata nodeAddrs) external;
+
+    /**
      * @notice Slashes nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.

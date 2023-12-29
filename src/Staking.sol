@@ -173,12 +173,23 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc IStaking
     function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external override {
+        if (taxFraction > _denominator()) revert Errors.TaxFractionTooLarge();
+
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
 
         node.taxFraction = taxFraction;
 
         emit Events.NodeTaxFractionSet(nodeAddr, taxFraction);
+    }
+
+    /// @inheritdoc IStaking
+    function setTaxFraction4PublicPool(uint64 taxFraction) external override onlyRole(ORACLE_ROLE) {
+        if (taxFraction > _denominator()) revert Errors.TaxFractionTooLarge();
+
+        _publicPool.taxFraction = taxFraction;
+
+        emit Events.PublicPoolTaxFractionSet(taxFraction);
     }
 
     /// @inheritdoc IStaking

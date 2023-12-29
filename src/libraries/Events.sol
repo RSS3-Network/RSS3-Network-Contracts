@@ -52,7 +52,11 @@ library Events {
      * @param taxFraction The new tax fraction of node operator.
      */
     event NodeTaxFractionSet(address indexed nodeAddr, uint64 indexed taxFraction);
-
+    /**
+     * @dev Emitted on setTaxFraction4PublicPool().
+     * @param taxFraction The new tax fraction of public pool.
+     */
+    event PublicPoolTaxFractionSet(uint64 indexed taxFraction);
     /**
      * @dev Emitted on withdrawOperatorPoolRewards()
      * @param nodeAddr Address of node operator.

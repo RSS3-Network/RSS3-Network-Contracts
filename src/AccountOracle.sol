@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import {IAccountOracle} from "./interfaces/IAccountOracle.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {Errors} from "./libraries/Errors.sol";
+import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {
     AccessControlEnumerable
@@ -51,6 +52,20 @@ contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable
             requestBonuses,
             stakingRewards
         );
+    }
+
+    /// @inheritdoc IAccountOracle
+    function setTaxFraction4PublicPool(
+        address[] calldata nodeAddrs
+    ) external override onlyRole(ORACLE_ROLE) {
+        uint256 length = nodeAddrs.length;
+
+        uint128 totalTaxFraction;
+        for (uint256 i = 0; i < length; i++) {
+            DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddrs[i]);
+            totalTaxFraction += node.taxFraction;
+        }
+        IStaking(_staking).setTaxFraction4PublicPool(uint64(totalTaxFraction / length));
     }
 
     /// @inheritdoc IAccountOracle

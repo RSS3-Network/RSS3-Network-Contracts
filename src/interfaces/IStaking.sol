@@ -100,6 +100,14 @@ interface IStaking {
     function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external;
 
     /**
+     * @notice Sets tax fraction for public pool.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param taxFraction The tax fraction to set.
+     */
+    function setTaxFraction4PublicPool(uint64 taxFraction) external;
+
+    /**
      * @notice Withdraws operator pool rewards for node operator.
      * @param nodeAddr Address of node operator.
      */
