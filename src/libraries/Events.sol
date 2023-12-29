@@ -63,6 +63,13 @@ library Events {
     );
 
     /**
+     * @dev Emitted on setNodeTaxFraction().
+     * @param nodeAddr Address of node operator.
+     * @param taxFraction The new tax fraction of node operator.
+     */
+    event NodeTaxFractionSet(address indexed nodeAddr, uint64 indexed taxFraction);
+
+    /**
      * @dev Emitted on withdrawOperatorPoolRewards()
      * @param nodeAddr Address of node operator.
      * @param rewardAddress Reward address to receive the rewards.

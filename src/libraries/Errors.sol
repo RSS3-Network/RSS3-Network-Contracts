@@ -38,4 +38,7 @@ library Errors {
 
     /// @dev Deposited tokens was slashed completely
     error DepositedTokensSlashedAll();
+
+    /// @dev Deposit is not allowed for public good node.
+    error PublicGoodNotAllowed();
 }

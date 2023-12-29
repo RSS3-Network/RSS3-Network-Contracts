@@ -108,6 +108,14 @@ interface IStaking {
     function requestWithdrawal(uint256 amount) external returns (uint256 requestId);
 
     /**
+     * @notice Changes tax fraction of the node.
+     * @param nodeAddr The address of node to change.
+     * @param taxFraction The tax fraction to set.
+     * Tax percentage measured in basis points. Each basis point represents 0.01%.
+     */
+    function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external;
+
+    /**
      * @notice Withdraws operator pool rewards for node operator.
      * @param nodeAddr Address of node operator.
      */

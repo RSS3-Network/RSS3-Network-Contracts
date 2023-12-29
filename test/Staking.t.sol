@@ -87,18 +87,31 @@ contract StakingTest is Utils {
         vm.prank(alice);
         _staking.createNode(alice, name, description, taxFraction, publicGood, endpoint);
 
-        DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.name, name);
-        assertEq(node.description, description);
-        assertEq(node.taxFraction, taxFraction);
-        assertEq(node.publicGood, publicGood);
-        assertEq(node.endpoint, endpoint);
+        // check node info
+        _checkNode(alice, name, description, taxFraction, publicGood, endpoint);
+    }
+
+    function testUpdateNode() public {
+        _createNode(alice);
+
+        string memory newName = "Bob";
+        string memory newDescription = "Bob's node";
+        string memory newEndpoint = "https://bob.com";
+        uint64 newTaxFraction = uint64(10000);
+
+        expectEmit();
+        emit Events.NodeUpdated(alice, newName, newDescription, newTaxFraction, newEndpoint);
+        vm.prank(alice);
+        _staking.updateNode(alice, newName, newDescription, newTaxFraction, newEndpoint);
+
+        // check node info
+        _checkNode(alice, newName, newDescription, newTaxFraction, false, newEndpoint);
     }
 
     function testDeposit(uint256 amount) public {
         vm.assume(amount > 10000 ether && amount < _initialAmount);
 
-        _createNode(alice, uint64(100));
+        _createNode(alice);
 
         vm.startPrank(alice);
         _rss3.approve(address(_staking), amount);
@@ -111,13 +124,33 @@ contract StakingTest is Utils {
         vm.stopPrank();
     }
 
+    function testRequestWithdrawal() public {
+        uint256 amount = 10000 ether;
+
+        vm.startPrank(alice);
+        _rss3.approve(address(_staking), amount);
+        _staking.createNodeAndDeposit(
+            "Alice",
+            "Alice's node",
+            uint64(100),
+            false,
+            "https://alice.com",
+            amount
+        );
+
+        _staking.requestWithdrawal(amount);
+        vm.stopPrank();
+
+        // check status
+    }
+
     function testStake(uint256 amount) public {
         vm.assume(amount > 500 ether && amount <= 1000000 ether);
 
         uint256 chipsCount = amount / _staking.SHARES_PER_CHIP();
         uint256 expectedStakedAmount = chipsCount * _staking.SHARES_PER_CHIP();
 
-        _createNode(alice, uint64(100));
+        _createNode(alice);
 
         // stake
         vm.startPrank(alice);
@@ -141,8 +174,24 @@ contract StakingTest is Utils {
         vm.stopPrank();
     }
 
-    function _createNode(address nodeAddr, uint64 taxFraction) internal {
-        vm.prank(nodeAddr);
-        _staking.createNode(nodeAddr, "name", "description", taxFraction, false, "http://endpoint");
+    function _checkNode(
+        address nodeAddr,
+        string memory name,
+        string memory description,
+        uint64 taxFraction,
+        bool publicGood,
+        string memory endpoint
+    ) internal {
+        DataTypes.Node memory node = _staking.getNode(nodeAddr);
+        assertEq(node.name, name);
+        assertEq(node.description, description);
+        assertEq(node.taxFraction, taxFraction);
+        assertEq(node.publicGood, publicGood);
+        assertEq(node.endpoint, endpoint);
+    }
+
+    function _createNode(address to) internal {
+        vm.prank(to);
+        _staking.createNode(to, "Name", "Description", uint64(1000), false, "https://domain.com");
     }
 }

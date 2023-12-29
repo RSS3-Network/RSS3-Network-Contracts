@@ -148,6 +148,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         string calldata endpoint,
         uint256 amount
     ) external override whenNotPaused {
+        if (publicGood) revert Errors.PublicGoodNotAllowed();
+
         _createNode(msg.sender, name, description, taxFraction, publicGood, endpoint);
         _deposit(msg.sender, amount);
     }
@@ -181,6 +183,16 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         _withdrawOperatorPoolRewards(node);
 
         emit Events.WithdrawRequested(msg.sender, amount, requestId);
+    }
+
+    /// @inheritdoc IStaking
+    function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external override {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
+
+        node.taxFraction = taxFraction;
+
+        emit Events.NodeTaxFractionSet(nodeAddr, taxFraction);
     }
 
     /// @inheritdoc IStaking
