@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
-set -x
+#set -x
 
-if [ ! -d "contracts" ]; then
+if [ ! -d "src" ]; then
 	echo "error: script needs to be run from project root './tools/checkStorageLayout.sh'"
 	exit 1
 fi
 
-exit 0
-
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-for contract in CrossbellGateway MainchainGateway
+for contract in Staking Chips AccountOracle
 do
   file=$(mktemp /tmp/contracts-storage-layout-${contract}.XXXXX) || exit 2
   forge inspect ${contract} storage-layout --pretty > ${file} || exit 3

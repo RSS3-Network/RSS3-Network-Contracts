@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 #set -x
 
-if [ ! -d "contracts" ]; then
+if [ ! -d "src" ]; then
 	echo "error: script needs to be run from project root './tools/mythril.sh'"
 	exit 1
 fi
 
-exit 0
+platform=""
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    platform="--platform linux/amd64"
+fi
 
 echo '
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "MainchainGateway: "
-myth analyze contracts/MainchainGateway.sol --solc-json mythril.config.json --solv 0.8.16 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
-echo "CrossbellGateway: "
-myth analyze contracts/CrossbellGateway.sol --solc-json mythril.config.json --solv 0.8.16 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
-echo "Validator: "
-myth analyze contracts/Validator.sol --solc-json mythril.config.json --solv 0.8.16 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
-echo "MiraToken: "
-myth analyze contracts/token/MiraToken.sol --solc-json mythril.config.json --solv 0.8.16 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
+echo "Staking: "
+myth analyze src/Staking.sol --solc-json mythril.config.json --solv 0.8.20 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
+echo "Chips: "
+myth analyze src/Chips.sol --solc-json mythril.config.json --solv 0.8.20 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
+echo "AccountOracle: "
+myth analyze src/AccountOracle.sol --solc-json mythril.config.json --solv 0.8.20 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" ' |
-docker run --rm -v "$PWD":/project -i --workdir=/project --entrypoint=sh mythril/myth
+docker run --rm -v "$PWD":/project -i --workdir=/project --entrypoint=sh ${platform} mythril/myth

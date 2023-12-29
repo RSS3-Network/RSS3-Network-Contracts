@@ -16,6 +16,10 @@ update:; forge update
 # Builds
 build  :; forge build
 
+bindings :
+	@echo " > \033[32mCreate go bindings...\033[0m"
+	./tools/createBindings.sh
+
 # Tests
 # --ffi # enable if you need the `ffi` cheat code on HEVM
 foundry-test :; forge clean && forge test --optimize --optimizer-runs 200 -v

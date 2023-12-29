@@ -8,9 +8,8 @@ GO_DIR="$base_path/go"
 
 rm -rf base_path && mkdir -p ${BIN_DIR} ${ABI_DIR} ${GO_DIR}
 
-exit 0
 
-for contract in Validator CrossbellGateway MainchainGateway
+for contract in Staking Chips AccountOracle
 do
   # extract abi and bin files
   forge inspect ${contract} abi > ${ABI_DIR}/${contract}.abi
