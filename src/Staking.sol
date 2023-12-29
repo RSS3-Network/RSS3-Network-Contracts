@@ -292,6 +292,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // update node rewards
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
+            if (node.account == address(0)) {
+                // if node not exists, send rewards to public pool
+                node = _publicPool;
+            }
+
             // request fee is send to operator pool
             node.operatorPoolRewards += requestFees[i];
 
