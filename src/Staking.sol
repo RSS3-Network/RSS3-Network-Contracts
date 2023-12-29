@@ -384,7 +384,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function getTotalNodeCount() external view override returns (uint256) {
+    function getNodeCount() external view override returns (uint256) {
         return _nodeAddrs.length();
     }
 
@@ -427,13 +427,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
         if (address(0) != node.account) revert Errors.NodeExists();
-
         node.account = nodeAddr;
         node.name = name;
         node.description = description;
         node.taxFraction = taxFraction;
         node.publicGood = publicGood;
         node.endpoint = endpoint;
+
+        // add to node list
+        _nodeAddrs.add(nodeAddr);
 
         emit Events.NodeCreated(nodeAddr, name, description, taxFraction, publicGood, endpoint);
     }

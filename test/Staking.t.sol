@@ -89,6 +89,18 @@ contract StakingTest is Utils {
 
         // check node info
         _checkNode(alice, name, description, taxFraction, publicGood, endpoint);
+        assertEq(_staking.getNodeCount(), 1);
+
+        DataTypes.Node[] memory nodes = _staking.getNodes(0, 2);
+        assertEq(nodes.length, 1);
+        _checkNode(
+            nodes[0].account,
+            nodes[0].name,
+            nodes[0].description,
+            nodes[0].taxFraction,
+            nodes[0].publicGood,
+            nodes[0].endpoint
+        );
     }
 
     function testDeposit(uint256 amount) public {
