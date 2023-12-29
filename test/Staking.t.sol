@@ -121,10 +121,15 @@ contract StakingTest is Utils {
             amount
         );
 
-        _staking.requestWithdrawal(amount);
+        uint256 requestId = _staking.requestWithdrawal(amount);
         vm.stopPrank();
 
         // check status
+        DataTypes.WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
+        assertEq(req.owner, alice);
+        assertEq(req.isClaimed, false);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.amount, amount);
     }
 
     function testStake(uint256 amount) public {

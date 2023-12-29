@@ -178,6 +178,24 @@ interface IStaking {
     function slashNodes(address[] calldata nodeAddrs) external;
 
     /**
+     * @notice Returns the pending withdrawal request by `requestId`.
+     * @param requestId The id of withdrawal request.
+     * @return DataTypes.WithdrawalRequest The pending withdrawal request.
+     */
+    function getPendingWithdrawal(
+        uint256 requestId
+    ) external view returns (DataTypes.WithdrawalRequest memory);
+
+    /**
+     * @notice Returns the pending unstake request by `requestId`.
+     * @param requestId The id of unstake request.
+     * @return DataTypes.UnstakeRequest The pending unstake request.
+     */
+    function getPendingUnstake(
+        uint256 requestId
+    ) external view returns (DataTypes.UnstakeRequest memory);
+
+    /**
      * @notice Returns the minimal tokens to stake for a node.
      * @param nodeAddr Address of node operator to stake.
      * @return uint256 The minimal mount of tokens to stake for a node .

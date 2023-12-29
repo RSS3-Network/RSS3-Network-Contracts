@@ -39,15 +39,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @dev all node info
     mapping(address nodeAddr => DataTypes.Node) internal _nodes;
 
-    /// @dev withdraw request queue counter
-    uint256 internal _withdrawalRequestCounter;
-    /// @dev withdraw request queue
-    mapping(uint256 requestId => DataTypes.WithdrawalRequest) internal _withdrawalQueue;
+    /// @dev pending withdrawal request counter
+    uint256 internal _pendingWithdrawalCounter;
+    /// @dev pending withdrawal request
+    mapping(uint256 requestId => DataTypes.WithdrawalRequest) internal _pendingWithdrawals;
 
     /// @dev unstake request queue counter
-    uint256 internal _unstakeRequestCounter;
+    uint256 internal _pendingUnstakeCounter;
     /// @dev unstake request queue
-    mapping(uint256 requestId => DataTypes.UnstakeRequest) internal _unstakeQueue;
+    mapping(uint256 requestId => DataTypes.UnstakeRequest) internal _pendingUnstake;
 
     /// @dev the chips contract
     address internal _chips;
@@ -151,9 +151,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         node.depositAmount -= amount;
 
-        requestId = ++_withdrawalRequestCounter;
+        requestId = ++_pendingWithdrawalCounter;
 
-        DataTypes.WithdrawalRequest storage req = _withdrawalQueue[requestId];
+        DataTypes.WithdrawalRequest storage req = _pendingWithdrawals[requestId];
         req.timestamp = uint40(block.timestamp);
         req.owner = msg.sender;
         req.amount = amount;
@@ -251,7 +251,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             IChips(_chips).burn(tokenId);
         }
 
-        requestId = ++_unstakeRequestCounter;
+        requestId = ++_pendingUnstakeCounter;
 
         // update rewards
         uint256 shares = SHARES_PER_CHIP * chipsIds.length;
@@ -259,7 +259,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256 unstakeAmount = (shares * node.stakedAmount) / node.totalShares;
 
         // add to request queue
-        DataTypes.UnstakeRequest storage req = _unstakeQueue[requestId];
+        DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
         req.timestamp = block.timestamp;
         req.owner = msg.sender;
         req.nodeAddr = nodeAddr;
@@ -340,6 +340,20 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
             emit Events.NodeSlashed(nodeAddrs[i], slashedAmount);
         }
+    }
+
+    /// @inheritdoc IStaking
+    function getPendingWithdrawal(
+        uint256 requestId
+    ) external view override returns (DataTypes.WithdrawalRequest memory) {
+        return _pendingWithdrawals[requestId];
+    }
+
+    /// @inheritdoc IStaking
+    function getPendingUnstake(
+        uint256 requestId
+    ) external view override returns (DataTypes.UnstakeRequest memory) {
+        return _pendingUnstake[requestId];
     }
 
     /// @inheritdoc IStaking
@@ -441,7 +455,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @dev claim unstake request
     function _claimUnstake(uint256 requestId) internal {
-        DataTypes.UnstakeRequest storage req = _unstakeQueue[requestId];
+        DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
 
         if (req.isClaimed) revert Errors.AlreadyClaimed();
         if (block.timestamp - req.timestamp < _stakeUnbondingPeriod)
@@ -465,7 +479,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @dev claim withdrawal request
     function _claimWithdrawal(uint256 requestId) internal {
-        DataTypes.WithdrawalRequest storage req = _withdrawalQueue[requestId];
+        DataTypes.WithdrawalRequest storage req = _pendingWithdrawals[requestId];
 
         if (req.isClaimed) revert Errors.AlreadyClaimed();
         if (block.timestamp - req.timestamp < _depositUnbondingPeriod)
