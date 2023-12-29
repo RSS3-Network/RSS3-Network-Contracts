@@ -120,26 +120,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function updateNode(
-        address nodeAddr,
-        string calldata name,
-        string calldata description,
-        uint64 taxFraction,
-        string calldata endpoint
-    ) external override {
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
-
-        node.account = nodeAddr;
-        node.name = name;
-        node.description = description;
-        node.taxFraction = taxFraction;
-        node.endpoint = endpoint;
-
-        emit Events.NodeUpdated(nodeAddr, name, description, taxFraction, endpoint);
-    }
-
-    /// @inheritdoc IStaking
     function createNodeAndDeposit(
         string calldata name,
         string calldata description,

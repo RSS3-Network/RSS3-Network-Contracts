@@ -91,23 +91,6 @@ contract StakingTest is Utils {
         _checkNode(alice, name, description, taxFraction, publicGood, endpoint);
     }
 
-    function testUpdateNode() public {
-        _createNode(alice);
-
-        string memory newName = "Bob";
-        string memory newDescription = "Bob's node";
-        string memory newEndpoint = "https://bob.com";
-        uint64 newTaxFraction = uint64(10000);
-
-        expectEmit();
-        emit Events.NodeUpdated(alice, newName, newDescription, newTaxFraction, newEndpoint);
-        vm.prank(alice);
-        _staking.updateNode(alice, newName, newDescription, newTaxFraction, newEndpoint);
-
-        // check node info
-        _checkNode(alice, newName, newDescription, newTaxFraction, false, newEndpoint);
-    }
-
     function testDeposit(uint256 amount) public {
         vm.assume(amount > 10000 ether && amount < _initialAmount);
 

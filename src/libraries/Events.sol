@@ -28,22 +28,6 @@ library Events {
     event NodeDeleted(address indexed nodeAddr);
 
     /**
-     * @dev Emitted on updateNode()
-     * @param nodeAddr Address of node operator.
-     * @param name Human-readable name.
-     * @param description Description of node.
-     * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
-     * @param endpoint API endpoint of node.
-     */
-    event NodeUpdated(
-        address indexed nodeAddr,
-        string name,
-        string description,
-        uint64 taxFraction,
-        string endpoint
-    );
-
-    /**
      * @dev Emitted on deposit()
      * @param nodeAddr Address of node operator.
      * @param amount Amount of tokens deposited by node operator.

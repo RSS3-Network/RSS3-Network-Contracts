@@ -61,22 +61,6 @@ interface IStaking {
     function deleteNode(address addr) external;
 
     /**
-     * @notice Updates a node.
-     * @param nodeAddr Address of node operator.
-     * @param name Human-readable name.
-     * @param description Description of node.
-     * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
-     * @param endpoint API endpoint of node.
-     */
-    function updateNode(
-        address nodeAddr,
-        string calldata name,
-        string calldata description,
-        uint64 taxFraction,
-        string calldata endpoint
-    ) external;
-
-    /**
      * @notice Creates a node and deposits tokens.
      * @param name Human-readable name.
      * @param description Description of node.
