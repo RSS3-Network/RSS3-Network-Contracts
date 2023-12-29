@@ -432,22 +432,13 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc IStaking
     function minTokensToStake(address nodeAddr) external view override returns (uint256) {
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.totalShares == 0) {
-            return SHARES_PER_CHIP;
-        }
-
-        return (SHARES_PER_CHIP * _getRewardPoolTokens(node)) / node.totalShares;
+        return _minTokensToStake(nodeAddr);
     }
 
     /// @inheritdoc IStaking
     function getChipsInfo(uint256 tokenId) external view override returns (address nodeAddr, uint256 tokens) {
         nodeAddr = _issuers[tokenId];
-
-        if (nodeAddr != address(0)) {
-            DataTypes.Node storage node = _nodes[nodeAddr];
-            tokens = (_getRewardPoolTokens(node) / node.totalShares) * SHARES_PER_CHIP;
-        }
+        tokens = _minTokensToStake(nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -604,21 +595,29 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             return shares;
         }
 
-        return (shares * _getRewardPoolTokens(node)) / node.totalShares;
-    }
-
-    /// @dev get reward pool tokens from a node operator, it includes: user delegated tokens and rewards
-    function _getRewardPoolTokens(DataTypes.Node memory node) internal pure returns (uint256) {
-        return node.rewardPoolRewards + node.stakedAmount;
+        uint256 poolTokens = node.rewardPoolRewards + node.stakedAmount;
+        return (shares * poolTokens) / node.totalShares;
     }
 
     /// @dev get shares amount
-    function _getShares(DataTypes.Node memory node, uint256 stakeAmount) internal pure returns (uint256 sharesAmount) {
+    function _getShares(DataTypes.Node memory node, uint256 stakeAmount) internal pure returns (uint256 shares) {
         if (node.totalShares == 0) {
-            sharesAmount = stakeAmount;
+            shares = stakeAmount;
         } else {
-            sharesAmount = (stakeAmount * _getRewardPoolTokens(node)) / node.totalShares;
+            uint256 poolTokens = node.rewardPoolRewards + node.stakedAmount;
+            shares = (stakeAmount * poolTokens) / node.totalShares;
         }
+    }
+
+    /// @dev get minimal tokens to stake for a node
+    function _minTokensToStake(address nodeAddr) internal view returns (uint256) {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (node.totalShares == 0) {
+            return SHARES_PER_CHIP;
+        }
+
+        uint256 poolTokens = node.rewardPoolRewards + node.stakedAmount;
+        return (SHARES_PER_CHIP * poolTokens) / node.totalShares;
     }
 
     /**
