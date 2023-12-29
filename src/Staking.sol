@@ -192,6 +192,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
         uint256 claimableTax = node.tax - node.claimedTax;
+        if (claimableTax == 0) return;
+
+        node.claimedTax = node.tax;
 
         IERC20(_token).safeTransfer(node.account, claimableTax);
 
@@ -516,7 +519,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @dev withdraw operator pool rewards
     function _withdrawOperatorPoolRewards(DataTypes.Node storage node) internal {
         // get rewards
-        uint256 rewards = _getOperatorPoolRewards(node);
+        uint256 rewards = node.operatorPoolRewards - node.claimedOperatorPoollRewards;
+        if (rewards == 0) return;
 
         // update claimed rewards
         node.claimedOperatorPoollRewards = node.operatorPoolRewards;
@@ -524,7 +528,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // transfer rewards
         IERC20(_token).safeTransfer(node.account, rewards);
 
-        emit Events.OperatorPoolRewardsWithdrawn(node.account, node.account, rewards);
+        emit Events.OperatorPoolRewardsWithdrawn(node.account, rewards);
     }
 
     function _sharesToTokens(
@@ -541,11 +545,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @dev get reward pool tokens from a node operator, it includes: user delegated tokens and rewards
     function _getRewardPoolTokens(DataTypes.Node memory node) internal pure returns (uint256) {
         return node.rewardPoolRewards + node.stakedAmount;
-    }
-
-    /// @dev get operator pool rewards
-    function _getOperatorPoolRewards(DataTypes.Node memory node) internal pure returns (uint256) {
-        return node.operatorPoolRewards - node.claimedOperatorPoollRewards;
     }
 
     /// @dev get shares amount

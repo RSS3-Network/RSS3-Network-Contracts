@@ -56,14 +56,9 @@ library Events {
     /**
      * @dev Emitted on withdrawOperatorPoolRewards()
      * @param nodeAddr Address of node operator.
-     * @param rewardAddress Reward address to receive the rewards.
      * @param rewards Amount of rewards withdrawn.
      */
-    event OperatorPoolRewardsWithdrawn(
-        address indexed nodeAddr,
-        address indexed rewardAddress,
-        uint256 indexed rewards
-    );
+    event OperatorPoolRewardsWithdrawn(address indexed nodeAddr, uint256 indexed rewards);
 
     /**
      * @dev Emitted on distributeRewards()
