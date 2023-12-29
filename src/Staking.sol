@@ -185,6 +185,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function withdrawOperatorPoolRewards(address nodeAddr) external override whenNotPaused {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
+        if (node.publicGood) revert Errors.PublicGoodNotAllowed();
 
         _withdrawOperatorPoolRewards(node);
     }
@@ -193,6 +194,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function withdrawTax(address nodeAddr) external override whenNotPaused {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
+        if (node.publicGood) revert Errors.PublicGoodNotAllowed();
 
         uint256 claimableTax = node.tax - node.claimedTax;
         if (claimableTax == 0) return;
