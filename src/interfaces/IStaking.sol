@@ -131,10 +131,7 @@ interface IStaking {
      * @return startTokenId The start of new minted chips token ids.
      * @return endTokenId The end of new minted chips token ids.
      */
-    function stake(
-        address nodeAddr,
-        uint256 amount
-    ) external returns (uint256 startTokenId, uint256 endTokenId);
+    function stake(address nodeAddr, uint256 amount) external returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
      * @notice Requests unstake tokens from a node operator.
@@ -143,10 +140,7 @@ interface IStaking {
      * @param chipsIds The chips token ids for unstake.
      * @return requestId THe created unstake request id.
      */
-    function requestUnstake(
-        address nodeAddr,
-        uint256[] calldata chipsIds
-    ) external returns (uint256 requestId);
+    function requestUnstake(address nodeAddr, uint256[] calldata chipsIds) external returns (uint256 requestId);
 
     /**
      * @notice Claims a batch of unstake requests.
@@ -160,9 +154,7 @@ interface IStaking {
      * @return startTokenId The start of new minted chips token ids.
      * @return endTokenId The end of new minted chips token ids.
      */
-    function stakeToPublicPool(
-        uint256 amount
-    ) external returns (uint256 startTokenId, uint256 endTokenId);
+    function stakeToPublicPool(uint256 amount) external returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
      * @notice Requests unstake tokens from public pool.
@@ -170,9 +162,7 @@ interface IStaking {
      * @param chipsIds The chips token ids for unstake.
      * @return requestId THe created unstake request id.
      */
-    function requestUnstakeFromPublicPool(
-        uint256[] calldata chipsIds
-    ) external returns (uint256 requestId);
+    function requestUnstakeFromPublicPool(uint256[] calldata chipsIds) external returns (uint256 requestId);
 
     /**
      * @notice Delegates chips to a public good node.
@@ -222,18 +212,14 @@ interface IStaking {
      * @param requestId The id of withdrawal request.
      * @return DataTypes.WithdrawalRequest The pending withdrawal request.
      */
-    function getPendingWithdrawal(
-        uint256 requestId
-    ) external view returns (DataTypes.WithdrawalRequest memory);
+    function getPendingWithdrawal(uint256 requestId) external view returns (DataTypes.WithdrawalRequest memory);
 
     /**
      * @notice Returns the pending unstake request by `requestId`.
      * @param requestId The id of unstake request.
      * @return DataTypes.UnstakeRequest The pending unstake request.
      */
-    function getPendingUnstake(
-        uint256 requestId
-    ) external view returns (DataTypes.UnstakeRequest memory);
+    function getPendingUnstake(uint256 requestId) external view returns (DataTypes.UnstakeRequest memory);
 
     /**
      * @notice Returns the minimal tokens to stake for a node.
@@ -274,10 +260,7 @@ interface IStaking {
      * @param offset The offset of nodes to query.
      * @param limit The limit of nodes to query.
      */
-    function getNodes(
-        uint256 offset,
-        uint256 limit
-    ) external view returns (DataTypes.Node[] memory);
+    function getNodes(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
 
     /**
      * @notice Returns the address of the staking token contract.

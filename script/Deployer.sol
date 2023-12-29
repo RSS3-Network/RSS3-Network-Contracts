@@ -61,12 +61,10 @@ abstract contract Deployer is Script {
     /// @notice The storage slot that holds the address of the implementation.
     ///        bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1)
 
-    bytes32 internal constant IMPLEMENTATION_KEY =
-        0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
+    bytes32 internal constant IMPLEMENTATION_KEY = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
     /// @notice The storage slot that holds the address of the owner.
     ///        bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1)
-    bytes32 internal constant OWNER_KEY =
-        0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
+    bytes32 internal constant OWNER_KEY = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
 
     /// @notice Create the global variables and set up the filesystem.
     ///         Forge script will create a file where the prefix is the
@@ -83,15 +81,7 @@ abstract contract Deployer is Script {
         string memory sig = vm.envOr("SIG", string("run"));
         string memory deployFile = vm.envOr("DEPLOY_FILE", string.concat(sig, "-latest.json"));
         uint256 chainId = vm.envOr("CHAIN_ID", block.chainid);
-        deployPath = string.concat(
-            root,
-            "/broadcast/",
-            deployScript,
-            ".s.sol/",
-            vm.toString(chainId),
-            "/",
-            deployFile
-        );
+        deployPath = string.concat(root, "/broadcast/", deployScript, ".s.sol/", vm.toString(chainId), "/", deployFile);
 
         deploymentsDir = string.concat(root, "/deployments/", deploymentContext);
         try vm.createDir(deploymentsDir, true) {} catch (bytes memory) {}
@@ -135,12 +125,7 @@ abstract contract Deployer is Script {
             bytes memory deployedCode = _getDeployedCode(contractName);
             string memory receipt = _getDeployReceiptByContractAddress(addr);
 
-            string memory artifactPath = string.concat(
-                deploymentsDir,
-                "/",
-                deploymentName,
-                ".json"
-            );
+            string memory artifactPath = string.concat(deploymentsDir, "/", deploymentName, ".json");
 
             uint256 numDeployments = 0;
             try vm.readFile(artifactPath) returns (string memory res) {
@@ -272,9 +257,7 @@ abstract contract Deployer is Script {
     }
 
     /// @notice Returns the json of the deployment transaction given a contract address.
-    function _getDeployTransactionByContractAddress(
-        address _addr
-    ) internal returns (string memory) {
+    function _getDeployTransactionByContractAddress(address _addr) internal returns (string memory) {
         string[] memory cmd = new string[](3);
         cmd[0] = Executables.bash;
         cmd[1] = "-c";
@@ -294,9 +277,7 @@ abstract contract Deployer is Script {
     }
 
     /// @notice Returns the contract name from a deploy transaction.
-    function _getContractNameFromDeployTransaction(
-        string memory _deployTx
-    ) internal pure returns (string memory) {
+    function _getContractNameFromDeployTransaction(string memory _deployTx) internal pure returns (string memory) {
         return stdJson.readString(_deployTx, ".contractName");
     }
 
@@ -334,9 +315,7 @@ abstract contract Deployer is Script {
     }
 
     /// @notice Returns the constructor argument of a deployment transaction given a transaction json.
-    function getDeployTransactionConstructorArguments(
-        string memory _transaction
-    ) internal returns (string[] memory) {
+    function getDeployTransactionConstructorArguments(string memory _transaction) internal returns (string[] memory) {
         string[] memory cmd = new string[](3);
         cmd[0] = Executables.bash;
         cmd[1] = "-c";
@@ -420,11 +399,7 @@ abstract contract Deployer is Script {
         string[] memory cmd = new string[](3);
         cmd[0] = Executables.bash;
         cmd[1] = "-c";
-        cmd[2] = string.concat(
-            Executables.jq,
-            " -r '.storageLayout' < ",
-            _getForgeArtifactPath(_name)
-        );
+        cmd[2] = string.concat(Executables.jq, " -r '.storageLayout' < ", _getForgeArtifactPath(_name));
         bytes memory res = vm.ffi(cmd);
         return string(res);
     }
@@ -454,11 +429,7 @@ abstract contract Deployer is Script {
         string[] memory cmd = new string[](3);
         cmd[0] = Executables.bash;
         cmd[1] = "-c";
-        cmd[2] = string.concat(
-            Executables.jq,
-            " '.metadata | tostring' < ",
-            _getForgeArtifactPath(_name)
-        );
+        cmd[2] = string.concat(Executables.jq, " '.metadata | tostring' < ", _getForgeArtifactPath(_name));
         bytes memory res = vm.ffi(cmd);
         return string(res);
     }
@@ -517,9 +488,7 @@ abstract contract Deployer is Script {
     /// @notice Reads the artifact from the filesystem by name and returns the address.
     /// @param _name The name of the artifact to read.
     /// @return The address of the artifact.
-    function _getExistingDeploymentAdress(
-        string memory _name
-    ) internal view returns (address payable) {
+    function _getExistingDeploymentAdress(string memory _name) internal view returns (address payable) {
         return _getExistingDeployment(_name).addr;
     }
 

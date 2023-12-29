@@ -40,11 +40,7 @@ library Events {
      * @param amount Amount of tokens to withdraw.
      * @param requestId The created withdraw request id.
      */
-    event WithdrawRequested(
-        address indexed nodeAddr,
-        uint256 indexed amount,
-        uint256 indexed requestId
-    );
+    event WithdrawRequested(address indexed nodeAddr, uint256 indexed amount, uint256 indexed requestId);
 
     /**
      * @dev Emitted on setNodeTaxFraction().

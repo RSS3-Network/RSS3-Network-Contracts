@@ -6,16 +6,14 @@ import {IStaking} from "./interfaces/IStaking.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {
-    AccessControlEnumerable
-} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 
 contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable {
     /// @dev Staking contract address.
     address internal _staking;
 
-    bytes32 public constant ORACLE_ROLE =
-        0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1; // keccak256("ORACLE_ROLE");
+    // keccak256("ORACLE_ROLE");
+    bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
     /// @inheritdoc IAccountOracle
     function initialize(address staking_, address oracleAccount) external override initializer {
@@ -55,9 +53,7 @@ contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable
     }
 
     /// @inheritdoc IAccountOracle
-    function setTaxFraction4PublicPool(
-        address[] calldata nodeAddrs
-    ) external override onlyRole(ORACLE_ROLE) {
+    function setTaxFraction4PublicPool(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
         uint256 length = nodeAddrs.length;
 
         uint128 totalTaxFraction;

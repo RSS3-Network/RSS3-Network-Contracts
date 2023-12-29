@@ -8,9 +8,7 @@ import {Errors} from "./libraries/Errors.sol";
 import {Events} from "./libraries/Events.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
-import {
-    AccessControlEnumerable
-} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -64,10 +62,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     mapping(uint256 tokenId => address nodeAddr) internal _issuers;
 
     /// ACL
-    bytes32 public constant PAUSE_ROLE =
-        0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d; // keccak256("PAUSE_ROLE");
-    bytes32 public constant ORACLE_ROLE =
-        0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1; // keccak256("ORACLE_ROLE");
+    // keccak256("PAUSE_ROLE");
+    bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
+    // keccak256("ORACLE_ROLE");
+    bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
     /// @inheritdoc IStaking
     function initialize(
@@ -146,9 +144,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function requestWithdrawal(
-        uint256 amount
-    ) external override whenNotPaused returns (uint256 requestId) {
+    function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
@@ -252,8 +248,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // check and burn chips
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender)
-                revert Errors.NotChipsOwner(tokenId);
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner(tokenId);
 
             if (_issuers[tokenId] != nodeAddr) revert Errors.NotTokenIssuer(tokenId, nodeAddr);
 
@@ -316,12 +311,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             // request bonus and staking rewards are sent to reward pool
             uint256 rewardPoolRewards = requestBonuses[i] + stakingRewards[i];
 
-            uint256 tax = _getTax(
-                rewardPoolRewards,
-                node.taxFraction,
-                node.depositAmount,
-                node.stakedAmount
-            );
+            uint256 tax = _getTax(rewardPoolRewards, node.taxFraction, node.depositAmount, node.stakedAmount);
             node.tax += tax;
             taxAmounts[i] = tax;
 
@@ -349,17 +339,13 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function requestUnstakeFromPublicPool(
-        uint256[] calldata chipsIds
-    ) external override returns (uint256 requestId) {
+    function requestUnstakeFromPublicPool(uint256[] calldata chipsIds) external override returns (uint256 requestId) {
         // check and burn chips
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender)
-                revert Errors.NotChipsOwner(tokenId);
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner(tokenId);
 
-            if (_issuers[tokenId] != address(0))
-                revert Errors.ChipsDelegatedOrNotPublicGood(tokenId);
+            if (_issuers[tokenId] != address(0)) revert Errors.ChipsDelegatedOrNotPublicGood(tokenId);
 
             IChips(_chips).burn(tokenId);
         }
@@ -386,11 +372,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function delegate(address nodeAddr, uint256[] calldata chipsIds) external override {
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender)
-                revert Errors.NotChipsOwner(tokenId);
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner(tokenId);
 
-            if (_issuers[tokenId] != address(0))
-                revert Errors.ChipsDelegatedOrNotPublicGood(tokenId);
+            if (_issuers[tokenId] != address(0)) revert Errors.ChipsDelegatedOrNotPublicGood(tokenId);
 
             _issuers[tokenId] = nodeAddr;
         }
@@ -402,8 +386,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function undelegate(address nodeAddr, uint256[] calldata chipsIds) external override {
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender)
-                revert Errors.NotChipsOwner(tokenId);
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner(tokenId);
 
             if (_issuers[tokenId] != nodeAddr) revert Errors.NotTokenIssuer(tokenId, nodeAddr);
 
@@ -431,12 +414,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             uint256 slashRewards = (node.rewardPoolRewards * slashRewardFraction) / _denominator();
             node.rewardPoolRewards -= slashRewards;
 
-            emit Events.NodeSlashed(
-                nodeAddrs[i],
-                slashedDepositAmount,
-                slashedStakedAmount,
-                slashRewards
-            );
+            emit Events.NodeSlashed(nodeAddrs[i], slashedDepositAmount, slashedStakedAmount, slashRewards);
         }
     }
 
@@ -448,9 +426,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function getPendingUnstake(
-        uint256 requestId
-    ) external view override returns (DataTypes.UnstakeRequest memory) {
+    function getPendingUnstake(uint256 requestId) external view override returns (DataTypes.UnstakeRequest memory) {
         return _pendingUnstake[requestId];
     }
 
@@ -465,9 +441,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function getChipsInfo(
-        uint256 tokenId
-    ) external view override returns (address nodeAddr, uint256 tokens) {
+    function getChipsInfo(uint256 tokenId) external view override returns (address nodeAddr, uint256 tokens) {
         nodeAddr = _issuers[tokenId];
 
         if (nodeAddr != address(0)) {
@@ -492,10 +466,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc IStaking
-    function getNodes(
-        uint256 offset,
-        uint256 limit
-    ) external view override returns (DataTypes.Node[] memory nodes) {
+    function getNodes(uint256 offset, uint256 limit) external view override returns (DataTypes.Node[] memory nodes) {
         uint256 totalNodes = _nodeAddrs.length();
         uint256 len = (totalNodes - offset).min(limit);
         nodes = new DataTypes.Node[](len);
@@ -547,8 +518,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
-        if (node.depositAmount == 0 && amount < firstDepositAmount)
-            revert Errors.AmountTooSmall(amount);
+        if (node.depositAmount == 0 && amount < firstDepositAmount) revert Errors.AmountTooSmall(amount);
 
         // update operator pool
         node.depositAmount += amount;
@@ -586,8 +556,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
 
         if (req.isClaimed) revert Errors.AlreadyClaimed();
-        if (block.timestamp - req.timestamp < _stakeUnbondingPeriod)
-            revert Errors.ClaimTimeNotReady();
+        if (block.timestamp - req.timestamp < _stakeUnbondingPeriod) revert Errors.ClaimTimeNotReady();
 
         // set claimed status
         req.isClaimed = true;
@@ -596,13 +565,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         IERC20(_token).safeTransfer(req.owner, req.unstakeAmount);
         IERC20(_token).safeTransfer(req.owner, req.rewards);
 
-        emit Events.UnstakeClaimed(
-            requestId,
-            req.nodeAddr,
-            req.owner,
-            req.unstakeAmount,
-            req.rewards
-        );
+        emit Events.UnstakeClaimed(requestId, req.nodeAddr, req.owner, req.unstakeAmount, req.rewards);
     }
 
     /// @dev claim withdrawal request
@@ -610,8 +573,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.WithdrawalRequest storage req = _pendingWithdrawals[requestId];
 
         if (req.isClaimed) revert Errors.AlreadyClaimed();
-        if (block.timestamp - req.timestamp < _depositUnbondingPeriod)
-            revert Errors.ClaimTimeNotReady();
+        if (block.timestamp - req.timestamp < _depositUnbondingPeriod) revert Errors.ClaimTimeNotReady();
 
         // set claimed status
         req.isClaimed = true;
@@ -637,10 +599,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         emit Events.OperatorPoolRewardsWithdrawn(node.account, rewards);
     }
 
-    function _sharesToTokens(
-        DataTypes.Node storage node,
-        uint256 shares
-    ) internal view returns (uint256) {
+    function _sharesToTokens(DataTypes.Node storage node, uint256 shares) internal view returns (uint256) {
         if (node.totalShares == 0) {
             return shares;
         }
@@ -654,10 +613,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     }
 
     /// @dev get shares amount
-    function _getShares(
-        DataTypes.Node memory node,
-        uint256 stakeAmount
-    ) internal pure returns (uint256 sharesAmount) {
+    function _getShares(DataTypes.Node memory node, uint256 stakeAmount) internal pure returns (uint256 sharesAmount) {
         if (node.totalShares == 0) {
             sharesAmount = stakeAmount;
         } else {

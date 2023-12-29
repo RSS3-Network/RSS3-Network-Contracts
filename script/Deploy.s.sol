@@ -12,10 +12,10 @@ import {TransparentUpgradeableProxy} from "../src/upgradeability/TransparentUpgr
 
 contract Deploy is Deployer {
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
-    bytes32 public constant PAUSE_ROLE =
-        0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d; // keccak256("PAUSE_ROLE");
-    bytes32 public constant ORACLE_ROLE =
-        0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1; // keccak256("ORACLE_ROLE");
+    // keccak256("PAUSE_ROLE");
+    bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
+    // keccak256("ORACLE_ROLE");
+    bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
     // solhint-disable private-vars-leading-underscore
     DeployConfig internal cfg;
@@ -35,12 +35,7 @@ contract Deploy is Deployer {
 
     function setUp() public override {
         super.setUp();
-        string memory path = string.concat(
-            vm.projectRoot(),
-            "/deploy-config/",
-            deploymentContext,
-            ".json"
-        );
+        string memory path = string.concat(vm.projectRoot(), "/deploy-config/", deploymentContext, ".json");
         cfg = new DeployConfig(path);
 
         console.log("Deploying from %s", deployScript);
@@ -124,10 +119,7 @@ contract Deploy is Deployer {
 
         // check states
         require(!accountOracle.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "oracle role error");
-        require(
-            accountOracle.stakingContract() == address(0),
-            "check accountOracle contract error"
-        );
+        require(accountOracle.stakingContract() == address(0), "check accountOracle contract error");
 
         save("AccountOracle", address(accountOracle));
         console.log("AccountOracle deployed at %s", address(accountOracle));
@@ -172,13 +164,7 @@ contract Deploy is Deployer {
         accountOracleProxy.initialize(stakingProxy, cfg.oracleAccount());
 
         // check states
-        require(
-            accountOracleProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()),
-            "check oracle role error"
-        );
-        require(
-            accountOracleProxy.stakingContract() == stakingProxy,
-            "check accountOracle contract error"
-        );
+        require(accountOracleProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");
+        require(accountOracleProxy.stakingContract() == stakingProxy, "check accountOracle contract error");
     }
 }
