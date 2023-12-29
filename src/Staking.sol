@@ -27,6 +27,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
     uint256 public constant firstDepositAmount = 10000 * 10 ** 18;
 
+    uint256 public constant slashFraction = 100;
+
     uint256 public constant STAKE_RATIO = 25;
 
     /// @dev The period of time that node operator can't withdraw staked tokens
@@ -335,10 +337,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) revert Errors.NodeNotExists();
 
-            // TODO: slash node
-            uint256 slashedAmount;
+            // slash staked tokens
+            uint256 slashedAmount = (node.stakedAmount * slashFraction) / _denominator();
+            node.stakedAmount -= slashedAmount;
 
-            emit Events.NodeSlashed(nodeAddrs[i], slashedAmount);
+            // slash reward pool rewards
+            uint256 slashRewards = (node.rewardPoolRewards * slashFraction) / _denominator();
+            node.rewardPoolRewards -= slashRewards;
+
+            emit Events.NodeSlashed(nodeAddrs[i], slashedAmount, slashRewards);
         }
     }
 
@@ -558,18 +565,17 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256 stakeCapacity = depositAmount * STAKE_RATIO;
         if (stakedAmount <= stakeCapacity) {
             // node will receive its full tax
-            return (rewards * taxFraction) / _taxDenominator();
+            return (rewards * taxFraction) / _denominator();
         }
 
         uint256 stakingRewards = (rewards * stakeCapacity) / stakedAmount;
-        return (stakingRewards * taxFraction) / _taxDenominator();
+        return (stakingRewards * taxFraction) / _denominator();
     }
 
     /**
-     * @dev The denominator with which to interpret the tax as a fraction.
-     * Defaults to 10000 so tax is expressed in basis points.
+     * @dev doniminator
      */
-    function _taxDenominator() internal pure virtual returns (uint96) {
+    function _denominator() internal pure virtual returns (uint96) {
         return 10000;
     }
 }
