@@ -285,17 +285,17 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             }
 
             // request bonus and staking rewards are sent to reward pool
-            uint256 rewardpool = requestBonuses[i] + stakingRewards[i];
-            uint256 tax = _getTax(rewardpool, node.taxFraction, node.operatorPool, node.rewardPool);
+            uint256 rewardPool = requestBonuses[i] + stakingRewards[i];
+            uint256 tax = _getTax(rewardPool, node.taxFraction, node.operatorPool, node.rewardPool);
             // request fee and tax are sent to operator pool
             uint256 operatorPool = requestFees[i] + tax;
             taxAmounts[i] = tax;
-            rewardpool -= tax;
+            rewardPool -= tax;
 
             // update node
             node.operatorPool += operatorPool;
             // all after-tax rewards and request bonus are sent to the reward pool
-            node.rewardPool += rewardpool;
+            node.rewardPool += rewardPool;
         }
 
         emit Events.RewardDistributed(
@@ -565,6 +565,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256 operatorPool,
         uint256 rewardPool
     ) internal view returns (uint256) {
+        if (operatorPool == 0) return 0;
+
         uint256 stakeCapacity = operatorPool * _stakeRatio;
         if (rewardPool <= stakeCapacity) {
             // node will receive its full tax
