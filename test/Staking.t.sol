@@ -62,6 +62,9 @@ contract StakingTest is CommonTest {
         emit Events.Deposited(alice, amount);
         _staking.deposit(amount);
         vm.stopPrank();
+
+        DataTypes.Node memory node = _staking.getNode(alice);
+        assertEq(node.operatorPool, amount);
     }
 
     function testRequestWithdrawal() public {
@@ -77,7 +80,6 @@ contract StakingTest is CommonTest {
         // check status
         DataTypes.WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
         assertEq(req.owner, alice);
-        assertEq(req.isClaimed, false);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.amount, amount);
     }

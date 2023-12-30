@@ -19,20 +19,10 @@ library DataTypes {
         string description;
         /// @notice API endpoint of the node
         string endpoint;
-        /// @notice amount of tokens deposited by node operator
-        uint256 depositAmount;
-        /// @notice amount of tokens staked by users
-        uint256 stakedAmount;
-        /// @notice total rewards of operator pool
-        uint256 operatorPoolRewards;
-        /// @notice claimed rewards of operator pool
-        uint256 claimedOperatorPoollRewards;
-        /// @notice total rewards of reward pool
-        uint256 rewardPoolRewards;
-        /// @notice tax of reward pool
-        uint256 tax;
-        /// @notice claimed tax of reward pool
-        uint256 claimedTax;
+        /// @notice total tokens of operator pool
+        uint256 operatorPool;
+        /// @notice total tokens of reward pool
+        uint256 rewardPool;
         /// @notice total shares of the pool
         uint256 totalShares;
         /// @notice total amount of slashed tokens
@@ -42,8 +32,6 @@ library DataTypes {
     struct WithdrawalRequest {
         /// @notice address that can claim request
         address owner;
-        /// @notice flag indicating if the request was claimed
-        bool isClaimed;
         /// @notice block.timestamp when the request was created
         uint40 timestamp;
         /// @notice amount of tokens to withdraw
@@ -55,13 +43,9 @@ library DataTypes {
         address owner;
         /// @notice Address of the node operator
         address nodeAddr;
-        /// @notice flag indicating if the request was claimed
-        bool isClaimed;
         /// @notice block.timestamp when the request was created
         uint256 timestamp;
         /// @notice amount of tokens to unstake
         uint256 unstakeAmount;
-        /// @notice total rewards to claim
-        uint256 rewards;
     }
 }

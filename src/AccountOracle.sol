@@ -50,6 +50,10 @@ contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable
             requestBonuses,
             stakingRewards
         );
+
+        // TODO: transfer tokens to staking contract
+        // maybe the reward and slashing can be completed in one call,
+        // and the slashing is done before the reward.
     }
 
     /// @inheritdoc IAccountOracle

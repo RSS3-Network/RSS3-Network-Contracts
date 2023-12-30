@@ -108,18 +108,6 @@ interface IStaking {
     function setTaxFraction4PublicPool(uint64 taxFraction) external;
 
     /**
-     * @notice Withdraws operator pool rewards for node operator.
-     * @param nodeAddr Address of node operator.
-     */
-    function withdrawOperatorPoolRewards(address nodeAddr) external;
-
-    /**
-     * @notice Withdraws tax for node operator.
-     * @param nodeAddr Address of node operator.
-     */
-    function withdrawTax(address nodeAddr) external;
-
-    /**
      * @notice Claims a batch of withdrawal requests.
      */
     function claimWithdrawal(uint256[] calldata requestIds) external;

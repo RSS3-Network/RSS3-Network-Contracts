@@ -115,7 +115,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
 
         // can't delete a node with staked or deposited tokens
-        if (node.stakedAmount > 0 || node.depositAmount > 0) revert Errors.NodeStakedOrDeposited();
+        if (node.operatorPool > 0 || node.rewardPool > 0) revert Errors.NodeStakedOrDeposited();
 
         delete _nodes[nodeAddr];
         _nodeAddrs.remove(nodeAddr);
@@ -149,9 +149,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
         //  deposited tokens has been slashed completely
-        if (amount > node.depositAmount) revert Errors.DepositedTokensSlashedAll();
+        if (amount > node.operatorPool) revert Errors.DepositedTokensSlashedAll();
 
-        node.depositAmount -= amount;
+        node.operatorPool -= amount;
 
         requestId = ++_pendingWithdrawalCounter;
 
@@ -159,10 +159,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         req.timestamp = uint40(block.timestamp);
         req.owner = msg.sender;
         req.amount = amount;
-
-        // withdraw operator pool rewards
-        // TODO: 30 epoches later
-        _withdrawOperatorPoolRewards(node);
 
         emit Events.WithdrawRequested(msg.sender, amount, requestId);
     }
@@ -186,31 +182,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         _publicPool.taxFraction = taxFraction;
 
         emit Events.PublicPoolTaxFractionSet(taxFraction);
-    }
-
-    /// @inheritdoc IStaking
-    function withdrawOperatorPoolRewards(address nodeAddr) external override whenNotPaused {
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.account == address(0)) revert Errors.NodeNotExists();
-        if (node.publicGood) revert Errors.PublicGoodNotAllowed();
-
-        _withdrawOperatorPoolRewards(node);
-    }
-
-    /// @inheritdoc IStaking
-    function withdrawTax(address nodeAddr) external override whenNotPaused {
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.account == address(0)) revert Errors.NodeNotExists();
-        if (node.publicGood) revert Errors.PublicGoodNotAllowed();
-
-        uint256 claimableTax = node.tax - node.claimedTax;
-        if (claimableTax == 0) return;
-
-        node.claimedTax = node.tax;
-
-        IERC20(_token).safeTransfer(node.account, claimableTax);
-
-        emit Events.TaxWithdrawn(node.account, claimableTax);
     }
 
     /// @inheritdoc IStaking
@@ -259,15 +230,13 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         // update rewards
         uint256 shares = SHARES_PER_CHIP * chipsIds.length;
-        uint256 rewards = (shares * node.rewardPoolRewards) / node.totalShares;
-        uint256 unstakeAmount = (shares * node.stakedAmount) / node.totalShares;
+        uint256 unstakeAmount = (shares * node.rewardPool) / node.totalShares;
 
         // add to request queue
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
         req.timestamp = block.timestamp;
         req.owner = msg.sender;
         req.nodeAddr = nodeAddr;
-        req.rewards = rewards;
         req.unstakeAmount = unstakeAmount;
 
         emit Events.UnstakeRequested(msg.sender, nodeAddr, requestId, chipsIds);
@@ -305,18 +274,18 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
                 node = _publicPool;
             }
 
-            // request fee is send to operator pool
-            node.operatorPoolRewards += requestFees[i];
-
             // request bonus and staking rewards are sent to reward pool
-            uint256 rewardPoolRewards = requestBonuses[i] + stakingRewards[i];
-
-            uint256 tax = _getTax(rewardPoolRewards, node.taxFraction, node.depositAmount, node.stakedAmount);
-            node.tax += tax;
+            uint256 rewardpool = requestBonuses[i] + stakingRewards[i];
+            uint256 tax = _getTax(rewardpool, node.taxFraction, node.operatorPool, node.rewardPool);
+            // request fee and tax are sent to operator pool
+            uint256 operatorPool = requestFees[i] + tax;
             taxAmounts[i] = tax;
+            rewardpool -= tax;
 
+            // update node
+            node.operatorPool += operatorPool;
             // all after-tax rewards and request bonus are sent to the reward pool
-            node.rewardPoolRewards += rewardPoolRewards - tax;
+            node.rewardPool += rewardpool;
         }
 
         emit Events.RewardDistributed(
@@ -354,15 +323,13 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         // update rewards
         uint256 shares = SHARES_PER_CHIP * chipsIds.length;
-        uint256 rewards = (shares * _publicPool.rewardPoolRewards) / _publicPool.totalShares;
-        uint256 unstakeAmount = (shares * _publicPool.stakedAmount) / _publicPool.totalShares;
+        uint256 unstakeAmount = (shares * _publicPool.rewardPool) / _publicPool.totalShares;
 
         // add to request queue
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
         req.timestamp = block.timestamp;
         req.owner = msg.sender;
         req.nodeAddr = _publicPool.account;
-        req.rewards = rewards;
         req.unstakeAmount = unstakeAmount;
 
         emit Events.UnstakeRequested(msg.sender, _publicPool.account, requestId, chipsIds);
@@ -402,19 +369,17 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) revert Errors.NodeNotExists();
 
-            // slash deposited tokens
-            uint256 slashedDepositAmount = (node.depositAmount * slashFraction) / _denominator();
-            node.depositAmount -= slashedDepositAmount;
+            // slash operator pool tokens
+            uint256 slashedOperatorPool = (node.operatorPool * slashFraction) / _denominator();
+            node.operatorPool -= slashedOperatorPool;
 
-            // slash staked tokens
-            uint256 slashedStakedAmount = (node.stakedAmount * slashFraction) / _denominator();
-            node.stakedAmount -= slashedStakedAmount;
+            // slash reward pool tokens
+            uint256 slashedRewardPool = (node.rewardPool * slashFraction) / _denominator();
+            node.rewardPool -= slashedRewardPool;
 
-            // slash reward pool rewards
-            uint256 slashRewards = (node.rewardPoolRewards * slashRewardFraction) / _denominator();
-            node.rewardPoolRewards -= slashRewards;
+            node.slashedAmount += slashedOperatorPool + slashedRewardPool;
 
-            emit Events.NodeSlashed(nodeAddrs[i], slashedDepositAmount, slashedStakedAmount, slashRewards);
+            emit Events.NodeSlashed(nodeAddrs[i], slashedOperatorPool, slashedRewardPool);
         }
     }
 
@@ -509,10 +474,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
 
-        if (node.depositAmount == 0 && amount < firstDepositAmount) revert Errors.AmountTooSmall(amount);
+        if (node.operatorPool == 0 && amount < firstDepositAmount) revert Errors.AmountTooSmall(amount);
 
         // update operator pool
-        node.depositAmount += amount;
+        node.operatorPool += amount;
 
         // transfer tokens
         IERC20(_token).safeTransferFrom(nodeAddr, address(this), amount);
@@ -533,7 +498,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
         // update stakedAmount
         uint256 stakedAmount = _sharesToTokens(node, chipsCount * SHARES_PER_CHIP);
-        node.stakedAmount += stakedAmount;
+        node.rewardPool += stakedAmount;
         // update total shares
         node.totalShares += (chipsCount * SHARES_PER_CHIP);
         // transfer tokens
@@ -544,50 +509,30 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @dev claim unstake request
     function _claimUnstake(uint256 requestId) internal {
-        DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
-
-        if (req.isClaimed) revert Errors.AlreadyClaimed();
+        DataTypes.UnstakeRequest memory req = _pendingUnstake[requestId];
         if (block.timestamp - req.timestamp < _stakeUnbondingPeriod) revert Errors.ClaimTimeNotReady();
-
-        // set claimed status
-        req.isClaimed = true;
 
         // transfer
         IERC20(_token).safeTransfer(req.owner, req.unstakeAmount);
-        IERC20(_token).safeTransfer(req.owner, req.rewards);
 
-        emit Events.UnstakeClaimed(requestId, req.nodeAddr, req.owner, req.unstakeAmount, req.rewards);
+        // delete request
+        delete _pendingUnstake[requestId];
+
+        emit Events.UnstakeClaimed(requestId, req.nodeAddr, req.owner, req.unstakeAmount);
     }
 
     /// @dev claim withdrawal request
     function _claimWithdrawal(uint256 requestId) internal {
-        DataTypes.WithdrawalRequest storage req = _pendingWithdrawals[requestId];
-
-        if (req.isClaimed) revert Errors.AlreadyClaimed();
+        DataTypes.WithdrawalRequest memory req = _pendingWithdrawals[requestId];
         if (block.timestamp - req.timestamp < _depositUnbondingPeriod) revert Errors.ClaimTimeNotReady();
-
-        // set claimed status
-        req.isClaimed = true;
 
         // transfer staked tokens
         IERC20(_token).safeTransfer(req.owner, req.amount);
 
+        // delete request
+        delete _pendingWithdrawals[requestId];
+
         emit Events.WithdrawalClaimed(requestId);
-    }
-
-    /// @dev withdraw operator pool rewards
-    function _withdrawOperatorPoolRewards(DataTypes.Node storage node) internal {
-        // get rewards
-        uint256 rewards = node.operatorPoolRewards - node.claimedOperatorPoollRewards;
-        if (rewards == 0) return;
-
-        // update claimed rewards
-        node.claimedOperatorPoollRewards = node.operatorPoolRewards;
-
-        // transfer rewards
-        IERC20(_token).safeTransfer(node.account, rewards);
-
-        emit Events.OperatorPoolRewardsWithdrawn(node.account, rewards);
     }
 
     function _sharesToTokens(DataTypes.Node storage node, uint256 shares) internal view returns (uint256) {
@@ -595,17 +540,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             return shares;
         }
 
-        uint256 poolTokens = node.rewardPoolRewards + node.stakedAmount;
-        return (shares * poolTokens) / node.totalShares;
+        return (shares * node.rewardPool) / node.totalShares;
     }
 
     /// @dev get shares amount
-    function _getShares(DataTypes.Node memory node, uint256 stakeAmount) internal pure returns (uint256 shares) {
+    function _getShares(DataTypes.Node memory node, uint256 stakeAmount) internal view returns (uint256 shares) {
         if (node.totalShares == 0) {
             shares = stakeAmount;
         } else {
-            uint256 poolTokens = node.rewardPoolRewards + node.stakedAmount;
-            shares = (stakeAmount * poolTokens) / node.totalShares;
+            shares = (stakeAmount * node.rewardPool) / node.totalShares;
         }
     }
 
@@ -616,8 +559,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             return SHARES_PER_CHIP;
         }
 
-        uint256 poolTokens = node.rewardPoolRewards + node.stakedAmount;
-        return (SHARES_PER_CHIP * poolTokens) / node.totalShares;
+        return (SHARES_PER_CHIP * node.rewardPool) / node.totalShares;
     }
 
     /**
@@ -629,16 +571,16 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function _getTax(
         uint256 rewards,
         uint256 taxFraction,
-        uint256 depositAmount,
-        uint256 stakedAmount
+        uint256 operatorPool,
+        uint256 rewardPool
     ) internal pure returns (uint256) {
-        uint256 stakeCapacity = depositAmount * STAKE_RATIO;
-        if (stakedAmount <= stakeCapacity) {
+        uint256 stakeCapacity = operatorPool * STAKE_RATIO;
+        if (rewardPool <= stakeCapacity) {
             // node will receive its full tax
             return (rewards * taxFraction) / _denominator();
         }
 
-        uint256 stakingRewards = (rewards * stakeCapacity) / stakedAmount;
+        uint256 stakingRewards = (rewards * stakeCapacity) / operatorPool;
         return (stakingRewards * taxFraction) / _denominator();
     }
 

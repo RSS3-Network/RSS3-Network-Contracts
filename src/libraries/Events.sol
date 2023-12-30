@@ -53,12 +53,6 @@ library Events {
      * @param taxFraction The new tax fraction of public pool.
      */
     event PublicPoolTaxFractionSet(uint64 indexed taxFraction);
-    /**
-     * @dev Emitted on withdrawOperatorPoolRewards()
-     * @param nodeAddr Address of node operator.
-     * @param rewards Amount of rewards withdrawn.
-     */
-    event OperatorPoolRewardsWithdrawn(address indexed nodeAddr, uint256 indexed rewards);
 
     /**
      * @dev Emitted on distributeRewards()
@@ -138,32 +132,19 @@ library Events {
      * @param nodeAddr The address of node to unstake.
      * @param user Address of user who unstaked tokens.
      * @param unstakeAmount Amount of tokens unstaked.
-     * @param rewards Amount of rewards claimed.
      */
     event UnstakeClaimed(
         uint256 indexed requestId,
         address indexed nodeAddr,
         address indexed user,
-        uint256 unstakeAmount,
-        uint256 rewards
+        uint256 unstakeAmount
     );
-    /**
-     * @dev Emitted on withdrawTax()
-     * @param nodeAddr The address of node operator.
-     * @param tax Amount of tokens withdrawn.
-     */
-    event TaxWithdrawn(address indexed nodeAddr, uint256 indexed tax);
+
     /**
      * @dev Emitted on slashNode()
      * @param nodeAddr The address of node to slash.
-     * @param slashedDepositAmount Amount of deposit tokens slashed.
-     * @param slashedStakedAmount Amount of staked tokens slashed.
-     * @param slashedRewards Amount of rewards slashed.
+     * @param slashedOperatorPool Amount of operator pool tokens slashed.
+     * @param slashedRewardPool Amount of reward pool tokens slashed.
      */
-    event NodeSlashed(
-        address indexed nodeAddr,
-        uint256 indexed slashedDepositAmount,
-        uint256 indexed slashedStakedAmount,
-        uint256 slashedRewards
-    );
+    event NodeSlashed(address indexed nodeAddr, uint256 indexed slashedOperatorPool, uint256 indexed slashedRewardPool);
 }
