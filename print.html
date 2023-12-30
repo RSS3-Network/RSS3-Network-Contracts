@@ -204,7 +204,7 @@ forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --priv
 <li><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="iaccountoracle"><a class="header" href="#iaccountoracle">IAccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/interfaces/IAccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/interfaces/IAccountOracle.sol">Git Source</a></p>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the AccountOracle contract.</p>
@@ -278,7 +278,7 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ichips"><a class="header" href="#ichips">IChips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/interfaces/IChips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/interfaces/IChips.sol">Git Source</a></p>
 <h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
 <h3 id="initialize-1"><a class="header" href="#initialize-1">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
@@ -346,7 +346,7 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/interfaces/IStaking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/interfaces/IStaking.sol">Git Source</a></p>
 <h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
 <h3 id="initialize-2"><a class="header" href="#initialize-2">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
@@ -356,7 +356,10 @@ Requirements:</p>
     address chips,
     address token,
     uint256 stakeUnbondingPeriod,
-    uint256 depositUnbondingPeriod
+    uint256 depositUnbondingPeriod,
+    uint256 nodeSlashFraction,
+    uint256 userSlashFraction,
+    uint256 stakeRatio
 ) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -367,6 +370,9 @@ Requirements:</p>
 <tr><td><code>token</code></td><td><code>address</code></td><td>Staking token contract.</td></tr>
 <tr><td><code>stakeUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds user need to wait to unstake its stake.</td></tr>
 <tr><td><code>depositUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds node operator need to wait to withdraw its deposit.</td></tr>
+<tr><td><code>nodeSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for node operator.</td></tr>
+<tr><td><code>userSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for user.</td></tr>
+<tr><td><code>stakeRatio</code></td><td><code>uint256</code></td><td>The stake ratio of the node operator.</td></tr>
 </tbody></table>
 </div>
 <h3 id="pause"><a class="header" href="#pause">pause</a></h3>
@@ -741,7 +747,7 @@ Requirements:</p>
 <li><a href="src/libraries/Events.sol/library.Events.html">Events</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -774,7 +780,7 @@ Requirements:</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/libraries/Errors.sol">Git Source</a></p>
 <h2 id="errors-1"><a class="header" href="#errors-1">Errors</a></h2>
 <h3 id="callernotstaking"><a class="header" href="#callernotstaking">CallerNotStaking</a></h3>
 <p><em>Caller is not staking contract</em></p>
@@ -837,7 +843,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error TaxFractionTooLarge();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -1014,7 +1020,7 @@ Requirements:</p>
 <li><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rss3token"><a class="header" href="#rss3token">RSS3Token</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/mocks/RSS3Token.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/mocks/RSS3Token.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC20</p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
@@ -1028,7 +1034,7 @@ ERC20</p>
 <li><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="proxyadmin"><a class="header" href="#proxyadmin">ProxyAdmin</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/upgradeability/ProxyAdmin.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/upgradeability/ProxyAdmin.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Ownable</p>
 <p><em>This is an auxiliary contract meant to be assigned as the admin of a {TransparentUpgradeableProxy}. For an
@@ -1063,7 +1069,7 @@ Requirements:</p>
     onlyOwner;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="itransparentupgradeableproxy"><a class="header" href="#itransparentupgradeableproxy">ITransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 IERC1967</p>
 <p><em>Interface for {TransparentUpgradeableProxy}. In order to implement transparency, {TransparentUpgradeableProxy}
@@ -1075,7 +1081,7 @@ include them in the ABI so this interface must be used to interact with it.</em>
 <pre><code class="language-solidity">function upgradeToAndCall(address, bytes calldata) external payable;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transparentupgradeableproxy"><a class="header" href="#transparentupgradeableproxy">TransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC1967Proxy</p>
 <p>*This contract implements a proxy that is upgradeable through an associated {ProxyAdmin} instance.
@@ -1143,7 +1149,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error ProxyDeniedAdminAccess();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="accountoracle"><a class="header" href="#accountoracle">AccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/AccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/AccountOracle.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/AccountOracle.sol//src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
@@ -1240,7 +1246,7 @@ Requirements:</p>
 <pre><code class="language-solidity">function _log2(uint256 x) internal pure returns (uint256 result);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/Chips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/Chips.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, Initializable, ERC721</p>
 <h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
@@ -1341,31 +1347,31 @@ Metadata JSON Schema&quot;.</em></p>
 <pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view override returns (string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/17919e3748931ef6e63819a8d967b56d42dd26d6/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e892cd74af05836c913c243b8d6b3f0206865b6a/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Staking.sol//src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-4"><a class="header" href="#state-variables-4">State Variables</a></h2>
 <h3 id="shares_per_chip"><a class="header" href="#shares_per_chip">SHARES_PER_CHIP</a></h3>
 <pre><code class="language-solidity">uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 </code></pre>
-<h3 id="firstdepositamount"><a class="header" href="#firstdepositamount">firstDepositAmount</a></h3>
-<pre><code class="language-solidity">uint256 public constant firstDepositAmount = 10000 * 10 ** 18;
+<h3 id="_nodeslashfraction"><a class="header" href="#_nodeslashfraction">_nodeSlashFraction</a></h3>
+<p><em>slash fraction</em></p>
+<pre><code class="language-solidity">uint256 internal _nodeSlashFraction;
 </code></pre>
-<h3 id="slashfraction"><a class="header" href="#slashfraction">slashFraction</a></h3>
-<pre><code class="language-solidity">uint256 public constant slashFraction = 100;
+<h3 id="_userslashfraction"><a class="header" href="#_userslashfraction">_userSlashFraction</a></h3>
+<pre><code class="language-solidity">uint256 internal _userSlashFraction;
 </code></pre>
-<h3 id="slashrewardfraction"><a class="header" href="#slashrewardfraction">slashRewardFraction</a></h3>
-<pre><code class="language-solidity">uint256 public constant slashRewardFraction = 200;
-</code></pre>
-<h3 id="stake_ratio"><a class="header" href="#stake_ratio">STAKE_RATIO</a></h3>
-<pre><code class="language-solidity">uint256 public constant STAKE_RATIO = 25;
+<h3 id="_stakeratio"><a class="header" href="#_stakeratio">_stakeRatio</a></h3>
+<p><em>the ratio of staked tokens to total tokens, 1/25 by default.
+node operator can receive its full tax if it stakes at least 1/25 of the tokens staked by external delegators</em></p>
+<pre><code class="language-solidity">uint256 internal _stakeRatio;
 </code></pre>
 <h3 id="_depositunbondingperiod"><a class="header" href="#_depositunbondingperiod">_depositUnbondingPeriod</a></h3>
-<p><em>The period of time that node operator can't withdraw staked tokens</em></p>
+<p><em>the period of time that node operator can't withdraw staked tokens</em></p>
 <pre><code class="language-solidity">uint256 internal _depositUnbondingPeriod;
 </code></pre>
 <h3 id="_stakeunbondingperiod"><a class="header" href="#_stakeunbondingperiod">_stakeUnbondingPeriod</a></h3>
-<p><em>The period of time that user can't withdraw staked tokens</em></p>
+<p><em>the period of time that user can't withdraw staked tokens</em></p>
 <pre><code class="language-solidity">uint256 internal _stakeUnbondingPeriod;
 </code></pre>
 <h3 id="_nodeaddrs"><a class="header" href="#_nodeaddrs">_nodeAddrs</a></h3>
@@ -1424,7 +1430,10 @@ Metadata JSON Schema&quot;.</em></p>
     address chips,
     address token,
     uint256 stakeUnbondingPeriod,
-    uint256 depositUnbondingPeriod
+    uint256 depositUnbondingPeriod,
+    uint256 nodeSlashFraction,
+    uint256 userSlashFraction,
+    uint256 stakeRatio
 ) external override initializer;
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -1435,6 +1444,9 @@ Metadata JSON Schema&quot;.</em></p>
 <tr><td><code>token</code></td><td><code>address</code></td><td>Staking token contract.</td></tr>
 <tr><td><code>stakeUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds user need to wait to unstake its stake.</td></tr>
 <tr><td><code>depositUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds node operator need to wait to withdraw its deposit.</td></tr>
+<tr><td><code>nodeSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for node operator.</td></tr>
+<tr><td><code>userSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for user.</td></tr>
+<tr><td><code>stakeRatio</code></td><td><code>uint256</code></td><td>The stake ratio of the node operator.</td></tr>
 </tbody></table>
 </div>
 <h3 id="pause-1"><a class="header" href="#pause-1">pause</a></h3>
@@ -1861,7 +1873,7 @@ it needs to stake at least 1/25 of the tokens staked by external delegators,
 or the exceeding part of the tax will be sent to the reward pool.</em></p>
 <pre><code class="language-solidity">function _getTax(uint256 rewards, uint256 taxFraction, uint256 operatorPool, uint256 rewardPool)
     internal
-    pure
+    view
     returns (uint256);
 </code></pre>
 <h3 id="_denominator"><a class="header" href="#_denominator">_denominator</a></h3>
