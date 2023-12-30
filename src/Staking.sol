@@ -490,14 +490,14 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         DataTypes.Node storage node,
         uint256 amount
     ) internal returns (uint256 startTokenId, uint256 endTokenId) {
-        uint256 shares = _getShares(node, amount);
+        uint256 shares = _getShares(amount, node.rewardPool, node.totalShares);
         uint256 chipsCount = shares / SHARES_PER_CHIP;
         if (chipsCount == 0) revert Errors.AmountTooSmall(amount);
         // mint chips
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
 
         // update stakedAmount
-        uint256 stakedAmount = _sharesToTokens(node, chipsCount * SHARES_PER_CHIP);
+        uint256 stakedAmount = _sharesToTokens(chipsCount * SHARES_PER_CHIP, node.totalShares, node.rewardPool);
         node.rewardPool += stakedAmount;
         // update total shares
         node.totalShares += (chipsCount * SHARES_PER_CHIP);
@@ -535,21 +535,23 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         emit Events.WithdrawalClaimed(requestId);
     }
 
-    function _sharesToTokens(DataTypes.Node storage node, uint256 shares) internal view returns (uint256) {
-        if (node.totalShares == 0) {
+    function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalAmount) internal pure returns (uint256) {
+        if (totalAmount == 0) {
             return shares;
         }
 
-        return (shares * node.rewardPool) / node.totalShares;
+        // TODO: division or modulo by zero ?
+        return (shares * totalAmount) / totalShares;
     }
 
     /// @dev get shares amount
-    function _getShares(DataTypes.Node memory node, uint256 stakeAmount) internal view returns (uint256 shares) {
-        if (node.totalShares == 0) {
-            shares = stakeAmount;
-        } else {
-            shares = (stakeAmount * node.rewardPool) / node.totalShares;
+    function _getShares(uint256 amount, uint256 totalAmount, uint256 totalShares) internal pure returns (uint256) {
+        if (totalShares == 0) {
+            return amount;
         }
+
+        // TODO: division or modulo by zero ?
+        return (amount * totalShares) / totalAmount;
     }
 
     /// @dev get minimal tokens to stake for a node
