@@ -22,9 +22,13 @@ contract CommonTest is Utils {
     address public constant oracleAccount = address(0x999);
 
     uint256 public constant stakeUnbondingPeriod = 22.5 days;
-    uint256 public constant delegateUnbondingPeriod = 30 days;
+    uint256 public constant delegateUnbondingPeriod = 22.5 days;
 
     uint256 internal _initialAmount = 100000000 ether;
+
+    uint256 public constant nodeSlashFraction = 200;
+    uint256 public constant userSlashFraction = 100;
+    uint256 public constant stakeRatio = 25;
 
     RSS3Token internal _rss3;
     Staking internal _staking;
@@ -45,13 +49,16 @@ contract CommonTest is Utils {
             address(stakingImpl),
             proxyAdmin,
             abi.encodeWithSignature(
-                "initialize(address,address,address,address,uint256,uint256)",
+                "initialize(address,address,address,address,uint256,uint256,uint256,uint256,uint256)",
                 pauseAccount,
                 address(_accountOracle),
                 address(_chips),
                 address(_rss3),
                 stakeUnbondingPeriod,
-                delegateUnbondingPeriod
+                delegateUnbondingPeriod,
+                nodeSlashFraction,
+                userSlashFraction,
+                stakeRatio
             )
         );
         _staking = Staking(address(proxy));

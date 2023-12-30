@@ -20,6 +20,9 @@ contract DeployConfig is Script {
     address public rss3Token;
     uint256 public depositUnbondingPeriod;
     uint256 public stakeUnbondingPeriod;
+    uint256 public nodeSlashFraction;
+    uint256 public userSlashFraction;
+    uint256 public stakeRatio;
 
     constructor(string memory _path) {
         console.log("DeployConfig: reading file %s", _path);
@@ -37,5 +40,8 @@ contract DeployConfig is Script {
         rss3Token = stdJson.readAddress(_json, "$.rss3Token");
         depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
         stakeUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
+        nodeSlashFraction = stdJson.readUint(_json, "$.nodeSlashFraction");
+        userSlashFraction = stdJson.readUint(_json, "$.userSlashFraction");
+        stakeRatio = stdJson.readUint(_json, "$.stakeRatio");
     }
 }

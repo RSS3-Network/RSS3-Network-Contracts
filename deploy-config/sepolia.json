@@ -5,6 +5,8 @@
   "oracleAccount": "0x11872CdEa66888546D5602e1c577Eb19400aeae1",
   "rss3Token": "0x568F64582A377ea52d0067c4E430B9aE22A60473",
   "depositUnbondingPeriod": "1944000",
-  "stakeUnbondingPeriod": "1944000"
-
+  "stakeUnbondingPeriod": "1944000",
+  "nodeSlashFraction": "200",
+  "userSlashFraction": "100",
+  "stakeRatio": "25"
 }

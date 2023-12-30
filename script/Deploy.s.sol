@@ -137,7 +137,10 @@ contract Deploy is Deployer {
             chipsProxy,
             cfg.rss3Token(),
             cfg.stakeUnbondingPeriod(),
-            cfg.depositUnbondingPeriod()
+            cfg.depositUnbondingPeriod(),
+            cfg.nodeSlashFraction(),
+            cfg.userSlashFraction(),
+            cfg.stakeRatio()
         );
 
         // check states

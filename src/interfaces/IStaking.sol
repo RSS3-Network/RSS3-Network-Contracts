@@ -12,6 +12,9 @@ interface IStaking {
      * @param token Staking token contract.
      * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
      * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its deposit.
+     * @param nodeSlashFraction Slash fraction for node operator.
+     * @param userSlashFraction Slash fraction for user.
+     * @param stakeRatio The stake ratio of the node operator.
      */
     function initialize(
         address pauseAccount,
@@ -19,7 +22,10 @@ interface IStaking {
         address chips,
         address token,
         uint256 stakeUnbondingPeriod,
-        uint256 depositUnbondingPeriod
+        uint256 depositUnbondingPeriod,
+        uint256 nodeSlashFraction,
+        uint256 userSlashFraction,
+        uint256 stakeRatio
     ) external;
 
     /**

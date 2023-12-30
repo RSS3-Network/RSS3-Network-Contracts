@@ -23,16 +23,18 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     using SafeERC20 for IERC20;
 
     uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
-    uint256 public constant firstDepositAmount = 10000 * 10 ** 18;
 
-    uint256 public constant slashFraction = 100;
-    uint256 public constant slashRewardFraction = 200;
+    /// @dev slash fraction
+    uint256 internal _nodeSlashFraction;
+    uint256 internal _userSlashFraction;
 
-    uint256 public constant STAKE_RATIO = 25;
+    /// @dev the ratio of staked tokens to total tokens, 1/25 by default.
+    /// node operator can receive its full tax if it stakes at least 1/25 of the tokens staked by external delegators
+    uint256 internal _stakeRatio;
 
-    /// @dev The period of time that node operator can't withdraw staked tokens
+    /// @dev the period of time that node operator can't withdraw staked tokens
     uint256 internal _depositUnbondingPeriod;
-    /// @dev The period of time that user can't withdraw staked tokens
+    /// @dev the period of time that user can't withdraw staked tokens
     uint256 internal _stakeUnbondingPeriod;
 
     /// @dev all node addresses
@@ -74,13 +76,21 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         address chips,
         address token,
         uint256 stakeUnbondingPeriod,
-        uint256 depositUnbondingPeriod
+        uint256 depositUnbondingPeriod,
+        uint256 nodeSlashFraction,
+        uint256 userSlashFraction,
+        uint256 stakeRatio
     ) external override initializer {
         _chips = chips;
         _token = token;
 
         _stakeUnbondingPeriod = stakeUnbondingPeriod;
         _depositUnbondingPeriod = depositUnbondingPeriod;
+
+        _nodeSlashFraction = nodeSlashFraction;
+        _userSlashFraction = userSlashFraction;
+
+        _stakeRatio = stakeRatio;
 
         _grantRole(PAUSE_ROLE, pauseAccount);
         _grantRole(ORACLE_ROLE, oracleAccount);
@@ -370,11 +380,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             if (node.account == address(0)) revert Errors.NodeNotExists();
 
             // slash operator pool tokens
-            uint256 slashedOperatorPool = (node.operatorPool * slashFraction) / _denominator();
+            uint256 slashedOperatorPool = (node.operatorPool * _nodeSlashFraction) / _denominator();
             node.operatorPool -= slashedOperatorPool;
 
             // slash reward pool tokens
-            uint256 slashedRewardPool = (node.rewardPool * slashFraction) / _denominator();
+            uint256 slashedRewardPool = (node.rewardPool * _userSlashFraction) / _denominator();
             node.rewardPool -= slashedRewardPool;
 
             node.slashedAmount += slashedOperatorPool + slashedRewardPool;
@@ -473,8 +483,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function _deposit(address nodeAddr, uint256 amount) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert Errors.NodeNotExists();
-
-        if (node.operatorPool == 0 && amount < firstDepositAmount) revert Errors.AmountTooSmall(amount);
 
         // update operator pool
         node.operatorPool += amount;
@@ -575,8 +583,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256 taxFraction,
         uint256 operatorPool,
         uint256 rewardPool
-    ) internal pure returns (uint256) {
-        uint256 stakeCapacity = operatorPool * STAKE_RATIO;
+    ) internal view returns (uint256) {
+        uint256 stakeCapacity = operatorPool * _stakeRatio;
         if (rewardPool <= stakeCapacity) {
             // node will receive its full tax
             return (rewards * taxFraction) / _denominator();
