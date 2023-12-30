@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/4e24b2427841493d7f40891292a25119c36ed6aa/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0f34fd5f68fee7925ca5ce2e4aeb6a4504230a13/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -385,24 +385,6 @@ Requirements:</p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>taxFraction</code></td><td><code>uint64</code></td><td>The tax fraction to set.</td></tr>
-</tbody></table>
-</div>
-<h3 id="withdrawoperatorpoolrewards"><a class="header" href="#withdrawoperatorpoolrewards">withdrawOperatorPoolRewards</a></h3>
-<p>Withdraws operator pool rewards for node operator.</p>
-<pre><code class="language-solidity">function withdrawOperatorPoolRewards(address nodeAddr) external override whenNotPaused;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator.</td></tr>
-</tbody></table>
-</div>
-<h3 id="withdrawtax"><a class="header" href="#withdrawtax">withdrawTax</a></h3>
-<p>Withdraws tax for node operator.</p>
-<pre><code class="language-solidity">function withdrawTax(address nodeAddr) external override whenNotPaused;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>Address of node operator.</td></tr>
 </tbody></table>
 </div>
 <h3 id="claimwithdrawal"><a class="header" href="#claimwithdrawal">claimWithdrawal</a></h3>
@@ -698,16 +680,12 @@ Requirements:</p>
 <p><em>claim withdrawal request</em></p>
 <pre><code class="language-solidity">function _claimWithdrawal(uint256 requestId) internal;
 </code></pre>
-<h3 id="_withdrawoperatorpoolrewards"><a class="header" href="#_withdrawoperatorpoolrewards">_withdrawOperatorPoolRewards</a></h3>
-<p><em>withdraw operator pool rewards</em></p>
-<pre><code class="language-solidity">function _withdrawOperatorPoolRewards(DataTypes.Node storage node) internal;
-</code></pre>
 <h3 id="_sharestotokens"><a class="header" href="#_sharestotokens">_sharesToTokens</a></h3>
 <pre><code class="language-solidity">function _sharesToTokens(DataTypes.Node storage node, uint256 shares) internal view returns (uint256);
 </code></pre>
 <h3 id="_getshares"><a class="header" href="#_getshares">_getShares</a></h3>
 <p><em>get shares amount</em></p>
-<pre><code class="language-solidity">function _getShares(DataTypes.Node memory node, uint256 stakeAmount) internal pure returns (uint256 shares);
+<pre><code class="language-solidity">function _getShares(DataTypes.Node memory node, uint256 stakeAmount) internal view returns (uint256 shares);
 </code></pre>
 <h3 id="_mintokenstostake"><a class="header" href="#_mintokenstostake">_minTokensToStake</a></h3>
 <p><em>get minimal tokens to stake for a node</em></p>
@@ -718,7 +696,7 @@ Requirements:</p>
 For a node operator to receive its full tax,
 it needs to stake at least 1/25 of the tokens staked by external delegators,
 or the exceeding part of the tax will be sent to the reward pool.</em></p>
-<pre><code class="language-solidity">function _getTax(uint256 rewards, uint256 taxFraction, uint256 depositAmount, uint256 stakedAmount)
+<pre><code class="language-solidity">function _getTax(uint256 rewards, uint256 taxFraction, uint256 operatorPool, uint256 rewardPool)
     internal
     pure
     returns (uint256);
