@@ -103,12 +103,38 @@ contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable
     }
 
     /// @dev returns log2(x)
-    function _log2(uint256 x) internal pure returns (uint256 result) {
-        if (x == 0) return 0;
-
-        while ((x & 1) == 0) {
-            x >>= 1;
-            result += 1;
+    // solhint-disable-next-line code-complexity
+    function _log2(uint256 x) internal pure returns (uint256 n) {
+        if (x >= 2 ** 128) {
+            x >>= 128;
+            n += 128;
+        }
+        if (x >= 2 ** 64) {
+            x >>= 64;
+            n += 64;
+        }
+        if (x >= 2 ** 32) {
+            x >>= 32;
+            n += 32;
+        }
+        if (x >= 2 ** 16) {
+            x >>= 16;
+            n += 16;
+        }
+        if (x >= 2 ** 8) {
+            x >>= 8;
+            n += 8;
+        }
+        if (x >= 2 ** 4) {
+            x >>= 4;
+            n += 4;
+        }
+        if (x >= 2 ** 2) {
+            x >>= 2;
+            n += 2;
+        }
+        if (x >= 2 ** 1) {
+            n += 1;
         }
     }
 }
