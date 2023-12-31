@@ -8,5 +8,7 @@
   "stakeUnbondingPeriod": "1944000",
   "nodeSlashFraction": "200",
   "userSlashFraction": "100",
-  "stakeRatio": "25"
+  "stakeRatio": "25",
+  "chipsName": "RSS3 Chips",
+  "chipsSymbol": "Chips"
 }

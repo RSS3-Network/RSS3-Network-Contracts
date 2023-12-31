@@ -4,8 +4,8 @@ pragma solidity 0.8.20;
 import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {Errors} from "./libraries/Errors.sol";
+import {ERC721} from "./base/ERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
 contract Chips is IChips, Initializable, ERC721 {
@@ -22,11 +22,11 @@ contract Chips is IChips, Initializable, ERC721 {
         _;
     }
 
-    constructor() ERC721("RSS3 Chips", "Chips") {}
-
     /// @inheritdoc IChips
-    function initialize(address staking_) external override initializer {
+    function initialize(string memory name_, string memory symbol_, address staking_) external override initializer {
         _staking = staking_;
+
+        super._initialize(name_, symbol_);
     }
 
     /// @inheritdoc IChips

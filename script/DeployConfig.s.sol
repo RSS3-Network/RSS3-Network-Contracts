@@ -23,6 +23,8 @@ contract DeployConfig is Script {
     uint256 public nodeSlashFraction;
     uint256 public userSlashFraction;
     uint256 public stakeRatio;
+    string public chipsName;
+    string public chipsSymbol;
 
     constructor(string memory _path) {
         console.log("DeployConfig: reading file %s", _path);
@@ -43,5 +45,7 @@ contract DeployConfig is Script {
         nodeSlashFraction = stdJson.readUint(_json, "$.nodeSlashFraction");
         userSlashFraction = stdJson.readUint(_json, "$.userSlashFraction");
         stakeRatio = stdJson.readUint(_json, "$.stakeRatio");
+        chipsName = stdJson.readString(_json, "$.chipsName");
+        chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");
     }
 }

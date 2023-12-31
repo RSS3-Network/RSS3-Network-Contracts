@@ -7,8 +7,8 @@ import {DataTypes} from "./libraries/DataTypes.sol";
 import {Errors} from "./libraries/Errors.sol";
 import {Events} from "./libraries/Events.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
-import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
+import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -518,7 +518,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @dev claim unstake request
     function _claimUnstake(uint256 requestId) internal {
         DataTypes.UnstakeRequest memory req = _pendingUnstake[requestId];
-        if (block.timestamp - req.timestamp < _stakeUnbondingPeriod) revert Errors.ClaimTimeNotReady();
+        if (block.timestamp < req.timestamp + _stakeUnbondingPeriod) revert Errors.ClaimTimeNotReady();
 
         // transfer
         IERC20(_token).safeTransfer(req.owner, req.unstakeAmount);
@@ -532,7 +532,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @dev claim withdrawal request
     function _claimWithdrawal(uint256 requestId) internal {
         DataTypes.WithdrawalRequest memory req = _pendingWithdrawals[requestId];
-        if (block.timestamp - req.timestamp < _depositUnbondingPeriod) revert Errors.ClaimTimeNotReady();
+        if (block.timestamp < req.timestamp + _depositUnbondingPeriod) revert Errors.ClaimTimeNotReady();
 
         // transfer staked tokens
         IERC20(_token).safeTransfer(req.owner, req.amount);

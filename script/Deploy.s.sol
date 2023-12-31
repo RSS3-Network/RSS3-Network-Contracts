@@ -76,14 +76,13 @@ contract Deploy is Deployer {
         address logic = mustGetAddress(_stripSemver(_name));
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy({
             _logic: logic,
-            initialOwner: cfg.proxyAdminOwner(),
+            admin_: cfg.proxyAdminOwner(),
             _data: ""
         });
 
         // check states
         address proxyAdmin = address(uint160(uint256(vm.load(address(proxy), OWNER_KEY))));
-        address admin = address(uint160(uint256(vm.load(proxyAdmin, bytes32(0)))));
-        require(admin == cfg.proxyAdminOwner(), "proxy admin assert error");
+        require(proxyAdmin == cfg.proxyAdminOwner(), "proxy admin assert error");
 
         string memory proxyName = string.concat(_name, "Proxy");
         save(proxyName, address(proxy));
@@ -145,7 +144,7 @@ contract Deploy is Deployer {
 
         // check states
         require(stakingProxy.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "check pause role error");
-        require(stakingProxy.hasRole(PAUSE_ROLE, accountOracleProxy), "check oracle role error");
+        require(stakingProxy.hasRole(ORACLE_ROLE, accountOracleProxy), "check oracle role error");
         require(stakingProxy.stakingToken() == cfg.rss3Token(), "check staking token error");
         require(stakingProxy.chipsContract() == chipsProxy, "check chips token error");
     }
@@ -154,7 +153,7 @@ contract Deploy is Deployer {
         Chips chipsProxy = Chips(mustGetAddress("ChipsProxy"));
         address stakingProxy = mustGetAddress("StakingProxy");
 
-        chipsProxy.initialize(stakingProxy);
+        chipsProxy.initialize(cfg.chipsName(), cfg.chipsSymbol(), stakingProxy);
 
         // check states
         require(chipsProxy.stakingContract() == stakingProxy, "check chip contract error");

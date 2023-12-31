@@ -64,7 +64,7 @@ contract CommonTest is Utils {
         _staking = Staking(address(proxy));
 
         // init chips token
-        _chips.initialize(address(_staking));
+        _chips.initialize("RSS3 Chips", "Chips", address(_staking));
         // init account oracle
         _accountOracle.initialize(address(_staking), oracleAccount);
     }
