@@ -11,6 +11,11 @@ contract ChipsTest is CommonTest {
         _setUp();
     }
 
+    function testCheckSetupStatus() public {
+        assertEq(_chips.name(), chipsName);
+        assertEq(_chips.symbol(), chipsSymbol);
+    }
+
     function testMint() public {
         vm.prank(address(_staking));
         uint256 tokenId = _chips.mint(alice);

@@ -30,6 +30,9 @@ contract CommonTest is Utils {
     uint256 public constant userSlashFraction = 100;
     uint256 public constant stakeRatio = 25;
 
+    string public constant chipsName = "RSS3 Chips";
+    string public constant chipsSymbol = "Chips";
+
     RSS3Token internal _rss3;
     Staking internal _staking;
     Chips internal _chips;
@@ -64,7 +67,7 @@ contract CommonTest is Utils {
         _staking = Staking(address(proxy));
 
         // init chips token
-        _chips.initialize("RSS3 Chips", "Chips", address(_staking));
+        _chips.initialize(chipsName, chipsSymbol, address(_staking));
         // init account oracle
         _accountOracle.initialize(address(_staking), oracleAccount);
     }

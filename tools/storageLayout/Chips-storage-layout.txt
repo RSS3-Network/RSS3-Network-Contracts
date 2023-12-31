@@ -1,10 +1,13 @@
 | Name               | Type                                         | Slot | Offset | Bytes | Contract            |
 |--------------------|----------------------------------------------|------|--------|-------|---------------------|
-| _name              | string                                       | 0    | 0      | 32    | src/Chips.sol:Chips |
-| _symbol            | string                                       | 1    | 0      | 32    | src/Chips.sol:Chips |
-| _owners            | mapping(uint256 => address)                  | 2    | 0      | 32    | src/Chips.sol:Chips |
-| _balances          | mapping(address => uint256)                  | 3    | 0      | 32    | src/Chips.sol:Chips |
-| _tokenApprovals    | mapping(uint256 => address)                  | 4    | 0      | 32    | src/Chips.sol:Chips |
-| _operatorApprovals | mapping(address => mapping(address => bool)) | 5    | 0      | 32    | src/Chips.sol:Chips |
-| _staking           | address                                      | 6    | 0      | 20    | src/Chips.sol:Chips |
-| _counter           | uint256                                      | 7    | 0      | 32    | src/Chips.sol:Chips |
+| _initialized       | uint8                                        | 0    | 0      | 1     | src/Chips.sol:Chips |
+| _initializing      | bool                                         | 0    | 1      | 1     | src/Chips.sol:Chips |
+| _name              | string                                       | 1    | 0      | 32    | src/Chips.sol:Chips |
+| _symbol            | string                                       | 2    | 0      | 32    | src/Chips.sol:Chips |
+| _owners            | mapping(uint256 => address)                  | 3    | 0      | 32    | src/Chips.sol:Chips |
+| _balances          | mapping(address => uint256)                  | 4    | 0      | 32    | src/Chips.sol:Chips |
+| _tokenApprovals    | mapping(uint256 => address)                  | 5    | 0      | 32    | src/Chips.sol:Chips |
+| _operatorApprovals | mapping(address => mapping(address => bool)) | 6    | 0      | 32    | src/Chips.sol:Chips |
+| _staking           | address                                      | 7    | 0      | 20    | src/Chips.sol:Chips |
+| _counter           | uint256                                      | 8    | 0      | 32    | src/Chips.sol:Chips |
+| _totalSupply       | uint256                                      | 9    | 0      | 32    | src/Chips.sol:Chips |
