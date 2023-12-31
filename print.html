@@ -90,7 +90,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item "><a href="index.html">Home</a></li><li class="chapter-item affix "><li class="part-title">src</li><li class="chapter-item "><a href="src/interfaces/index.html">❱ interfaces</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a></li><li class="chapter-item "><a href="src/interfaces/IChips.sol/interface.IChips.html">IChips</a></li><li class="chapter-item "><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li></ol></li><li class="chapter-item "><a href="src/libraries/index.html">❱ libraries</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/libraries/DataTypes.sol/library.DataTypes.html">DataTypes</a></li><li class="chapter-item "><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li><li class="chapter-item "><a href="src/libraries/Events.sol/library.Events.html">Events</a></li></ol></li><li class="chapter-item "><a href="src/mocks/index.html">❱ mocks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li></ol></li><li class="chapter-item "><a href="src/upgradeability/index.html">❱ upgradeability</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/upgradeability/ProxyAdmin.sol/contract.ProxyAdmin.html">ProxyAdmin</a></li><li class="chapter-item "><a href="src/upgradeability/TransparentUpgradeableProxy.sol/interface.ITransparentUpgradeableProxy.html">ITransparentUpgradeableProxy</a></li><li class="chapter-item "><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li></ol></li><li class="chapter-item "><a href="src/AccountOracle.sol/contract.AccountOracle.html">AccountOracle</a></li><li class="chapter-item "><a href="src/Chips.sol/contract.Chips.html">Chips</a></li><li class="chapter-item "><a href="src/Staking.sol/contract.Staking.html">Staking</a></li></ol>
+                <ol class="chapter"><li class="chapter-item "><a href="index.html">Home</a></li><li class="chapter-item affix "><li class="part-title">src</li><li class="chapter-item "><a href="src/base/index.html">❱ base</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/base/ERC721.sol/contract.ERC721.html">ERC721</a></li></ol></li><li class="chapter-item "><a href="src/interfaces/index.html">❱ interfaces</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a></li><li class="chapter-item "><a href="src/interfaces/IChips.sol/interface.IChips.html">IChips</a></li><li class="chapter-item "><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li></ol></li><li class="chapter-item "><a href="src/libraries/index.html">❱ libraries</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/libraries/DataTypes.sol/library.DataTypes.html">DataTypes</a></li><li class="chapter-item "><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li><li class="chapter-item "><a href="src/libraries/Events.sol/library.Events.html">Events</a></li></ol></li><li class="chapter-item "><a href="src/mocks/index.html">❱ mocks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li></ol></li><li class="chapter-item "><a href="src/upgradeability/index.html">❱ upgradeability</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="src/upgradeability/TransparentUpgradeableProxy.sol/interface.ITransparentUpgradeableProxy.html">ITransparentUpgradeableProxy</a></li><li class="chapter-item "><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li></ol></li><li class="chapter-item "><a href="src/AccountOracle.sol/contract.AccountOracle.html">AccountOracle</a></li><li class="chapter-item "><a href="src/Chips.sol/contract.Chips.html">Chips</a></li><li class="chapter-item "><a href="src/Staking.sol/contract.Staking.html">Staking</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -199,13 +199,258 @@ forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --priv
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="contents"><a class="header" href="#contents">Contents</a></h1>
 <ul>
+<li><a href="src/base/ERC721.sol/contract.ERC721.html">ERC721</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="erc721"><a class="header" href="#erc721">ERC721</a></h1>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/base/ERC721.sol">Git Source</a></p>
+<p><strong>Inherits:</strong>
+Context, ERC165, IERC721, IERC721Metadata</p>
+<p><em>Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
+the Metadata extension, but not including the Enumerable extension, which is available separately as
+{ERC721Enumerable}.</em></p>
+<h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
+<h3 id="_name"><a class="header" href="#_name">_name</a></h3>
+<pre><code class="language-solidity">string private _name;
+</code></pre>
+<h3 id="_symbol"><a class="header" href="#_symbol">_symbol</a></h3>
+<pre><code class="language-solidity">string private _symbol;
+</code></pre>
+<h3 id="_owners"><a class="header" href="#_owners">_owners</a></h3>
+<pre><code class="language-solidity">mapping(uint256 =&gt; address) private _owners;
+</code></pre>
+<h3 id="_balances"><a class="header" href="#_balances">_balances</a></h3>
+<pre><code class="language-solidity">mapping(address =&gt; uint256) private _balances;
+</code></pre>
+<h3 id="_tokenapprovals"><a class="header" href="#_tokenapprovals">_tokenApprovals</a></h3>
+<pre><code class="language-solidity">mapping(uint256 =&gt; address) private _tokenApprovals;
+</code></pre>
+<h3 id="_operatorapprovals"><a class="header" href="#_operatorapprovals">_operatorApprovals</a></h3>
+<pre><code class="language-solidity">mapping(address =&gt; mapping(address =&gt; bool)) private _operatorApprovals;
+</code></pre>
+<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<h3 id="_initialize"><a class="header" href="#_initialize">_initialize</a></h3>
+<p><em>Initializes the contract by setting a <code>name</code> and a <code>symbol</code> to the token collection.</em></p>
+<pre><code class="language-solidity">function _initialize(string memory name_, string memory symbol_) internal;
+</code></pre>
+<h3 id="supportsinterface"><a class="header" href="#supportsinterface">supportsInterface</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#supportsinterface">IERC165-supportsInterface</a>.</em></p>
+<pre><code class="language-solidity">function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool);
+</code></pre>
+<h3 id="balanceof"><a class="header" href="#balanceof">balanceOf</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/test/StdCheats.t.sol/contract.BarERC1155.html#balanceof">IERC721-balanceOf</a>.</em></p>
+<pre><code class="language-solidity">function balanceOf(address owner) public view virtual override returns (uint256);
+</code></pre>
+<h3 id="ownerof"><a class="header" href="#ownerof">ownerOf</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/test/StdCheats.t.sol/contract.BarERC721.html#ownerof">IERC721-ownerOf</a>.</em></p>
+<pre><code class="language-solidity">function ownerOf(uint256 tokenId) public view virtual override returns (address);
+</code></pre>
+<h3 id="name"><a class="header" href="#name">name</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC20.sol/interface.IERC20.html#name">IERC721Metadata-name</a>.</em></p>
+<pre><code class="language-solidity">function name() public view virtual override returns (string memory);
+</code></pre>
+<h3 id="symbol"><a class="header" href="#symbol">symbol</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC20.sol/interface.IERC20.html#symbol">IERC721Metadata-symbol</a>.</em></p>
+<pre><code class="language-solidity">function symbol() public view virtual override returns (string memory);
+</code></pre>
+<h3 id="tokenuri"><a class="header" href="#tokenuri">tokenURI</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//src/Chips.sol/contract.Chips.html#tokenuri">IERC721Metadata-tokenURI</a>.</em></p>
+<pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view virtual override returns (string memory);
+</code></pre>
+<h3 id="_baseuri"><a class="header" href="#_baseuri">_baseURI</a></h3>
+<p><em>Base URI for computing <a href="src/base/ERC721.sol//src/base/ERC721.sol/contract.ERC721.html#tokenuri">tokenURI</a>. If set, the resulting URI for each
+token will be the concatenation of the <code>baseURI</code> and the <code>tokenId</code>. Empty
+by default, can be overridden in child contracts.</em></p>
+<pre><code class="language-solidity">function _baseURI() internal view virtual returns (string memory);
+</code></pre>
+<h3 id="approve"><a class="header" href="#approve">approve</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#approve">IERC721-approve</a>.</em></p>
+<pre><code class="language-solidity">function approve(address to, uint256 tokenId) public virtual override;
+</code></pre>
+<h3 id="getapproved"><a class="header" href="#getapproved">getApproved</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721.html#getapproved">IERC721-getApproved</a>.</em></p>
+<pre><code class="language-solidity">function getApproved(uint256 tokenId) public view virtual override returns (address);
+</code></pre>
+<h3 id="setapprovalforall"><a class="header" href="#setapprovalforall">setApprovalForAll</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#setapprovalforall">IERC721-setApprovalForAll</a>.</em></p>
+<pre><code class="language-solidity">function setApprovalForAll(address operator, bool approved) public virtual override;
+</code></pre>
+<h3 id="isapprovedforall"><a class="header" href="#isapprovedforall">isApprovedForAll</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#isapprovedforall">IERC721-isApprovedForAll</a>.</em></p>
+<pre><code class="language-solidity">function isApprovedForAll(address owner, address operator) public view virtual override returns (bool);
+</code></pre>
+<h3 id="transferfrom"><a class="header" href="#transferfrom">transferFrom</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#transferfrom">IERC721-transferFrom</a>.</em></p>
+<pre><code class="language-solidity">function transferFrom(address from, address to, uint256 tokenId) public virtual override;
+</code></pre>
+<h3 id="safetransferfrom"><a class="header" href="#safetransferfrom">safeTransferFrom</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
+<pre><code class="language-solidity">function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override;
+</code></pre>
+<h3 id="safetransferfrom-1"><a class="header" href="#safetransferfrom-1">safeTransferFrom</a></h3>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
+<pre><code class="language-solidity">function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public virtual override;
+</code></pre>
+<h3 id="_safetransfer"><a class="header" href="#_safetransfer">_safeTransfer</a></h3>
+<p>*Safely transfers <code>tokenId</code> token from <code>from</code> to <code>to</code>, checking first that contract recipients
+are aware of the ERC721 protocol to prevent tokens from being forever locked.
+<code>data</code> is additional data, it has no specified format and it is sent in call to <code>to</code>.
+This internal function is equivalent to <a href="src/base/ERC721.sol//src/base/ERC721.sol/contract.ERC721.html#safetransferfrom">safeTransferFrom</a>, and can be used to e.g.
+implement alternative mechanisms to perform token transfer, such as signature-based.
+Requirements:</p>
+<ul>
+<li><code>from</code> cannot be the zero address.</li>
+<li><code>to</code> cannot be the zero address.</li>
+<li><code>tokenId</code> token must exist and be owned by <code>from</code>.</li>
+<li>If <code>to</code> refers to a smart contract, it must implement {IERC721Receiver-onERC721Received},
+which is called upon a safe transfer.
+Emits a {Transfer} event.*</li>
+</ul>
+<pre><code class="language-solidity">function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal virtual;
+</code></pre>
+<h3 id="_ownerof"><a class="header" href="#_ownerof">_ownerOf</a></h3>
+<p><em>Returns the owner of the <code>tokenId</code>. Does NOT revert if token doesn't exist</em></p>
+<pre><code class="language-solidity">function _ownerOf(uint256 tokenId) internal view virtual returns (address);
+</code></pre>
+<h3 id="_exists"><a class="header" href="#_exists">_exists</a></h3>
+<p><em>Returns whether <code>tokenId</code> exists.
+Tokens can be managed by their owner or approved accounts via <a href="src/base/ERC721.sol//src/base/ERC721.sol/contract.ERC721.html#approve">approve</a> or {setApprovalForAll}.
+Tokens start existing when they are minted (<code>_mint</code>),
+and stop existing when they are burned (<code>_burn</code>).</em></p>
+<pre><code class="language-solidity">function _exists(uint256 tokenId) internal view virtual returns (bool);
+</code></pre>
+<h3 id="_isapprovedorowner"><a class="header" href="#_isapprovedorowner">_isApprovedOrOwner</a></h3>
+<p>*Returns whether <code>spender</code> is allowed to manage <code>tokenId</code>.
+Requirements:</p>
+<ul>
+<li><code>tokenId</code> must exist.*</li>
+</ul>
+<pre><code class="language-solidity">function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual returns (bool);
+</code></pre>
+<h3 id="_safemint"><a class="header" href="#_safemint">_safeMint</a></h3>
+<p>*Safely mints <code>tokenId</code> and transfers it to <code>to</code>.
+Requirements:</p>
+<ul>
+<li><code>tokenId</code> must not exist.</li>
+<li>If <code>to</code> refers to a smart contract, it must implement <a href="src/base/ERC721.sol//lib/forge-std/test/mocks/MockERC721.t.sol/contract.ERC721Recipient.html#onerc721received">IERC721Receiver-onERC721Received</a>,
+which is called upon a safe transfer.
+Emits a {Transfer} event.*</li>
+</ul>
+<pre><code class="language-solidity">function _safeMint(address to, uint256 tokenId) internal virtual;
+</code></pre>
+<h3 id="_safemint-1"><a class="header" href="#_safemint-1">_safeMint</a></h3>
+<p><em>Same as <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#_safemint"><code>_safeMint</code></a>, with an additional <code>data</code> parameter which is
+forwarded in {IERC721Receiver-onERC721Received} to contract recipients.</em></p>
+<pre><code class="language-solidity">function _safeMint(address to, uint256 tokenId, bytes memory data) internal virtual;
+</code></pre>
+<h3 id="_mint"><a class="header" href="#_mint">_mint</a></h3>
+<p>*Mints <code>tokenId</code> and transfers it to <code>to</code>.
+WARNING: Usage of this method is discouraged, use <a href="src/base/ERC721.sol//src/base/ERC721.sol/contract.ERC721.html#_safemint">_safeMint</a> whenever possible
+Requirements:</p>
+<ul>
+<li><code>tokenId</code> must not exist.</li>
+<li><code>to</code> cannot be the zero address.
+Emits a {Transfer} event.*</li>
+</ul>
+<pre><code class="language-solidity">function _mint(address to, uint256 tokenId) internal virtual;
+</code></pre>
+<h3 id="_burn"><a class="header" href="#_burn">_burn</a></h3>
+<p>*Destroys <code>tokenId</code>.
+The approval is cleared when the token is burned.
+This is an internal function that does not check if the sender is authorized to operate on the token.
+Requirements:</p>
+<ul>
+<li><code>tokenId</code> must exist.
+Emits a {Transfer} event.*</li>
+</ul>
+<pre><code class="language-solidity">function _burn(uint256 tokenId) internal virtual;
+</code></pre>
+<h3 id="_transfer"><a class="header" href="#_transfer">_transfer</a></h3>
+<p>*Transfers <code>tokenId</code> from <code>from</code> to <code>to</code>.
+As opposed to <a href="src/base/ERC721.sol//src/base/ERC721.sol/contract.ERC721.html#transferfrom">transferFrom</a>, this imposes no restrictions on msg.sender.
+Requirements:</p>
+<ul>
+<li><code>to</code> cannot be the zero address.</li>
+<li><code>tokenId</code> token must be owned by <code>from</code>.
+Emits a {Transfer} event.*</li>
+</ul>
+<pre><code class="language-solidity">function _transfer(address from, address to, uint256 tokenId) internal virtual;
+</code></pre>
+<h3 id="_approve"><a class="header" href="#_approve">_approve</a></h3>
+<p><em>Approve <code>to</code> to operate on <code>tokenId</code>
+Emits an {Approval} event.</em></p>
+<pre><code class="language-solidity">function _approve(address to, uint256 tokenId) internal virtual;
+</code></pre>
+<h3 id="_setapprovalforall"><a class="header" href="#_setapprovalforall">_setApprovalForAll</a></h3>
+<p><em>Approve <code>operator</code> to operate on all of <code>owner</code> tokens
+Emits an {ApprovalForAll} event.</em></p>
+<pre><code class="language-solidity">function _setApprovalForAll(address owner, address operator, bool approved) internal virtual;
+</code></pre>
+<h3 id="_requireminted"><a class="header" href="#_requireminted">_requireMinted</a></h3>
+<p><em>Reverts if the <code>tokenId</code> has not been minted yet.</em></p>
+<pre><code class="language-solidity">function _requireMinted(uint256 tokenId) internal view virtual;
+</code></pre>
+<h3 id="_checkonerc721received"><a class="header" href="#_checkonerc721received">_checkOnERC721Received</a></h3>
+<p><em>Internal function to invoke <a href="src/base/ERC721.sol//lib/forge-std/test/mocks/MockERC721.t.sol/contract.ERC721Recipient.html#onerc721received">IERC721Receiver-onERC721Received</a> on a target address.
+The call is not executed if the target address is not a contract.</em></p>
+<pre><code class="language-solidity">function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory data) private returns (bool);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>from</code></td><td><code>address</code></td><td>address representing the previous owner of the given token ID</td></tr>
+<tr><td><code>to</code></td><td><code>address</code></td><td>target address that will receive the tokens</td></tr>
+<tr><td><code>tokenId</code></td><td><code>uint256</code></td><td>uint256 ID of the token to be transferred</td></tr>
+<tr><td><code>data</code></td><td><code>bytes</code></td><td>bytes optional data to send along with the call</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>bool</code></td><td>bool whether the call correctly returned the expected magic value</td></tr>
+</tbody></table>
+</div>
+<h3 id="_beforetokentransfer"><a class="header" href="#_beforetokentransfer">_beforeTokenTransfer</a></h3>
+<p>*Hook that is called before any token transfer. This includes minting and burning. If {ERC721Consecutive} is
+used, the hook may be called as part of a consecutive (batch) mint, as indicated by <code>batchSize</code> greater than 1.
+Calling conditions:</p>
+<ul>
+<li>When <code>from</code> and <code>to</code> are both non-zero, <code>from</code>'s tokens will be transferred to <code>to</code>.</li>
+<li>When <code>from</code> is zero, the tokens will be minted for <code>to</code>.</li>
+<li>When <code>to</code> is zero, <code>from</code>'s tokens will be burned.</li>
+<li><code>from</code> and <code>to</code> are never both zero.</li>
+<li><code>batchSize</code> is non-zero.
+To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].*</li>
+</ul>
+<pre><code class="language-solidity">function _beforeTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual;
+</code></pre>
+<h3 id="_aftertokentransfer"><a class="header" href="#_aftertokentransfer">_afterTokenTransfer</a></h3>
+<p>*Hook that is called after any token transfer. This includes minting and burning. If {ERC721Consecutive} is
+used, the hook may be called as part of a consecutive (batch) mint, as indicated by <code>batchSize</code> greater than 1.
+Calling conditions:</p>
+<ul>
+<li>When <code>from</code> and <code>to</code> are both non-zero, <code>from</code>'s tokens were transferred to <code>to</code>.</li>
+<li>When <code>from</code> is zero, the tokens were minted for <code>to</code>.</li>
+<li>When <code>to</code> is zero, <code>from</code>'s tokens were burned.</li>
+<li><code>from</code> and <code>to</code> are never both zero.</li>
+<li><code>batchSize</code> is non-zero.
+To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].*</li>
+</ul>
+<pre><code class="language-solidity">function _afterTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize) internal virtual;
+</code></pre>
+<h3 id="__unsafe_increasebalance"><a class="header" href="#__unsafe_increasebalance">__unsafe_increaseBalance</a></h3>
+<p><em>Unsafe write access to the balances, used by extensions that &quot;mint&quot; tokens using an <a href="src/base/ERC721.sol//src/base/ERC721.sol/contract.ERC721.html#ownerof">ownerOf</a> override.
+WARNING: Anyone calling this MUST ensure that the balances remain consistent with the ownership. The invariant
+being that for any address <code>a</code> the value returned by <code>balanceOf(a)</code> must be equal to the number of tokens such
+that <code>ownerOf(tokenId)</code> is <code>a</code>.</em></p>
+<pre><code class="language-solidity">function __unsafe_increaseBalance(address account, uint256 amount) internal;
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="contents-1"><a class="header" href="#contents-1">Contents</a></h1>
+<ul>
 <li><a href="src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a></li>
 <li><a href="src/interfaces/IChips.sol/interface.IChips.html">IChips</a></li>
 <li><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="iaccountoracle"><a class="header" href="#iaccountoracle">IAccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/interfaces/IAccountOracle.sol">Git Source</a></p>
-<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/interfaces/IAccountOracle.sol">Git Source</a></p>
+<h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the AccountOracle contract.</p>
 <pre><code class="language-solidity">function initialize(address staking_, address oracleAccount) external;
@@ -278,14 +523,16 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ichips"><a class="header" href="#ichips">IChips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/interfaces/IChips.sol">Git Source</a></p>
-<h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/interfaces/IChips.sol">Git Source</a></p>
+<h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
 <h3 id="initialize-1"><a class="header" href="#initialize-1">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
-<pre><code class="language-solidity">function initialize(address staking_) external;
+<pre><code class="language-solidity">function initialize(string memory name_, string memory symbol_, address staking_) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>name_</code></td><td><code>string</code></td><td>Name of the token.</td></tr>
+<tr><td><code>symbol_</code></td><td><code>string</code></td><td>Symbol of the token.</td></tr>
 <tr><td><code>staking_</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div>
@@ -346,8 +593,8 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/interfaces/IStaking.sol">Git Source</a></p>
-<h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/interfaces/IStaking.sol">Git Source</a></p>
+<h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="initialize-2"><a class="header" href="#initialize-2">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
 <pre><code class="language-solidity">function initialize(
@@ -740,14 +987,14 @@ Requirements:</p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>address The address of the chips contract.</td></tr>
 </tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="contents-1"><a class="header" href="#contents-1">Contents</a></h1>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="contents-2"><a class="header" href="#contents-2">Contents</a></h1>
 <ul>
 <li><a href="src/libraries/DataTypes.sol/library.DataTypes.html">DataTypes</a></li>
 <li><a href="src/libraries/Errors.sol/library.Errors.html">Errors</a></li>
 <li><a href="src/libraries/Events.sol/library.Events.html">Events</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -780,7 +1027,7 @@ Requirements:</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="errors"><a class="header" href="#errors">Errors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/libraries/Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/libraries/Errors.sol">Git Source</a></p>
 <h2 id="errors-1"><a class="header" href="#errors-1">Errors</a></h2>
 <h3 id="callernotstaking"><a class="header" href="#callernotstaking">CallerNotStaking</a></h3>
 <p><em>Caller is not staking contract</em></p>
@@ -843,7 +1090,7 @@ Requirements:</p>
 <pre><code class="language-solidity">error TaxFractionTooLarge();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -1015,144 +1262,137 @@ Requirements:</p>
 <tr><td><code>slashedOperatorPool</code></td><td><code>uint256</code></td><td>Amount of operator pool tokens slashed.</td></tr>
 <tr><td><code>slashedRewardPool</code></td><td><code>uint256</code></td><td>Amount of reward pool tokens slashed.</td></tr>
 </tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="contents-2"><a class="header" href="#contents-2">Contents</a></h1>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="contents-3"><a class="header" href="#contents-3">Contents</a></h1>
 <ul>
 <li><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rss3token"><a class="header" href="#rss3token">RSS3Token</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/mocks/RSS3Token.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/mocks/RSS3Token.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC20</p>
-<h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
+<h2 id="functions-4"><a class="header" href="#functions-4">Functions</a></h2>
 <h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
 <pre><code class="language-solidity">constructor(address initialAccount) ERC20(&quot;RSS3&quot;, &quot;RSS3&quot;);
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="contents-3"><a class="header" href="#contents-3">Contents</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="contents-4"><a class="header" href="#contents-4">Contents</a></h1>
 <ul>
-<li><a href="src/upgradeability/ProxyAdmin.sol/contract.ProxyAdmin.html">ProxyAdmin</a></li>
 <li><a href="src/upgradeability/TransparentUpgradeableProxy.sol/interface.ITransparentUpgradeableProxy.html">ITransparentUpgradeableProxy</a></li>
 <li><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="proxyadmin"><a class="header" href="#proxyadmin">ProxyAdmin</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/upgradeability/ProxyAdmin.sol">Git Source</a></p>
-<p><strong>Inherits:</strong>
-Ownable</p>
-<p><em>This is an auxiliary contract meant to be assigned as the admin of a {TransparentUpgradeableProxy}. For an
-explanation of why you would want to use this see the documentation for {TransparentUpgradeableProxy}.</em></p>
-<h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
-<h3 id="upgrade_interface_version"><a class="header" href="#upgrade_interface_version">UPGRADE_INTERFACE_VERSION</a></h3>
-<p><em>The version of the upgrade interface of the contract. If this getter is missing, both <code>upgrade(address)</code>
-and <code>upgradeAndCall(address,bytes)</code> are present, and <code>upgradeTo</code> must be used if no function should be called,
-while <code>upgradeAndCall</code> will invoke the <code>receive</code> function if the second argument is the empty byte string.
-If the getter returns <code>&quot;5.0.0&quot;</code>, only <code>upgradeAndCall(address,bytes)</code> is present, and the second argument must
-be the empty byte string if no function should be called, making it impossible to invoke the <code>receive</code> function
-during an upgrade.</em></p>
-<pre><code class="language-solidity">string public constant UPGRADE_INTERFACE_VERSION = &quot;5.0.0&quot;;
-</code></pre>
-<h2 id="functions-4"><a class="header" href="#functions-4">Functions</a></h2>
-<h3 id="constructor-1"><a class="header" href="#constructor-1">constructor</a></h3>
-<p><em>Sets the initial owner who can perform upgrades.</em></p>
-<pre><code class="language-solidity">constructor(address initialOwner) Ownable(initialOwner);
-</code></pre>
-<h3 id="upgradeandcall"><a class="header" href="#upgradeandcall">upgradeAndCall</a></h3>
-<p>*Upgrades <code>proxy</code> to <code>implementation</code> and calls a function on the new implementation.
-See <a href="src/upgradeability/ProxyAdmin.sol//node_modules/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html#_dispatchupgradetoandcall">TransparentUpgradeableProxy-_dispatchUpgradeToAndCall</a>.
-Requirements:</p>
-<ul>
-<li>This contract must be the admin of <code>proxy</code>.</li>
-<li>If <code>data</code> is empty, <code>msg.value</code> must be zero.*</li>
-</ul>
-<pre><code class="language-solidity">function upgradeAndCall(ITransparentUpgradeableProxy proxy, address implementation, bytes memory data)
-    public
-    payable
-    virtual
-    onlyOwner;
-</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="itransparentupgradeableproxy"><a class="header" href="#itransparentupgradeableproxy">ITransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 IERC1967</p>
 <p><em>Interface for {TransparentUpgradeableProxy}. In order to implement transparency, {TransparentUpgradeableProxy}
-does not implement this interface directly, and its upgradeability mechanism is implemented by an internal dispatch
+does not implement this interface directly, and some of its functions are implemented by an internal dispatch
 mechanism. The compiler is unaware that these functions are implemented by {TransparentUpgradeableProxy} and will not
 include them in the ABI so this interface must be used to interact with it.</em></p>
 <h2 id="functions-5"><a class="header" href="#functions-5">Functions</a></h2>
+<h3 id="admin"><a class="header" href="#admin">admin</a></h3>
+<pre><code class="language-solidity">function admin() external view returns (address);
+</code></pre>
+<h3 id="implementation"><a class="header" href="#implementation">implementation</a></h3>
+<pre><code class="language-solidity">function implementation() external view returns (address);
+</code></pre>
+<h3 id="changeadmin"><a class="header" href="#changeadmin">changeAdmin</a></h3>
+<pre><code class="language-solidity">function changeAdmin(address) external;
+</code></pre>
+<h3 id="upgradeto"><a class="header" href="#upgradeto">upgradeTo</a></h3>
+<pre><code class="language-solidity">function upgradeTo(address) external;
+</code></pre>
 <h3 id="upgradetoandcall"><a class="header" href="#upgradetoandcall">upgradeToAndCall</a></h3>
-<pre><code class="language-solidity">function upgradeToAndCall(address, bytes calldata) external payable;
+<pre><code class="language-solidity">function upgradeToAndCall(address, bytes memory) external payable;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transparentupgradeableproxy"><a class="header" href="#transparentupgradeableproxy">TransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC1967Proxy</p>
-<p>*This contract implements a proxy that is upgradeable through an associated {ProxyAdmin} instance.
+<p>*This contract implements a proxy that is upgradeable by an admin.
 To avoid https://medium.com/nomic-labs-blog/malicious-backdoors-in-ethereum-proxies-62629adf3357[proxy selector
 clashing], which can potentially be used in an attack, this contract uses the
 https://blog.openzeppelin.com/the-transparent-proxy-pattern/[transparent proxy pattern]. This pattern implies two
 things that go hand in hand:</p>
 <ol>
 <li>If any account other than the admin calls the proxy, the call will be forwarded to the implementation, even if
-that call matches the {ITransparentUpgradeableProxy-upgradeToAndCall} function exposed by the proxy itself.</li>
-<li>If the admin calls the proxy, it can call the <code>upgradeToAndCall</code> function but any other call won't be forwarded to
-the implementation. If the admin tries to call a function on the implementation it will fail with an error indicating
-the proxy admin cannot fallback to the target implementation.
-These properties mean that the admin account can only be used for upgrading the proxy, so it's best if it's a
-dedicated account that is not used for anything else. This will avoid headaches due to sudden errors when trying to
-call a function from the proxy implementation. For this reason, the proxy deploys an instance of {ProxyAdmin} and
-allows upgrades only if they come through it. You should think of the <code>ProxyAdmin</code> instance as the administrative
-interface of the proxy, including the ability to change who can trigger upgrades by transferring ownership.
+that call matches one of the admin functions exposed by the proxy itself.</li>
+<li>If the admin calls the proxy, it can access the admin functions, but its calls will never be forwarded to the
+implementation. If the admin tries to call a function on the implementation it will fail with an error that says
+&quot;admin cannot fallback to proxy target&quot;.
+These properties mean that the admin account can only be used for admin actions like upgrading the proxy or changing
+the admin, so it's best if it's a dedicated account that is not used for anything else. This will avoid headaches due
+to sudden errors when trying to call a function from the proxy implementation.
+Our recommendation is for the dedicated account to be an instance of the {ProxyAdmin} contract. If set up this way,
+you should think of the <code>ProxyAdmin</code> instance as the real administrative interface of your proxy.
 NOTE: The real interface of this proxy is that defined in <code>ITransparentUpgradeableProxy</code>. This contract does not
-inherit from that interface, and instead <code>upgradeToAndCall</code> is implicitly implemented using a custom dispatch
+inherit from that interface, and instead the admin functions are implicitly implemented using a custom dispatch
 mechanism in <code>_fallback</code>. Consequently, the compiler will not produce an ABI for this contract. This is necessary to
 fully implement transparency without decoding reverts caused by selector clashes between the proxy and the
 implementation.
-NOTE: This proxy does not inherit from {Context} deliberately. The {ProxyAdmin} of this contract won't send a
-meta-transaction in any way, and any other meta-transaction setup should be made in the implementation contract.
-IMPORTANT: This contract avoids unnecessary storage reads by setting the admin only during construction as an
-immutable variable, preventing any changes thereafter. However, the admin slot defined in ERC-1967 can still be
-overwritten by the implementation logic pointed to by this proxy. In such cases, the contract may end up in an
-undesirable state where the admin slot is different from the actual admin.
-WARNING: It is not recommended to extend this contract to add additional external functions. If you do so, the
-compiler will not check that there are no selector conflicts, due to the note above. A selector clash between any new
-function and the functions declared in {ITransparentUpgradeableProxy} will be resolved in favor of the new one. This
-could render the <code>upgradeToAndCall</code> function inaccessible, preventing upgradeability and compromising transparency.*</li>
+WARNING: It is not recommended to extend this contract to add additional external functions. If you do so, the compiler
+will not check that there are no selector conflicts, due to the note above. A selector clash between any new function
+and the functions declared in {ITransparentUpgradeableProxy} will be resolved in favor of the new one. This could
+render the admin operations inaccessible, which could prevent upgradeability. Transparency may also be compromised.*</li>
 </ol>
-<h2 id="state-variables-1"><a class="header" href="#state-variables-1">State Variables</a></h2>
-<h3 id="_admin"><a class="header" href="#_admin">_admin</a></h3>
-<pre><code class="language-solidity">address private immutable _admin;
-</code></pre>
 <h2 id="functions-6"><a class="header" href="#functions-6">Functions</a></h2>
-<h3 id="constructor-2"><a class="header" href="#constructor-2">constructor</a></h3>
-<p><em>Initializes an upgradeable proxy managed by an instance of a {ProxyAdmin} with an <code>initialOwner</code>,
-backed by the implementation at <code>_logic</code>, and optionally initialized with <code>_data</code> as explained in
-{ERC1967Proxy-constructor}.</em></p>
-<pre><code class="language-solidity">constructor(address _logic, address initialOwner, bytes memory _data) payable ERC1967Proxy(_logic, _data);
+<h3 id="constructor-1"><a class="header" href="#constructor-1">constructor</a></h3>
+<p><em>Initializes an upgradeable proxy managed by <code>_admin</code>, backed by the implementation at <code>_logic</code>, and
+optionally initialized with <code>_data</code> as explained in <a href="src/upgradeability/TransparentUpgradeableProxy.sol//lib/forge-std/test/mocks/MockERC721.t.sol/contract.Token_ERC721.html#constructor">ERC1967Proxy-constructor</a>.</em></p>
+<pre><code class="language-solidity">constructor(address _logic, address admin_, bytes memory _data) payable ERC1967Proxy(_logic, _data);
 </code></pre>
-<h3 id="_proxyadmin"><a class="header" href="#_proxyadmin">_proxyAdmin</a></h3>
-<p><em>Returns the admin of this proxy.</em></p>
-<pre><code class="language-solidity">function _proxyAdmin() internal virtual returns (address);
+<h3 id="ifadmin"><a class="header" href="#ifadmin">ifAdmin</a></h3>
+<p><em>Modifier used internally that will delegate the call to the implementation unless the sender is the admin.
+CAUTION: This modifier is deprecated, as it could cause issues if the modified function has arguments, and the
+implementation provides a function with the same selector.</em></p>
+<pre><code class="language-solidity">modifier ifAdmin();
 </code></pre>
 <h3 id="_fallback"><a class="header" href="#_fallback">_fallback</a></h3>
-<p><em>If caller is the admin process the call internally, otherwise transparently fallback to the proxy behavior.</em></p>
+<p><em>If caller is the admin process the call internally, otherwise transparently fallback to the proxy behavior</em></p>
 <pre><code class="language-solidity">function _fallback() internal virtual override;
 </code></pre>
-<h3 id="_dispatchupgradetoandcall"><a class="header" href="#_dispatchupgradetoandcall">_dispatchUpgradeToAndCall</a></h3>
-<p>*Upgrade the implementation of the proxy. See <a href="src/upgradeability/TransparentUpgradeableProxy.sol//node_modules/@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol/interface.ITransparentUpgradeableProxy.html#upgradetoandcall">ERC1967Utils-upgradeToAndCall</a>.
-Requirements:</p>
-<ul>
-<li>If <code>data</code> is empty, <code>msg.value</code> must be zero.*</li>
-</ul>
-<pre><code class="language-solidity">function _dispatchUpgradeToAndCall() private;
+<h3 id="_dispatchadmin"><a class="header" href="#_dispatchadmin">_dispatchAdmin</a></h3>
+<p><em>Returns the current admin.
+TIP: To get this value clients can read directly from the storage slot shown below (specified by EIP1967) using the
+https://eth.wiki/json-rpc/API#eth_getstorageat[<code>eth_getStorageAt</code>] RPC call.
+<code>0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103</code></em></p>
+<pre><code class="language-solidity">function _dispatchAdmin() private returns (bytes memory);
 </code></pre>
-<h2 id="errors-2"><a class="header" href="#errors-2">Errors</a></h2>
-<h3 id="proxydeniedadminaccess"><a class="header" href="#proxydeniedadminaccess">ProxyDeniedAdminAccess</a></h3>
-<p><em>The proxy caller is the current admin, and can't fallback to the proxy target.</em></p>
-<pre><code class="language-solidity">error ProxyDeniedAdminAccess();
+<h3 id="_dispatchimplementation"><a class="header" href="#_dispatchimplementation">_dispatchImplementation</a></h3>
+<p><em>Returns the current implementation.
+TIP: To get this value clients can read directly from the storage slot shown below (specified by EIP1967) using the
+https://eth.wiki/json-rpc/API#eth_getstorageat[<code>eth_getStorageAt</code>] RPC call.
+<code>0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc</code></em></p>
+<pre><code class="language-solidity">function _dispatchImplementation() private returns (bytes memory);
+</code></pre>
+<h3 id="_dispatchchangeadmin"><a class="header" href="#_dispatchchangeadmin">_dispatchChangeAdmin</a></h3>
+<p><em>Changes the admin of the proxy.
+Emits an {AdminChanged} event.</em></p>
+<pre><code class="language-solidity">function _dispatchChangeAdmin() private returns (bytes memory);
+</code></pre>
+<h3 id="_dispatchupgradeto"><a class="header" href="#_dispatchupgradeto">_dispatchUpgradeTo</a></h3>
+<p><em>Upgrade the implementation of the proxy.</em></p>
+<pre><code class="language-solidity">function _dispatchUpgradeTo() private returns (bytes memory);
+</code></pre>
+<h3 id="_dispatchupgradetoandcall"><a class="header" href="#_dispatchupgradetoandcall">_dispatchUpgradeToAndCall</a></h3>
+<p><em>Upgrade the implementation of the proxy, and then call a function from the new implementation as specified
+by <code>data</code>, which should be an encoded function call. This is useful to initialize new storage variables in the
+proxied contract.</em></p>
+<pre><code class="language-solidity">function _dispatchUpgradeToAndCall() private returns (bytes memory);
+</code></pre>
+<h3 id="_admin"><a class="header" href="#_admin">_admin</a></h3>
+<p><em>Returns the current admin.
+CAUTION: This function is deprecated. Use <a href="src/upgradeability/TransparentUpgradeableProxy.sol//node_modules/@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol/abstract.ERC1967Upgrade.html#_getadmin">ERC1967Upgrade-_getAdmin</a> instead.</em></p>
+<pre><code class="language-solidity">function _admin() internal view virtual returns (address);
+</code></pre>
+<h3 id="_requirezerovalue"><a class="header" href="#_requirezerovalue">_requireZeroValue</a></h3>
+<p><em>To keep this contract fully transparent, all <code>ifAdmin</code> functions must be payable. This helper is here to
+emulate some proxy functions being non-payable while still allowing value to pass through.</em></p>
+<pre><code class="language-solidity">function _requireZeroValue() private;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="accountoracle"><a class="header" href="#accountoracle">AccountOracle</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/AccountOracle.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/AccountOracle.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/AccountOracle.sol//src/interfaces/IAccountOracle.sol/interface.IAccountOracle.html">IAccountOracle</a>, Initializable, AccessControlEnumerable</p>
-<h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
+<h2 id="state-variables-1"><a class="header" href="#state-variables-1">State Variables</a></h2>
 <h3 id="_staking"><a class="header" href="#_staking">_staking</a></h3>
 <p><em>Staking contract address.</em></p>
 <pre><code class="language-solidity">address internal _staking;
@@ -1246,10 +1486,10 @@ Requirements:</p>
 <pre><code class="language-solidity">function _log2(uint256 x) internal pure returns (uint256 n);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/Chips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/Chips.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
-<a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, Initializable, ERC721</p>
-<h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
+<a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, Initializable, <a href="src/Chips.sol//src/base/ERC721.sol/contract.ERC721.html">ERC721</a></p>
+<h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
 <h3 id="_staking-1"><a class="header" href="#_staking-1">_staking</a></h3>
 <p><em>Staking contract address.</em></p>
 <pre><code class="language-solidity">address internal _staking;
@@ -1266,15 +1506,14 @@ Requirements:</p>
 <h3 id="onlystaking"><a class="header" href="#onlystaking">onlyStaking</a></h3>
 <pre><code class="language-solidity">modifier onlyStaking();
 </code></pre>
-<h3 id="constructor-3"><a class="header" href="#constructor-3">constructor</a></h3>
-<pre><code class="language-solidity">constructor() ERC721(&quot;RSS3 Chips&quot;, &quot;Chips&quot;);
-</code></pre>
 <h3 id="initialize-4"><a class="header" href="#initialize-4">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
-<pre><code class="language-solidity">function initialize(address staking_) external override initializer;
+<pre><code class="language-solidity">function initialize(string memory name_, string memory symbol_, address staking_) external override initializer;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>name_</code></td><td><code>string</code></td><td>Name of the token.</td></tr>
+<tr><td><code>symbol_</code></td><td><code>string</code></td><td>Symbol of the token.</td></tr>
 <tr><td><code>staking_</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div>
@@ -1339,7 +1578,7 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>Total supply of tokens.</td></tr>
 </tbody></table>
 </div>
-<h3 id="tokenuri"><a class="header" href="#tokenuri">tokenURI</a></h3>
+<h3 id="tokenuri-1"><a class="header" href="#tokenuri-1">tokenURI</a></h3>
 <p>A distinct Uniform Resource Identifier (URI) for a given asset.</p>
 <p><em>Throws if <code>_tokenId</code> is not a valid NFT. URIs are defined in RFC
 3986. The URI may point to a JSON file that conforms to the &quot;ERC721
@@ -1347,10 +1586,10 @@ Metadata JSON Schema&quot;.</em></p>
 <pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view override returns (string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/14a944b7e749569d74d5bd0a793dcdb974112474/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e5354aa4aa6263f8132976ea31c25017993ba943/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Staking.sol//src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Pausable, Initializable, AccessControlEnumerable</p>
-<h2 id="state-variables-4"><a class="header" href="#state-variables-4">State Variables</a></h2>
+<h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
 <h3 id="shares_per_chip"><a class="header" href="#shares_per_chip">SHARES_PER_CHIP</a></h3>
 <pre><code class="language-solidity">uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 </code></pre>
