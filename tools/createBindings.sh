@@ -9,7 +9,7 @@ GO_DIR="$base_path/go"
 rm -rf base_path && mkdir -p ${BIN_DIR} ${ABI_DIR} ${GO_DIR}
 
 
-for contract in Staking Chips AccountOracle
+for contract in Staking Chips Settlement
 do
   # extract abi and bin files
   forge inspect ${contract} abi > ${ABI_DIR}/${contract}.abi

@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 interface ISettlement {
     /**
-     * @notice Initializes the AccountOracle contract.
+     * @notice Initializes the Settlement contract.
      * @param staking_ Address of the Staking contract.
      * @param oracleAccount Address who makes settlement with the Staking contract.
      */

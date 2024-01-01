@@ -35,8 +35,8 @@ slither-check-upgradeability . Staking \
 2>>"$file1" 1>&2
 
 
-echo "AccountOracle: " >"$file2"
-slither-check-upgradeability . AccountOracle \
+echo "Settlement: " >"$file2"
+slither-check-upgradeability . Settlement \
 --proxy-filename . \
 --proxy-name TransparentUpgradeableProxy \
 --compile-force-framework 'foundry' \

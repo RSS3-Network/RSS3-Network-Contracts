@@ -55,21 +55,21 @@ contract Deploy is Deployer {
     function initialize() public {
         initializeStaking();
         initializeChips();
-        initializeAccountOracle();
+        initializeSettlement();
     }
 
     /// @notice Deploy all of the proxies
     function deployProxies() public {
         deployProxy("Staking");
         deployProxy("Chips");
-        deployProxy("AccountOracle");
+        deployProxy("Settlement");
     }
 
     /// @notice Deploy all of the logic contracts
     function deployImplementations() public {
         deployStaking();
         deployChips();
-        deployAccountOracle();
+        deploySettlement();
     }
 
     function deployProxy(string memory _name) public broadcast returns (address addr_) {
@@ -113,26 +113,26 @@ contract Deploy is Deployer {
         addr_ = address(chips);
     }
 
-    function deployAccountOracle() public broadcast returns (address addr_) {
+    function deploySettlement() public broadcast returns (address addr_) {
         Settlement settlement = new Settlement();
 
         // check states
         require(!settlement.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "oracle role error");
-        require(settlement.stakingContract() == address(0), "check accountOracle contract error");
+        require(settlement.stakingContract() == address(0), "check settlement contract error");
 
-        save("AccountOracle", address(settlement));
-        console.log("AccountOracle deployed at %s", address(settlement));
+        save("Settlement", address(settlement));
+        console.log("Settlement deployed at %s", address(settlement));
         addr_ = address(settlement);
     }
 
     function initializeStaking() public broadcast {
         Staking stakingProxy = Staking(mustGetAddress("StakingProxy"));
         address chipsProxy = mustGetAddress("ChipsProxy");
-        address accountOracleProxy = mustGetAddress("AccountOracleProxy");
+        address settlementProxy = mustGetAddress("SettlementProxy");
 
         stakingProxy.initialize(
             cfg.pauseAccount(),
-            accountOracleProxy,
+            settlementProxy,
             chipsProxy,
             cfg.rss3Token(),
             cfg.stakeUnbondingPeriod(),
@@ -144,10 +144,9 @@ contract Deploy is Deployer {
             cfg.depositBaseline(),
             cfg.treasury()
         );
-
         // check states
         require(stakingProxy.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "check pause role error");
-        require(stakingProxy.hasRole(ORACLE_ROLE, accountOracleProxy), "check oracle role error");
+        require(stakingProxy.hasRole(ORACLE_ROLE, settlementProxy), "check oracle role error");
         require(stakingProxy.stakingToken() == cfg.rss3Token(), "check staking token error");
         require(stakingProxy.chipsContract() == chipsProxy, "check chips token error");
     }
@@ -162,14 +161,14 @@ contract Deploy is Deployer {
         require(chipsProxy.stakingContract() == stakingProxy, "check chip contract error");
     }
 
-    function initializeAccountOracle() public broadcast {
-        Settlement settlementProxy = Settlement(mustGetAddress("AccountOracleProxy"));
+    function initializeSettlement() public broadcast {
+        Settlement settlementProxy = Settlement(mustGetAddress("SettlementProxy"));
         address stakingProxy = mustGetAddress("StakingProxy");
 
         settlementProxy.initialize(stakingProxy, cfg.oracleAccount());
 
         // check states
         require(settlementProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");
-        require(settlementProxy.stakingContract() == stakingProxy, "check accountOracle contract error");
+        require(settlementProxy.stakingContract() == stakingProxy, "check settlement contract error");
     }
 }

@@ -7,7 +7,7 @@ if [ ! -d "src" ]; then
 fi
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-for contract in Staking Chips AccountOracle
+for contract in Staking Chips Settlement
 do
   file=$(mktemp /tmp/contracts-storage-layout-${contract}.XXXXX) || exit 2
   forge inspect ${contract} storage-layout --pretty > ${file} || exit 3
