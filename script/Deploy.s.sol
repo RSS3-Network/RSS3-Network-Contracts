@@ -6,7 +6,7 @@ import {Deployer} from "./Deployer.sol";
 import {DeployConfig} from "./DeployConfig.s.sol";
 import {Staking} from "../src/Staking.sol";
 import {Chips} from "../src/Chips.sol";
-import {AccountOracle} from "../src/AccountOracle.sol";
+import {Settlement} from "../src/Settlement.sol";
 import {console2 as console} from "forge-std/console2.sol";
 import {TransparentUpgradeableProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 
@@ -114,15 +114,15 @@ contract Deploy is Deployer {
     }
 
     function deployAccountOracle() public broadcast returns (address addr_) {
-        AccountOracle accountOracle = new AccountOracle();
+        Settlement settlement = new Settlement();
 
         // check states
-        require(!accountOracle.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "oracle role error");
-        require(accountOracle.stakingContract() == address(0), "check accountOracle contract error");
+        require(!settlement.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "oracle role error");
+        require(settlement.stakingContract() == address(0), "check accountOracle contract error");
 
-        save("AccountOracle", address(accountOracle));
-        console.log("AccountOracle deployed at %s", address(accountOracle));
-        addr_ = address(accountOracle);
+        save("AccountOracle", address(settlement));
+        console.log("AccountOracle deployed at %s", address(settlement));
+        addr_ = address(settlement);
     }
 
     function initializeStaking() public broadcast {
@@ -139,7 +139,10 @@ contract Deploy is Deployer {
             cfg.depositUnbondingPeriod(),
             cfg.nodeSlashFraction(),
             cfg.userSlashFraction(),
-            cfg.stakeRatio()
+            cfg.stakeRatio(),
+            cfg.stakeBaseline(),
+            cfg.depositBaseline(),
+            cfg.treasury()
         );
 
         // check states
@@ -160,13 +163,13 @@ contract Deploy is Deployer {
     }
 
     function initializeAccountOracle() public broadcast {
-        AccountOracle accountOracleProxy = AccountOracle(mustGetAddress("AccountOracleProxy"));
+        Settlement settlementProxy = Settlement(mustGetAddress("AccountOracleProxy"));
         address stakingProxy = mustGetAddress("StakingProxy");
 
-        accountOracleProxy.initialize(stakingProxy, cfg.oracleAccount());
+        settlementProxy.initialize(stakingProxy, cfg.oracleAccount());
 
         // check states
-        require(accountOracleProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");
-        require(accountOracleProxy.stakingContract() == stakingProxy, "check accountOracle contract error");
+        require(settlementProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");
+        require(settlementProxy.stakingContract() == stakingProxy, "check accountOracle contract error");
     }
 }

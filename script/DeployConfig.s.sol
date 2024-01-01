@@ -23,6 +23,10 @@ contract DeployConfig is Script {
     uint256 public nodeSlashFraction;
     uint256 public userSlashFraction;
     uint256 public stakeRatio;
+    uint256 public stakeBaseline;
+    uint256 public depositBaseline;
+    address public treasury;
+
     string public chipsName;
     string public chipsSymbol;
 
@@ -35,6 +39,8 @@ contract DeployConfig is Script {
             return;
         }
 
+        // TODO: any conscise way to do this?
+
         chainID = stdJson.readUint(_json, "$.chainID");
         proxyAdminOwner = stdJson.readAddress(_json, "$.proxyAdminOwner");
         pauseAccount = stdJson.readAddress(_json, "$.pauseAccount");
@@ -45,6 +51,9 @@ contract DeployConfig is Script {
         nodeSlashFraction = stdJson.readUint(_json, "$.nodeSlashFraction");
         userSlashFraction = stdJson.readUint(_json, "$.userSlashFraction");
         stakeRatio = stdJson.readUint(_json, "$.stakeRatio");
+        stakeBaseline = stdJson.readUint(_json, "$.stakeBaseline");
+        depositBaseline = stdJson.readUint(_json, "$.depositBaseline");
+        treasury = stdJson.readAddress(_json, "$.treasury");
         chipsName = stdJson.readString(_json, "$.chipsName");
         chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");
     }

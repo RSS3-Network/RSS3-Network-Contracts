@@ -32,6 +32,16 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// node operator can receive its full tax if it stakes at least 1/25 of the tokens staked by external delegators
     uint256 internal _stakeRatio;
 
+    /// @dev the baseline of staked tokens, 10,000 by default.
+    /// node operator can receive its full tax if it stakes at least 10,000 tokens
+    uint256 internal _stakeBaseline;
+
+    /// @dev the baseline of deposited tokens, [TODO] by default.
+    uint256 internal _depositBaseline;
+
+    /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
+    address internal _treasury;
+
     /// @dev the period of time that node operator can't withdraw staked tokens
     uint256 internal _depositUnbondingPeriod;
     /// @dev the period of time that user can't withdraw staked tokens
@@ -79,7 +89,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 depositUnbondingPeriod,
         uint256 nodeSlashFraction,
         uint256 userSlashFraction,
-        uint256 stakeRatio
+        uint256 stakeRatio,
+        uint256 stakeBaseline,
+        uint256 depositBaseline,
+        address treasury
     ) external override initializer {
         _chips = chips;
         _token = token;
@@ -91,6 +104,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _userSlashFraction = userSlashFraction;
 
         _stakeRatio = stakeRatio;
+        _stakeBaseline = stakeBaseline;
+
+        _depositBaseline = depositBaseline;
+
+        _treasury = treasury;
 
         _grantRole(PAUSE_ROLE, pauseAccount);
         _grantRole(ORACLE_ROLE, oracleAccount);
@@ -174,7 +192,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external override {
+    function setTaxFraction4Node(address nodeAddr, uint64 taxFraction) external override {
         if (taxFraction > _denominator()) revert TaxFractionTooLarge();
 
         DataTypes.Node storage node = _nodes[nodeAddr];

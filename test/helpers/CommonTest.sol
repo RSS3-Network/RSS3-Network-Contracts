@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 import {Utils} from "./Utils.sol";
 import {Staking} from "../../src/Staking.sol";
 import {Chips} from "../../src/Chips.sol";
-import {AccountOracle} from "../../src/AccountOracle.sol";
+import {Settlement} from "../../src/Settlement.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
 import {TransparentUpgradeableProxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
 
@@ -36,7 +36,7 @@ contract CommonTest is Utils {
     RSS3Token internal _rss3;
     Staking internal _staking;
     Chips internal _chips;
-    AccountOracle internal _accountOracle;
+    Settlement internal _settlement;
 
     function _setUp() internal {
         // deploy rss3 token
@@ -44,7 +44,7 @@ contract CommonTest is Utils {
         // deploy chips token
         _chips = new Chips();
         // deploy account oracle
-        _accountOracle = new AccountOracle();
+        _settlement = new Settlement();
 
         // deploy and init Staking contract
         Staking stakingImpl = new Staking();
@@ -54,7 +54,7 @@ contract CommonTest is Utils {
             abi.encodeWithSignature(
                 "initialize(address,address,address,address,uint256,uint256,uint256,uint256,uint256)",
                 pauseAccount,
-                address(_accountOracle),
+                address(_settlement),
                 address(_chips),
                 address(_rss3),
                 stakeUnbondingPeriod,
@@ -69,6 +69,6 @@ contract CommonTest is Utils {
         // init chips token
         _chips.initialize(chipsName, chipsSymbol, address(_staking));
         // init account oracle
-        _accountOracle.initialize(address(_staking), oracleAccount);
+        _settlement.initialize(address(_staking), oracleAccount);
     }
 }

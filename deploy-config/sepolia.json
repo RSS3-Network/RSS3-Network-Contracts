@@ -9,6 +9,9 @@
   "nodeSlashFraction": "200",
   "userSlashFraction": "100",
   "stakeRatio": "25",
+  "stakeBaseline": "1000000000000000000",
+  "depositBaseline": "1000000000000000000",
+  "treasury": "0x11872CdEa66888546D5602e1c577Eb19400aeae1",
   "chipsName": "RSS3 Chips",
   "chipsSymbol": "Chips"
 }

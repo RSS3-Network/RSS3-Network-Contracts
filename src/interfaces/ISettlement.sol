@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-interface IAccountOracle {
+interface ISettlement {
     /**
      * @notice Initializes the AccountOracle contract.
      * @param staking_ Address of the Staking contract.
-     * @param oracleAccount Address who can distribute rewards to the Staking contract.
+     * @param oracleAccount Address who makes settlement with the Staking contract.
      */
     function initialize(address staking_, address oracleAccount) external;
 

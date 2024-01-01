@@ -15,6 +15,9 @@ interface IStaking {
      * @param nodeSlashFraction Slash fraction for node operator.
      * @param userSlashFraction Slash fraction for user.
      * @param stakeRatio The stake ratio of the node operator.
+     * @param stakeBaseline The stake base line of the node operator.
+     * @param depositBaseline The deposit base line of the node operator.
+     * @param treasury The treasury address.
      */
     function initialize(
         address pauseAccount,
@@ -25,7 +28,10 @@ interface IStaking {
         uint256 depositUnbondingPeriod,
         uint256 nodeSlashFraction,
         uint256 userSlashFraction,
-        uint256 stakeRatio
+        uint256 stakeRatio,
+        uint256 stakeBaseline,
+        uint256 depositBaseline,
+        address treasury
     ) external;
 
     /**
@@ -103,7 +109,7 @@ interface IStaking {
      * @param taxFraction The tax fraction to set.
      * Tax percentage measured in basis points. Each basis point represents 0.01%.
      */
-    function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external;
+    function setTaxFraction4Node(address nodeAddr, uint64 taxFraction) external;
 
     /**
      * @notice Sets tax fraction for public pool.

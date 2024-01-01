@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 //import {console2 as console} from "forge-std/console2.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 
-contract AccountOracleTest is CommonTest {
+contract SettlementTest is CommonTest {
     function setUp() public {
         _setUp();
 
@@ -15,6 +15,6 @@ contract AccountOracleTest is CommonTest {
     }
 
     function testCheckSetupStatus() public {
-        assertEq(_accountOracle.stakingContract(), address(_staking));
+        assertEq(_settlement.stakingContract(), address(_staking));
     }
 }

@@ -1,28 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {IAccountOracle} from "./interfaces/IAccountOracle.sol";
+import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {IErrors} from "./interfaces/IErrors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
-contract AccountOracle is IAccountOracle, IErrors, Initializable, AccessControlEnumerable {
+contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
     /// @dev Staking contract address.
     address internal _staking;
 
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
-    /// @inheritdoc IAccountOracle
+    /// @inheritdoc ISettlement
     function initialize(address staking_, address oracleAccount) external override initializer {
         _staking = staking_;
 
         _grantRole(ORACLE_ROLE, oracleAccount);
     }
 
-    /// @inheritdoc IAccountOracle
+    /// @inheritdoc ISettlement
     function distributeRewards(
         uint256 epoch,
         uint256 startTimestamp,
@@ -56,7 +56,7 @@ contract AccountOracle is IAccountOracle, IErrors, Initializable, AccessControlE
         // and the slashing is done before the reward.
     }
 
-    /// @inheritdoc IAccountOracle
+    /// @inheritdoc ISettlement
     function setTaxFraction4PublicPool(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
         uint256 length = nodeAddrs.length;
 
@@ -68,12 +68,12 @@ contract AccountOracle is IAccountOracle, IErrors, Initializable, AccessControlE
         IStaking(_staking).setTaxFraction4PublicPool(uint64(totalTaxFraction / length));
     }
 
-    /// @inheritdoc IAccountOracle
+    /// @inheritdoc ISettlement
     function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
         IStaking(_staking).slashNodes(nodeAddrs);
     }
 
-    /// @inheritdoc IAccountOracle
+    /// @inheritdoc ISettlement
     function stakingContract() external view override returns (address) {
         return _staking;
     }
