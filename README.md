@@ -6,6 +6,8 @@
 ### Build
 
 ```shell
+npm i
+forge install
 forge build
 ```
 
