@@ -27,6 +27,9 @@ interface IErrors {
     /// @dev Claim time not ready
     error ClaimTimeNotReady();
 
+    /// @dev Claim time not ready
+    error ClaimIdNotExists();
+
     /// @dev Staking amount too small
     error AmountTooSmall(uint256 amount);
 

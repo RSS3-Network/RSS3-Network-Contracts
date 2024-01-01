@@ -138,8 +138,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function deleteNode(address nodeAddr) external override {
+        // TODO: get nodeAddr from msg.sender
         DataTypes.Node storage node = _nodes[nodeAddr];
-        // can't delete a non-exist node
+        // can't delete a node not operated by msg.sender
         if (msg.sender != node.account) revert CallerNotNodeOwner();
 
         // can't delete a node with staked or deposited tokens
@@ -551,6 +552,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev claim withdrawal request
     function _claimWithdrawal(uint256 requestId) internal {
         DataTypes.WithdrawalRequest memory req = _pendingWithdrawals[requestId];
+
+        // TODO: should we revert or just skip this claim?
+        if (req.owner == address(0)) revert ClaimIdNotExists();
+
         if (block.timestamp < req.timestamp + _depositUnbondingPeriod) revert ClaimTimeNotReady();
 
         // transfer staked tokens

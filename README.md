@@ -53,9 +53,9 @@ For a node operator, available methods are:
 - createNodeAndDeposit: start either a public good node or a normal node. 
 - createNode
 - deleteNode(only node operator)
-- deposit(?)
-- requestWithdrawal(?)
-- claimWithdrawal
+- deposit(only node operator)
+- requestWithdrawal(only node operator)
+- claimWithdrawal(only node operator)
 - setNodeTaxFraction(only node operator)
 
 For all users,

@@ -22,7 +22,7 @@ contract CommonTest is Utils {
     address public constant oracleAccount = address(0x999);
 
     uint256 public constant stakeUnbondingPeriod = 22.5 days;
-    uint256 public constant delegateUnbondingPeriod = 22.5 days;
+    uint256 public constant depositUnbondingPeriod = 22.5 days;
 
     uint256 internal _initialAmount = 100000000 ether;
 
@@ -57,13 +57,13 @@ contract CommonTest is Utils {
             proxyAdmin,
             abi.encodeWithSignature(
                 // solhint-disable-next-line max-line-length
-                "initialize(address,address,addressw,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address)",
+                "initialize(address,address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address)",
                 pauseAccount,
                 address(_settlement),
                 address(_chips),
                 address(_rss3),
                 stakeUnbondingPeriod,
-                delegateUnbondingPeriod,
+                depositUnbondingPeriod,
                 nodeSlashFraction,
                 userSlashFraction,
                 stakeRatio,
