@@ -213,6 +213,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         (startTokenId, endTokenId) = _stakeToNode(node, amount);
 
         // update chips issuers
+        // TODO: gas optimization
         for (uint256 i = startTokenId; i <= endTokenId; i++) {
             _issuers[i] = nodeAddr;
         }

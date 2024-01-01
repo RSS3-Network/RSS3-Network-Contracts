@@ -26,7 +26,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     function initialize(string memory name_, string memory symbol_, address staking_) external override initializer {
         _staking = staking_;
 
-        super._initialize(name_, symbol_);
+        __ERC721_init(name_, symbol_);
     }
 
     /// @inheritdoc IChips
@@ -43,15 +43,16 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         address to,
         uint256 batchSize
     ) external override onlyStaking returns (uint256 startTokenId, uint256 endTokenId) {
+        if (batchSize == 0) revert BatchSizeZero();
+
         startTokenId = _counter + 1;
+        endTokenId = _counter + batchSize;
 
-        uint256 tokenId = startTokenId;
-        for (uint256 i = 0; i < batchSize; i++) {
-            _mint(to, tokenId++);
-        }
-        _counter = tokenId - 1;
-        endTokenId = tokenId - 1;
+        // mint tokens with consecutive token IDs
+        _mintConsecutive(to, startTokenId, endTokenId);
 
+        // update token counter
+        _counter += batchSize;
         // update total supply
         _totalSupply += batchSize;
     }

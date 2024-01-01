@@ -47,4 +47,7 @@ interface IErrors {
 
     /// @dev Tax fraction too large
     error TaxFractionTooLarge();
+
+    /// @dev Batch size is zero
+    error BatchSizeZero();
 }
