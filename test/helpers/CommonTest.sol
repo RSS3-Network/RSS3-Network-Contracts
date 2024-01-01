@@ -29,6 +29,9 @@ contract CommonTest is Utils {
     uint256 public constant nodeSlashFraction = 200;
     uint256 public constant userSlashFraction = 100;
     uint256 public constant stakeRatio = 25;
+    uint256 public constant stakeBaseline = 10000 ether;
+    uint256 public constant depositBaseline = 10000 ether;
+    address public constant treasury = address(0xaaa);
 
     string public constant chipsName = "RSS3 Chips";
     string public constant chipsSymbol = "Chips";
@@ -48,11 +51,13 @@ contract CommonTest is Utils {
 
         // deploy and init Staking contract
         Staking stakingImpl = new Staking();
+
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
             address(stakingImpl),
             proxyAdmin,
             abi.encodeWithSignature(
-                "initialize(address,address,address,address,uint256,uint256,uint256,uint256,uint256)",
+                // solhint-disable-next-line max-line-length
+                "initialize(address,address,addressw,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address)",
                 pauseAccount,
                 address(_settlement),
                 address(_chips),
@@ -61,7 +66,10 @@ contract CommonTest is Utils {
                 delegateUnbondingPeriod,
                 nodeSlashFraction,
                 userSlashFraction,
-                stakeRatio
+                stakeRatio,
+                stakeBaseline,
+                depositBaseline,
+                treasury
             )
         );
         _staking = Staking(address(proxy));
