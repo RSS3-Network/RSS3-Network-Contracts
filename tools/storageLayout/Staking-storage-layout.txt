@@ -1,6 +1,8 @@
 | Name                      | Type                                                   | Slot | Offset | Bytes | Contract                |
 |---------------------------|--------------------------------------------------------|------|--------|-------|-------------------------|
 | _paused                   | bool                                                   | 0    | 0      | 1     | src/Staking.sol:Staking |
+| _initialized              | uint8                                                  | 0    | 1      | 1     | src/Staking.sol:Staking |
+| _initializing             | bool                                                   | 0    | 2      | 1     | src/Staking.sol:Staking |
 | _roles                    | mapping(bytes32 => struct AccessControl.RoleData)      | 1    | 0      | 32    | src/Staking.sol:Staking |
 | _roleMembers              | mapping(bytes32 => struct EnumerableSet.AddressSet)    | 2    | 0      | 32    | src/Staking.sol:Staking |
 | _nodeSlashFraction        | uint256                                                | 3    | 0      | 32    | src/Staking.sol:Staking |

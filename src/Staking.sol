@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {IStaking} from "./interfaces/IStaking.sol";
 import {IChips} from "./interfaces/IChips.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
-import {Errors} from "./libraries/Errors.sol";
+import {IErrors} from "./interfaces/IErrors.sol";
 import {Events} from "./libraries/Events.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
@@ -17,7 +17,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 //import {console2 as console} from "forge-std/console2.sol";
 
-contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
+contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
@@ -122,10 +122,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function deleteNode(address nodeAddr) external override {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
-        if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
+        if (msg.sender != node.account) revert CallerNotNodeOwner();
 
         // can't delete a node with staked or deposited tokens
-        if (node.operatorPool > 0 || node.rewardPool > 0) revert Errors.NodeStakedOrDeposited();
+        if (node.operatorPool > 0 || node.rewardPool > 0) revert NodeStakedOrDeposited();
 
         delete _nodes[nodeAddr];
         _nodeAddrs.remove(nodeAddr);
@@ -142,7 +142,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         string calldata endpoint,
         uint256 amount
     ) external override whenNotPaused {
-        if (publicGood) revert Errors.PublicGoodNotAllowed();
+        if (publicGood) revert PublicGoodNotAllowed();
 
         _createNode(msg.sender, name, description, taxFraction, publicGood, endpoint);
         _deposit(msg.sender, amount);
@@ -156,10 +156,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @inheritdoc IStaking
     function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
-        if (node.account == address(0)) revert Errors.NodeNotExists();
+        if (node.account == address(0)) revert NodeNotExists();
 
         //  deposited tokens has been slashed completely
-        if (amount > node.operatorPool) revert Errors.DepositedTokensSlashedAll();
+        if (amount > node.operatorPool) revert DepositedTokensSlashedAll();
 
         node.operatorPool -= amount;
 
@@ -175,10 +175,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc IStaking
     function setNodeTaxFraction(address nodeAddr, uint64 taxFraction) external override {
-        if (taxFraction > _denominator()) revert Errors.TaxFractionTooLarge();
+        if (taxFraction > _denominator()) revert TaxFractionTooLarge();
 
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (msg.sender != node.account) revert Errors.CallerNotNodeOwner();
+        if (msg.sender != node.account) revert CallerNotNodeOwner();
 
         node.taxFraction = taxFraction;
 
@@ -187,7 +187,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc IStaking
     function setTaxFraction4PublicPool(uint64 taxFraction) external override onlyRole(ORACLE_ROLE) {
-        if (taxFraction > _denominator()) revert Errors.TaxFractionTooLarge();
+        if (taxFraction > _denominator()) revert TaxFractionTooLarge();
 
         _publicPool.taxFraction = taxFraction;
 
@@ -208,7 +208,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     ) external override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // validate node
-        if (node.account == address(0)) revert Errors.NodeNotExists();
+        if (node.account == address(0)) revert NodeNotExists();
 
         (startTokenId, endTokenId) = _stakeToNode(node, amount);
 
@@ -224,14 +224,14 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         uint256[] calldata chipsIds
     ) external override whenNotPaused returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.account == address(0)) revert Errors.NodeNotExists();
+        if (node.account == address(0)) revert NodeNotExists();
 
         // check and burn chips
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner(tokenId);
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert NotChipsOwner(tokenId);
 
-            if (_issuers[tokenId] != nodeAddr) revert Errors.NotTokenIssuer(tokenId, nodeAddr);
+            if (_issuers[tokenId] != nodeAddr) revert NotTokenIssuer(tokenId, nodeAddr);
 
             IChips(_chips).burn(tokenId);
         }
@@ -273,7 +273,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
             nodeAddrs.length != requestFees.length ||
             nodeAddrs.length != requestBonuses.length ||
             nodeAddrs.length != stakingRewards.length
-        ) revert Errors.InvalidArrayLength();
+        ) revert InvalidArrayLength();
 
         uint256[] memory taxAmounts = new uint256[](nodeAddrs.length);
         // update node rewards
@@ -322,9 +322,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
         // check and burn chips
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner(tokenId);
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert NotChipsOwner(tokenId);
 
-            if (_issuers[tokenId] != address(0)) revert Errors.ChipsDelegatedOrNotPublicGood(tokenId);
+            if (_issuers[tokenId] != address(0)) revert ChipsDelegatedOrNotPublicGood(tokenId);
 
             IChips(_chips).burn(tokenId);
         }
@@ -349,9 +349,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function delegate(address nodeAddr, uint256[] calldata chipsIds) external override {
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner(tokenId);
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert NotChipsOwner(tokenId);
 
-            if (_issuers[tokenId] != address(0)) revert Errors.ChipsDelegatedOrNotPublicGood(tokenId);
+            if (_issuers[tokenId] != address(0)) revert ChipsDelegatedOrNotPublicGood(tokenId);
 
             _issuers[tokenId] = nodeAddr;
         }
@@ -363,9 +363,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function undelegate(address nodeAddr, uint256[] calldata chipsIds) external override {
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert Errors.NotChipsOwner(tokenId);
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender) revert NotChipsOwner(tokenId);
 
-            if (_issuers[tokenId] != nodeAddr) revert Errors.NotTokenIssuer(tokenId, nodeAddr);
+            if (_issuers[tokenId] != nodeAddr) revert NotTokenIssuer(tokenId, nodeAddr);
 
             delete _issuers[tokenId];
         }
@@ -377,7 +377,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
-            if (node.account == address(0)) revert Errors.NodeNotExists();
+            if (node.account == address(0)) revert NodeNotExists();
 
             // slash operator pool tokens
             uint256 slashedOperatorPool = (node.operatorPool * _nodeSlashFraction) / _denominator();
@@ -466,7 +466,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     ) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
-        if (address(0) != node.account) revert Errors.NodeExists();
+        if (address(0) != node.account) revert NodeExists();
         node.account = nodeAddr;
         node.name = name;
         node.description = description;
@@ -482,7 +482,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
 
     function _deposit(address nodeAddr, uint256 amount) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.account == address(0)) revert Errors.NodeNotExists();
+        if (node.account == address(0)) revert NodeNotExists();
 
         // update operator pool
         node.operatorPool += amount;
@@ -500,7 +500,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     ) internal returns (uint256 startTokenId, uint256 endTokenId) {
         uint256 shares = _tokensToShares(amount, node.rewardPool, node.totalShares);
         uint256 chipsCount = shares / SHARES_PER_CHIP;
-        if (chipsCount == 0) revert Errors.AmountTooSmall(amount);
+        if (chipsCount == 0) revert AmountTooSmall(amount);
         // mint chips
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
 
@@ -518,7 +518,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @dev claim unstake request
     function _claimUnstake(uint256 requestId) internal {
         DataTypes.UnstakeRequest memory req = _pendingUnstake[requestId];
-        if (block.timestamp < req.timestamp + _stakeUnbondingPeriod) revert Errors.ClaimTimeNotReady();
+        if (block.timestamp < req.timestamp + _stakeUnbondingPeriod) revert ClaimTimeNotReady();
 
         // transfer
         IERC20(_token).safeTransfer(req.owner, req.unstakeAmount);
@@ -532,7 +532,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable {
     /// @dev claim withdrawal request
     function _claimWithdrawal(uint256 requestId) internal {
         DataTypes.WithdrawalRequest memory req = _pendingWithdrawals[requestId];
-        if (block.timestamp < req.timestamp + _depositUnbondingPeriod) revert Errors.ClaimTimeNotReady();
+        if (block.timestamp < req.timestamp + _depositUnbondingPeriod) revert ClaimTimeNotReady();
 
         // transfer staked tokens
         IERC20(_token).safeTransfer(req.owner, req.amount);

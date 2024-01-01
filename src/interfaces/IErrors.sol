@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.20;
 
-library Errors {
+interface IErrors {
     /// @dev Caller is not staking contract
     error CallerNotStaking();
 

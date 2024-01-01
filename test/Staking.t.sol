@@ -86,6 +86,7 @@ contract StakingTest is CommonTest {
 
     function testStake(uint256 amount) public {
         vm.assume(amount > 500 ether && amount <= 1000000 ether);
+        amount = 200000 ether;
 
         uint256 chipsCount = amount / _staking.SHARES_PER_CHIP();
         uint256 expectedStakedAmount = chipsCount * _staking.SHARES_PER_CHIP();

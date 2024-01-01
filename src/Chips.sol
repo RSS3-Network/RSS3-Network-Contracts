@@ -3,12 +3,12 @@ pragma solidity 0.8.20;
 
 import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
-import {Errors} from "./libraries/Errors.sol";
+import {IErrors} from "./interfaces/IErrors.sol";
 import {ERC721} from "./base/ERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-contract Chips is IChips, Initializable, ERC721 {
+contract Chips is IChips, IErrors, Initializable, ERC721 {
     /// @dev Staking contract address.
     address internal _staking;
 
@@ -18,7 +18,7 @@ contract Chips is IChips, Initializable, ERC721 {
     uint256 internal _totalSupply;
 
     modifier onlyStaking() {
-        if (msg.sender != _staking) revert Errors.CallerNotStaking();
+        if (msg.sender != _staking) revert CallerNotStaking();
         _;
     }
 

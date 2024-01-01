@@ -3,12 +3,12 @@ pragma solidity 0.8.20;
 
 import {IAccountOracle} from "./interfaces/IAccountOracle.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
-import {Errors} from "./libraries/Errors.sol";
+import {IErrors} from "./interfaces/IErrors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
-contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable {
+contract AccountOracle is IAccountOracle, IErrors, Initializable, AccessControlEnumerable {
     /// @dev Staking contract address.
     address internal _staking;
 
@@ -37,7 +37,7 @@ contract AccountOracle is IAccountOracle, Initializable, AccessControlEnumerable
             nodeAddrs.length != requestFees.length ||
             nodeAddrs.length != requestCounts.length ||
             nodeAddrs.length != stakingRewards.length
-        ) revert Errors.InvalidArrayLength();
+        ) revert InvalidArrayLength();
 
         uint256[] memory requestBonuses = _getRequestBonuses(totalRequestBonus, requestCounts);
 
