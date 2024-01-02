@@ -73,6 +73,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev the issuers of chips
     mapping(uint256 tokenId => address nodeAddr) internal _issuers;
 
+    /// @dev current epoch
+    uint256 internal _currentEpoch;
+
     /// ACL
     // keccak256("PAUSE_ROLE");
     bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
@@ -295,6 +298,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             nodeAddrs.length != stakingRewards.length
         ) revert InvalidArrayLength();
 
+        if (epoch != ++_currentEpoch) revert InvalidEpoch(_currentEpoch, epoch);
+
         uint256[] memory taxAmounts = new uint256[](nodeAddrs.length);
         // update node rewards
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
@@ -463,6 +468,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             address nodeAddr = _nodeAddrs.at(i);
             nodes[i - offset] = _nodes[nodeAddr];
         }
+    }
+
+    /// @inheritdoc IStaking
+    function currentEpoch() external view override returns (uint256) {
+        return _currentEpoch;
     }
 
     /// @inheritdoc IStaking

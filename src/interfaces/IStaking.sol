@@ -263,6 +263,12 @@ interface IStaking {
     function getNodes(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
 
     /**
+     * @notice Returns the current epoch number.
+     * @return uint256 The current epoch number.
+     */
+    function currentEpoch() external view returns (uint256);
+
+    /**
      * @notice Returns the address of the staking token contract.
      * @return address The address of the staking token contract.
      */

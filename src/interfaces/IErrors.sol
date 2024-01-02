@@ -53,4 +53,7 @@ interface IErrors {
 
     /// @dev Batch size is zero
     error BatchSizeZero();
+
+    /// @dev Invalid epoch
+    error InvalidEpoch(uint256 expected, uint256 actual);
 }
