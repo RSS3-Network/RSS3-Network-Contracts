@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e9d155d7fc548f1f69f441a99bfcccea7b82f97e/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -257,6 +257,10 @@ node operator can receive its full tax if it stakes at least 10,000 tokens</em><
 <h3 id="_issuers"><a class="header" href="#_issuers">_issuers</a></h3>
 <p><em>the issuers of chips</em></p>
 <pre><code class="language-solidity">mapping(uint256 tokenId =&gt; address nodeAddr) internal _issuers;
+</code></pre>
+<h3 id="_currentepoch"><a class="header" href="#_currentepoch">_currentEpoch</a></h3>
+<p><em>current epoch</em></p>
+<pre><code class="language-solidity">uint256 internal _currentEpoch;
 </code></pre>
 <h3 id="pause_role"><a class="header" href="#pause_role">PAUSE_ROLE</a></h3>
 <p>ACL</p>
@@ -657,6 +661,15 @@ Requirements:</p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>offset</code></td><td><code>uint256</code></td><td>The offset of nodes to query.</td></tr>
 <tr><td><code>limit</code></td><td><code>uint256</code></td><td>The limit of nodes to query.</td></tr>
+</tbody></table>
+</div>
+<h3 id="currentepoch"><a class="header" href="#currentepoch">currentEpoch</a></h3>
+<p>Returns the current epoch number.</p>
+<pre><code class="language-solidity">function currentEpoch() external view override returns (uint256);
+</code></pre>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>uint256 The current epoch number.</td></tr>
 </tbody></table>
 </div>
 <h3 id="stakingtoken"><a class="header" href="#stakingtoken">stakingToken</a></h3>
