@@ -59,4 +59,7 @@ interface IErrors {
 
     ///@dev Node list is empty
     error EmptyNodeList();
+
+    /// @dev Chips id overflow
+    error ChipsIdOverflow();
 }

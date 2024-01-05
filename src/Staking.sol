@@ -7,18 +7,22 @@ import {DataTypes} from "./libraries/DataTypes.sol";
 import {IErrors} from "./interfaces/IErrors.sol";
 import {Events} from "./libraries/Events.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
-import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
+import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
+    using BitMaps for BitMaps.BitMap;
+    using Checkpoints for Checkpoints.Trace160;
 
     uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 
@@ -70,10 +74,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     address internal _token;
 
     /// @dev the issuers of chips
-    mapping(uint256 tokenId => address nodeAddr) internal _families;
-
-    /// @dev
-    mapping(uint256 tokenId => bool) internal _issuedByPublicPool;
+    Checkpoints.Trace160 internal _families;
+    BitMaps.BitMap internal _chipsBurn;
 
     /// @dev current epoch
     uint256 internal _currentEpoch;
@@ -301,9 +303,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         address nodeAddr
     ) external override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
         (startTokenId, endTokenId) = _stakeToNode(_publicPool, amount, nodeAddr);
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            _issuedByPublicPool[i] = true;
-        }
     }
 
     /// @inheritdoc IStaking
@@ -352,7 +351,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function getChipsInfo(uint256 tokenId) external view override returns (address nodeAddr, uint256 tokens) {
-        nodeAddr = _families[tokenId];
+        nodeAddr = _issuerOf(tokenId);
         tokens = _minTokensToStake(nodeAddr);
     }
 
@@ -488,10 +487,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             if (IERC721(_chips).ownerOf(tokenId) != msg.sender && IERC721(_chips).getApproved(tokenId) != msg.sender)
                 revert ChipNotAuthorized(tokenId);
 
-            if (isPublicNode && !_issuedByPublicPool[tokenId]) revert ChipNotPublicGood(tokenId);
-            if (!isPublicNode && _families[tokenId] != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
+            if (isPublicNode) {
+                nodeAddr = _issuerOf(tokenId);
+                if (!_nodes[nodeAddr].publicGood) revert ChipNotPublicGood(tokenId);
+            } else if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
 
             IChips(_chips).burn(tokenId);
+            // mark token as burnt
+            _chipsBurn.set(tokenId);
         }
 
         requestId = ++_pendingUnstakeCounter;
@@ -561,6 +564,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (chipsCount == 0) revert AmountTooSmall(amount);
         // mint chips
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
+        if (endTokenId > type(uint96).max) revert ChipsIdOverflow();
 
         // update stakedAmount
         uint256 stakedAmount = _sharesToTokens(chipsCount * SHARES_PER_CHIP, node.totalShares, node.stakingPool);
@@ -572,10 +576,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         IERC20(_token).safeTransferFrom(msg.sender, address(this), stakedAmount);
 
         // update chips issuers
-        // TODO: gas optimization
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            _families[i] = nodeAddr;
-        }
+        _families.push(uint96(endTokenId), uint160(nodeAddr));
 
         emit Events.Staked(msg.sender, node.account, stakedAmount, startTokenId, endTokenId);
     }
@@ -611,6 +612,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         delete _pendingWithdrawals[requestId];
 
         emit Events.WithdrawalClaimed(requestId);
+    }
+
+    function _issuerOf(uint256 tokenId) internal view returns (address) {
+        // check the token was not burned, and fetch ownership from the anchors
+        // Note: no need for safe cast, we know that tokenId <= type(uint96).max
+        return _chipsBurn.get(tokenId) ? address(0) : address(_families.lowerLookup(uint96(tokenId)));
     }
 
     function _getTreasuryAmount() internal view returns (uint256) {

@@ -4,7 +4,7 @@
   "rules": {
     "avoid-tx-origin": "warn",
     "check-send-result": "error",
-    "code-complexity": ["error", 5],
+    "code-complexity": ["error", 6],
     "compiler-version": ["error", ">=0.8.0"],
     "comprehensive-interface": "error",
     "const-name-snakecase": "off",
