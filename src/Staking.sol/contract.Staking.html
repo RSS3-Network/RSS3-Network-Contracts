@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1345f09b85574e50a7faa33a2e787982cfc06e44/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/da01cc229c63f62fd03eaf349261d7cfa80124b7/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -259,9 +259,6 @@ node operator can receive its full tax if it stakes at least 10,000 tokens</em><
 <h3 id="_families"><a class="header" href="#_families">_families</a></h3>
 <p><em>the issuers of chips</em></p>
 <pre><code class="language-solidity">Checkpoints.Trace160 internal _families;
-</code></pre>
-<h3 id="_chipsburn"><a class="header" href="#_chipsburn">_chipsBurn</a></h3>
-<pre><code class="language-solidity">BitMaps.BitMap internal _chipsBurn;
 </code></pre>
 <h3 id="_currentepoch"><a class="header" href="#_currentepoch">_currentEpoch</a></h3>
 <p><em>current epoch</em></p>
@@ -514,7 +511,7 @@ Requirements:</p>
 </div>
 <h3 id="staketopublicpool"><a class="header" href="#staketopublicpool">stakeToPublicPool</a></h3>
 <p>Stakes tokens to public pool.</p>
-<pre><code class="language-solidity">function stakeToPublicPool(uint256 amount, address nodeAddr)
+<pre><code class="language-solidity">function stakeToPublicPool(address nodeAddr, uint256 amount)
     external
     override
     whenNotPaused
@@ -522,8 +519,8 @@ Requirements:</p>
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td>The address of node to like.</td></tr>
 <tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to stake.</td></tr>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td></td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
