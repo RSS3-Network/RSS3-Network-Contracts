@@ -4,10 +4,6 @@ pragma solidity 0.8.20;
 
 //import {console2 as console} from "forge-std/console2.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
-import {TestEvents} from "test/helpers/TestEvents.sol";
-import {DataTypes} from "../src/libraries/DataTypes.sol";
-
-import "forge-std/console.sol";
 
 contract SettlementTest is CommonTest {
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -90,9 +86,6 @@ contract SettlementTest is CommonTest {
         address[] memory nodeAddrs = new address[](2);
         nodeAddrs[0] = alice;
         nodeAddrs[1] = bob;
-
-        DataTypes.Node memory node = (_staking).getNode(alice);
-        console.log(node.rewardPool);
 
         (uint256 publicPoolReward, uint256[] memory nodeRewards) = _internalSettlementTest.getStakingRewards(nodeAddrs);
 

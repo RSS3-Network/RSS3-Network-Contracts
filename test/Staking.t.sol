@@ -11,7 +11,6 @@ import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {IErrors} from "../src/interfaces/IErrors.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
-import {Staking} from "../src/Staking.sol";
 
 contract StakingTest is CommonTest, IErrors, IERC721Errors {
     event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -177,8 +176,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         uint256[] memory requestIds = new uint256[](amount / value);
 
-        uint i = 0;
-        for (uint v = 0; v < amount; v += value) {
+        uint256 i = 0;
+        for (uint256 v = 0; v < amount; v += value) {
             requestIds[i] = _staking.requestWithdrawal(value);
             i++;
         }
@@ -332,70 +331,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(realTaxFraction, expectedTaxFraction);
     }
 
-    function testCalcTax1(uint256 operatorPool) public {
-        // case 1: receives no tax rewards
-        vm.assume(operatorPool < 10000 ether);
-
-        uint256 rewards = 10000 ether;
-        uint256 rewardPool = 1000 ether;
-        uint64 taxFraction = _defaultTaxFraction;
-
-        (uint256 tax1, uint256 partialTax1) = _internalStakingTest.calculateReward(
-            rewards,
-            taxFraction,
-            operatorPool,
-            rewardPool
-        );
-
-        assertEq(tax1, _getFullTax(rewards, taxFraction));
-        assertEq(partialTax1, 0);
-    }
-
-    function testCalcTax2() public {
-        // case 2: receives full tax rewards
-        uint256 operatorPool = minDeposit;
-        uint256 stakeRatio;
-        vm.assume(stakeRatio < 25);
-
-        uint256 rewardPool = operatorPool * stakeRatio;
-
-        uint256 rewards = 10000 ether;
-        uint64 taxFraction = _defaultTaxFraction;
-
-        (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
-            rewards,
-            taxFraction,
-            operatorPool,
-            rewardPool
-        );
-
-        assertEq(tax, partialTax);
-    }
-
-    function testCalcTax3(uint256 rewardPool) public view {
-        // case 2: receives partial tax rewards
-        uint256 operatorPool = minDeposit;
-
-        vm.assume(rewardPool > 25 * operatorPool && stakeRatio < 100 * operatorPool);
-
-        uint256 rewards = 10000 ether;
-        uint64 taxFraction = _defaultTaxFraction;
-
-        (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
-            rewards,
-            taxFraction,
-            operatorPool,
-            rewardPool
-        );
-
-        // partialTax has precision 1
-        assert(
-            tax * operatorPool * 25 >= partialTax * rewardPool &&
-                tax * operatorPool * 25 < (partialTax + 1) * rewardPool
-        );
-        // assert(tax / partialTax >= rewardPool / (operatorPool * 25));
-    }
-
     function testDistributeRewards() public {
         uint256 amount = 10000 ether;
 
@@ -507,6 +442,70 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(operatorPool, 0);
         assert(treasury > 0);
         assert(rewardPool > 0);
+    }
+
+    function testCalcTax1(uint256 operatorPool) public {
+        // case 1: receives no tax rewards
+        vm.assume(operatorPool < 10000 ether);
+
+        uint256 rewards = 10000 ether;
+        uint256 rewardPool = 1000 ether;
+        uint64 taxFraction = _defaultTaxFraction;
+
+        (uint256 tax1, uint256 partialTax1) = _internalStakingTest.calculateReward(
+            rewards,
+            taxFraction,
+            operatorPool,
+            rewardPool
+        );
+
+        assertEq(tax1, _getFullTax(rewards, taxFraction));
+        assertEq(partialTax1, 0);
+    }
+
+    function testCalcTax2() public {
+        // case 2: receives full tax rewards
+        uint256 operatorPool = minDeposit;
+        uint256 stakeRatio;
+        vm.assume(stakeRatio < 25);
+
+        uint256 rewardPool = operatorPool * stakeRatio;
+
+        uint256 rewards = 10000 ether;
+        uint64 taxFraction = _defaultTaxFraction;
+
+        (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
+            rewards,
+            taxFraction,
+            operatorPool,
+            rewardPool
+        );
+
+        assertEq(tax, partialTax);
+    }
+
+    function testCalcTax3(uint256 rewardPool) public view {
+        // case 2: receives partial tax rewards
+        uint256 operatorPool = minDeposit;
+
+        vm.assume(rewardPool > 25 * operatorPool && stakeRatio < 100 * operatorPool);
+
+        uint256 rewards = 10000 ether;
+        uint64 taxFraction = _defaultTaxFraction;
+
+        (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
+            rewards,
+            taxFraction,
+            operatorPool,
+            rewardPool
+        );
+
+        // partialTax has precision 1
+        assert(
+            tax * operatorPool * 25 >= partialTax * rewardPool &&
+                tax * operatorPool * 25 < (partialTax + 1) * rewardPool
+        );
+        // assert(tax / partialTax >= rewardPool / (operatorPool * 25));
     }
 
     function _unstakeAndCheckAmount(

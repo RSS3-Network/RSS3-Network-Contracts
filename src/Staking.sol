@@ -306,6 +306,127 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
+    /// @inheritdoc IStaking
+    function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            DataTypes.Node storage node = _nodes[nodeAddrs[i]];
+            if (node.account == address(0)) revert NodeNotExists();
+
+            // slash operator pool tokens
+            uint256 slashedOperatorPool = (node.operatorPool * _nodeSlashFraction) / _denominator();
+            _decreaseOperatorPool(node, slashedOperatorPool);
+
+            // slash reward pool tokens
+            uint256 slashedRewardPool = (node.rewardPool * _userSlashFraction) / _denominator();
+            _decreaseRewardPool(node, slashedRewardPool);
+
+            node.slashedAmount += slashedOperatorPool + slashedRewardPool;
+
+            emit Events.NodeSlashed(nodeAddrs[i], slashedOperatorPool, slashedRewardPool);
+        }
+    }
+
+    function withdraw2Treasury() external override {
+        uint256 amount = _getTreasuryAmount();
+        IERC20(_token).transferFrom(address(this), _treasury, amount);
+    }
+
+    /// @inheritdoc IStaking
+    function getPendingWithdrawal(
+        uint256 requestId
+    ) external view override returns (DataTypes.WithdrawalRequest memory) {
+        return _pendingWithdrawals[requestId];
+    }
+
+    /// @inheritdoc IStaking
+    function getPendingUnstake(uint256 requestId) external view override returns (DataTypes.UnstakeRequest memory) {
+        return _pendingUnstake[requestId];
+    }
+
+    /// @inheritdoc IStaking
+    // Tokens per share
+    function minTokensToStake(address nodeAddr) external view override returns (uint256) {
+        return _minTokensToStake(nodeAddr);
+    }
+
+    /// @inheritdoc IStaking
+    function getChipsInfo(uint256 tokenId) external view override returns (address nodeAddr, uint256 tokens) {
+        nodeAddr = _families[tokenId];
+        tokens = _minTokensToStake(nodeAddr);
+    }
+
+    /// @inheritdoc IStaking
+    function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
+        return _nodes[nodeAddr];
+    }
+
+    /// @inheritdoc IStaking
+    function getPublicPool() external view override returns (DataTypes.Node memory) {
+        return _publicPool;
+    }
+
+    /// @inheritdoc IStaking
+    function getNodeCount() external view override returns (uint256) {
+        return _nodeAddrs.length();
+    }
+
+    /// @inheritdoc IStaking
+    function getNodes(uint256 offset, uint256 limit) external view override returns (DataTypes.Node[] memory nodes) {
+        uint256 totalNodes = _nodeAddrs.length();
+        uint256 len = (totalNodes - offset).min(limit);
+        nodes = new DataTypes.Node[](len);
+
+        if (offset >= totalNodes) return nodes;
+
+        for (uint256 i = offset; i < len + offset; i++) {
+            address nodeAddr = _nodeAddrs.at(i);
+            nodes[i - offset] = _nodes[nodeAddr];
+        }
+    }
+
+    function getPoolInfo() external view override returns (uint256, uint256, uint256) {
+        return (_totalOperatorPool, _totalRewardPool, _getTreasuryAmount());
+    }
+
+    /// @inheritdoc IStaking
+    function currentEpoch() external view override returns (uint256) {
+        return _currentEpoch;
+    }
+
+    /// @inheritdoc IStaking
+    function stakingToken() external view override returns (address) {
+        return _token;
+    }
+
+    /// @inheritdoc IStaking
+    function chipsContract() external view override returns (address) {
+        return _chips;
+    }
+
+    function getMinDeposit() external view override returns (uint256) {
+        return _minDeposit;
+    }
+
+    function _increaseOperatorPool(DataTypes.Node storage node, uint256 amount) internal {
+        node.operatorPool += amount;
+        _totalOperatorPool += amount;
+    }
+
+    function _decreaseOperatorPool(DataTypes.Node storage node, uint256 amount) internal {
+        node.operatorPool -= amount;
+        _totalOperatorPool -= amount;
+    }
+
+    function _increaseRewardPool(DataTypes.Node storage node, uint256 amount) internal {
+        node.rewardPool += amount;
+        _totalRewardPool += amount;
+    }
+
+    function _decreaseRewardPool(DataTypes.Node storage node, uint256 amount) internal {
+        node.rewardPool -= amount;
+        _totalRewardPool -= amount;
+    }
+
     function _distributePublicPoolRewards(uint256 publicPoolReward) internal returns (uint256) {
         // rewards for public pool
         uint256 tax = _getFullTax(publicPoolReward, _publicPool.taxFraction);
@@ -386,133 +507,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         req.unstakeAmount = unstakeAmount;
 
         emit Events.UnstakeRequested(msg.sender, node.account, requestId, chipsIds);
-    }
-
-    /// @inheritdoc IStaking
-    function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            DataTypes.Node storage node = _nodes[nodeAddrs[i]];
-            if (node.account == address(0)) revert NodeNotExists();
-
-            // slash operator pool tokens
-            uint256 slashedOperatorPool = (node.operatorPool * _nodeSlashFraction) / _denominator();
-            _decreaseOperatorPool(node, slashedOperatorPool);
-
-            // slash reward pool tokens
-            uint256 slashedRewardPool = (node.rewardPool * _userSlashFraction) / _denominator();
-            _decreaseRewardPool(node, slashedRewardPool);
-
-            node.slashedAmount += slashedOperatorPool + slashedRewardPool;
-
-            emit Events.NodeSlashed(nodeAddrs[i], slashedOperatorPool, slashedRewardPool);
-        }
-    }
-
-    /// @inheritdoc IStaking
-    function getPendingWithdrawal(
-        uint256 requestId
-    ) external view override returns (DataTypes.WithdrawalRequest memory) {
-        return _pendingWithdrawals[requestId];
-    }
-
-    /// @inheritdoc IStaking
-    function getPendingUnstake(uint256 requestId) external view override returns (DataTypes.UnstakeRequest memory) {
-        return _pendingUnstake[requestId];
-    }
-
-    /// @inheritdoc IStaking
-    // Tokens per share
-    function minTokensToStake(address nodeAddr) external view override returns (uint256) {
-        return _minTokensToStake(nodeAddr);
-    }
-
-    /// @inheritdoc IStaking
-    function getChipsInfo(uint256 tokenId) external view override returns (address nodeAddr, uint256 tokens) {
-        nodeAddr = _families[tokenId];
-        tokens = _minTokensToStake(nodeAddr);
-    }
-
-    /// @inheritdoc IStaking
-    function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
-        return _nodes[nodeAddr];
-    }
-
-    /// @inheritdoc IStaking
-    function getPublicPool() external view override returns (DataTypes.Node memory) {
-        return _publicPool;
-    }
-
-    /// @inheritdoc IStaking
-    function getNodeCount() external view override returns (uint256) {
-        return _nodeAddrs.length();
-    }
-
-    /// @inheritdoc IStaking
-    function getNodes(uint256 offset, uint256 limit) external view override returns (DataTypes.Node[] memory nodes) {
-        uint256 totalNodes = _nodeAddrs.length();
-        uint256 len = (totalNodes - offset).min(limit);
-        nodes = new DataTypes.Node[](len);
-
-        if (offset >= totalNodes) return nodes;
-
-        for (uint256 i = offset; i < len + offset; i++) {
-            address nodeAddr = _nodeAddrs.at(i);
-            nodes[i - offset] = _nodes[nodeAddr];
-        }
-    }
-
-    function withdraw2Treasury() external override {
-        uint256 amount = _getTreasuryAmount();
-        IERC20(_token).transferFrom(address(this), _treasury, amount);
-    }
-
-    function getPoolInfo() external view override returns (uint256, uint256, uint256) {
-        return (_totalOperatorPool, _totalRewardPool, _getTreasuryAmount());
-    }
-
-    function _getTreasuryAmount() internal view returns (uint256) {
-        uint256 balance = IERC20(_token).balanceOf(address(this));
-        uint256 amount = balance - _totalOperatorPool - _totalRewardPool;
-        return amount;
-    }
-
-    function _increaseOperatorPool(DataTypes.Node storage node, uint256 amount) internal {
-        node.operatorPool += amount;
-        _totalOperatorPool += amount;
-    }
-
-    function _decreaseOperatorPool(DataTypes.Node storage node, uint256 amount) internal {
-        node.operatorPool -= amount;
-        _totalOperatorPool -= amount;
-    }
-
-    function _increaseRewardPool(DataTypes.Node storage node, uint256 amount) internal {
-        node.rewardPool += amount;
-        _totalRewardPool += amount;
-    }
-
-    function _decreaseRewardPool(DataTypes.Node storage node, uint256 amount) internal {
-        node.rewardPool -= amount;
-        _totalRewardPool -= amount;
-    }
-
-    /// @inheritdoc IStaking
-    function currentEpoch() external view override returns (uint256) {
-        return _currentEpoch;
-    }
-
-    /// @inheritdoc IStaking
-    function stakingToken() external view override returns (address) {
-        return _token;
-    }
-
-    /// @inheritdoc IStaking
-    function chipsContract() external view override returns (address) {
-        return _chips;
-    }
-
-    function getMinDeposit() external view override returns (uint256) {
-        return _minDeposit;
     }
 
     /// @dev create a node
@@ -614,6 +608,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         delete _pendingWithdrawals[requestId];
 
         emit Events.WithdrawalClaimed(requestId);
+    }
+
+    function _getTreasuryAmount() internal view returns (uint256) {
+        uint256 balance = IERC20(_token).balanceOf(address(this));
+        uint256 amount = balance - _totalOperatorPool - _totalRewardPool;
+        return amount;
     }
 
     /// @dev get minimal tokens to stake for a node

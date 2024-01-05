@@ -203,17 +203,17 @@ interface IStaking {
     function withdraw2Treasury() external;
 
     /**
-     * @notice The minimum amount of tokens to deposit for a node.
-     */
-    function getMinDeposit() external view returns (uint256);
-
-    /**
      *
      * @return total tokens in operator pool
      * @return total tokens in reward pool
      * @return total tokens for treasury
      */
     function getPoolInfo() external returns (uint256, uint256, uint256);
+
+    /**
+     * @notice The minimum amount of tokens to deposit for a node.
+     */
+    function getMinDeposit() external view returns (uint256);
 
     /**
      * @notice Returns the pending withdrawal request by `requestId`.

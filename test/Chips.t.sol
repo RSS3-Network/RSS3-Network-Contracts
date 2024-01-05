@@ -4,7 +4,6 @@ pragma solidity 0.8.20;
 
 //import {console2 as console} from "forge-std/console2.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
-import {TestEvents} from "test/helpers/TestEvents.sol";
 
 contract ChipsTest is CommonTest {
     function setUp() public {

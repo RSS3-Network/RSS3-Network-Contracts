@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.20;
 
-import {DataTypes} from "./DataTypes.sol";
-
 library Events {
     /**
      * @dev Emitted on createNode()
