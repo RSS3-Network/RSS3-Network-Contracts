@@ -271,7 +271,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         if (epoch != ++_currentEpoch) revert InvalidEpoch(_currentEpoch, epoch);
 
-        // distrubte rewards for public pool
+        // distribute rewards for public pool
         uint256 publicPoolTax = _distributePublicPoolRewards(publicPoolReward);
         emit Events.PublicGoodRewardDistributed(epoch, startTimestamp, endTimestamp, publicPoolReward, publicPoolTax);
 
