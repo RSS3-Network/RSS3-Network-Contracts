@@ -7,7 +7,8 @@ interface ISettlement {
      * @param staking Address of the Staking contract.
      * @param oracleAccount Address who makes settlement with the Staking contract.
      * @param startTime The start time of the first epoch.
-     * @param requsetBonusPercent The percentage of the total rewards to be allocated to the request bonus. Others will be allocated to the staking rewards.
+     * @param requsetBonusPercent The percentage of the total rewards to be allocated to the request bonus.
+     * Others will be allocated to the staking rewards.
      */
     function initialize(
         address staking,
@@ -40,7 +41,8 @@ interface ISettlement {
 
     /**
      * @notice Sets request bonus percentage.
-     * @param percent The percentage of the total rewards to be allocated to the request bonus. Others will be allocated to the staking rewards.
+     * @param percent The percentage of the total rewards to be allocated to the request bonus.
+     * Others will be allocated to the staking rewards.
      */
     function updateRewardsRatio(uint256 percent) external;
 

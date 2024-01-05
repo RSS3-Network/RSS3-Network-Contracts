@@ -9,8 +9,6 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "forge-std/console.sol";
-
 contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
     /// @dev Staking contract address.
     address internal _staking;

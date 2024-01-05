@@ -15,8 +15,6 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
-import "forge-std/console.sol";
-
 contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -513,6 +511,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return _chips;
     }
 
+    function getMinDeposit() external view override returns (uint256) {
+        return _minDeposit;
+    }
+
     /// @dev create a node
     function _createNode(
         address nodeAddr,
@@ -671,10 +673,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
 
         return (amount * totalShares) / totalAmount;
-    }
-
-    function getMinDeposit() public view returns (uint256) {
-        return _minDeposit;
     }
 
     /**
