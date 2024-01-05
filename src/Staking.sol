@@ -329,7 +329,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 amount = _getTreasuryAmount();
-        IERC20(_token).transferFrom(address(this), _treasury, amount);
+        IERC20(_token).safeTransfer(_treasury, amount);
     }
 
     /// @inheritdoc IStaking
