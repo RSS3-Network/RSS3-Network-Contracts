@@ -5,6 +5,13 @@ pragma solidity 0.8.20;
 import {Staking} from "../../src/Staking.sol";
 
 contract InternalStaking is Staking {
+    constructor(
+        address chips,
+        address token,
+        uint256 stakeRatio,
+        address treasury
+    ) Staking(chips, token, stakeRatio, treasury) {}
+
     function calculateReward(
         uint256 rewards,
         uint64 taxFraction,

@@ -8,28 +8,20 @@ interface IStaking {
      * @notice Initializes the Staking contract.
      * @param pauseAccount Address who can pause/unpause the Staking contract.
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
-     * @param chips Chips contract.
-     * @param token Staking token contract.
      * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
      * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its deposit.
      * @param nodeSlashFraction Slash fraction for node operator.
      * @param userSlashFraction Slash fraction for user.
-     * @param stakeRatio The stake ratio of the node operator.
      * @param minDeposit The deposit base line of the node operator.
-     * @param treasury The treasury address.
      */
     function initialize(
         address pauseAccount,
         address oracleAccount,
-        address chips,
-        address token,
         uint256 stakeUnbondingPeriod,
         uint256 depositUnbondingPeriod,
         uint256 nodeSlashFraction,
         uint256 userSlashFraction,
-        uint256 stakeRatio,
-        uint256 minDeposit,
-        address treasury
+        uint256 minDeposit
     ) external;
 
     /**

@@ -44,9 +44,9 @@ contract Deploy is Deployer {
 
     /* solhint-disable comprehensive-interface */
     function run() external {
-        deployImplementations();
-
         deployProxies();
+
+        deployImplementations();
 
         initialize();
     }
@@ -92,7 +92,8 @@ contract Deploy is Deployer {
     }
 
     function deployStaking() public broadcast returns (address addr_) {
-        Staking staking = new Staking();
+        address chipsProxy = mustGetAddress("ChipsProxy");
+        Staking staking = new Staking(chipsProxy, cfg.rss3Token(), cfg.stakeRatio(), cfg.treasury());
 
         // check states
         require(!staking.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "pause role error");
@@ -133,15 +134,11 @@ contract Deploy is Deployer {
         stakingProxy.initialize(
             cfg.pauseAccount(),
             settlementProxy,
-            chipsProxy,
-            cfg.rss3Token(),
             cfg.stakeUnbondingPeriod(),
             cfg.depositUnbondingPeriod(),
             cfg.nodeSlashFraction(),
             cfg.userSlashFraction(),
-            cfg.stakeRatio(),
-            cfg.depositBaseline(),
-            cfg.treasury()
+            cfg.depositBaseline()
         );
         // check states
         require(stakingProxy.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "check pause role error");

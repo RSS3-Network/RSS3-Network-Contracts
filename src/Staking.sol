@@ -26,20 +26,25 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 
+    /// @dev the chips contract
+    address internal immutable CHIP; // solhint-disable-line private-vars-leading-underscore
+    /// @dev the staking token contract
+    address internal immutable TOKEN; // solhint-disable-line private-vars-leading-underscore
+
+    /// @dev the ratio of total tokens to deposited tokens, 25 by default.
+    /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
+    uint256 internal immutable STAKE_RATIO; // solhint-disable-line private-vars-leading-underscore
+
+    /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
+    address internal immutable TREASURY; // solhint-disable-line private-vars-leading-underscore
+
     /// @dev slash fraction
     uint256 internal _nodeSlashFraction;
     uint256 internal _userSlashFraction;
 
-    /// @dev the ratio of total tokens to deposited tokens, 25 by default.
-    /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
-    uint256 internal _stakeRatio;
-
     /// @dev the minimal tokens for deposit, 10,000 by default.
     /// node operator can receive its full tax if it stakes at least 10,000 tokens
     uint256 internal _minDeposit;
-
-    /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
-    address internal _treasury;
 
     /// @dev the period of time that node operator can't withdraw staked tokens
     uint256 internal _depositUnbondingPeriod;
@@ -68,11 +73,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     uint256 internal _totalStakingPool;
 
-    /// @dev the chips contract
-    address internal _chips;
-    /// @dev the staking token contract
-    address internal _token;
-
     /// @dev the issuers of chips
     Checkpoints.Trace160 internal _families;
     BitMaps.BitMap internal _chipsBurn;
@@ -86,34 +86,32 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
+    constructor(address chips, address token, uint256 stakeRatio, address treasury) {
+        CHIP = chips;
+        TOKEN = token;
+
+        STAKE_RATIO = stakeRatio;
+
+        TREASURY = treasury;
+    }
+
     /// @inheritdoc IStaking
     function initialize(
         address pauseAccount,
         address oracleAccount,
-        address chips,
-        address token,
         uint256 stakeUnbondingPeriod,
         uint256 depositUnbondingPeriod,
         uint256 nodeSlashFraction,
         uint256 userSlashFraction,
-        uint256 stakeRatio,
-        uint256 minDeposit,
-        address treasury
+        uint256 minDeposit
     ) external override initializer {
-        _chips = chips;
-        _token = token;
-
         _stakeUnbondingPeriod = stakeUnbondingPeriod;
         _depositUnbondingPeriod = depositUnbondingPeriod;
 
         _nodeSlashFraction = nodeSlashFraction;
         _userSlashFraction = userSlashFraction;
 
-        _stakeRatio = stakeRatio;
-
         _minDeposit = minDeposit;
-
-        _treasury = treasury;
 
         _grantRole(PAUSE_ROLE, pauseAccount);
         _setRoleAdmin(PAUSE_ROLE, PAUSE_ROLE);
@@ -328,7 +326,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 amount = _getTreasuryAmount();
-        IERC20(_token).safeTransfer(_treasury, amount);
+        IERC20(TOKEN).safeTransfer(TREASURY, amount);
     }
 
     /// @inheritdoc IStaking
@@ -396,12 +394,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function stakingToken() external view override returns (address) {
-        return _token;
+        return TOKEN;
     }
 
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
-        return _chips;
+        return CHIP;
     }
 
     /// @inheritdoc IStaking
@@ -484,7 +482,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // check and burn chips
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender && IERC721(_chips).getApproved(tokenId) != msg.sender)
+            if (IERC721(CHIP).ownerOf(tokenId) != msg.sender && IERC721(CHIP).getApproved(tokenId) != msg.sender)
                 revert ChipNotAuthorized(tokenId);
 
             if (isPublicNode) {
@@ -492,7 +490,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
                 if (!_nodes[nodeAddr].publicGood) revert ChipNotPublicGood(tokenId);
             } else if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
 
-            IChips(_chips).burn(tokenId);
+            IChips(CHIP).burn(tokenId);
             // mark token as burnt
             _chipsBurn.set(tokenId);
         }
@@ -548,7 +546,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _increaseOperatingPool(node, amount);
 
         // transfer tokens
-        IERC20(_token).safeTransferFrom(nodeAddr, address(this), amount);
+        IERC20(TOKEN).safeTransferFrom(nodeAddr, address(this), amount);
 
         emit Events.Deposited(nodeAddr, amount);
     }
@@ -563,7 +561,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 chipsCount = shares / SHARES_PER_CHIP;
         if (chipsCount == 0) revert AmountTooSmall(amount);
         // mint chips
-        (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
+        (startTokenId, endTokenId) = IChips(CHIP).mintBatch(msg.sender, chipsCount);
         if (endTokenId > type(uint96).max) revert ChipsIdOverflow();
 
         // update stakedAmount
@@ -573,7 +571,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // update total shares
         node.totalShares += (chipsCount * SHARES_PER_CHIP);
         // transfer tokens
-        IERC20(_token).safeTransferFrom(msg.sender, address(this), stakedAmount);
+        IERC20(TOKEN).safeTransferFrom(msg.sender, address(this), stakedAmount);
 
         // update chips issuers
         _families.push(uint96(endTokenId), uint160(nodeAddr));
@@ -589,7 +587,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (block.timestamp < req.timestamp + _stakeUnbondingPeriod) revert ClaimTimeNotReady();
 
         // transfer
-        IERC20(_token).safeTransfer(req.owner, req.unstakeAmount);
+        IERC20(TOKEN).safeTransfer(req.owner, req.unstakeAmount);
 
         // delete request
         delete _pendingUnstake[requestId];
@@ -606,7 +604,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (block.timestamp < req.timestamp + _depositUnbondingPeriod) revert ClaimTimeNotReady();
 
         // transfer staked tokens
-        IERC20(_token).safeTransfer(req.owner, req.amount);
+        IERC20(TOKEN).safeTransfer(req.owner, req.amount);
 
         // delete request
         delete _pendingWithdrawals[requestId];
@@ -621,7 +619,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     function _getTreasuryAmount() internal view returns (uint256) {
-        uint256 balance = IERC20(_token).balanceOf(address(this));
+        uint256 balance = IERC20(TOKEN).balanceOf(address(this));
         uint256 amount = balance - _totalOperatingPool - _totalStakingPool;
         return amount;
     }
@@ -653,12 +651,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (operatingPool < _minDeposit) {
             // node will receive no tax
             return (fullTax, 0);
-        } else if (operatingPool >= _minDeposit && operatingPool * _stakeRatio >= rewardPool) {
+        } else if (operatingPool >= _minDeposit && operatingPool * STAKE_RATIO >= rewardPool) {
             // node will receive its full tax
             return (fullTax, fullTax);
         } else {
             // node will receive part of its tax
-            uint256 partialTax = (fullTax * operatingPool * _stakeRatio) / rewardPool;
+            uint256 partialTax = (fullTax * operatingPool * STAKE_RATIO) / rewardPool;
             return (fullTax, partialTax);
         }
     }
