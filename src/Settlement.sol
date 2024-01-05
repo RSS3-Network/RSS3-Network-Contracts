@@ -25,7 +25,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     uint256 internal _totalRequestBonusPerEpoch;
 
     /// @dev The current epoch.
-    uint256 internal _epoch = 1;
+    uint256 internal _epoch;
 
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
@@ -37,10 +37,13 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 requsetBonusPercent
+        uint256 requsetBonusPercent,
+        uint256 startEpoch // set as param for upgradeability
     ) external override initializer {
         _staking = staking;
         _token = IERC20(IStaking(staking).stakingToken());
+
+        _epoch = startEpoch;
 
         _grantRole(ORACLE_ROLE, oracleAccount);
 

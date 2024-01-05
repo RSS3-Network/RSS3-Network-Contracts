@@ -164,7 +164,7 @@ contract Deploy is Deployer {
         Settlement settlementProxy = Settlement(mustGetAddress("SettlementProxy"));
         address stakingProxy = mustGetAddress("StakingProxy");
 
-        settlementProxy.initialize(stakingProxy, cfg.oracleAccount(), block.timestamp, 0);
+        settlementProxy.initialize(stakingProxy, cfg.oracleAccount(), block.timestamp, 0, 1);
 
         // check states
         require(settlementProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");
