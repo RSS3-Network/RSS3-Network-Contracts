@@ -178,37 +178,29 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/91fd9995b98a82c703196e479f65d7efa7f752a0/src/interfaces/IStaking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1345f09b85574e50a7faa33a2e787982cfc06e44/src/interfaces/IStaking.sol">Git Source</a></p>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
 <pre><code class="language-solidity">function initialize(
     address pauseAccount,
     address oracleAccount,
-    address chips,
-    address token,
     uint256 stakeUnbondingPeriod,
     uint256 depositUnbondingPeriod,
     uint256 nodeSlashFraction,
     uint256 userSlashFraction,
-    uint256 stakeRatio,
-    uint256 minDeposit,
-    address treasury
+    uint256 minDeposit
 ) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>pauseAccount</code></td><td><code>address</code></td><td>Address who can pause/unpause the Staking contract.</td></tr>
 <tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who can distribute rewards to the Staking contract.</td></tr>
-<tr><td><code>chips</code></td><td><code>address</code></td><td>Chips contract.</td></tr>
-<tr><td><code>token</code></td><td><code>address</code></td><td>Staking token contract.</td></tr>
 <tr><td><code>stakeUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds user need to wait to unstake its stake.</td></tr>
 <tr><td><code>depositUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds node operator need to wait to withdraw its deposit.</td></tr>
 <tr><td><code>nodeSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for node operator.</td></tr>
 <tr><td><code>userSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for user.</td></tr>
-<tr><td><code>stakeRatio</code></td><td><code>uint256</code></td><td>The stake ratio of the node operator.</td></tr>
 <tr><td><code>minDeposit</code></td><td><code>uint256</code></td><td>The deposit base line of the node operator.</td></tr>
-<tr><td><code>treasury</code></td><td><code>address</code></td><td>The treasury address.</td></tr>
 </tbody></table>
 </div>
 <h3 id="pause"><a class="header" href="#pause">pause</a></h3>
