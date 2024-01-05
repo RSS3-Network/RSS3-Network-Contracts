@@ -140,7 +140,7 @@ contract Deploy is Deployer {
             cfg.nodeSlashFraction(),
             cfg.userSlashFraction(),
             cfg.stakeRatio(),
-            cfg.minDeposit(),
+            cfg.depositBaseline(),
             cfg.treasury()
         );
         // check states

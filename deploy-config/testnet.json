@@ -1,0 +1,17 @@
+{
+  "chainID": 2333,
+  "proxyAdminOwner": "0x97576e0eE9f795aE740C3F2EA9765314B5D66fd3",
+  "pauseAccount": "0xD34eCb5656508137D1DfeB3A3E686Eef86086A91",
+  "oracleAccount": "0x11872CdEa66888546D5602e1c577Eb19400aeae1",
+  "rss3Token": "0x4200000000000000000000000000000000000301",
+  "depositUnbondingPeriod": "3600",
+  "stakeUnbondingPeriod": "1800",
+  "nodeSlashFraction": "200",
+  "userSlashFraction": "100",
+  "stakeRatio": "25",
+  "stakeBaseline": "1000000000000000000",
+  "depositBaseline": "1000000000000000000",
+  "treasury": "0x4df52552A29D0625CF7ab3F2B247f718247a32b6",
+  "chipsName": "RSS3 Chips",
+  "chipsSymbol": "Chips"
+}
