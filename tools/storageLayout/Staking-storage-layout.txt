@@ -19,8 +19,8 @@
 | _pendingUnstakeCounter    | uint256                                                | 15   | 0      | 32    | src/Staking.sol:Staking |
 | _pendingUnstake           | mapping(uint256 => struct DataTypes.UnstakeRequest)    | 16   | 0      | 32    | src/Staking.sol:Staking |
 | _publicPool               | struct DataTypes.Node                                  | 17   | 0      | 256   | src/Staking.sol:Staking |
-| _totalOperatorPool        | uint256                                                | 25   | 0      | 32    | src/Staking.sol:Staking |
-| _totalRewardPool          | uint256                                                | 26   | 0      | 32    | src/Staking.sol:Staking |
+| _totalOperatingPool       | uint256                                                | 25   | 0      | 32    | src/Staking.sol:Staking |
+| _totalStakingPool         | uint256                                                | 26   | 0      | 32    | src/Staking.sol:Staking |
 | _chips                    | address                                                | 27   | 0      | 20    | src/Staking.sol:Staking |
 | _token                    | address                                                | 28   | 0      | 20    | src/Staking.sol:Staking |
 | _families                 | mapping(uint256 => address)                            | 29   | 0      | 32    | src/Staking.sol:Staking |
