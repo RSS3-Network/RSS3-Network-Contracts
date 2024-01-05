@@ -138,22 +138,22 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         DataTypes.Node memory publicPool = IStaking(_staking).getPublicPool();
 
-        sum = publicPool.rewardPool;
+        sum = publicPool.stakingPool;
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             nodes[i] = IStaking(_staking).getNode(nodeAddrs[i]);
 
-            sum += nodes[i].rewardPool;
+            sum += nodes[i].stakingPool;
         }
 
         if (sum == 0) return (0, new uint256[](nodeAddrs.length));
 
-        uint256 publicPoolReward = (publicPool.rewardPool * _totalStakingRewardsPerEpoch) / sum;
+        uint256 publicPoolReward = (publicPool.stakingPool * _totalStakingRewardsPerEpoch) / sum;
 
         uint256[] memory nodesReward = new uint256[](nodeAddrs.length);
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            nodesReward[i] = (nodes[i].rewardPool * _totalStakingRewardsPerEpoch) / sum;
+            nodesReward[i] = (nodes[i].stakingPool * _totalStakingRewardsPerEpoch) / sum;
         }
 
         return (publicPoolReward, nodesReward);

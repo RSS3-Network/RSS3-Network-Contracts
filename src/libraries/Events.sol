@@ -159,8 +159,12 @@ library Events {
     /**
      * @dev Emitted on slashNode()
      * @param nodeAddr The address of node to slash.
-     * @param slashedOperatorPool Amount of operator pool tokens slashed.
+     * @param slashedOperatingPool Amount of operator pool tokens slashed.
      * @param slashedRewardPool Amount of reward pool tokens slashed.
      */
-    event NodeSlashed(address indexed nodeAddr, uint256 indexed slashedOperatorPool, uint256 indexed slashedRewardPool);
+    event NodeSlashed(
+        address indexed nodeAddr,
+        uint256 indexed slashedOperatingPool,
+        uint256 indexed slashedRewardPool
+    );
 }

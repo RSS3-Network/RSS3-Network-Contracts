@@ -20,9 +20,9 @@ library DataTypes {
         /// @notice API endpoint of the node
         string endpoint;
         /// @notice total tokens of operator pool
-        uint256 operatorPool;
+        uint256 operatingPool;
         /// @notice total tokens of reward pool
-        uint256 rewardPool;
+        uint256 stakingPool;
         /// @notice total shares of the pool
         uint256 totalShares;
         /// @notice total amount of slashed tokens
