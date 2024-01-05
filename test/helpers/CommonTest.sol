@@ -8,6 +8,8 @@ import {Chips} from "../../src/Chips.sol";
 import {Settlement} from "../../src/Settlement.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
 import {TransparentUpgradeableProxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
+import {InternalStaking} from "./InternalStaking.sol";
+import {InternalSettlement} from "./InternalSettlement.sol";
 
 contract CommonTest is Utils {
     address public constant alice = address(0x111);
@@ -29,17 +31,20 @@ contract CommonTest is Utils {
     uint256 public constant nodeSlashFraction = 200;
     uint256 public constant userSlashFraction = 100;
     uint256 public constant stakeRatio = 25;
-    uint256 public constant stakeBaseline = 10000 ether;
-    uint256 public constant depositBaseline = 10000 ether;
+    uint256 public constant minDeposit = 10000 ether;
     address public constant treasury = address(0xaaa);
 
     string public constant chipsName = "RSS3 Chips";
     string public constant chipsSymbol = "Chips";
 
+    uint64 internal constant _defaultTaxFraction = uint64(1000);
+
     RSS3Token internal _rss3;
     Staking internal _staking;
     Chips internal _chips;
     Settlement internal _settlement;
+    InternalStaking internal _internalStakingTest;
+    InternalSettlement internal _internalSettlementTest;
 
     function _setUp() internal {
         // deploy rss3 token
@@ -49,6 +54,21 @@ contract CommonTest is Utils {
         // deploy account oracle
         _settlement = new Settlement();
 
+        _internalStakingTest = new InternalStaking();
+        _internalStakingTest.initialize(
+            pauseAccount,
+            oracleAccount,
+            address(_chips),
+            address(_rss3),
+            stakeUnbondingPeriod,
+            depositUnbondingPeriod,
+            nodeSlashFraction,
+            userSlashFraction,
+            stakeRatio,
+            minDeposit,
+            treasury
+        );
+
         // deploy and init Staking contract
         Staking stakingImpl = new Staking();
 
@@ -57,9 +77,10 @@ contract CommonTest is Utils {
             proxyAdmin,
             abi.encodeWithSignature(
                 // solhint-disable-next-line max-line-length
-                "initialize(address,address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,address)",
+                "initialize(address,address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,address)",
                 pauseAccount,
-                address(_settlement),
+                // address(_settlement),
+                oracleAccount,
                 address(_chips),
                 address(_rss3),
                 stakeUnbondingPeriod,
@@ -67,8 +88,7 @@ contract CommonTest is Utils {
                 nodeSlashFraction,
                 userSlashFraction,
                 stakeRatio,
-                stakeBaseline,
-                depositBaseline,
+                minDeposit,
                 treasury
             )
         );
@@ -76,7 +96,25 @@ contract CommonTest is Utils {
 
         // init chips token
         _chips.initialize(chipsName, chipsSymbol, address(_staking));
+
         // init account oracle
-        _settlement.initialize(address(_staking), oracleAccount);
+        uint256 totalRewards = (3 * _rss3.totalSupply()) / 100;
+        _rss3.approve(address(_settlement), totalRewards);
+
+        _settlement.initialize(address(_staking), oracleAccount, 0, 0);
+
+        vm.startPrank(oracleAccount);
+        _staking.grantRole(_staking.ORACLE_ROLE(), address(_settlement));
+        vm.stopPrank();
+
+        _internalSettlementTest = new InternalSettlement();
+        _rss3.approve(address(_internalSettlementTest), totalRewards);
+
+        _internalSettlementTest.initialize(address(_staking), oracleAccount, 0, 0);
+    }
+
+    function _createNode(address to) internal {
+        vm.prank(to);
+        _staking.createNode(to, "Name", "Description", _defaultTaxFraction, false, "https://domain.com");
     }
 }

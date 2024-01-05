@@ -15,8 +15,7 @@ interface IStaking {
      * @param nodeSlashFraction Slash fraction for node operator.
      * @param userSlashFraction Slash fraction for user.
      * @param stakeRatio The stake ratio of the node operator.
-     * @param stakeBaseline The stake base line of the node operator.
-     * @param depositBaseline The deposit base line of the node operator.
+     * @param minDeposit The deposit base line of the node operator.
      * @param treasury The treasury address.
      */
     function initialize(
@@ -29,8 +28,7 @@ interface IStaking {
         uint256 nodeSlashFraction,
         uint256 userSlashFraction,
         uint256 stakeRatio,
-        uint256 stakeBaseline,
-        uint256 depositBaseline,
+        uint256 minDeposit,
         address treasury
     ) external;
 
@@ -154,7 +152,10 @@ interface IStaking {
      * @return startTokenId The start of new minted chips token ids.
      * @return endTokenId The end of new minted chips token ids.
      */
-    function stakeToPublicPool(uint256 amount) external returns (uint256 startTokenId, uint256 endTokenId);
+    function stakeToPublicPool(
+        uint256 amount,
+        address nodeAddr
+    ) external returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
      * @notice Requests unstake tokens from public pool.
@@ -165,25 +166,13 @@ interface IStaking {
     function requestUnstakeFromPublicPool(uint256[] calldata chipsIds) external returns (uint256 requestId);
 
     /**
-     * @notice Delegates chips to a public good node.
-     * @param chipsIds The chips token ids for delegate.
-     */
-    function delegate(address nodeAddr, uint256[] calldata chipsIds) external;
-
-    /**
-     * @notice Undelegates chips from a public good node.
-     * @param chipsIds The chips token ids for undelegate.
-     */
-    function undelegate(address nodeAddr, uint256[] calldata chipsIds) external;
-
-    /**
      * @notice Updates accounting stats and distribute rewards.
      * @dev periodically called.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param epoch The current epoch number.
-     * @param startTime The startTimestamp of the epoch.
-     * @param endTime The endTimestamp of the epoch.
+     * @param epoch The current epoch id.
+     * @param startTimestamp The start timestamp of the current epoch.
+     * @param endTimestamp The end timestamp of the current epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param requestFees Amounts of request fees.
      * @param requestBonuses Amounts of request bonuses.
@@ -191,12 +180,13 @@ interface IStaking {
      */
     function distributeRewards(
         uint256 epoch,
-        uint256 startTime,
-        uint256 endTime,
+        uint256 startTimestamp,
+        uint256 endTimestamp,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
         uint256[] calldata requestBonuses,
-        uint256[] calldata stakingRewards
+        uint256[] calldata stakingRewards,
+        uint256 publicPoolReward
     ) external;
 
     /**
@@ -206,6 +196,24 @@ interface IStaking {
      * @param nodeAddrs The addresses of nodes to slash.
      */
     function slashNodes(address[] calldata nodeAddrs) external;
+
+    /**
+     * @notice Withdraws tokens from staking contract to treasury.
+     */
+    function withdraw2Treasury() external;
+
+    /**
+     * @notice The minimum amount of tokens to deposit for a node.
+     */
+    function getMinDeposit() external view returns (uint256);
+
+    /**
+     *
+     * @return total tokens in operator pool
+     * @return total tokens in reward pool
+     * @return total tokens for treasury
+     */
+    function getPoolInfo() external returns (uint256, uint256, uint256);
 
     /**
      * @notice Returns the pending withdrawal request by `requestId`.

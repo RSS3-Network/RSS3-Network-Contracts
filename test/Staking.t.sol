@@ -2,20 +2,23 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
+import "forge-std/console.sol";
+
 // import {console2} from "forge-std/console2.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {TestEvents} from "test/helpers/TestEvents.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {IErrors} from "../src/interfaces/IErrors.sol";
+import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
+import {Staking} from "../src/Staking.sol";
 
-contract StakingTest is CommonTest, IErrors {
+contract StakingTest is CommonTest, IErrors, IERC721Errors {
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     function setUp() public {
         _setUp();
-
         // transfer tokens
         _rss3.transfer(alice, _initialAmount);
         _rss3.transfer(bob, _initialAmount);
@@ -102,6 +105,10 @@ contract StakingTest is CommonTest, IErrors {
         assertEq(req.owner, alice);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.amount, amount);
+
+        // check node info
+        DataTypes.Node memory node = _staking.getNode(alice);
+        assertEq(node.operatorPool, 0);
     }
 
     function testMultipleDepositAndRequestWithdrawal() public {
@@ -129,8 +136,6 @@ contract StakingTest is CommonTest, IErrors {
 
         _createNode(alice);
 
-        uint256 balanceBefore = _rss3.balanceOf(address(alice));
-
         vm.startPrank(alice);
         _rss3.approve(address(_staking), amount);
         _staking.deposit(amount);
@@ -146,14 +151,13 @@ contract StakingTest is CommonTest, IErrors {
         skip(depositUnbondingPeriod);
 
         expectEmit();
+        emit Transfer(address(_staking), alice, amount);
+        expectEmit();
         emit Events.WithdrawalClaimed(requestId);
         _staking.claimWithdrawal(requestIds);
 
-        uint256 balanceAfter = _rss3.balanceOf(address(alice));
-        assertEq(balanceBefore, balanceAfter);
-
         // Claim again will fail
-        vm.expectRevert(abi.encodeWithSelector(ClaimIdNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(ClaimIdNotExists.selector, requestId));
         _staking.claimWithdrawal(requestIds);
 
         vm.stopPrank();
@@ -210,13 +214,6 @@ contract StakingTest is CommonTest, IErrors {
 
         _createNode(alice);
 
-        // create node
-        vm.startPrank(alice);
-        _rss3.approve(address(_staking), 10000 ether);
-        _staking.deposit(10000 ether);
-        vm.stopPrank();
-
-        // stake
         vm.startPrank(bob);
         _rss3.approve(address(_staking), amount);
 
@@ -230,6 +227,327 @@ contract StakingTest is CommonTest, IErrors {
         emit Events.Staked(bob, alice, expectedStakedAmount, 1, chipsCount);
         _staking.stake(alice, amount);
         vm.stopPrank();
+
+        DataTypes.Node memory node = _staking.getNode(alice);
+        assertEq(node.rewardPool, expectedStakedAmount);
+        assertEq(node.totalShares, chipsCount * _staking.SHARES_PER_CHIP());
+    }
+
+    function testRequestUnstake() public {
+        uint256 amount = 10000 ether;
+
+        _createNode(alice);
+
+        // stake
+        vm.startPrank(bob);
+
+        _rss3.approve(address(_staking), amount);
+        (uint256 startTokenId, uint256 endTokenId) = _staking.stake(alice, amount);
+
+        // request unstake
+        uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
+        for (uint256 i = startTokenId; i <= endTokenId; i++) {
+            tokenIds[i - startTokenId] = i;
+        }
+
+        // chips should be burnt
+        for (uint256 i = startTokenId; i <= endTokenId; i++) {
+            expectEmit();
+            emit TestEvents.Transfer(bob, address(0), i);
+        }
+
+        uint256 requestId = _staking.requestUnstake(alice, tokenIds);
+
+        // requestUnstake again will fail
+        vm.expectRevert(abi.encodeWithSelector(ERC721NonexistentToken.selector, tokenIds[0]));
+        _staking.requestUnstake(alice, tokenIds);
+
+        vm.stopPrank();
+
+        // check status
+        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        assertEq(req.owner, bob);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.unstakeAmount, amount);
+
+        // check node info
+        DataTypes.Node memory node = _staking.getNode(alice);
+        assertEq(node.rewardPool, 0);
+        assertEq(node.totalShares, 0);
+    }
+
+    function testClaimUnstake() public {
+        uint256 amount = 10000 ether;
+
+        _createNode(alice);
+
+        // stake
+        vm.startPrank(bob);
+
+        _rss3.approve(address(_staking), amount);
+        (uint256 startTokenId, uint256 endTokenId) = _staking.stake(alice, amount);
+
+        // request unstake
+        uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
+        for (uint256 i = startTokenId; i <= endTokenId; i++) {
+            tokenIds[i - startTokenId] = i;
+        }
+
+        uint256 requestId = _staking.requestUnstake(alice, tokenIds);
+
+        uint256[] memory requestIds = new uint256[](1);
+        requestIds[0] = requestId;
+
+        vm.expectRevert(abi.encodeWithSelector(ClaimTimeNotReady.selector));
+        _staking.claimUnstake(requestIds);
+
+        // claim unstake
+        skip(stakeUnbondingPeriod);
+
+        expectEmit();
+        emit Transfer(address(_staking), bob, amount);
+        expectEmit();
+        emit Events.UnstakeClaimed(requestId, alice, bob, amount);
+
+        _staking.claimUnstake(requestIds);
+
+        // claim again will fail
+        vm.expectRevert(abi.encodeWithSelector(ClaimIdNotExists.selector, requestId));
+        _staking.claimUnstake(requestIds);
+
+        vm.stopPrank();
+    }
+
+    function testSetTaxFraction4PublicPool(uint64 expectedTaxFraction) public {
+        vm.assume(expectedTaxFraction <= _denominator());
+
+        vm.startPrank(oracleAccount);
+        expectEmit();
+        emit Events.PublicPoolTaxFractionSet(expectedTaxFraction);
+        _staking.setTaxFraction4PublicPool(expectedTaxFraction);
+        vm.stopPrank();
+
+        uint64 realTaxFraction = _staking.getPublicPool().taxFraction;
+
+        assertEq(realTaxFraction, expectedTaxFraction);
+    }
+
+    function testCalcTax1(uint256 operatorPool) public {
+        // case 1: receives no tax rewards
+        vm.assume(operatorPool < 10000 ether);
+
+        uint256 rewards = 10000 ether;
+        uint256 rewardPool = 1000 ether;
+        uint64 taxFraction = _defaultTaxFraction;
+
+        (uint256 tax1, uint256 partialTax1) = _internalStakingTest.calculateReward(
+            rewards,
+            taxFraction,
+            operatorPool,
+            rewardPool
+        );
+
+        assertEq(tax1, _getFullTax(rewards, taxFraction));
+        assertEq(partialTax1, 0);
+    }
+
+    function testCalcTax2() public {
+        // case 2: receives full tax rewards
+        uint256 operatorPool = minDeposit;
+        uint256 stakeRatio;
+        vm.assume(stakeRatio < 25);
+
+        uint256 rewardPool = operatorPool * stakeRatio;
+
+        uint256 rewards = 10000 ether;
+        uint64 taxFraction = _defaultTaxFraction;
+
+        (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
+            rewards,
+            taxFraction,
+            operatorPool,
+            rewardPool
+        );
+
+        assertEq(tax, partialTax);
+    }
+
+    function testCalcTax3(uint256 rewardPool) public view {
+        // case 2: receives partial tax rewards
+        uint256 operatorPool = minDeposit;
+
+        vm.assume(rewardPool > 25 * operatorPool && stakeRatio < 100 * operatorPool);
+
+        uint256 rewards = 10000 ether;
+        uint64 taxFraction = _defaultTaxFraction;
+
+        (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
+            rewards,
+            taxFraction,
+            operatorPool,
+            rewardPool
+        );
+
+        // partialTax has precision 1
+        assert(
+            tax * operatorPool * 25 >= partialTax * rewardPool &&
+                tax * operatorPool * 25 < (partialTax + 1) * rewardPool
+        );
+        // assert(tax / partialTax >= rewardPool / (operatorPool * 25));
+    }
+
+    function testDistributeRewards() public {
+        uint256 amount = 10000 ether;
+
+        _createNode(alice);
+
+        vm.startPrank(alice);
+        _rss3.approve(address(_staking), amount);
+        _staking.deposit(amount);
+        vm.stopPrank();
+
+        // stake
+        vm.startPrank(bob);
+
+        _rss3.approve(address(_staking), amount);
+        (uint256 startTokenId, uint256 endTokenId) = _staking.stake(alice, amount);
+        uint256 chipsCount = endTokenId - startTokenId + 1;
+
+        vm.stopPrank();
+
+        // distribute rewards
+        uint256[] memory requestFees = new uint256[](1);
+        requestFees[0] = 1 ether;
+
+        uint256[] memory requestBonuses = new uint256[](1);
+        requestBonuses[0] = 1 ether;
+
+        uint256[] memory stakingRewards = new uint256[](1);
+        stakingRewards[0] = 1 ether;
+
+        vm.startPrank(oracleAccount);
+        uint256 startTime = block.timestamp;
+
+        skip(18 hours);
+
+        uint256 endTime = block.timestamp;
+
+        address[] memory nodeAddrs = new address[](1);
+        nodeAddrs[0] = alice;
+
+        uint256[] memory taxAmounts = new uint256[](1);
+        taxAmounts[0] = _getFullTax(requestFees[0] + stakingRewards[0], _defaultTaxFraction);
+        expectEmit();
+
+        emit Events.RewardDistributed(
+            1,
+            startTime,
+            endTime,
+            nodeAddrs,
+            requestFees,
+            requestBonuses,
+            stakingRewards,
+            taxAmounts
+        );
+        _staking.distributeRewards(
+            1,
+            startTime,
+            endTime,
+            nodeAddrs,
+            requestFees,
+            requestBonuses,
+            stakingRewards,
+            1 ether // public pool reward
+        );
+
+        vm.stopPrank();
+
+        _checkDistribution(amount, nodeAddrs, taxAmounts, requestFees, requestBonuses, stakingRewards);
+
+        uint256[] memory tokenIds = new uint256[](chipsCount);
+        for (uint256 i = startTokenId; i <= endTokenId; i++) {
+            tokenIds[i - startTokenId] = i;
+        }
+
+        // new stake and price will goes up
+        vm.startPrank(bob);
+        uint256 minTokens = _staking.minTokensToStake(alice);
+        assert(minTokens > _staking.SHARES_PER_CHIP());
+
+        _rss3.approve(address(_staking), minTokens);
+
+        vm.stopPrank();
+
+        _unstakeAndCheckAmount(bob, amount, tokenIds, taxAmounts, requestBonuses, stakingRewards);
+    }
+
+    function testWithdraw2Treasury() public {
+        _createNode(alice);
+
+        uint256 amount = 10000 ether;
+        vm.startPrank(bob);
+        _rss3.approve(address(_staking), amount);
+        _staking.stake(alice, amount);
+        vm.stopPrank();
+
+        vm.startPrank(oracleAccount);
+        address[] memory nodeAddrs = new address[](1);
+        nodeAddrs[0] = alice;
+
+        uint256[] memory requestFees = new uint256[](1);
+        requestFees[0] = 0 ether;
+
+        uint256[] memory requestCounts = new uint256[](1);
+        requestCounts[0] = 0;
+
+        _settlement.distributeRewards(nodeAddrs, requestFees, requestCounts);
+
+        (uint256 operatorPool, uint256 rewardPool, uint256 treasury) = _staking.getPoolInfo();
+
+        assertEq(operatorPool, 0);
+        assert(treasury > 0);
+        assert(rewardPool > 0);
+    }
+
+    function _unstakeAndCheckAmount(
+        address sender,
+        uint256 amount,
+        uint256[] memory tokenIds,
+        uint256[] memory taxAmounts,
+        uint256[] memory requestBonuses,
+        uint256[] memory stakingRewards
+    ) internal {
+        vm.startPrank(sender);
+
+        uint256 requestId = _staking.requestUnstake(alice, tokenIds);
+        skip(22.5 days);
+
+        uint256[] memory requestIds = new uint256[](1);
+        requestIds[0] = requestId;
+        expectEmit();
+        uint256 allRewards = amount + requestBonuses[0] + stakingRewards[0] - taxAmounts[0];
+        emit Transfer(address(_staking), bob, allRewards);
+        _staking.claimUnstake(requestIds);
+        vm.stopPrank();
+    }
+
+    function _checkDistribution(
+        uint256 amount,
+        address[] memory nodeAddrs,
+        uint256[] memory taxAmounts,
+        uint256[] memory requestFees,
+        uint256[] memory requestBonuses,
+        uint256[] memory stakingRewards
+    ) internal {
+        // status check
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            DataTypes.Node memory node = _staking.getNode(nodeAddrs[i]);
+            uint256 newOperatorPool = amount + requestFees[i] + taxAmounts[i];
+            assertEq(node.operatorPool, newOperatorPool);
+
+            uint256 newRewardPool = amount + requestBonuses[i] + stakingRewards[i] - taxAmounts[i];
+            assertEq(node.rewardPool, newRewardPool);
+        }
     }
 
     function _checkNode(
@@ -248,12 +566,11 @@ contract StakingTest is CommonTest, IErrors {
         assertEq(node.endpoint, endpoint);
     }
 
-    function _createNode(address to) internal {
-        vm.prank(to);
-        _staking.createNode(to, "Name", "Description", uint64(1000), false, "https://domain.com");
-    }
-
     function _denominator() internal pure virtual returns (uint96) {
         return 10000;
+    }
+
+    function _getFullTax(uint256 rewards, uint64 taxFraction) internal pure returns (uint256) {
+        return (rewards * taxFraction) / _denominator();
     }
 }

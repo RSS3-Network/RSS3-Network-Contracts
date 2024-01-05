@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.20;
 
+import {DataTypes} from "./DataTypes.sol";
+
 library Events {
     /**
      * @dev Emitted on createNode()
@@ -57,8 +59,8 @@ library Events {
     /**
      * @dev Emitted on distributeRewards()
      * @param epoch The current epoch number.
-     * @param startTimestamp The startTimestamp of the epoch.
-     * @param endTimestamp The endTimestamp of the epoch.
+     * @param startTimestamp The start timestamp of the epoch.
+     * @param endTimestamp The end timestamp of the epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param requestFees Amount of request fees to operator pool.
      * @param requestBonuses Amount of bonuses to reward pool.
@@ -67,13 +69,29 @@ library Events {
      */
     event RewardDistributed(
         uint256 indexed epoch,
-        uint256 indexed startTimestamp,
-        uint256 indexed endTimestamp,
+        uint256 startTimestamp,
+        uint256 endTimestamp,
         address[] nodeAddrs,
         uint256[] requestFees,
         uint256[] requestBonuses,
         uint256[] stakingRewards,
         uint256[] taxAmounts
+    );
+
+    /**
+     * @dev Emitted on distributePublicPoolRewards()
+     * @param epoch The current epoch number.
+     * @param startTimestamp The start timestamp of the epoch.
+     * @param endTimestamp The end timestamp of the epoch.
+     * @param publicPoolReward Amount of rewards to public pool.
+     * @param publicPoolTax Amount of tax to public pool.
+     */
+    event PublicGoodRewardDistributed(
+        uint256 indexed epoch,
+        uint256 startTimestamp,
+        uint256 endTimestamp,
+        uint256 publicPoolReward,
+        uint256 publicPoolTax
     );
 
     /**

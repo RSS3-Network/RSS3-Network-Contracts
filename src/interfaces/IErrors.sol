@@ -28,25 +28,25 @@ interface IErrors {
     error ClaimTimeNotReady();
 
     /// @dev Claim time not ready
-    error ClaimIdNotExists();
+    error ClaimIdNotExists(uint256 claimId);
 
     /// @dev Staking amount too small
     error AmountTooSmall(uint256 amount);
 
-    /// @dev Not chips owner
-    error NotChipsOwner(uint256 tokenId);
+    /// @dev Not chips owner or approver
+    error ChipNotAuthorized(uint256 tokenId);
 
-    /// @dev Token is not issued by node
-    error NotTokenIssuer(uint256 tokenId, address nodeAddr);
+    /// @dev Token is not valid for the node
+    error ChipNotValid(uint256 tokenId, address nodeAddr);
+
+    /// @dev Chips are not public good.
+    error ChipNotPublicGood(uint256 tokenId);
 
     /// @dev Deposited tokens was slashed completely
     error DepositedTokensSlashedAll();
 
     /// @dev Deposit is not allowed for public good node.
     error PublicGoodNotAllowed();
-
-    /// @dev Chips are delegated or not public good.
-    error ChipsDelegatedOrNotPublicGood(uint256 tokenId);
 
     /// @dev Tax fraction too large
     error TaxFractionTooLarge();
@@ -56,4 +56,7 @@ interface IErrors {
 
     /// @dev Invalid epoch
     error InvalidEpoch(uint256 expected, uint256 actual);
+
+    ///@dev Node list is empty
+    error EmptyNodeList();
 }

@@ -140,8 +140,7 @@ contract Deploy is Deployer {
             cfg.nodeSlashFraction(),
             cfg.userSlashFraction(),
             cfg.stakeRatio(),
-            cfg.stakeBaseline(),
-            cfg.depositBaseline(),
+            cfg.minDeposit(),
             cfg.treasury()
         );
         // check states
@@ -165,7 +164,7 @@ contract Deploy is Deployer {
         Settlement settlementProxy = Settlement(mustGetAddress("SettlementProxy"));
         address stakingProxy = mustGetAddress("StakingProxy");
 
-        settlementProxy.initialize(stakingProxy, cfg.oracleAccount());
+        settlementProxy.initialize(stakingProxy, cfg.oracleAccount(), block.timestamp, 0);
 
         // check states
         require(settlementProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");

@@ -7,60 +7,99 @@ import {IErrors} from "./interfaces/IErrors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import "forge-std/console.sol";
 
 contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
     /// @dev Staking contract address.
     address internal _staking;
 
+    /// @dev Staking token contract.
+    IERC20 internal _token;
+
+    /// @dev Duration of an epoch.
+    uint256 internal constant _epochDuration = 22.5 days;
+
+    /// @dev Total rewards of the first year.
+    uint256 internal _totalRewards;
+    uint256 internal _totalStakingRewardsPerEpoch;
+    uint256 internal _totalRequestBonusPerEpoch;
+
+    /// @dev The current epoch.
+    uint256 internal _epoch = 1;
+
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
+    uint256 internal _startTimestamp;
+
     /// @inheritdoc ISettlement
-    function initialize(address staking_, address oracleAccount) external override initializer {
-        _staking = staking_;
+    function initialize(
+        address staking,
+        address oracleAccount,
+        uint256 startTime,
+        uint256 requsetBonusPercent
+    ) external override initializer {
+        _staking = staking;
+        _token = IERC20(IStaking(staking).stakingToken());
 
         _grantRole(ORACLE_ROLE, oracleAccount);
+
+        _totalRewards = (3 * _token.totalSupply()) / 100;
+
+        _updateRewardsRatio(requsetBonusPercent);
+
+        // deposit the total incentive tokens of the next year in the settlement contract
+        // for the next year's rewards, the settlement contract will mint tokens from token's contracts
+        _token.transferFrom(msg.sender, address(this), _totalRewards);
+
+        _startTimestamp = startTime;
+    }
+
+    function updateRewardsRatio(uint256 requestBonusPercent) external override onlyRole(ORACLE_ROLE) {
+        _updateRewardsRatio(requestBonusPercent);
     }
 
     /// @inheritdoc ISettlement
     function distributeRewards(
-        uint256 epoch,
-        uint256 startTimestamp,
-        uint256 endTimestamp,
-        uint256 totalRequestBonus,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
-        uint256[] calldata requestCounts,
-        uint256[] calldata stakingRewards
+        uint256[] calldata requestCounts
     ) external override onlyRole(ORACLE_ROLE) {
-        if (
-            nodeAddrs.length != requestFees.length ||
-            nodeAddrs.length != requestCounts.length ||
-            nodeAddrs.length != stakingRewards.length
-        ) revert InvalidArrayLength();
+        if (nodeAddrs.length != requestFees.length || nodeAddrs.length != requestCounts.length)
+            revert InvalidArrayLength();
 
-        uint256[] memory requestBonuses = _getRequestBonuses(totalRequestBonus, requestCounts);
+        uint256[] memory requestBonuses = _getRequestBonuses(_totalRequestBonusPerEpoch, requestCounts);
+
+        (uint256 publicPoolReward, uint256[] memory stakingRewards) = _getStakingRewards(nodeAddrs);
+
+        uint256 endTimestamp = block.timestamp;
 
         IStaking(_staking).distributeRewards(
-            epoch,
-            startTimestamp,
+            _epoch,
+            _startTimestamp,
             endTimestamp,
             nodeAddrs,
-            requestFees, // request fees will be sent to operator pool
+            requestFees,
             requestBonuses,
-            stakingRewards
+            stakingRewards,
+            publicPoolReward
         );
 
-        // TODO: transfer tokens to staking contract
-        // maybe the reward and slashing can be completed in one call,
-        // and the slashing is done before the reward.
+        _startTimestamp = endTimestamp;
+        _epoch++;
+
+        IERC20(_token).transfer(_staking, _totalStakingRewardsPerEpoch + _totalRequestBonusPerEpoch);
     }
 
     /// @inheritdoc ISettlement
     function setTaxFraction4PublicPool(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
         uint256 length = nodeAddrs.length;
 
-        uint128 totalTaxFraction;
+        if (length == 0) revert EmptyNodeList();
+
+        uint256 totalTaxFraction;
         for (uint256 i = 0; i < length; i++) {
             DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddrs[i]);
             totalTaxFraction += node.taxFraction;
@@ -78,6 +117,46 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         return _staking;
     }
 
+    function getBonusInfo() external view override returns (uint256, uint256) {
+        return (_totalRequestBonusPerEpoch, _totalStakingRewardsPerEpoch);
+    }
+
+    function _updateRewardsRatio(uint256 requestBonusPercent) internal {
+        uint256 rewardsPerEpoch = _totalRewards / (365 days / _epochDuration);
+
+        _totalRequestBonusPerEpoch = (rewardsPerEpoch * requestBonusPercent) / 100;
+        _totalStakingRewardsPerEpoch = (rewardsPerEpoch * (100 - requestBonusPercent)) / 100;
+    }
+
+    /// @dev returns staking rewards
+    function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256, uint256[] memory) {
+        uint256 sum = 0;
+
+        DataTypes.Node[] memory nodes = new DataTypes.Node[](nodeAddrs.length + 1);
+
+        DataTypes.Node memory publicPool = IStaking(_staking).getPublicPool();
+
+        sum = publicPool.rewardPool;
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            nodes[i] = IStaking(_staking).getNode(nodeAddrs[i]);
+
+            sum += nodes[i].rewardPool;
+        }
+
+        if (sum == 0) return (0, new uint256[](nodeAddrs.length));
+
+        uint256 publicPoolReward = (publicPool.rewardPool * _totalStakingRewardsPerEpoch) / sum;
+
+        uint256[] memory nodesReward = new uint256[](nodeAddrs.length);
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            nodesReward[i] = (nodes[i].rewardPool * _totalStakingRewardsPerEpoch) / sum;
+        }
+
+        return (publicPoolReward, nodesReward);
+    }
+
     /// @dev returns request bonuses
     function _getRequestBonuses(
         uint256 totalBonus,
@@ -88,15 +167,13 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         /// @dev sum of log2 of each element in `requestCounts`
         uint256 sum;
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            uint256 logValue = _log2(requestCounts[i]);
-
-            sum += logValue;
-            result[i] = logValue;
+            sum += requestCounts[i];
         }
 
-        uint256 bonusPerUnit = totalBonus / sum;
+        if (sum == 0) return result;
+
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            result[i] *= bonusPerUnit;
+            result[i] = (_log2(requestCounts[i] / sum + 1) * totalBonus * 693147) / 1000000; // ln 2 = 693147 / 1000000
         }
 
         return result;
