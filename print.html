@@ -248,7 +248,7 @@ forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --priv
 <li><a href="src/base/ERC721.sol/abstract.ERC721.html">ERC721</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="erc721"><a class="header" href="#erc721">ERC721</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/base/ERC721.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/base/ERC721.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Context, ERC165, IERC721, IERC721Metadata, <a href="src/base/ERC721.sol//src/interfaces/IERC721Errors.sol/interface.IERC721Errors.html">IERC721Errors</a></p>
 <p><em>Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
@@ -507,7 +507,7 @@ recipient doesn't accept the token transfer. The call is not executed if the tar
 <li><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ichips"><a class="header" href="#ichips">IChips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/interfaces/IChips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/interfaces/IChips.sol">Git Source</a></p>
 <h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
@@ -577,7 +577,7 @@ recipient doesn't accept the token transfer. The call is not executed if the tar
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ierc721errors"><a class="header" href="#ierc721errors">IERC721Errors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/interfaces/IERC721Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/interfaces/IERC721Errors.sol">Git Source</a></p>
 <p><em>Standard ERC-721 Errors
 Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-721 tokens.</em></p>
 <h2 id="errors"><a class="header" href="#errors">Errors</a></h2>
@@ -657,7 +657,7 @@ Used in balance queries.</em></p>
 <tr><td><code>operator</code></td><td><code>address</code></td><td>Address that may be allowed to operate on tokens without being their owner.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ierrors"><a class="header" href="#ierrors">IErrors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/interfaces/IErrors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/interfaces/IErrors.sol">Git Source</a></p>
 <h2 id="errors-1"><a class="header" href="#errors-1">Errors</a></h2>
 <h3 id="callernotstaking"><a class="header" href="#callernotstaking">CallerNotStaking</a></h3>
 <p><em>Caller is not staking contract</em></p>
@@ -693,19 +693,23 @@ Used in balance queries.</em></p>
 </code></pre>
 <h3 id="claimidnotexists"><a class="header" href="#claimidnotexists">ClaimIdNotExists</a></h3>
 <p><em>Claim time not ready</em></p>
-<pre><code class="language-solidity">error ClaimIdNotExists();
+<pre><code class="language-solidity">error ClaimIdNotExists(uint256 claimId);
 </code></pre>
 <h3 id="amounttoosmall"><a class="header" href="#amounttoosmall">AmountTooSmall</a></h3>
 <p><em>Staking amount too small</em></p>
 <pre><code class="language-solidity">error AmountTooSmall(uint256 amount);
 </code></pre>
-<h3 id="notchipsowner"><a class="header" href="#notchipsowner">NotChipsOwner</a></h3>
-<p><em>Not chips owner</em></p>
-<pre><code class="language-solidity">error NotChipsOwner(uint256 tokenId);
+<h3 id="chipnotauthorized"><a class="header" href="#chipnotauthorized">ChipNotAuthorized</a></h3>
+<p><em>Not chips owner or approver</em></p>
+<pre><code class="language-solidity">error ChipNotAuthorized(uint256 tokenId);
 </code></pre>
-<h3 id="nottokenissuer"><a class="header" href="#nottokenissuer">NotTokenIssuer</a></h3>
-<p><em>Token is not issued by node</em></p>
-<pre><code class="language-solidity">error NotTokenIssuer(uint256 tokenId, address nodeAddr);
+<h3 id="chipnotvalid"><a class="header" href="#chipnotvalid">ChipNotValid</a></h3>
+<p><em>Token is not valid for the node</em></p>
+<pre><code class="language-solidity">error ChipNotValid(uint256 tokenId, address nodeAddr);
+</code></pre>
+<h3 id="chipnotpublicgood"><a class="header" href="#chipnotpublicgood">ChipNotPublicGood</a></h3>
+<p><em>Chips are not public good.</em></p>
+<pre><code class="language-solidity">error ChipNotPublicGood(uint256 tokenId);
 </code></pre>
 <h3 id="depositedtokensslashedall"><a class="header" href="#depositedtokensslashedall">DepositedTokensSlashedAll</a></h3>
 <p><em>Deposited tokens was slashed completely</em></p>
@@ -714,10 +718,6 @@ Used in balance queries.</em></p>
 <h3 id="publicgoodnotallowed"><a class="header" href="#publicgoodnotallowed">PublicGoodNotAllowed</a></h3>
 <p><em>Deposit is not allowed for public good node.</em></p>
 <pre><code class="language-solidity">error PublicGoodNotAllowed();
-</code></pre>
-<h3 id="chipsdelegatedornotpublicgood"><a class="header" href="#chipsdelegatedornotpublicgood">ChipsDelegatedOrNotPublicGood</a></h3>
-<p><em>Chips are delegated or not public good.</em></p>
-<pre><code class="language-solidity">error ChipsDelegatedOrNotPublicGood(uint256 tokenId);
 </code></pre>
 <h3 id="taxfractiontoolarge"><a class="header" href="#taxfractiontoolarge">TaxFractionTooLarge</a></h3>
 <p><em>Tax fraction too large</em></p>
@@ -731,43 +731,39 @@ Used in balance queries.</em></p>
 <p><em>Invalid epoch</em></p>
 <pre><code class="language-solidity">error InvalidEpoch(uint256 expected, uint256 actual);
 </code></pre>
+<h3 id="emptynodelist"><a class="header" href="#emptynodelist">EmptyNodeList</a></h3>
+<p><em>Node list is empty</em></p>
+<pre><code class="language-solidity">error EmptyNodeList();
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="isettlement"><a class="header" href="#isettlement">ISettlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/interfaces/ISettlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/interfaces/ISettlement.sol">Git Source</a></p>
 <h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
 <h3 id="initialize-1"><a class="header" href="#initialize-1">initialize</a></h3>
 <p>Initializes the Settlement contract.</p>
-<pre><code class="language-solidity">function initialize(address staking_, address oracleAccount) external;
+<pre><code class="language-solidity">function initialize(address staking, address oracleAccount, uint256 startTime, uint256 requsetBonusPercent) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>staking_</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
+<tr><td><code>staking</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 <tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who makes settlement with the Staking contract.</td></tr>
+<tr><td><code>startTime</code></td><td><code>uint256</code></td><td>The start time of the first epoch.</td></tr>
+<tr><td><code>requsetBonusPercent</code></td><td><code>uint256</code></td><td>The percentage of the total rewards to be allocated to the request bonus. Others will be allocated to the staking rewards.</td></tr>
 </tbody></table>
 </div>
 <h3 id="distributerewards"><a class="header" href="#distributerewards">distributeRewards</a></h3>
 <p>Updates accounting stats and distribute rewards.</p>
 <p><em>periodically called.</em></p>
 <pre><code class="language-solidity">function distributeRewards(
-    uint256 epoch,
-    uint256 startTimestamp,
-    uint256 endTimestamp,
-    uint256 totalRequestBonus,
     address[] calldata nodeAddrs,
     uint256[] calldata requestFees,
-    uint256[] calldata requestCounts,
-    uint256[] calldata stakingRewards
+    uint256[] calldata requestCounts
 ) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
-<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
-<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
-<tr><td><code>totalRequestBonus</code></td><td><code>uint256</code></td><td>The total amount of request bonus.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
 <tr><td><code>requestCounts</code></td><td><code>uint256[]</code></td><td>Amounts of requests handled by each node.</td></tr>
-<tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards.</td></tr>
 </tbody></table>
 </div>
 <h3 id="settaxfraction4publicpool"><a class="header" href="#settaxfraction4publicpool">setTaxFraction4PublicPool</a></h3>
@@ -782,6 +778,15 @@ Requirements:</p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>The addresses of active nodes.</td></tr>
+</tbody></table>
+</div>
+<h3 id="updaterewardsratio"><a class="header" href="#updaterewardsratio">updateRewardsRatio</a></h3>
+<p>Sets request bonus percentage.</p>
+<pre><code class="language-solidity">function updateRewardsRatio(uint256 percent) external;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>percent</code></td><td><code>uint256</code></td><td>The percentage of the total rewards to be allocated to the request bonus. Others will be allocated to the staking rewards.</td></tr>
 </tbody></table>
 </div>
 <h3 id="slashnodes"><a class="header" href="#slashnodes">slashNodes</a></h3>
@@ -805,8 +810,18 @@ Requirements:</p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
+</div>
+<h3 id="getbonusinfo"><a class="header" href="#getbonusinfo">getBonusInfo</a></h3>
+<p>Returns the bonus info.</p>
+<pre><code class="language-solidity">function getBonusInfo() external view returns (uint256, uint256);
+</code></pre>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>(requestBonusPerEpoch, stakingRewardsPerEpoch) The amount of request bonus per epoch.</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
+</tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/interfaces/IStaking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/interfaces/IStaking.sol">Git Source</a></p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="initialize-2"><a class="header" href="#initialize-2">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
@@ -820,8 +835,7 @@ Requirements:</p>
     uint256 nodeSlashFraction,
     uint256 userSlashFraction,
     uint256 stakeRatio,
-    uint256 stakeBaseline,
-    uint256 depositBaseline,
+    uint256 minDeposit,
     address treasury
 ) external;
 </code></pre>
@@ -836,8 +850,7 @@ Requirements:</p>
 <tr><td><code>nodeSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for node operator.</td></tr>
 <tr><td><code>userSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for user.</td></tr>
 <tr><td><code>stakeRatio</code></td><td><code>uint256</code></td><td>The stake ratio of the node operator.</td></tr>
-<tr><td><code>stakeBaseline</code></td><td><code>uint256</code></td><td>The stake base line of the node operator.</td></tr>
-<tr><td><code>depositBaseline</code></td><td><code>uint256</code></td><td>The deposit base line of the node operator.</td></tr>
+<tr><td><code>minDeposit</code></td><td><code>uint256</code></td><td>The deposit base line of the node operator.</td></tr>
 <tr><td><code>treasury</code></td><td><code>address</code></td><td>The treasury address.</td></tr>
 </tbody></table>
 </div>
@@ -1001,11 +1014,14 @@ Requirements:</p>
 </div>
 <h3 id="staketopublicpool"><a class="header" href="#staketopublicpool">stakeToPublicPool</a></h3>
 <p>Stakes tokens to public pool.</p>
-<pre><code class="language-solidity">function stakeToPublicPool(uint256 amount) external returns (uint256 startTokenId, uint256 endTokenId);
+<pre><code class="language-solidity">function stakeToPublicPool(uint256 amount, address nodeAddr)
+    external
+    returns (uint256 startTokenId, uint256 endTokenId);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to stake.</td></tr>
+<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td></td></tr>
 </tbody></table>
 </div>
 <p><strong>Returns</strong></p>
@@ -1029,26 +1045,6 @@ Requirements:</p>
 <tr><td><code>requestId</code></td><td><code>uint256</code></td><td>THe created unstake request id.</td></tr>
 </tbody></table>
 </div>
-<h3 id="delegate"><a class="header" href="#delegate">delegate</a></h3>
-<p>Delegates chips to a public good node.</p>
-<pre><code class="language-solidity">function delegate(address nodeAddr, uint256[] calldata chipsIds) external;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td></td></tr>
-<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids for delegate.</td></tr>
-</tbody></table>
-</div>
-<h3 id="undelegate"><a class="header" href="#undelegate">undelegate</a></h3>
-<p>Undelegates chips from a public good node.</p>
-<pre><code class="language-solidity">function undelegate(address nodeAddr, uint256[] calldata chipsIds) external;
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td></td></tr>
-<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids for undelegate.</td></tr>
-</tbody></table>
-</div>
 <h3 id="distributerewards-1"><a class="header" href="#distributerewards-1">distributeRewards</a></h3>
 <p>Updates accounting stats and distribute rewards.</p>
 <p>*periodically called.
@@ -1058,23 +1054,25 @@ Requirements:</p>
 </ul>
 <pre><code class="language-solidity">function distributeRewards(
     uint256 epoch,
-    uint256 startTime,
-    uint256 endTime,
+    uint256 startTimestamp,
+    uint256 endTimestamp,
     address[] calldata nodeAddrs,
     uint256[] calldata requestFees,
     uint256[] calldata requestBonuses,
-    uint256[] calldata stakingRewards
+    uint256[] calldata stakingRewards,
+    uint256 publicPoolReward
 ) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
-<tr><td><code>startTime</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
-<tr><td><code>endTime</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
+<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch id.</td></tr>
+<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The start timestamp of the current epoch.</td></tr>
+<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The end timestamp of the current epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
 <tr><td><code>requestBonuses</code></td><td><code>uint256[]</code></td><td>Amounts of request bonuses.</td></tr>
 <tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards to reward pool.</td></tr>
+<tr><td><code>publicPoolReward</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
 <h3 id="slashnodes-1"><a class="header" href="#slashnodes-1">slashNodes</a></h3>
@@ -1090,6 +1088,24 @@ Requirements:</p>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>The addresses of nodes to slash.</td></tr>
 </tbody></table>
 </div>
+<h3 id="withdraw2treasury"><a class="header" href="#withdraw2treasury">withdraw2Treasury</a></h3>
+<p>Withdraws tokens from staking contract to treasury.</p>
+<pre><code class="language-solidity">function withdraw2Treasury() external;
+</code></pre>
+<h3 id="getpoolinfo"><a class="header" href="#getpoolinfo">getPoolInfo</a></h3>
+<pre><code class="language-solidity">function getPoolInfo() external returns (uint256, uint256, uint256);
+</code></pre>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>total tokens in operator pool</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>total tokens in reward pool</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>total tokens for treasury</td></tr>
+</tbody></table>
+</div>
+<h3 id="getmindeposit"><a class="header" href="#getmindeposit">getMinDeposit</a></h3>
+<p>The minimum amount of tokens to deposit for a node.</p>
+<pre><code class="language-solidity">function getMinDeposit() external view returns (uint256);
+</code></pre>
 <h3 id="getpendingwithdrawal"><a class="header" href="#getpendingwithdrawal">getPendingWithdrawal</a></h3>
 <p>Returns the pending withdrawal request by <code>requestId</code>.</p>
 <pre><code class="language-solidity">function getPendingWithdrawal(uint256 requestId) external view returns (DataTypes.WithdrawalRequest memory);
@@ -1221,7 +1237,7 @@ Requirements:</p>
 <li><a href="src/libraries/Events.sol/library.Events.html">Events</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -1254,7 +1270,7 @@ Requirements:</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -1325,8 +1341,8 @@ Requirements:</p>
 <p><em>Emitted on distributeRewards()</em></p>
 <pre><code class="language-solidity">event RewardDistributed(
     uint256 indexed epoch,
-    uint256 indexed startTimestamp,
-    uint256 indexed endTimestamp,
+    uint256 startTimestamp,
+    uint256 endTimestamp,
     address[] nodeAddrs,
     uint256[] requestFees,
     uint256[] requestBonuses,
@@ -1337,13 +1353,28 @@ Requirements:</p>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
-<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
-<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
+<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The start timestamp of the epoch.</td></tr>
+<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The end timestamp of the epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amount of request fees to operator pool.</td></tr>
 <tr><td><code>requestBonuses</code></td><td><code>uint256[]</code></td><td>Amount of bonuses to reward pool.</td></tr>
 <tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to reward pool.</td></tr>
 <tr><td><code>taxAmounts</code></td><td><code>uint256[]</code></td><td>Amount of tax to node operator.</td></tr>
+</tbody></table>
+</div>
+<h3 id="publicgoodrewarddistributed"><a class="header" href="#publicgoodrewarddistributed">PublicGoodRewardDistributed</a></h3>
+<p><em>Emitted on distributePublicPoolRewards()</em></p>
+<pre><code class="language-solidity">event PublicGoodRewardDistributed(
+    uint256 indexed epoch, uint256 startTimestamp, uint256 endTimestamp, uint256 publicPoolReward, uint256 publicPoolTax
+);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
+<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The start timestamp of the epoch.</td></tr>
+<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The end timestamp of the epoch.</td></tr>
+<tr><td><code>publicPoolReward</code></td><td><code>uint256</code></td><td>Amount of rewards to public pool.</td></tr>
+<tr><td><code>publicPoolTax</code></td><td><code>uint256</code></td><td>Amount of tax to public pool.</td></tr>
 </tbody></table>
 </div>
 <h3 id="withdrawalclaimed"><a class="header" href="#withdrawalclaimed">WithdrawalClaimed</a></h3>
@@ -1431,7 +1462,7 @@ Requirements:</p>
 <li><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rss3token"><a class="header" href="#rss3token">RSS3Token</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/mocks/RSS3Token.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/mocks/RSS3Token.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC20</p>
 <h2 id="functions-4"><a class="header" href="#functions-4">Functions</a></h2>
@@ -1444,7 +1475,7 @@ ERC20</p>
 <li><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="itransparentupgradeableproxy"><a class="header" href="#itransparentupgradeableproxy">ITransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 IERC1967</p>
 <p><em>Interface for {TransparentUpgradeableProxy}. In order to implement transparency, {TransparentUpgradeableProxy}
@@ -1468,7 +1499,7 @@ include them in the ABI so this interface must be used to interact with it.</em>
 <pre><code class="language-solidity">function upgradeToAndCall(address, bytes memory) external payable;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transparentupgradeableproxy"><a class="header" href="#transparentupgradeableproxy">TransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC1967Proxy</p>
 <p>*This contract implements a proxy that is upgradeable by an admin.
@@ -1553,7 +1584,7 @@ emulate some proxy functions being non-payable while still allowing value to pas
 <pre><code class="language-solidity">function _requireZeroValue() private;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/Chips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/Chips.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, <a href="src/Chips.sol//src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, <a href="src/Chips.sol//src/base/ERC721.sol/abstract.ERC721.html">ERC721</a></p>
 <h2 id="state-variables-1"><a class="header" href="#state-variables-1">State Variables</a></h2>
@@ -1653,7 +1684,7 @@ Metadata JSON Schema&quot;.</em></p>
 <pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view override returns (string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Settlement.sol//src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, <a href="src/Settlement.sol//src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
@@ -1661,44 +1692,67 @@ Metadata JSON Schema&quot;.</em></p>
 <p><em>Staking contract address.</em></p>
 <pre><code class="language-solidity">address internal _staking;
 </code></pre>
+<h3 id="_token"><a class="header" href="#_token">_token</a></h3>
+<p><em>Staking token contract.</em></p>
+<pre><code class="language-solidity">IERC20 internal _token;
+</code></pre>
+<h3 id="_epochduration"><a class="header" href="#_epochduration">_epochDuration</a></h3>
+<p><em>Duration of an epoch.</em></p>
+<pre><code class="language-solidity">uint256 internal constant _epochDuration = 22.5 days;
+</code></pre>
+<h3 id="_totalrewards"><a class="header" href="#_totalrewards">_totalRewards</a></h3>
+<p><em>Total rewards of the first year.</em></p>
+<pre><code class="language-solidity">uint256 internal _totalRewards;
+</code></pre>
+<h3 id="_totalstakingrewardsperepoch"><a class="header" href="#_totalstakingrewardsperepoch">_totalStakingRewardsPerEpoch</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalStakingRewardsPerEpoch;
+</code></pre>
+<h3 id="_totalrequestbonusperepoch"><a class="header" href="#_totalrequestbonusperepoch">_totalRequestBonusPerEpoch</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalRequestBonusPerEpoch;
+</code></pre>
+<h3 id="_epoch"><a class="header" href="#_epoch">_epoch</a></h3>
+<p><em>The current epoch.</em></p>
+<pre><code class="language-solidity">uint256 internal _epoch = 1;
+</code></pre>
 <h3 id="oracle_role"><a class="header" href="#oracle_role">ORACLE_ROLE</a></h3>
 <pre><code class="language-solidity">bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+</code></pre>
+<h3 id="_starttimestamp"><a class="header" href="#_starttimestamp">_startTimestamp</a></h3>
+<pre><code class="language-solidity">uint256 internal _startTimestamp;
 </code></pre>
 <h2 id="functions-8"><a class="header" href="#functions-8">Functions</a></h2>
 <h3 id="initialize-4"><a class="header" href="#initialize-4">initialize</a></h3>
 <p>Initializes the Settlement contract.</p>
-<pre><code class="language-solidity">function initialize(address staking_, address oracleAccount) external override initializer;
+<pre><code class="language-solidity">function initialize(address staking, address oracleAccount, uint256 startTime, uint256 requsetBonusPercent)
+    external
+    override
+    initializer;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>staking_</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
+<tr><td><code>staking</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 <tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who makes settlement with the Staking contract.</td></tr>
+<tr><td><code>startTime</code></td><td><code>uint256</code></td><td>The start time of the first epoch.</td></tr>
+<tr><td><code>requsetBonusPercent</code></td><td><code>uint256</code></td><td>The percentage of the total rewards to be allocated to the request bonus. Others will be allocated to the staking rewards.</td></tr>
 </tbody></table>
 </div>
+<h3 id="updaterewardsratio-1"><a class="header" href="#updaterewardsratio-1">updateRewardsRatio</a></h3>
+<pre><code class="language-solidity">function updateRewardsRatio(uint256 requestBonusPercent) external override onlyRole(ORACLE_ROLE);
+</code></pre>
 <h3 id="distributerewards-2"><a class="header" href="#distributerewards-2">distributeRewards</a></h3>
 <p>Updates accounting stats and distribute rewards.</p>
 <p><em>periodically called.</em></p>
 <pre><code class="language-solidity">function distributeRewards(
-    uint256 epoch,
-    uint256 startTimestamp,
-    uint256 endTimestamp,
-    uint256 totalRequestBonus,
     address[] calldata nodeAddrs,
     uint256[] calldata requestFees,
-    uint256[] calldata requestCounts,
-    uint256[] calldata stakingRewards
+    uint256[] calldata requestCounts
 ) external override onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
-<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
-<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
-<tr><td><code>totalRequestBonus</code></td><td><code>uint256</code></td><td>The total amount of request bonus.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
 <tr><td><code>requestCounts</code></td><td><code>uint256[]</code></td><td>Amounts of requests handled by each node.</td></tr>
-<tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards.</td></tr>
 </tbody></table>
 </div>
 <h3 id="settaxfraction4publicpool-2"><a class="header" href="#settaxfraction4publicpool-2">setTaxFraction4PublicPool</a></h3>
@@ -1737,6 +1791,16 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div>
+<h3 id="getbonusinfo-1"><a class="header" href="#getbonusinfo-1">getBonusInfo</a></h3>
+<pre><code class="language-solidity">function getBonusInfo() external view override returns (uint256, uint256);
+</code></pre>
+<h3 id="_updaterewardsratio"><a class="header" href="#_updaterewardsratio">_updateRewardsRatio</a></h3>
+<pre><code class="language-solidity">function _updateRewardsRatio(uint256 requestBonusPercent) internal;
+</code></pre>
+<h3 id="_getstakingrewards"><a class="header" href="#_getstakingrewards">_getStakingRewards</a></h3>
+<p><em>returns staking rewards</em></p>
+<pre><code class="language-solidity">function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256, uint256[] memory);
+</code></pre>
 <h3 id="_getrequestbonuses"><a class="header" href="#_getrequestbonuses">_getRequestBonuses</a></h3>
 <p><em>returns request bonuses</em></p>
 <pre><code class="language-solidity">function _getRequestBonuses(uint256 totalBonus, uint256[] memory requestCounts)
@@ -1750,7 +1814,7 @@ Requirements:</p>
 <pre><code class="language-solidity">function _log2(uint256 x) internal pure returns (uint256 n);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Staking.sol//src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="src/Staking.sol//src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
@@ -1765,18 +1829,14 @@ Requirements:</p>
 <pre><code class="language-solidity">uint256 internal _userSlashFraction;
 </code></pre>
 <h3 id="_stakeratio"><a class="header" href="#_stakeratio">_stakeRatio</a></h3>
-<p><em>the ratio of staked tokens to total tokens, 1/25 by default.
-node operator can receive its full tax if it stakes at least 1/25 of the tokens staked by external delegators</em></p>
+<p><em>the ratio of total tokens to deposited tokens, 25 by default.
+node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators</em></p>
 <pre><code class="language-solidity">uint256 internal _stakeRatio;
 </code></pre>
-<h3 id="_stakebaseline"><a class="header" href="#_stakebaseline">_stakeBaseline</a></h3>
-<p><em>the baseline of staked tokens, 10,000 by default.
+<h3 id="_mindeposit"><a class="header" href="#_mindeposit">_minDeposit</a></h3>
+<p><em>the minimal tokens for deposit, 10,000 by default.
 node operator can receive its full tax if it stakes at least 10,000 tokens</em></p>
-<pre><code class="language-solidity">uint256 internal _stakeBaseline;
-</code></pre>
-<h3 id="_depositbaseline"><a class="header" href="#_depositbaseline">_depositBaseline</a></h3>
-<p><em>the baseline of deposited tokens, [TODO] by default.</em></p>
-<pre><code class="language-solidity">uint256 internal _depositBaseline;
+<pre><code class="language-solidity">uint256 internal _minDeposit;
 </code></pre>
 <h3 id="_treasury"><a class="header" href="#_treasury">_treasury</a></h3>
 <p><em>the treasury receives all unqualified rewards, e.g. the exceeding part of the tax</em></p>
@@ -1818,17 +1878,27 @@ node operator can receive its full tax if it stakes at least 10,000 tokens</em><
 <p><em>public pool</em></p>
 <pre><code class="language-solidity">DataTypes.Node internal _publicPool;
 </code></pre>
+<h3 id="_totaloperatorpool"><a class="header" href="#_totaloperatorpool">_totalOperatorPool</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalOperatorPool;
+</code></pre>
+<h3 id="_totalrewardpool"><a class="header" href="#_totalrewardpool">_totalRewardPool</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalRewardPool;
+</code></pre>
 <h3 id="_chips"><a class="header" href="#_chips">_chips</a></h3>
 <p><em>the chips contract</em></p>
 <pre><code class="language-solidity">address internal _chips;
 </code></pre>
-<h3 id="_token"><a class="header" href="#_token">_token</a></h3>
+<h3 id="_token-1"><a class="header" href="#_token-1">_token</a></h3>
 <p><em>the staking token contract</em></p>
 <pre><code class="language-solidity">address internal _token;
 </code></pre>
-<h3 id="_issuers"><a class="header" href="#_issuers">_issuers</a></h3>
+<h3 id="_families"><a class="header" href="#_families">_families</a></h3>
 <p><em>the issuers of chips</em></p>
-<pre><code class="language-solidity">mapping(uint256 tokenId =&gt; address nodeAddr) internal _issuers;
+<pre><code class="language-solidity">mapping(uint256 tokenId =&gt; address nodeAddr) internal _families;
+</code></pre>
+<h3 id="_issuedbypublicpool"><a class="header" href="#_issuedbypublicpool">_issuedByPublicPool</a></h3>
+<p>**</p>
+<pre><code class="language-solidity">mapping(uint256 tokenId =&gt; bool) internal _issuedByPublicPool;
 </code></pre>
 <h3 id="_currentepoch"><a class="header" href="#_currentepoch">_currentEpoch</a></h3>
 <p><em>current epoch</em></p>
@@ -1854,8 +1924,7 @@ node operator can receive its full tax if it stakes at least 10,000 tokens</em><
     uint256 nodeSlashFraction,
     uint256 userSlashFraction,
     uint256 stakeRatio,
-    uint256 stakeBaseline,
-    uint256 depositBaseline,
+    uint256 minDeposit,
     address treasury
 ) external override initializer;
 </code></pre>
@@ -1870,8 +1939,7 @@ node operator can receive its full tax if it stakes at least 10,000 tokens</em><
 <tr><td><code>nodeSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for node operator.</td></tr>
 <tr><td><code>userSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for user.</td></tr>
 <tr><td><code>stakeRatio</code></td><td><code>uint256</code></td><td>The stake ratio of the node operator.</td></tr>
-<tr><td><code>stakeBaseline</code></td><td><code>uint256</code></td><td>The stake base line of the node operator.</td></tr>
-<tr><td><code>depositBaseline</code></td><td><code>uint256</code></td><td>The deposit base line of the node operator.</td></tr>
+<tr><td><code>minDeposit</code></td><td><code>uint256</code></td><td>The deposit base line of the node operator.</td></tr>
 <tr><td><code>treasury</code></td><td><code>address</code></td><td>The treasury address.</td></tr>
 </tbody></table>
 </div>
@@ -2050,42 +2118,25 @@ Requirements:</p>
 </ul>
 <pre><code class="language-solidity">function distributeRewards(
     uint256 epoch,
-    uint256 startTime,
-    uint256 endTime,
+    uint256 startTimestamp,
+    uint256 endTimestamp,
     address[] calldata nodeAddrs,
     uint256[] calldata requestFees,
     uint256[] calldata requestBonuses,
-    uint256[] calldata stakingRewards
+    uint256[] calldata stakingRewards,
+    uint256 publicPoolReward
 ) external override onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
-<tr><td><code>startTime</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
-<tr><td><code>endTime</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
+<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch id.</td></tr>
+<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The start timestamp of the current epoch.</td></tr>
+<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The end timestamp of the current epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
 <tr><td><code>requestBonuses</code></td><td><code>uint256[]</code></td><td>Amounts of request bonuses.</td></tr>
 <tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards to reward pool.</td></tr>
-</tbody></table>
-</div>
-<h3 id="staketopublicpool-1"><a class="header" href="#staketopublicpool-1">stakeToPublicPool</a></h3>
-<p>Stakes tokens to public pool.</p>
-<pre><code class="language-solidity">function stakeToPublicPool(uint256 amount)
-    external
-    override
-    whenNotPaused
-    returns (uint256 startTokenId, uint256 endTokenId);
-</code></pre>
-<p><strong>Parameters</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to stake.</td></tr>
-</tbody></table>
-</div>
-<p><strong>Returns</strong></p>
-<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>startTokenId</code></td><td><code>uint256</code></td><td>The start of new minted chips token ids.</td></tr>
-<tr><td><code>endTokenId</code></td><td><code>uint256</code></td><td>The end of new minted chips token ids.</td></tr>
+<tr><td><code>publicPoolReward</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
 <h3 id="requestunstakefrompublicpool-1"><a class="header" href="#requestunstakefrompublicpool-1">requestUnstakeFromPublicPool</a></h3>
@@ -2103,24 +2154,24 @@ Requirements:</p>
 <tr><td><code>requestId</code></td><td><code>uint256</code></td><td>THe created unstake request id.</td></tr>
 </tbody></table>
 </div>
-<h3 id="delegate-1"><a class="header" href="#delegate-1">delegate</a></h3>
-<p>Delegates chips to a public good node.</p>
-<pre><code class="language-solidity">function delegate(address nodeAddr, uint256[] calldata chipsIds) external override;
+<h3 id="staketopublicpool-1"><a class="header" href="#staketopublicpool-1">stakeToPublicPool</a></h3>
+<p>Stakes tokens to public pool.</p>
+<pre><code class="language-solidity">function stakeToPublicPool(uint256 amount, address nodeAddr)
+    external
+    override
+    whenNotPaused
+    returns (uint256 startTokenId, uint256 endTokenId);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>amount</code></td><td><code>uint256</code></td><td>Amount of tokens to stake.</td></tr>
 <tr><td><code>nodeAddr</code></td><td><code>address</code></td><td></td></tr>
-<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids for delegate.</td></tr>
 </tbody></table>
 </div>
-<h3 id="undelegate-1"><a class="header" href="#undelegate-1">undelegate</a></h3>
-<p>Undelegates chips from a public good node.</p>
-<pre><code class="language-solidity">function undelegate(address nodeAddr, uint256[] calldata chipsIds) external override;
-</code></pre>
-<p><strong>Parameters</strong></p>
+<p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>nodeAddr</code></td><td><code>address</code></td><td></td></tr>
-<tr><td><code>chipsIds</code></td><td><code>uint256[]</code></td><td>The chips token ids for undelegate.</td></tr>
+<tr><td><code>startTokenId</code></td><td><code>uint256</code></td><td>The start of new minted chips token ids.</td></tr>
+<tr><td><code>endTokenId</code></td><td><code>uint256</code></td><td>The end of new minted chips token ids.</td></tr>
 </tbody></table>
 </div>
 <h3 id="slashnodes-3"><a class="header" href="#slashnodes-3">slashNodes</a></h3>
@@ -2136,6 +2187,9 @@ Requirements:</p>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>The addresses of nodes to slash.</td></tr>
 </tbody></table>
 </div>
+<h3 id="withdraw2treasury-1"><a class="header" href="#withdraw2treasury-1">withdraw2Treasury</a></h3>
+<pre><code class="language-solidity">function withdraw2Treasury() external override;
+</code></pre>
 <h3 id="getpendingwithdrawal-1"><a class="header" href="#getpendingwithdrawal-1">getPendingWithdrawal</a></h3>
 <p>Returns the pending withdrawal request by <code>requestId</code>.</p>
 <pre><code class="language-solidity">function getPendingWithdrawal(uint256 requestId) external view override returns (DataTypes.WithdrawalRequest memory);
@@ -2235,6 +2289,9 @@ Requirements:</p>
 <tr><td><code>limit</code></td><td><code>uint256</code></td><td>The limit of nodes to query.</td></tr>
 </tbody></table>
 </div>
+<h3 id="getpoolinfo-1"><a class="header" href="#getpoolinfo-1">getPoolInfo</a></h3>
+<pre><code class="language-solidity">function getPoolInfo() external view override returns (uint256, uint256, uint256);
+</code></pre>
 <h3 id="currentepoch-1"><a class="header" href="#currentepoch-1">currentEpoch</a></h3>
 <p>Returns the current epoch number.</p>
 <pre><code class="language-solidity">function currentEpoch() external view override returns (uint256);
@@ -2262,6 +2319,37 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>address The address of the chips contract.</td></tr>
 </tbody></table>
 </div>
+<h3 id="getmindeposit-1"><a class="header" href="#getmindeposit-1">getMinDeposit</a></h3>
+<pre><code class="language-solidity">function getMinDeposit() external view override returns (uint256);
+</code></pre>
+<h3 id="_increaseoperatorpool"><a class="header" href="#_increaseoperatorpool">_increaseOperatorPool</a></h3>
+<pre><code class="language-solidity">function _increaseOperatorPool(DataTypes.Node storage node, uint256 amount) internal;
+</code></pre>
+<h3 id="_decreaseoperatorpool"><a class="header" href="#_decreaseoperatorpool">_decreaseOperatorPool</a></h3>
+<pre><code class="language-solidity">function _decreaseOperatorPool(DataTypes.Node storage node, uint256 amount) internal;
+</code></pre>
+<h3 id="_increaserewardpool"><a class="header" href="#_increaserewardpool">_increaseRewardPool</a></h3>
+<pre><code class="language-solidity">function _increaseRewardPool(DataTypes.Node storage node, uint256 amount) internal;
+</code></pre>
+<h3 id="_decreaserewardpool"><a class="header" href="#_decreaserewardpool">_decreaseRewardPool</a></h3>
+<pre><code class="language-solidity">function _decreaseRewardPool(DataTypes.Node storage node, uint256 amount) internal;
+</code></pre>
+<h3 id="_distributepublicpoolrewards"><a class="header" href="#_distributepublicpoolrewards">_distributePublicPoolRewards</a></h3>
+<pre><code class="language-solidity">function _distributePublicPoolRewards(uint256 publicPoolReward) internal returns (uint256);
+</code></pre>
+<h3 id="_distributenodesrewards"><a class="header" href="#_distributenodesrewards">_distributeNodesRewards</a></h3>
+<pre><code class="language-solidity">function _distributeNodesRewards(
+    address[] memory nodeAddrs,
+    uint256[] memory requestFees,
+    uint256[] memory requestBonuses,
+    uint256[] memory stakingRewards
+) internal returns (uint256[] memory);
+</code></pre>
+<h3 id="_unstakefromnode"><a class="header" href="#_unstakefromnode">_unstakeFromNode</a></h3>
+<pre><code class="language-solidity">function _unstakeFromNode(address nodeAddr, uint256[] calldata chipsIds, bool isPublicNode)
+    internal
+    returns (uint256 requestId);
+</code></pre>
 <h3 id="_createnode"><a class="header" href="#_createnode">_createNode</a></h3>
 <p><em>create a node</em></p>
 <pre><code class="language-solidity">function _createNode(
@@ -2278,7 +2366,7 @@ Requirements:</p>
 </code></pre>
 <h3 id="_staketonode"><a class="header" href="#_staketonode">_stakeToNode</a></h3>
 <p><em>stakes tokens to a node</em></p>
-<pre><code class="language-solidity">function _stakeToNode(DataTypes.Node storage node, uint256 amount)
+<pre><code class="language-solidity">function _stakeToNode(DataTypes.Node storage node, uint256 amount, address nodeAddr)
     internal
     returns (uint256 startTokenId, uint256 endTokenId);
 </code></pre>
@@ -2290,6 +2378,9 @@ Requirements:</p>
 <p><em>claim withdrawal request</em></p>
 <pre><code class="language-solidity">function _claimWithdrawal(uint256 requestId) internal;
 </code></pre>
+<h3 id="_gettreasuryamount"><a class="header" href="#_gettreasuryamount">_getTreasuryAmount</a></h3>
+<pre><code class="language-solidity">function _getTreasuryAmount() internal view returns (uint256);
+</code></pre>
 <h3 id="_mintokenstostake"><a class="header" href="#_mintokenstostake">_minTokensToStake</a></h3>
 <p><em>get minimal tokens to stake for a node</em></p>
 <pre><code class="language-solidity">function _minTokensToStake(address nodeAddr) internal view returns (uint256);
@@ -2299,10 +2390,13 @@ Requirements:</p>
 For a node operator to receive its full tax,
 it needs to stake at least 1/25 of the tokens staked by external delegators,
 or the exceeding part of the tax will be sent to the reward pool.</em></p>
-<pre><code class="language-solidity">function _getTax(uint256 rewards, uint256 taxFraction, uint256 operatorPool, uint256 rewardPool)
+<pre><code class="language-solidity">function _getTax(uint256 rewards, uint64 taxFraction, uint256 operatorPool, uint256 rewardPool)
     internal
     view
-    returns (uint256);
+    returns (uint256, uint256);
+</code></pre>
+<h3 id="_getfulltax"><a class="header" href="#_getfulltax">_getFullTax</a></h3>
+<pre><code class="language-solidity">function _getFullTax(uint256 rewards, uint64 taxFraction) internal pure returns (uint256);
 </code></pre>
 <h3 id="_sharestotokens"><a class="header" href="#_sharestotokens">_sharesToTokens</a></h3>
 <p><em>convert shares to equivalent tokens</em></p>

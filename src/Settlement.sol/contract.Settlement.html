@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -186,44 +186,67 @@
 <p><em>Staking contract address.</em></p>
 <pre><code class="language-solidity">address internal _staking;
 </code></pre>
+<h3 id="_token"><a class="header" href="#_token">_token</a></h3>
+<p><em>Staking token contract.</em></p>
+<pre><code class="language-solidity">IERC20 internal _token;
+</code></pre>
+<h3 id="_epochduration"><a class="header" href="#_epochduration">_epochDuration</a></h3>
+<p><em>Duration of an epoch.</em></p>
+<pre><code class="language-solidity">uint256 internal constant _epochDuration = 22.5 days;
+</code></pre>
+<h3 id="_totalrewards"><a class="header" href="#_totalrewards">_totalRewards</a></h3>
+<p><em>Total rewards of the first year.</em></p>
+<pre><code class="language-solidity">uint256 internal _totalRewards;
+</code></pre>
+<h3 id="_totalstakingrewardsperepoch"><a class="header" href="#_totalstakingrewardsperepoch">_totalStakingRewardsPerEpoch</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalStakingRewardsPerEpoch;
+</code></pre>
+<h3 id="_totalrequestbonusperepoch"><a class="header" href="#_totalrequestbonusperepoch">_totalRequestBonusPerEpoch</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalRequestBonusPerEpoch;
+</code></pre>
+<h3 id="_epoch"><a class="header" href="#_epoch">_epoch</a></h3>
+<p><em>The current epoch.</em></p>
+<pre><code class="language-solidity">uint256 internal _epoch = 1;
+</code></pre>
 <h3 id="oracle_role"><a class="header" href="#oracle_role">ORACLE_ROLE</a></h3>
 <pre><code class="language-solidity">bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+</code></pre>
+<h3 id="_starttimestamp"><a class="header" href="#_starttimestamp">_startTimestamp</a></h3>
+<pre><code class="language-solidity">uint256 internal _startTimestamp;
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the Settlement contract.</p>
-<pre><code class="language-solidity">function initialize(address staking_, address oracleAccount) external override initializer;
+<pre><code class="language-solidity">function initialize(address staking, address oracleAccount, uint256 startTime, uint256 requsetBonusPercent)
+    external
+    override
+    initializer;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>staking_</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
+<tr><td><code>staking</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 <tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who makes settlement with the Staking contract.</td></tr>
+<tr><td><code>startTime</code></td><td><code>uint256</code></td><td>The start time of the first epoch.</td></tr>
+<tr><td><code>requsetBonusPercent</code></td><td><code>uint256</code></td><td>The percentage of the total rewards to be allocated to the request bonus. Others will be allocated to the staking rewards.</td></tr>
 </tbody></table>
 </div>
+<h3 id="updaterewardsratio"><a class="header" href="#updaterewardsratio">updateRewardsRatio</a></h3>
+<pre><code class="language-solidity">function updateRewardsRatio(uint256 requestBonusPercent) external override onlyRole(ORACLE_ROLE);
+</code></pre>
 <h3 id="distributerewards"><a class="header" href="#distributerewards">distributeRewards</a></h3>
 <p>Updates accounting stats and distribute rewards.</p>
 <p><em>periodically called.</em></p>
 <pre><code class="language-solidity">function distributeRewards(
-    uint256 epoch,
-    uint256 startTimestamp,
-    uint256 endTimestamp,
-    uint256 totalRequestBonus,
     address[] calldata nodeAddrs,
     uint256[] calldata requestFees,
-    uint256[] calldata requestCounts,
-    uint256[] calldata stakingRewards
+    uint256[] calldata requestCounts
 ) external override onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
-<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The startTimestamp of the epoch.</td></tr>
-<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The endTimestamp of the epoch.</td></tr>
-<tr><td><code>totalRequestBonus</code></td><td><code>uint256</code></td><td>The total amount of request bonus.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
 <tr><td><code>requestCounts</code></td><td><code>uint256[]</code></td><td>Amounts of requests handled by each node.</td></tr>
-<tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of staking rewards.</td></tr>
 </tbody></table>
 </div>
 <h3 id="settaxfraction4publicpool"><a class="header" href="#settaxfraction4publicpool">setTaxFraction4PublicPool</a></h3>
@@ -262,6 +285,16 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
 </tbody></table>
 </div>
+<h3 id="getbonusinfo"><a class="header" href="#getbonusinfo">getBonusInfo</a></h3>
+<pre><code class="language-solidity">function getBonusInfo() external view override returns (uint256, uint256);
+</code></pre>
+<h3 id="_updaterewardsratio"><a class="header" href="#_updaterewardsratio">_updateRewardsRatio</a></h3>
+<pre><code class="language-solidity">function _updateRewardsRatio(uint256 requestBonusPercent) internal;
+</code></pre>
+<h3 id="_getstakingrewards"><a class="header" href="#_getstakingrewards">_getStakingRewards</a></h3>
+<p><em>returns staking rewards</em></p>
+<pre><code class="language-solidity">function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256, uint256[] memory);
+</code></pre>
 <h3 id="_getrequestbonuses"><a class="header" href="#_getrequestbonuses">_getRequestBonuses</a></h3>
 <p><em>returns request bonuses</em></p>
 <pre><code class="language-solidity">function _getRequestBonuses(uint256 totalBonus, uint256[] memory requestCounts)

@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="ierrors"><a class="header" href="#ierrors">IErrors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/26b3ca1fdb9636718aa95bf10ad84bd4e120b1cf/src/interfaces/IErrors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/6807c36f014117bac53d561504d5e99093725a77/src/interfaces/IErrors.sol">Git Source</a></p>
 <h2 id="errors"><a class="header" href="#errors">Errors</a></h2>
 <h3 id="callernotstaking"><a class="header" href="#callernotstaking">CallerNotStaking</a></h3>
 <p><em>Caller is not staking contract</em></p>
@@ -214,19 +214,23 @@
 </code></pre>
 <h3 id="claimidnotexists"><a class="header" href="#claimidnotexists">ClaimIdNotExists</a></h3>
 <p><em>Claim time not ready</em></p>
-<pre><code class="language-solidity">error ClaimIdNotExists();
+<pre><code class="language-solidity">error ClaimIdNotExists(uint256 claimId);
 </code></pre>
 <h3 id="amounttoosmall"><a class="header" href="#amounttoosmall">AmountTooSmall</a></h3>
 <p><em>Staking amount too small</em></p>
 <pre><code class="language-solidity">error AmountTooSmall(uint256 amount);
 </code></pre>
-<h3 id="notchipsowner"><a class="header" href="#notchipsowner">NotChipsOwner</a></h3>
-<p><em>Not chips owner</em></p>
-<pre><code class="language-solidity">error NotChipsOwner(uint256 tokenId);
+<h3 id="chipnotauthorized"><a class="header" href="#chipnotauthorized">ChipNotAuthorized</a></h3>
+<p><em>Not chips owner or approver</em></p>
+<pre><code class="language-solidity">error ChipNotAuthorized(uint256 tokenId);
 </code></pre>
-<h3 id="nottokenissuer"><a class="header" href="#nottokenissuer">NotTokenIssuer</a></h3>
-<p><em>Token is not issued by node</em></p>
-<pre><code class="language-solidity">error NotTokenIssuer(uint256 tokenId, address nodeAddr);
+<h3 id="chipnotvalid"><a class="header" href="#chipnotvalid">ChipNotValid</a></h3>
+<p><em>Token is not valid for the node</em></p>
+<pre><code class="language-solidity">error ChipNotValid(uint256 tokenId, address nodeAddr);
+</code></pre>
+<h3 id="chipnotpublicgood"><a class="header" href="#chipnotpublicgood">ChipNotPublicGood</a></h3>
+<p><em>Chips are not public good.</em></p>
+<pre><code class="language-solidity">error ChipNotPublicGood(uint256 tokenId);
 </code></pre>
 <h3 id="depositedtokensslashedall"><a class="header" href="#depositedtokensslashedall">DepositedTokensSlashedAll</a></h3>
 <p><em>Deposited tokens was slashed completely</em></p>
@@ -235,10 +239,6 @@
 <h3 id="publicgoodnotallowed"><a class="header" href="#publicgoodnotallowed">PublicGoodNotAllowed</a></h3>
 <p><em>Deposit is not allowed for public good node.</em></p>
 <pre><code class="language-solidity">error PublicGoodNotAllowed();
-</code></pre>
-<h3 id="chipsdelegatedornotpublicgood"><a class="header" href="#chipsdelegatedornotpublicgood">ChipsDelegatedOrNotPublicGood</a></h3>
-<p><em>Chips are delegated or not public good.</em></p>
-<pre><code class="language-solidity">error ChipsDelegatedOrNotPublicGood(uint256 tokenId);
 </code></pre>
 <h3 id="taxfractiontoolarge"><a class="header" href="#taxfractiontoolarge">TaxFractionTooLarge</a></h3>
 <p><em>Tax fraction too large</em></p>
@@ -251,6 +251,10 @@
 <h3 id="invalidepoch"><a class="header" href="#invalidepoch">InvalidEpoch</a></h3>
 <p><em>Invalid epoch</em></p>
 <pre><code class="language-solidity">error InvalidEpoch(uint256 expected, uint256 actual);
+</code></pre>
+<h3 id="emptynodelist"><a class="header" href="#emptynodelist">EmptyNodeList</a></h3>
+<p><em>Node list is empty</em></p>
+<pre><code class="language-solidity">error EmptyNodeList();
 </code></pre>
 
                     </main>
