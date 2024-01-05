@@ -118,6 +118,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         return _staking;
     }
 
+    /// @inheritdoc ISettlement
     function getBonusInfo() external view override returns (uint256, uint256) {
         return (_totalRequestBonusPerEpoch, _totalStakingRewardsPerEpoch);
     }

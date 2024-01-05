@@ -326,6 +326,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
+    /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 amount = _getTreasuryAmount();
         IERC20(_token).transferFrom(address(this), _treasury, amount);
@@ -344,8 +345,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    // Tokens per share
     function minTokensToStake(address nodeAddr) external view override returns (uint256) {
+        // Tokens per share
         return _minTokensToStake(nodeAddr);
     }
 
@@ -384,6 +385,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
+    /// @inheritdoc IStaking
     function getPoolInfo() external view override returns (uint256, uint256, uint256) {
         return (_totalOperatorPool, _totalRewardPool, _getTreasuryAmount());
     }
@@ -403,6 +405,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return _chips;
     }
 
+    /// @inheritdoc IStaking
     function getMinDeposit() external view override returns (uint256) {
         return _minDeposit;
     }
