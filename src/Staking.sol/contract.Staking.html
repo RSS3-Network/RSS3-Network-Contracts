@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/d103b853432289cd17258a9cfd72a2d74a09a404/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/97b3b622f027d61b44e054085234dcfe0b88a3aa/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -242,11 +242,11 @@ node operator can receive its full tax if it stakes at least 10,000 tokens</em><
 <p><em>public pool</em></p>
 <pre><code class="language-solidity">DataTypes.Node internal _publicPool;
 </code></pre>
-<h3 id="_totaloperatorpool"><a class="header" href="#_totaloperatorpool">_totalOperatorPool</a></h3>
-<pre><code class="language-solidity">uint256 internal _totalOperatorPool;
+<h3 id="_totaloperatingpool"><a class="header" href="#_totaloperatingpool">_totalOperatingPool</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalOperatingPool;
 </code></pre>
-<h3 id="_totalrewardpool"><a class="header" href="#_totalrewardpool">_totalRewardPool</a></h3>
-<pre><code class="language-solidity">uint256 internal _totalRewardPool;
+<h3 id="_totalstakingpool"><a class="header" href="#_totalstakingpool">_totalStakingPool</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalStakingPool;
 </code></pre>
 <h3 id="_chips"><a class="header" href="#_chips">_chips</a></h3>
 <p><em>the chips contract</em></p>
@@ -695,17 +695,17 @@ Requirements:</p>
 <p>The minimum amount of tokens to deposit for a node.</p>
 <pre><code class="language-solidity">function getMinDeposit() external view override returns (uint256);
 </code></pre>
-<h3 id="_increaseoperatorpool"><a class="header" href="#_increaseoperatorpool">_increaseOperatorPool</a></h3>
-<pre><code class="language-solidity">function _increaseOperatorPool(DataTypes.Node storage node, uint256 amount) internal;
+<h3 id="_increaseoperatingpool"><a class="header" href="#_increaseoperatingpool">_increaseOperatingPool</a></h3>
+<pre><code class="language-solidity">function _increaseOperatingPool(DataTypes.Node storage node, uint256 amount) internal;
 </code></pre>
-<h3 id="_decreaseoperatorpool"><a class="header" href="#_decreaseoperatorpool">_decreaseOperatorPool</a></h3>
-<pre><code class="language-solidity">function _decreaseOperatorPool(DataTypes.Node storage node, uint256 amount) internal;
+<h3 id="_decreaseoperatingpool"><a class="header" href="#_decreaseoperatingpool">_decreaseOperatingPool</a></h3>
+<pre><code class="language-solidity">function _decreaseOperatingPool(DataTypes.Node storage node, uint256 amount) internal;
 </code></pre>
-<h3 id="_increaserewardpool"><a class="header" href="#_increaserewardpool">_increaseRewardPool</a></h3>
-<pre><code class="language-solidity">function _increaseRewardPool(DataTypes.Node storage node, uint256 amount) internal;
+<h3 id="_increasestakingpool"><a class="header" href="#_increasestakingpool">_increaseStakingPool</a></h3>
+<pre><code class="language-solidity">function _increaseStakingPool(DataTypes.Node storage node, uint256 amount) internal;
 </code></pre>
-<h3 id="_decreaserewardpool"><a class="header" href="#_decreaserewardpool">_decreaseRewardPool</a></h3>
-<pre><code class="language-solidity">function _decreaseRewardPool(DataTypes.Node storage node, uint256 amount) internal;
+<h3 id="_decreasestakingpool"><a class="header" href="#_decreasestakingpool">_decreaseStakingPool</a></h3>
+<pre><code class="language-solidity">function _decreaseStakingPool(DataTypes.Node storage node, uint256 amount) internal;
 </code></pre>
 <h3 id="_distributepublicpoolrewards"><a class="header" href="#_distributepublicpoolrewards">_distributePublicPoolRewards</a></h3>
 <pre><code class="language-solidity">function _distributePublicPoolRewards(uint256 publicPoolReward) internal returns (uint256);
@@ -763,7 +763,7 @@ Requirements:</p>
 For a node operator to receive its full tax,
 it needs to stake at least 1/25 of the tokens staked by external delegators,
 or the exceeding part of the tax will be sent to the reward pool.</em></p>
-<pre><code class="language-solidity">function _getTax(uint256 rewards, uint64 taxFraction, uint256 operatorPool, uint256 rewardPool)
+<pre><code class="language-solidity">function _getTax(uint256 rewards, uint64 taxFraction, uint256 operatingPool, uint256 rewardPool)
     internal
     view
     returns (uint256, uint256);
