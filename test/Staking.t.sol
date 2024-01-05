@@ -230,6 +230,48 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         DataTypes.Node memory node = _staking.getNode(alice);
         assertEq(node.stakingPool, expectedStakedAmount);
         assertEq(node.totalShares, chipsCount * _staking.SHARES_PER_CHIP());
+
+        // stake to public pool will fail
+        _createPublicGoodNode(bob);
+
+        vm.startPrank(alice);
+        vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeNotStaked.selector, bob));
+        _staking.stake(bob, amount);
+        vm.stopPrank();
+    }
+
+    function testStakeToPublicPool() public {
+        uint256 amount = 10000 ether;
+
+        _createPublicGoodNode(alice);
+
+        uint256 chipsCount = amount / _staking.SHARES_PER_CHIP();
+
+        vm.startPrank(alice);
+        _rss3.approve(address(_staking), amount);
+
+        expectEmit();
+        emit Transfer(alice, address(_staking), amount);
+        _staking.stakeToPublicPool(alice, amount);
+        vm.stopPrank();
+
+        _staking.getNode(alice);
+
+        assertEq(_staking.getPublicPool().stakingPool, amount);
+        assertEq(_staking.getPublicPool().totalShares, chipsCount * _staking.SHARES_PER_CHIP());
+
+        // stake to public pool with non public good node will fail
+        _createNode(bob);
+        vm.startPrank(alice);
+        vm.expectRevert(abi.encodeWithSelector(NodeNotPublicGood.selector, bob));
+        _staking.stakeToPublicPool(bob, amount);
+        vm.stopPrank();
+
+        // stake to public pool with empty node addr will fail
+        vm.startPrank(alice);
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.stakeToPublicPool(address(0xabc), amount);
+        vm.stopPrank();
     }
 
     function testRequestUnstake() public {

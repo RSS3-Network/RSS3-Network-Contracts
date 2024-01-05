@@ -54,13 +54,16 @@ contract SettlementTest is CommonTest {
         _createNode(alice);
         _createNode(bob);
 
+        address carol = address(0xccc);
+        _createPublicGoodNode(carol);
+
         vm.startPrank(alice);
 
         vm.assume(stakingAmount > 5000 && stakingAmount < 10000);
         stakingAmount = stakingAmount * 1 ether;
 
         _rss3.approve(address(_staking), stakingAmount);
-        _staking.stakeToPublicPool(stakingAmount, alice);
+        _staking.stakeToPublicPool(address(0xccc), stakingAmount);
         vm.stopPrank();
 
         vm.startPrank(bob);
@@ -68,7 +71,7 @@ contract SettlementTest is CommonTest {
         _staking.stake(alice, 10000 ether);
         vm.stopPrank();
 
-        vm.startPrank(address(0xccc));
+        vm.startPrank(carol);
         _rss3.approve(address(_staking), 8000 ether);
         _staking.stake(alice, 8000 ether);
         vm.stopPrank();
@@ -78,7 +81,7 @@ contract SettlementTest is CommonTest {
         _staking.stake(bob, stakingAmount);
         vm.stopPrank();
 
-        vm.startPrank(address(0xccc));
+        vm.startPrank(carol);
         _rss3.approve(address(_staking), 9000 ether);
         _staking.stake(bob, 9000 ether);
         vm.stopPrank();

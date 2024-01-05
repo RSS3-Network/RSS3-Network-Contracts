@@ -140,13 +140,14 @@ interface IStaking {
 
     /**
      * @notice Stakes tokens to public pool.
+     * @param nodeAddr The address of node to like.
      * @param amount Amount of tokens to stake.
      * @return startTokenId The start of new minted chips token ids.
      * @return endTokenId The end of new minted chips token ids.
      */
     function stakeToPublicPool(
-        uint256 amount,
-        address nodeAddr
+        address nodeAddr,
+        uint256 amount
     ) external returns (uint256 startTokenId, uint256 endTokenId);
 
     /**

@@ -42,11 +42,17 @@ interface IErrors {
     /// @dev Chips are not public good.
     error ChipNotPublicGood(uint256 tokenId);
 
+    /// @dev Node is not public good node.
+    error NodeNotPublicGood(address nodeAddr);
+
     /// @dev Deposited tokens was slashed completely
     error DepositedTokensSlashedAll();
 
     /// @dev Deposit is not allowed for public good node.
-    error PublicGoodNotAllowed();
+    error PublicGoodNodeNotDeposited();
+
+    /// @dev Public good node cannot be staked
+    error PublicGoodNodeNotStaked(address nodeAddr);
 
     /// @dev Tax fraction too large
     error TaxFractionTooLarge();

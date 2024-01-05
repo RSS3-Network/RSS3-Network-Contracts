@@ -109,4 +109,9 @@ contract CommonTest is Utils {
         vm.prank(to);
         _staking.createNode(to, "Name", "Description", _defaultTaxFraction, false, "https://domain.com");
     }
+
+    function _createPublicGoodNode(address to) internal {
+        vm.prank(to);
+        _staking.createNode(to, "Name", "Description", _defaultTaxFraction, true, "https://domain.com");
+    }
 }

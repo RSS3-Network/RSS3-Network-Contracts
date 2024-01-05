@@ -75,7 +75,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev the issuers of chips
     Checkpoints.Trace160 internal _families;
-    BitMaps.BitMap internal _chipsBurn;
 
     /// @dev current epoch
     uint256 internal _currentEpoch;
@@ -166,7 +165,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         string calldata endpoint,
         uint256 amount
     ) external override whenNotPaused {
-        if (publicGood) revert PublicGoodNotAllowed();
+        if (publicGood) revert PublicGoodNodeNotDeposited();
 
         _createNode(msg.sender, name, description, taxFraction, publicGood, endpoint);
         _deposit(msg.sender, amount);
@@ -233,6 +232,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.Node storage node = _nodes[nodeAddr];
         // validate node
         if (node.account == address(0)) revert NodeNotExists();
+        if (node.publicGood) revert PublicGoodNodeNotStaked(nodeAddr);
 
         (startTokenId, endTokenId) = _stakeToNode(node, amount, nodeAddr);
     }
@@ -297,9 +297,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function stakeToPublicPool(
-        uint256 amount,
-        address nodeAddr
+        address nodeAddr,
+        uint256 amount
     ) external override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (node.account == address(0)) revert NodeNotExists();
+        if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
         (startTokenId, endTokenId) = _stakeToNode(_publicPool, amount, nodeAddr);
     }
 
@@ -491,8 +494,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             } else if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
 
             IChips(CHIP).burn(tokenId);
-            // mark token as burnt
-            _chipsBurn.set(tokenId);
         }
 
         requestId = ++_pendingUnstakeCounter;
@@ -615,7 +616,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function _issuerOf(uint256 tokenId) internal view returns (address) {
         // check the token was not burned, and fetch ownership from the anchors
         // Note: no need for safe cast, we know that tokenId <= type(uint96).max
-        return _chipsBurn.get(tokenId) ? address(0) : address(_families.lowerLookup(uint96(tokenId)));
+        return address(_families.lowerLookup(uint96(tokenId)));
     }
 
     function _getTreasuryAmount() internal view returns (uint256) {
