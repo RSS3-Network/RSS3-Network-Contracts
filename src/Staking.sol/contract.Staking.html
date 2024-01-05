@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c6464d460f26e15e9a60de8f07b549e826f2c0f8/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/91fd9995b98a82c703196e479f65d7efa7f752a0/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -258,11 +258,10 @@ node operator can receive its full tax if it stakes at least 10,000 tokens</em><
 </code></pre>
 <h3 id="_families"><a class="header" href="#_families">_families</a></h3>
 <p><em>the issuers of chips</em></p>
-<pre><code class="language-solidity">mapping(uint256 tokenId =&gt; address nodeAddr) internal _families;
+<pre><code class="language-solidity">Checkpoints.Trace160 internal _families;
 </code></pre>
-<h3 id="_issuedbypublicpool"><a class="header" href="#_issuedbypublicpool">_issuedByPublicPool</a></h3>
-<p>**</p>
-<pre><code class="language-solidity">mapping(uint256 tokenId =&gt; bool) internal _issuedByPublicPool;
+<h3 id="_chipsburn"><a class="header" href="#_chipsburn">_chipsBurn</a></h3>
+<pre><code class="language-solidity">BitMaps.BitMap internal _chipsBurn;
 </code></pre>
 <h3 id="_currentepoch"><a class="header" href="#_currentepoch">_currentEpoch</a></h3>
 <p><em>current epoch</em></p>
@@ -750,6 +749,9 @@ Requirements:</p>
 <h3 id="_claimwithdrawal"><a class="header" href="#_claimwithdrawal">_claimWithdrawal</a></h3>
 <p><em>claim withdrawal request</em></p>
 <pre><code class="language-solidity">function _claimWithdrawal(uint256 requestId) internal;
+</code></pre>
+<h3 id="_issuerof"><a class="header" href="#_issuerof">_issuerOf</a></h3>
+<pre><code class="language-solidity">function _issuerOf(uint256 tokenId) internal view returns (address);
 </code></pre>
 <h3 id="_gettreasuryamount"><a class="header" href="#_gettreasuryamount">_getTreasuryAmount</a></h3>
 <pre><code class="language-solidity">function _getTreasuryAmount() internal view returns (uint256);
