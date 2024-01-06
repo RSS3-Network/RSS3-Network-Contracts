@@ -196,7 +196,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         // scale with scalar to keep more precision
         uint256 scalar = type(uint64).max;
         uint256 scaledA = (requestCount + totalCount) * scalar;
-        uint256 res = _log2(scaledA / totalCount) - _log2(scalar);
+        uint256 res = _log2(scaledA / totalCount) - 630000; // log2(scalar) = 630000
         return (res * 693147) / 1000000; // ln 2 = 693147 / 1000000
     }
 
