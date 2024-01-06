@@ -11,6 +11,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
+    using Math for uint256;
+
     /// @dev Duration of an epoch.
     uint256 public constant EPOCH_DURATION = 18 hours;
 
@@ -173,12 +175,31 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         if (sum == 0) return result;
 
+        // get weights for bonus
+        uint256[] memory weights = new uint256[](requestCounts.length);
+        uint256 sumWeight;
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            // TODO: `log2(requestCounts[i] / sum)` will always be 0
-            // ln 2 = 693147 / 1000000
-            result[i] = (Math.log2(requestCounts[i] / sum + 1) * totalBonus * 693147) / 1000000;
+            weights[i] = _getWeight(requestCounts[i], sum);
+            sumWeight += weights[i];
+        }
+
+        // get bonus for each node
+        for (uint256 i = 0; i < requestCounts.length; i++) {
+            result[i] = (totalBonus * weights[i]) / sumWeight;
         }
 
         return result;
+    }
+
+    /// @dev  log2(requestCount/totalCount +1) * G, where G = ln(2)
+    function _getWeight(uint256 requestCount, uint256 totalCount) internal pure returns (uint256) {
+        // we scale all the numbers by 1e18 to keep more precision
+        uint256 scalar = 1e18;
+
+        // ln 2 = 693147 / 1000000
+        uint256 scaledG = (scalar * 693147) / 1000000;
+        uint256 scaledA = (requestCount + totalCount) * 1e18;
+        uint256 scaledB = totalCount * 1e18;
+        return (scaledA.log2() * scaledG - scaledB.log2() * scaledG) / scalar;
     }
 }
