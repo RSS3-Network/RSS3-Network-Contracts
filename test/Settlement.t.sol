@@ -16,6 +16,9 @@ contract SettlementTest is CommonTest {
         _rss3.transfer(bob, 100000 ether);
         _rss3.transfer(address(0xccc), 100000 ether);
         _rss3.transfer(address(0xddd), 100000 ether);
+
+        // transfer tokens to settlement contract
+        _rss3.transfer(address(_settlement), 30000000 ether);
     }
 
     function testCheckSetupStatus() public {

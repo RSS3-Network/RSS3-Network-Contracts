@@ -63,6 +63,12 @@ interface ISettlement {
     function stakingContract() external view returns (address);
 
     /**
+     * @notice Returns the current epoch number.
+     * @return uint256 The current epoch number.
+     */
+    function currentEpoch() external view returns (uint256);
+
+    /**
      * @notice  Returns the bonus info.
      * @return (requestBonusPerEpoch, stakingRewardsPerEpoch) The amount of request bonus per epoch.
      */

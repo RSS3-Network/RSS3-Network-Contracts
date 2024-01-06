@@ -55,7 +55,7 @@ contract Deploy is Deployer {
     function initialize() public {
         initializeStaking();
         initializeChips();
-        //        initializeSettlement();
+        initializeSettlement();
     }
 
     /// @notice Deploy all of the proxies
@@ -161,10 +161,19 @@ contract Deploy is Deployer {
         Settlement settlementProxy = Settlement(mustGetAddress("SettlementProxy"));
         address stakingProxy = mustGetAddress("StakingProxy");
 
-        settlementProxy.initialize(stakingProxy, cfg.oracleAccount(), block.timestamp, 0, 1);
+        settlementProxy.initialize(
+            stakingProxy,
+            cfg.oracleAccount(),
+            cfg.settlementStartTime(),
+            cfg.requsetBonusPercent(),
+            cfg.startEpoch()
+        );
 
         // check states
         require(settlementProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");
         require(settlementProxy.stakingContract() == stakingProxy, "check settlement contract error");
+        require(settlementProxy.currentEpoch() == cfg.startEpoch(), "check start epoch error");
+        require(settlementProxy.EPOCH_DURATION() == 18 hours, "check start epoch error");
+        require(settlementProxy.TOTAL_REWARDS_PER_YEAR() == 30000000 ether, "check start epoch error");
     }
 }

@@ -13,5 +13,8 @@
   "depositBaseline": "1000000000000000000",
   "treasury": "0x4df52552A29D0625CF7ab3F2B247f718247a32b6",
   "chipsName": "RSS3 Chips",
-  "chipsSymbol": "Chips"
+  "chipsSymbol": "Chips",
+  "settlementStartTime": "1620000000",
+  "requsetBonusPercent": "0",
+  "startEpoch": "1"
 }

@@ -26,9 +26,11 @@ contract DeployConfig is Script {
     uint256 public stakeBaseline;
     uint256 public depositBaseline;
     address public treasury;
-
     string public chipsName;
     string public chipsSymbol;
+    uint256 public settlementStartTime;
+    uint256 public requsetBonusPercent;
+    uint256 public startEpoch;
 
     constructor(string memory _path) {
         console.log("DeployConfig: reading file %s", _path);
@@ -56,5 +58,8 @@ contract DeployConfig is Script {
         treasury = stdJson.readAddress(_json, "$.treasury");
         chipsName = stdJson.readString(_json, "$.chipsName");
         chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");
+        settlementStartTime = stdJson.readUint(_json, "$.settlementStartTime");
+        requsetBonusPercent = stdJson.readUint(_json, "$.requsetBonusPercent");
+        startEpoch = stdJson.readUint(_json, "$.startEpoch");
     }
 }

@@ -8,19 +8,21 @@ import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
+    /// @dev Duration of an epoch.
+    uint256 public constant EPOCH_DURATION = 18 hours;
+
+    /// @dev Total rewards of the first year.
+    uint256 public constant TOTAL_REWARDS_PER_YEAR = 30000000 * 10 ** 18;
+
     /// @dev Staking contract address.
     address internal _staking;
 
     /// @dev Staking token contract.
     IERC20 internal _token;
 
-    /// @dev Duration of an epoch.
-    uint256 internal constant _epochDuration = 22.5 days;
-
-    /// @dev Total rewards of the first year.
-    uint256 internal _totalRewards;
     uint256 internal _totalStakingRewardsPerEpoch;
     uint256 internal _totalRequestBonusPerEpoch;
 
@@ -42,20 +44,12 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     ) external override initializer {
         _staking = staking;
         _token = IERC20(IStaking(staking).stakingToken());
-
         _epoch = startEpoch;
-
-        _grantRole(ORACLE_ROLE, oracleAccount);
-
-        _totalRewards = (3 * _token.totalSupply()) / 100;
+        _startTimestamp = startTime;
 
         _updateRewardsRatio(requsetBonusPercent);
 
-        // deposit the total incentive tokens of the next year in the settlement contract
-        // for the next year's rewards, the settlement contract will mint tokens from token's contracts
-        _token.transferFrom(msg.sender, address(this), _totalRewards);
-
-        _startTimestamp = startTime;
+        _grantRole(ORACLE_ROLE, oracleAccount);
     }
 
     function updateRewardsRatio(uint256 requestBonusPercent) external override onlyRole(ORACLE_ROLE) {
@@ -119,12 +113,17 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @inheritdoc ISettlement
+    function currentEpoch() external view override returns (uint256) {
+        return _epoch;
+    }
+
+    /// @inheritdoc ISettlement
     function getBonusInfo() external view override returns (uint256, uint256) {
         return (_totalRequestBonusPerEpoch, _totalStakingRewardsPerEpoch);
     }
 
     function _updateRewardsRatio(uint256 requestBonusPercent) internal {
-        uint256 rewardsPerEpoch = _totalRewards / (365 days / _epochDuration);
+        uint256 rewardsPerEpoch = TOTAL_REWARDS_PER_YEAR / (365 days / EPOCH_DURATION);
 
         _totalRequestBonusPerEpoch = (rewardsPerEpoch * requestBonusPercent) / 100;
         _totalStakingRewardsPerEpoch = (rewardsPerEpoch * (100 - requestBonusPercent)) / 100;
@@ -175,45 +174,11 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         if (sum == 0) return result;
 
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            result[i] = (_log2(requestCounts[i] / sum + 1) * totalBonus * 693147) / 1000000; // ln 2 = 693147 / 1000000
+            // TODO: `log2(requestCounts[i] / sum)` will always be 0
+            // ln 2 = 693147 / 1000000
+            result[i] = (Math.log2(requestCounts[i] / sum + 1) * totalBonus * 693147) / 1000000;
         }
 
         return result;
-    }
-
-    /// @dev returns log2(x)
-    // solhint-disable-next-line code-complexity
-    function _log2(uint256 x) internal pure returns (uint256 n) {
-        if (x >= 2 ** 128) {
-            x >>= 128;
-            n += 128;
-        }
-        if (x >= 2 ** 64) {
-            x >>= 64;
-            n += 64;
-        }
-        if (x >= 2 ** 32) {
-            x >>= 32;
-            n += 32;
-        }
-        if (x >= 2 ** 16) {
-            x >>= 16;
-            n += 16;
-        }
-        if (x >= 2 ** 8) {
-            x >>= 8;
-            n += 8;
-        }
-        if (x >= 2 ** 4) {
-            x >>= 4;
-            n += 4;
-        }
-        if (x >= 2 ** 2) {
-            x >>= 2;
-            n += 2;
-        }
-        if (x >= 2 ** 1) {
-            n += 1;
-        }
     }
 }

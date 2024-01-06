@@ -21,6 +21,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         // transfer tokens
         _rss3.transfer(alice, _initialAmount);
         _rss3.transfer(bob, _initialAmount);
+        // transfer tokens to settlement contract
+        _rss3.transfer(address(_settlement), 30000000 ether);
     }
 
     function testCreateNode(uint64 taxFraction, bool publicGood) public {
