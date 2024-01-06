@@ -6,23 +6,11 @@ import {DataTypes} from "../libraries/DataTypes.sol";
 interface IStaking {
     /**
      * @notice Initializes the Staking contract.
+     * @param chips Address of the chips contract.
      * @param pauseAccount Address who can pause/unpause the Staking contract.
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
-     * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
-     * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its deposit.
-     * @param nodeSlashFraction Slash fraction for node operator.
-     * @param userSlashFraction Slash fraction for user.
-     * @param minDeposit The deposit base line of the node operator.
      */
-    function initialize(
-        address pauseAccount,
-        address oracleAccount,
-        uint256 stakeUnbondingPeriod,
-        uint256 depositUnbondingPeriod,
-        uint256 nodeSlashFraction,
-        uint256 userSlashFraction,
-        uint256 minDeposit
-    ) external;
+    function initialize(address chips, address pauseAccount, address oracleAccount) external;
 
     /**
      * @notice Pauses interaction with the Staking contract.

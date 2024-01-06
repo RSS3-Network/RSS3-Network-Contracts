@@ -44,9 +44,9 @@ contract Deploy is Deployer {
 
     /* solhint-disable comprehensive-interface */
     function run() external {
-        deployProxies();
-
         deployImplementations();
+
+        deployProxies();
 
         initialize();
     }
@@ -55,7 +55,7 @@ contract Deploy is Deployer {
     function initialize() public {
         initializeStaking();
         initializeChips();
-        initializeSettlement();
+        //        initializeSettlement();
     }
 
     /// @notice Deploy all of the proxies
@@ -92,8 +92,16 @@ contract Deploy is Deployer {
     }
 
     function deployStaking() public broadcast returns (address addr_) {
-        address chipsProxy = mustGetAddress("ChipsProxy");
-        Staking staking = new Staking(chipsProxy, cfg.rss3Token(), cfg.stakeRatio(), cfg.treasury());
+        Staking staking = new Staking(
+            cfg.rss3Token(),
+            cfg.treasury(),
+            cfg.stakeRatio(),
+            cfg.stakeUnbondingPeriod(),
+            cfg.depositUnbondingPeriod(),
+            cfg.nodeSlashFraction(),
+            cfg.userSlashFraction(),
+            cfg.depositBaseline()
+        );
 
         // check states
         require(!staking.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "pause role error");
@@ -131,15 +139,7 @@ contract Deploy is Deployer {
         address chipsProxy = mustGetAddress("ChipsProxy");
         address settlementProxy = mustGetAddress("SettlementProxy");
 
-        stakingProxy.initialize(
-            cfg.pauseAccount(),
-            settlementProxy,
-            cfg.stakeUnbondingPeriod(),
-            cfg.depositUnbondingPeriod(),
-            cfg.nodeSlashFraction(),
-            cfg.userSlashFraction(),
-            cfg.depositBaseline()
-        );
+        stakingProxy.initialize(chipsProxy, cfg.pauseAccount(), settlementProxy);
         // check states
         require(stakingProxy.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "check pause role error");
         require(stakingProxy.hasRole(ORACLE_ROLE, settlementProxy), "check oracle role error");

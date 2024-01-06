@@ -54,10 +54,23 @@ contract CommonTest is Utils {
         // deploy account oracle
         _settlement = new Settlement();
 
-        _internalStakingTest = new InternalStaking(address(_chips), address(_rss3), stakeRatio, treasury);
-        _internalStakingTest.initialize(
-            pauseAccount,
-            oracleAccount,
+        _internalStakingTest = new InternalStaking(
+            address(_rss3),
+            treasury,
+            stakeRatio,
+            stakeUnbondingPeriod,
+            depositUnbondingPeriod,
+            nodeSlashFraction,
+            userSlashFraction,
+            minDeposit
+        );
+        _internalStakingTest.initialize(address(_chips), pauseAccount, oracleAccount);
+
+        // deploy and init Staking contract
+        Staking stakingImpl = new Staking(
+            address(_rss3),
+            treasury,
+            stakeRatio,
             stakeUnbondingPeriod,
             depositUnbondingPeriod,
             nodeSlashFraction,
@@ -65,23 +78,15 @@ contract CommonTest is Utils {
             minDeposit
         );
 
-        // deploy and init Staking contract
-        Staking stakingImpl = new Staking(address(_chips), address(_rss3), stakeRatio, treasury);
-
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
             address(stakingImpl),
             proxyAdmin,
             abi.encodeWithSignature(
                 // solhint-disable-next-line max-line-length
-                "initialize(address,address,uint256,uint256,uint256,uint256,uint256)",
+                "initialize(address,address,address)",
+                address(_chips),
                 pauseAccount,
-                // address(_settlement),
-                oracleAccount,
-                stakeUnbondingPeriod,
-                depositUnbondingPeriod,
-                nodeSlashFraction,
-                userSlashFraction,
-                minDeposit
+                oracleAccount
             )
         );
         _staking = Staking(address(proxy));

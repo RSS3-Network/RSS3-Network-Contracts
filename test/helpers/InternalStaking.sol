@@ -6,11 +6,26 @@ import {Staking} from "../../src/Staking.sol";
 
 contract InternalStaking is Staking {
     constructor(
-        address chips,
         address token,
+        address treasury,
         uint256 stakeRatio,
-        address treasury
-    ) Staking(chips, token, stakeRatio, treasury) {}
+        uint256 stakeUnbondingPeriod,
+        uint256 depositUnbondingPeriod,
+        uint256 nodeSlashFraction,
+        uint256 userSlashFraction,
+        uint256 minDeposit
+    )
+        Staking(
+            token,
+            treasury,
+            stakeRatio,
+            stakeUnbondingPeriod,
+            depositUnbondingPeriod,
+            nodeSlashFraction,
+            userSlashFraction,
+            minDeposit
+        )
+    {}
 
     function calculateReward(
         uint256 rewards,

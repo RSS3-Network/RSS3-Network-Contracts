@@ -26,30 +26,31 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 
-    /// @dev the chips contract
-    address internal immutable CHIP; // solhint-disable-line private-vars-leading-underscore
     /// @dev the staking token contract
-    address internal immutable TOKEN; // solhint-disable-line private-vars-leading-underscore
+    address public immutable TOKEN; // solhint-disable-line private-vars-leading-underscore
 
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
     /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
-    uint256 internal immutable STAKE_RATIO; // solhint-disable-line private-vars-leading-underscore
+    uint256 public immutable STAKE_RATIO; // solhint-disable-line private-vars-leading-underscore
 
     /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
-    address internal immutable TREASURY; // solhint-disable-line private-vars-leading-underscore
+    address public immutable TREASURY; // solhint-disable-line private-vars-leading-underscore
 
     /// @dev slash fraction
-    uint256 internal _nodeSlashFraction;
-    uint256 internal _userSlashFraction;
+    uint256 public immutable NODE_SLASH_FRACTION;
+    uint256 public immutable USER_SLASH_FRACTION;
 
     /// @dev the minimal tokens for deposit, 10,000 by default.
     /// node operator can receive its full tax if it stakes at least 10,000 tokens
-    uint256 internal _minDeposit;
+    uint256 public immutable MIN_DEPOSIT;
 
     /// @dev the period of time that node operator can't withdraw staked tokens
-    uint256 internal _depositUnbondingPeriod;
+    uint256 public immutable DEPOSIT_UNBONDING_PERIOD;
     /// @dev the period of time that user can't withdraw staked tokens
-    uint256 internal _stakeUnbondingPeriod;
+    uint256 public immutable STAKE_UNBONDING_PERIOD;
+
+    /// @dev the chips contract
+    address internal _chips;
 
     /// @dev all node addresses
     EnumerableSet.AddressSet internal _nodeAddrs;
@@ -85,32 +86,45 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
-    constructor(address chips, address token, uint256 stakeRatio, address treasury) {
-        CHIP = chips;
-        TOKEN = token;
-
-        STAKE_RATIO = stakeRatio;
-
-        TREASURY = treasury;
-    }
-
-    /// @inheritdoc IStaking
-    function initialize(
-        address pauseAccount,
-        address oracleAccount,
+    /**
+     * @notice constructor.
+     * @param token The address of staking token.
+     * @param treasury The address of treasury.
+     * @param stakeRatio The stake ratio of the node operator.
+     * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
+     * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its deposit.
+     * @param nodeSlashFraction Slash fraction for node operator.
+     * @param userSlashFraction Slash fraction for user.
+     * @param stakeRatio The stake ratio of the node operator.
+     * @param minDeposit The deposit base line of the node operator.
+     */
+    constructor(
+        address token,
+        address treasury,
+        uint256 stakeRatio,
         uint256 stakeUnbondingPeriod,
         uint256 depositUnbondingPeriod,
         uint256 nodeSlashFraction,
         uint256 userSlashFraction,
         uint256 minDeposit
-    ) external override initializer {
-        _stakeUnbondingPeriod = stakeUnbondingPeriod;
-        _depositUnbondingPeriod = depositUnbondingPeriod;
+    ) {
+        TOKEN = token;
 
-        _nodeSlashFraction = nodeSlashFraction;
-        _userSlashFraction = userSlashFraction;
+        TREASURY = treasury;
+        STAKE_RATIO = stakeRatio;
 
-        _minDeposit = minDeposit;
+        STAKE_UNBONDING_PERIOD = stakeUnbondingPeriod;
+        DEPOSIT_UNBONDING_PERIOD = depositUnbondingPeriod;
+
+        NODE_SLASH_FRACTION = nodeSlashFraction;
+        USER_SLASH_FRACTION = userSlashFraction;
+
+        MIN_DEPOSIT = minDeposit;
+    }
+
+    /// @inheritdoc IStaking
+    function initialize(address chips, address pauseAccount, address oracleAccount) external override initializer {
+        _chips = chips;
 
         _grantRole(PAUSE_ROLE, pauseAccount);
         _setRoleAdmin(PAUSE_ROLE, PAUSE_ROLE);
@@ -313,11 +327,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             if (node.account == address(0)) revert NodeNotExists();
 
             // slash operator pool tokens
-            uint256 slashedOperatingPool = (node.operatingPool * _nodeSlashFraction) / _denominator();
+            uint256 slashedOperatingPool = (node.operatingPool * NODE_SLASH_FRACTION) / _denominator();
             _decreaseOperatingPool(node, slashedOperatingPool);
 
             // slash reward pool tokens
-            uint256 slashedStakingPool = (node.stakingPool * _userSlashFraction) / _denominator();
+            uint256 slashedStakingPool = (node.stakingPool * USER_SLASH_FRACTION) / _denominator();
             _decreaseStakingPool(node, slashedStakingPool);
 
             node.slashedAmount += slashedOperatingPool + slashedStakingPool;
@@ -402,12 +416,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
-        return CHIP;
+        return _chips;
     }
 
     /// @inheritdoc IStaking
     function getMinDeposit() external view override returns (uint256) {
-        return _minDeposit;
+        return MIN_DEPOSIT;
     }
 
     function _increaseOperatingPool(DataTypes.Node storage node, uint256 amount) internal {
@@ -485,7 +499,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // check and burn chips
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (IERC721(CHIP).ownerOf(tokenId) != msg.sender && IERC721(CHIP).getApproved(tokenId) != msg.sender)
+            if (IERC721(_chips).ownerOf(tokenId) != msg.sender && IERC721(_chips).getApproved(tokenId) != msg.sender)
                 revert ChipNotAuthorized(tokenId);
 
             if (isPublicNode) {
@@ -493,7 +507,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
                 if (!_nodes[nodeAddr].publicGood) revert ChipNotPublicGood(tokenId);
             } else if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
 
-            IChips(CHIP).burn(tokenId);
+            IChips(_chips).burn(tokenId);
         }
 
         requestId = ++_pendingUnstakeCounter;
@@ -562,7 +576,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 chipsCount = shares / SHARES_PER_CHIP;
         if (chipsCount == 0) revert AmountTooSmall(amount);
         // mint chips
-        (startTokenId, endTokenId) = IChips(CHIP).mintBatch(msg.sender, chipsCount);
+        (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
         if (endTokenId > type(uint96).max) revert ChipsIdOverflow();
 
         // update stakedAmount
@@ -585,7 +599,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.UnstakeRequest memory req = _pendingUnstake[requestId];
         if (req.owner == address(0)) revert ClaimIdNotExists(requestId);
 
-        if (block.timestamp < req.timestamp + _stakeUnbondingPeriod) revert ClaimTimeNotReady();
+        if (block.timestamp < req.timestamp + STAKE_UNBONDING_PERIOD) revert ClaimTimeNotReady();
 
         // transfer
         IERC20(TOKEN).safeTransfer(req.owner, req.unstakeAmount);
@@ -602,7 +616,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         if (req.owner == address(0)) revert ClaimIdNotExists(requestId);
 
-        if (block.timestamp < req.timestamp + _depositUnbondingPeriod) revert ClaimTimeNotReady();
+        if (block.timestamp < req.timestamp + DEPOSIT_UNBONDING_PERIOD) revert ClaimTimeNotReady();
 
         // transfer staked tokens
         IERC20(TOKEN).safeTransfer(req.owner, req.amount);
@@ -649,10 +663,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     ) internal view returns (uint256, uint256) {
         uint256 fullTax = _getFullTax(rewards, taxFraction);
 
-        if (operatingPool < _minDeposit) {
+        if (operatingPool < MIN_DEPOSIT) {
             // node will receive no tax
             return (fullTax, 0);
-        } else if (operatingPool >= _minDeposit && operatingPool * STAKE_RATIO >= rewardPool) {
+        } else if (operatingPool >= MIN_DEPOSIT && operatingPool * STAKE_RATIO >= rewardPool) {
             // node will receive its full tax
             return (fullTax, fullTax);
         } else {
