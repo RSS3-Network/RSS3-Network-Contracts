@@ -178,49 +178,49 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/da01cc229c63f62fd03eaf349261d7cfa80124b7/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/54068cdf4491a23d4e97d07660f63916fa0e518c/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
 <h3 id="shares_per_chip"><a class="header" href="#shares_per_chip">SHARES_PER_CHIP</a></h3>
 <pre><code class="language-solidity">uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 </code></pre>
-<h3 id="chip"><a class="header" href="#chip">CHIP</a></h3>
-<p><em>the chips contract</em></p>
-<pre><code class="language-solidity">address internal immutable CHIP;
-</code></pre>
 <h3 id="token"><a class="header" href="#token">TOKEN</a></h3>
 <p><em>the staking token contract</em></p>
-<pre><code class="language-solidity">address internal immutable TOKEN;
+<pre><code class="language-solidity">address public immutable TOKEN;
 </code></pre>
 <h3 id="stake_ratio"><a class="header" href="#stake_ratio">STAKE_RATIO</a></h3>
 <p><em>the ratio of total tokens to deposited tokens, 25 by default.
 node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators</em></p>
-<pre><code class="language-solidity">uint256 internal immutable STAKE_RATIO;
+<pre><code class="language-solidity">uint256 public immutable STAKE_RATIO;
 </code></pre>
 <h3 id="treasury"><a class="header" href="#treasury">TREASURY</a></h3>
 <p><em>the treasury receives all unqualified rewards, e.g. the exceeding part of the tax</em></p>
-<pre><code class="language-solidity">address internal immutable TREASURY;
+<pre><code class="language-solidity">address public immutable TREASURY;
 </code></pre>
-<h3 id="_nodeslashfraction"><a class="header" href="#_nodeslashfraction">_nodeSlashFraction</a></h3>
+<h3 id="node_slash_fraction"><a class="header" href="#node_slash_fraction">NODE_SLASH_FRACTION</a></h3>
 <p><em>slash fraction</em></p>
-<pre><code class="language-solidity">uint256 internal _nodeSlashFraction;
+<pre><code class="language-solidity">uint256 public immutable NODE_SLASH_FRACTION;
 </code></pre>
-<h3 id="_userslashfraction"><a class="header" href="#_userslashfraction">_userSlashFraction</a></h3>
-<pre><code class="language-solidity">uint256 internal _userSlashFraction;
+<h3 id="user_slash_fraction"><a class="header" href="#user_slash_fraction">USER_SLASH_FRACTION</a></h3>
+<pre><code class="language-solidity">uint256 public immutable USER_SLASH_FRACTION;
 </code></pre>
-<h3 id="_mindeposit"><a class="header" href="#_mindeposit">_minDeposit</a></h3>
+<h3 id="min_deposit"><a class="header" href="#min_deposit">MIN_DEPOSIT</a></h3>
 <p><em>the minimal tokens for deposit, 10,000 by default.
 node operator can receive its full tax if it stakes at least 10,000 tokens</em></p>
-<pre><code class="language-solidity">uint256 internal _minDeposit;
+<pre><code class="language-solidity">uint256 public immutable MIN_DEPOSIT;
 </code></pre>
-<h3 id="_depositunbondingperiod"><a class="header" href="#_depositunbondingperiod">_depositUnbondingPeriod</a></h3>
+<h3 id="deposit_unbonding_period"><a class="header" href="#deposit_unbonding_period">DEPOSIT_UNBONDING_PERIOD</a></h3>
 <p><em>the period of time that node operator can't withdraw staked tokens</em></p>
-<pre><code class="language-solidity">uint256 internal _depositUnbondingPeriod;
+<pre><code class="language-solidity">uint256 public immutable DEPOSIT_UNBONDING_PERIOD;
 </code></pre>
-<h3 id="_stakeunbondingperiod"><a class="header" href="#_stakeunbondingperiod">_stakeUnbondingPeriod</a></h3>
+<h3 id="stake_unbonding_period"><a class="header" href="#stake_unbonding_period">STAKE_UNBONDING_PERIOD</a></h3>
 <p><em>the period of time that user can't withdraw staked tokens</em></p>
-<pre><code class="language-solidity">uint256 internal _stakeUnbondingPeriod;
+<pre><code class="language-solidity">uint256 public immutable STAKE_UNBONDING_PERIOD;
+</code></pre>
+<h3 id="_chips"><a class="header" href="#_chips">_chips</a></h3>
+<p><em>the chips contract</em></p>
+<pre><code class="language-solidity">address internal _chips;
 </code></pre>
 <h3 id="_nodeaddrs"><a class="header" href="#_nodeaddrs">_nodeAddrs</a></h3>
 <p><em>all node addresses</em></p>
@@ -273,29 +273,39 @@ node operator can receive its full tax if it stakes at least 10,000 tokens</em><
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
-<pre><code class="language-solidity">constructor(address chips, address token, uint256 stakeRatio, address treasury);
-</code></pre>
-<h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
-<p>Initializes the Staking contract.</p>
-<pre><code class="language-solidity">function initialize(
-    address pauseAccount,
-    address oracleAccount,
+<p>constructor.</p>
+<pre><code class="language-solidity">constructor(
+    address token,
+    address treasury,
+    uint256 stakeRatio,
     uint256 stakeUnbondingPeriod,
     uint256 depositUnbondingPeriod,
     uint256 nodeSlashFraction,
     uint256 userSlashFraction,
     uint256 minDeposit
-) external override initializer;
+);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>pauseAccount</code></td><td><code>address</code></td><td>Address who can pause/unpause the Staking contract.</td></tr>
-<tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who can distribute rewards to the Staking contract.</td></tr>
+<tr><td><code>token</code></td><td><code>address</code></td><td>The address of staking token.</td></tr>
+<tr><td><code>treasury</code></td><td><code>address</code></td><td>The address of treasury.</td></tr>
+<tr><td><code>stakeRatio</code></td><td><code>uint256</code></td><td>The stake ratio of the node operator.</td></tr>
 <tr><td><code>stakeUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds user need to wait to unstake its stake.</td></tr>
 <tr><td><code>depositUnbondingPeriod</code></td><td><code>uint256</code></td><td>Time in seconds node operator need to wait to withdraw its deposit.</td></tr>
 <tr><td><code>nodeSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for node operator.</td></tr>
 <tr><td><code>userSlashFraction</code></td><td><code>uint256</code></td><td>Slash fraction for user.</td></tr>
 <tr><td><code>minDeposit</code></td><td><code>uint256</code></td><td>The deposit base line of the node operator.</td></tr>
+</tbody></table>
+</div>
+<h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
+<p>Initializes the Staking contract.</p>
+<pre><code class="language-solidity">function initialize(address chips, address pauseAccount, address oracleAccount) external override initializer;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>chips</code></td><td><code>address</code></td><td>Address of the chips contract.</td></tr>
+<tr><td><code>pauseAccount</code></td><td><code>address</code></td><td>Address who can pause/unpause the Staking contract.</td></tr>
+<tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who can distribute rewards to the Staking contract.</td></tr>
 </tbody></table>
 </div>
 <h3 id="pause"><a class="header" href="#pause">pause</a></h3>
