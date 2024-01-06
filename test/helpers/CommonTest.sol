@@ -108,6 +108,17 @@ contract CommonTest is Utils {
         _rss3.approve(address(_internalSettlementTest), totalRewards);
 
         _internalSettlementTest.initialize(address(_staking), oracleAccount, 0, 0, 1);
+
+        // label test accounts
+        vm.label(alice, "alice");
+        vm.label(bob, "bob");
+        vm.label(carol, "carol");
+        vm.label(dave, "dave");
+        vm.label(eve, "eve");
+        vm.label(frank, "frank");
+        vm.label(address(_staking), "staking");
+        vm.label(address(_settlement), "settlement");
+        vm.label(address(_chips), "chips");
     }
 
     function _createNode(address to) internal {

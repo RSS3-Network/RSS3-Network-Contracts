@@ -14,8 +14,8 @@ contract SettlementTest is CommonTest {
         // transfer tokens
         _rss3.transfer(alice, 100000 ether);
         _rss3.transfer(bob, 100000 ether);
-        _rss3.transfer(address(0xccc), 100000 ether);
-        _rss3.transfer(address(0xddd), 100000 ether);
+        _rss3.transfer(carol, 100000 ether);
+        _rss3.transfer(dave, 100000 ether);
 
         // transfer tokens to settlement contract
         _rss3.transfer(address(_settlement), 30000000 ether);
@@ -47,19 +47,16 @@ contract SettlementTest is CommonTest {
     }
 
     function testStakingRewards(uint256 stakingAmount) public {
-        _createNode(alice);
-        _createNode(bob);
-
-        address carol = address(0xccc);
-        _createPublicGoodNode(carol);
-
-        vm.startPrank(alice);
-
         vm.assume(stakingAmount > 5000 && stakingAmount < 10000);
         stakingAmount = stakingAmount * 1 ether;
 
+        _createNode(alice);
+        _createNode(bob);
+        _createPublicGoodNode(carol);
+
+        vm.startPrank(alice);
         _rss3.approve(address(_staking), stakingAmount);
-        _staking.stakeToPublicPool(address(0xccc), stakingAmount);
+        _staking.stakeToPublicPool(carol, stakingAmount);
         vm.stopPrank();
 
         vm.startPrank(bob);
@@ -82,10 +79,7 @@ contract SettlementTest is CommonTest {
         _staking.stake(bob, 9000 ether);
         vm.stopPrank();
 
-        address[] memory nodeAddrs = new address[](2);
-        nodeAddrs[0] = alice;
-        nodeAddrs[1] = bob;
-
+        address[] memory nodeAddrs = array(alice, bob);
         (uint256 publicPoolReward, uint256[] memory nodeRewards) = _internalSettlementTest.getStakingRewards(nodeAddrs);
 
         uint256 sum = publicPoolReward;
@@ -93,6 +87,7 @@ contract SettlementTest is CommonTest {
             sum += nodeRewards[i];
         }
 
+        //  we use `nodeRewards.length` here because each node's reward may have the 1wei roundup caused by truncation
         assert(
             sum <= _internalSettlementTest.getTotalStakingRewardsPerEpoch() &&
                 sum >= _internalSettlementTest.getTotalStakingRewardsPerEpoch() - nodeRewards.length

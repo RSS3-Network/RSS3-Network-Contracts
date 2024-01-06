@@ -9,9 +9,11 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
     using Math for uint256;
+    using SafeCast for uint256;
 
     /// @dev Duration of an epoch.
     uint256 public constant EPOCH_DURATION = 18 hours;
@@ -41,7 +43,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 requsetBonusPercent,
+        uint256 requestBonusPercent,
         uint256 startEpoch // set as param for upgradeability
     ) external override initializer {
         _staking = staking;
@@ -49,7 +51,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         _epoch = startEpoch;
         _startTimestamp = startTime;
 
-        _updateRewardsRatio(requsetBonusPercent);
+        _updateRewardsRatio(requestBonusPercent);
 
         _grantRole(ORACLE_ROLE, oracleAccount);
     }
@@ -101,7 +103,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddrs[i]);
             totalTaxFraction += node.taxFraction;
         }
-        IStaking(_staking).setTaxFraction4PublicPool(uint64(totalTaxFraction / length));
+        IStaking(_staking).setTaxFraction4PublicPool((totalTaxFraction / length).toUint64());
     }
 
     /// @inheritdoc ISettlement
@@ -132,32 +134,30 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @dev returns staking rewards
-    function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256, uint256[] memory) {
+    function _getStakingRewards(
+        address[] calldata nodeAddrs
+    ) internal view returns (uint256 publicPoolReward, uint256[] memory nodesReward) {
         uint256 len = nodeAddrs.length;
         uint256 totalRewards = _totalStakingRewardsPerEpoch;
 
-        DataTypes.Node memory publicPool = IStaking(_staking).getPublicPool();
-
         // get total staking of all nodes
-        uint256 totalStaking = publicPool.stakingPool;
-        uint256[] memory nodeStakings = new uint256[](len);
-        for (uint256 i = 0; i < len; i++) {
-            nodeStakings[i] = IStaking(_staking).getNode(nodeAddrs[i]).stakingPool;
-
-            totalStaking += nodeStakings[i];
-        }
+        (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
 
         if (totalStaking == 0) return (0, new uint256[](len));
 
-        // get staking rewards for public pool and all nodes
-        uint256 publicPoolReward = (publicPool.stakingPool * totalRewards) / totalStaking;
+        uint256[] memory nodeStakings = new uint256[](len);
+        for (uint256 i = 0; i < len; i++) {
+            nodeStakings[i] = IStaking(_staking).getNode(nodeAddrs[i]).stakingPool;
+        }
 
-        uint256[] memory nodesReward = new uint256[](len);
+        // get staking rewards for public pool and all nodes
+        DataTypes.Node memory publicPool = IStaking(_staking).getPublicPool();
+        publicPoolReward = (publicPool.stakingPool * totalRewards) / totalStaking;
+
+        nodesReward = new uint256[](len);
         for (uint256 i = 0; i < len; i++) {
             nodesReward[i] = (nodeStakings[i] * totalRewards) / totalStaking;
         }
-
-        return (publicPoolReward, nodesReward);
     }
 
     /// @dev returns request bonuses

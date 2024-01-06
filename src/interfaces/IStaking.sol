@@ -184,25 +184,11 @@ interface IStaking {
     function withdraw2Treasury() external;
 
     /**
-     *
-     * @return total tokens in operator pool
-     * @return total tokens in reward pool
-     * @return total tokens for treasury
-     */
-    function getPoolInfo() external returns (uint256, uint256, uint256);
-
-    /**
-     * @notice The minimum amount of tokens to deposit for a node.
-     */
-    function getMinDeposit() external view returns (uint256);
-
-    /**
      * @notice Returns the pending withdrawal request by `requestId`.
      * @param requestId The id of withdrawal request.
      * @return DataTypes.WithdrawalRequest The pending withdrawal request.
      */
     function getPendingWithdrawal(uint256 requestId) external view returns (DataTypes.WithdrawalRequest memory);
-
     /**
      * @notice Returns the pending unstake request by `requestId`.
      * @param requestId The id of unstake request.
@@ -250,6 +236,22 @@ interface IStaking {
      * @param limit The limit of nodes to query.
      */
     function getNodes(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
+
+    /**
+     *
+     * @return totalOperatingPool Total tokens in operator pool
+     * @return totalStakingPool Total tokens in reward pool
+     * @return treasuryAmount Total tokens for treasury
+     */
+    function getPoolInfo()
+        external
+        view
+        returns (uint256 totalOperatingPool, uint256 totalStakingPool, uint256 treasuryAmount);
+
+    /**
+     * @notice The minimum amount of tokens to deposit for a node.
+     */
+    function getMinDeposit() external view returns (uint256);
 
     /**
      * @notice Returns the current epoch number.

@@ -400,8 +400,20 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function getPoolInfo() external view override returns (uint256, uint256, uint256) {
-        return (_totalOperatingPool, _totalStakingPool, _getTreasuryAmount());
+    function getPoolInfo()
+        external
+        view
+        override
+        returns (uint256 totalOperatingPool, uint256 totalStakingPool, uint256 treasuryAmount)
+    {
+        totalOperatingPool = _totalOperatingPool;
+        totalStakingPool = _totalStakingPool;
+        treasuryAmount = _getTreasuryAmount();
+    }
+
+    /// @inheritdoc IStaking
+    function getMinDeposit() external view override returns (uint256) {
+        return MIN_DEPOSIT;
     }
 
     /// @inheritdoc IStaking
@@ -417,11 +429,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
         return _chips;
-    }
-
-    /// @inheritdoc IStaking
-    function getMinDeposit() external view override returns (uint256) {
-        return MIN_DEPOSIT;
     }
 
     function _increaseOperatingPool(DataTypes.Node storage node, uint256 amount) internal {
@@ -634,8 +641,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     function _getTreasuryAmount() internal view returns (uint256) {
         uint256 balance = IERC20(TOKEN).balanceOf(address(this));
-        uint256 amount = balance - _totalOperatingPool - _totalStakingPool;
-        return amount;
+        return balance - _totalOperatingPool - _totalStakingPool;
     }
 
     /// @dev get minimal tokens to stake for a node

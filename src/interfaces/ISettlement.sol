@@ -7,7 +7,7 @@ interface ISettlement {
      * @param staking Address of the Staking contract.
      * @param oracleAccount Address who makes settlement with the Staking contract.
      * @param startTime The start time of the first epoch.
-     * @param requsetBonusPercent The percentage of the total rewards to be allocated to the request bonus.
+     * @param requestBonusPercent The percentage of the total rewards to be allocated to the request bonus.
      * Others will be allocated to the staking rewards.
      * @param startEpoch The start epoch.
      */
@@ -15,7 +15,7 @@ interface ISettlement {
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 requsetBonusPercent,
+        uint256 requestBonusPercent,
         uint256 startEpoch
     ) external;
 
