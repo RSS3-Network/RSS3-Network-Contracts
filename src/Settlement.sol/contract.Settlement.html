@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/521fb046f465570f9e1390f6d54b6cb2fff1314b/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/86e317dbc1b6e6f80ed001c7bbebf0acdf278692/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -321,6 +321,11 @@ Requirements:</p>
     internal
     pure
     returns (uint256[] memory);
+</code></pre>
+<h3 id="_getweight"><a class="header" href="#_getweight">_getWeight</a></h3>
+<p><em>sum of log2 of each element in <code>requestCounts</code></em></p>
+<p><em>log2(requestCount/totalCount +1) * G, where G = ln(2)</em></p>
+<pre><code class="language-solidity">function _getWeight(uint256 requestCount, uint256 totalCount) internal pure returns (uint256);
 </code></pre>
 
                     </main>
