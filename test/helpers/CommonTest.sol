@@ -98,7 +98,7 @@ contract CommonTest is Utils {
         uint256 totalRewards = (3 * _rss3.totalSupply()) / 100;
         _rss3.approve(address(_settlement), totalRewards);
 
-        _settlement.initialize(address(_staking), oracleAccount, 0, 0, 1);
+        _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20, 1);
 
         vm.startPrank(oracleAccount);
         _staking.grantRole(_staking.ORACLE_ROLE(), address(_settlement));

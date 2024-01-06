@@ -23,34 +23,27 @@ contract SettlementTest is CommonTest {
 
     function testCheckSetupStatus() public {
         assertEq(_settlement.stakingContract(), address(_staking));
+        assertEq(_settlement.currentEpoch(), 1);
+        assertEq(_settlement.EPOCH_DURATION(), 18 hours);
+        assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
     }
 
     function testDistributeRewards() public {
         _createNode(alice);
-
-        address[] memory nodeAddrs = new address[](1);
-        nodeAddrs[0] = alice;
-
-        uint256[] memory requestFees = new uint256[](1);
-        requestFees[0] = 1 ether;
-
-        uint256[] memory requestBonuses = new uint256[](1);
-        requestBonuses[0] = 1 ether;
-
-        uint256[] memory stakingRewards = new uint256[](1);
-        stakingRewards[0] = 1 ether;
-
-        uint256[] memory requestCounts = new uint256[](1);
-        stakingRewards[0] = 100;
+        _createNode(bob);
 
         (uint256 requestBonusPerEpoch, uint256 stakingRewardPerEpoch) = _settlement.getBonusInfo();
 
-        vm.startPrank(oracleAccount);
-
         expectEmit();
         emit Transfer(address(_settlement), address(_staking), requestBonusPerEpoch + stakingRewardPerEpoch);
-        _settlement.distributeRewards(nodeAddrs, requestFees, requestCounts);
-        vm.stopPrank();
+        vm.prank(oracleAccount);
+        _settlement.distributeRewards(
+            array(alice, bob), // node addresses
+            array(1 ether, 2 ether), // request fees
+            array(100, 300) // request counts
+        );
+
+        // TODO: check status
     }
 
     function testStakingRewards(uint256 stakingAmount) public {

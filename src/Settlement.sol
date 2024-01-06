@@ -133,28 +133,28 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @dev returns staking rewards
     function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256, uint256[] memory) {
-        uint256 sum = 0;
-
-        DataTypes.Node[] memory nodes = new DataTypes.Node[](nodeAddrs.length + 1);
+        uint256 len = nodeAddrs.length;
+        uint256 totalRewards = _totalStakingRewardsPerEpoch;
 
         DataTypes.Node memory publicPool = IStaking(_staking).getPublicPool();
 
-        sum = publicPool.stakingPool;
+        // get total staking of all nodes
+        uint256 totalStaking = publicPool.stakingPool;
+        uint256[] memory nodeStakings = new uint256[](len);
+        for (uint256 i = 0; i < len; i++) {
+            nodeStakings[i] = IStaking(_staking).getNode(nodeAddrs[i]).stakingPool;
 
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            nodes[i] = IStaking(_staking).getNode(nodeAddrs[i]);
-
-            sum += nodes[i].stakingPool;
+            totalStaking += nodeStakings[i];
         }
 
-        if (sum == 0) return (0, new uint256[](nodeAddrs.length));
+        if (totalStaking == 0) return (0, new uint256[](len));
 
-        uint256 publicPoolReward = (publicPool.stakingPool * _totalStakingRewardsPerEpoch) / sum;
+        // get staking rewards for public pool and all nodes
+        uint256 publicPoolReward = (publicPool.stakingPool * totalRewards) / totalStaking;
 
-        uint256[] memory nodesReward = new uint256[](nodeAddrs.length);
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            nodesReward[i] = (nodes[i].stakingPool * _totalStakingRewardsPerEpoch) / sum;
+        uint256[] memory nodesReward = new uint256[](len);
+        for (uint256 i = 0; i < len; i++) {
+            nodesReward[i] = (nodeStakings[i] * totalRewards) / totalStaking;
         }
 
         return (publicPoolReward, nodesReward);
@@ -191,15 +191,31 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         return result;
     }
 
-    /// @dev  log2(requestCount/totalCount +1) * G, where G = ln(2)
+    /// @dev  log2(requestCount/totalCount +1) * G , where G = ln(2)
     function _getWeight(uint256 requestCount, uint256 totalCount) internal pure returns (uint256) {
-        // we scale all the numbers by 1e18 to keep more precision
-        uint256 scalar = 1e18;
+        // scale with scalar to keep more precision
+        uint256 scalar = type(uint64).max;
+        uint256 scaledA = (requestCount + totalCount) * scalar;
+        uint256 res = _log2(scaledA / totalCount) - _log2(scalar);
+        return (res * 693147) / 1000000; // ln 2 = 693147 / 1000000
+    }
 
-        // ln 2 = 693147 / 1000000
-        uint256 scaledG = (scalar * 693147) / 1000000;
-        uint256 scaledA = (requestCount + totalCount) * 1e18;
-        uint256 scaledB = totalCount * 1e18;
-        return (scaledA.log2() * scaledG - scaledB.log2() * scaledG) / scalar;
+    /// @dev log2(x) with precision 4
+    function _log2(uint256 x) internal pure returns (uint256) {
+        uint256 n = x.log2();
+        x = x >> n;
+
+        uint256 frac = 0;
+        uint256 base = 1;
+        for (uint256 i = 0; i < 32; i++) {
+            base *= 2;
+            x *= x;
+            if (x >= base) {
+                frac += 10000 >> (i + 1);
+                x >>= 1;
+            }
+        }
+
+        return n * 10000 + frac;
     }
 }
