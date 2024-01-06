@@ -15,9 +15,11 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable {
     using Math for uint256;
+    using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
     using Checkpoints for Checkpoints.Trace160;
@@ -575,7 +577,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (chipsCount == 0) revert AmountTooSmall(amount);
         // mint chips
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
-        if (endTokenId > type(uint96).max) revert ChipsIdOverflow();
 
         // update stakedAmount
         uint256 stakedAmount = _sharesToTokens(chipsCount * SHARES_PER_CHIP, node.totalShares, node.stakingPool);
@@ -587,7 +588,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         IERC20(TOKEN).safeTransferFrom(msg.sender, address(this), stakedAmount);
 
         // update chips issuers
-        _families.push(uint96(endTokenId), uint160(nodeAddr));
+        _families.push(endTokenId.toUint96(), uint160(nodeAddr));
 
         emit Events.Staked(msg.sender, node.account, stakedAmount, startTokenId, endTokenId);
     }
@@ -628,7 +629,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function _issuerOf(uint256 tokenId) internal view returns (address) {
         // check the token was not burned, and fetch ownership from the anchors
         // Note: no need for safe cast, we know that tokenId <= type(uint96).max
-        return address(_families.lowerLookup(uint96(tokenId)));
+        return address(_families.lowerLookup(tokenId.toUint96()));
     }
 
     function _getTreasuryAmount() internal view returns (uint256) {
@@ -699,7 +700,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /**
      * @dev doniminator
      */
-    function _denominator() internal pure virtual returns (uint96) {
+    function _denominator() internal pure virtual returns (uint64) {
         return 10000;
     }
 }
