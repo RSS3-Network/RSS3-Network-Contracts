@@ -1,5 +1,6 @@
 # RSS3-Network-Contracts
-
+[![Docs](https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/actions/workflows/docs.yml/badge.svg)](https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/actions/workflows/docs.yml)
+[![Tests](https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/actions/workflows/tests.yml/badge.svg)](https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/NaturalSelectionLabs/RSS3-Network-Contracts/graph/badge.svg?token=9TUYUQOCA5)](https://codecov.io/gh/NaturalSelectionLabs/RSS3-Network-Contracts)
 
 ## Usage
