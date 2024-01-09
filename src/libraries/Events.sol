@@ -10,16 +10,8 @@ library Events {
      * @param description Description of node.
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
-     * @param endpoint API endpoint of node.
      */
-    event NodeCreated(
-        address indexed nodeAddr,
-        string name,
-        string description,
-        uint64 taxFraction,
-        bool publicGood,
-        string endpoint
-    );
+    event NodeCreated(address indexed nodeAddr, string name, string description, uint64 taxFraction, bool publicGood);
 
     /**
      * @dev Emitted on deleteNode()

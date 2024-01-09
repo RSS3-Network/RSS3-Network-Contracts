@@ -33,15 +33,13 @@ interface IStaking {
      * @param description Description of node.
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
-     * @param endpoint API endpoint of node.
      */
     function createNode(
         address to,
         string calldata name,
         string calldata description,
         uint64 taxFraction,
-        bool publicGood,
-        string calldata endpoint
+        bool publicGood
     ) external;
 
     /**
@@ -56,7 +54,6 @@ interface IStaking {
      * @param description Description of node.
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
-     * @param endpoint API endpoint of node.
      * @param amount Amount of tokens to deposit.
      */
     function createNodeAndDeposit(
@@ -64,7 +61,6 @@ interface IStaking {
         string calldata description,
         uint64 taxFraction,
         bool publicGood,
-        string calldata endpoint,
         uint256 amount
     ) external;
 

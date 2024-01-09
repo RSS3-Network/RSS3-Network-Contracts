@@ -149,10 +149,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         string calldata name,
         string calldata description,
         uint64 taxFraction,
-        bool publicGood,
-        string calldata endpoint
+        bool publicGood
     ) external override {
-        _createNode(to, name, description, taxFraction, publicGood, endpoint);
+        _createNode(to, name, description, taxFraction, publicGood);
     }
 
     /// @inheritdoc IStaking
@@ -176,12 +175,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         string calldata description,
         uint64 taxFraction,
         bool publicGood,
-        string calldata endpoint,
         uint256 amount
     ) external override whenNotPaused {
         if (publicGood) revert PublicGoodNodeNotDeposited();
 
-        _createNode(msg.sender, name, description, taxFraction, publicGood, endpoint);
+        _createNode(msg.sender, name, description, taxFraction, publicGood);
         _deposit(msg.sender, amount);
     }
 
@@ -541,8 +539,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         string calldata name,
         string calldata description,
         uint64 taxFraction,
-        bool publicGood,
-        string calldata endpoint
+        bool publicGood
     ) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
@@ -552,12 +549,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         node.description = description;
         node.taxFraction = taxFraction;
         node.publicGood = publicGood;
-        node.endpoint = endpoint;
 
         // add to node list
         _nodeAddrs.add(nodeAddr);
 
-        emit Events.NodeCreated(nodeAddr, name, description, taxFraction, publicGood, endpoint);
+        emit Events.NodeCreated(nodeAddr, name, description, taxFraction, publicGood);
     }
 
     function _deposit(address nodeAddr, uint256 amount) internal {

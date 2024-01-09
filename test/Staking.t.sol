@@ -30,27 +30,19 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         string memory name = "Alice";
         string memory description = "Alice's node";
-        string memory endpoint = "https://alice.com";
 
         expectEmit();
-        emit Events.NodeCreated(alice, name, description, taxFraction, publicGood, endpoint);
+        emit Events.NodeCreated(alice, name, description, taxFraction, publicGood);
         vm.prank(alice);
-        _staking.createNode(alice, name, description, taxFraction, publicGood, endpoint);
+        _staking.createNode(alice, name, description, taxFraction, publicGood);
 
         // check node info
-        _checkNode(alice, name, description, taxFraction, publicGood, endpoint);
+        _checkNode(alice, name, description, taxFraction, publicGood);
         assertEq(_staking.getNodeCount(), 1);
 
         DataTypes.Node[] memory nodes = _staking.getNodes(0, 2);
         assertEq(nodes.length, 1);
-        _checkNode(
-            nodes[0].account,
-            nodes[0].name,
-            nodes[0].description,
-            nodes[0].taxFraction,
-            nodes[0].publicGood,
-            nodes[0].endpoint
-        );
+        _checkNode(nodes[0].account, nodes[0].name, nodes[0].description, nodes[0].taxFraction, nodes[0].publicGood);
     }
 
     function testDeposit(uint256 amount) public {
@@ -92,7 +84,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         vm.startPrank(alice);
         _rss3.approve(address(_staking), amount);
-        _staking.createNodeAndDeposit("Alice", "Alice's node", uint64(100), false, "https://alice.com", amount);
+        _staking.createNodeAndDeposit("Alice", "Alice's node", uint64(100), false, amount);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
@@ -117,7 +109,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         vm.startPrank(alice);
         _rss3.approve(address(_staking), amount);
-        _staking.createNodeAndDeposit("Alice", "Alice's node", uint64(100), false, "https://alice.com", amount);
+        _staking.createNodeAndDeposit("Alice", "Alice's node", uint64(100), false, amount);
 
         _rss3.approve(address(_staking), amount);
         _staking.deposit(amount);
@@ -598,15 +590,13 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         string memory name,
         string memory description,
         uint64 taxFraction,
-        bool publicGood,
-        string memory endpoint
+        bool publicGood
     ) internal {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.name, name);
         assertEq(node.description, description);
         assertEq(node.taxFraction, taxFraction);
         assertEq(node.publicGood, publicGood);
-        assertEq(node.endpoint, endpoint);
     }
 
     function _denominator() internal pure virtual returns (uint96) {

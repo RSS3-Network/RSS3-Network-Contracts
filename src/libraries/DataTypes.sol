@@ -17,8 +17,6 @@ library DataTypes {
         string name;
         /// @notice description of the node
         string description;
-        /// @notice API endpoint of the node
-        string endpoint;
         /// @notice total tokens of operator pool
         uint256 operatingPool;
         /// @notice total tokens of reward pool
