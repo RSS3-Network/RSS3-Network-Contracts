@@ -147,18 +147,17 @@ interface IStaking {
      * @dev periodically called.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param epoch The current epoch id.
-     * @param startTimestamp The start timestamp of the current epoch.
-     * @param endTimestamp The end timestamp of the current epoch.
+     * @param epochInfo The current epoch info.
+     * - epochInfo[0]: The current epoch number.
+     * - epochInfo[1]: The start timestamp of the current epoch.
+     * - epochInfo[2]: The end timestamp of the current epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param requestFees Amounts of request fees.
      * @param requestBonuses Amounts of request bonuses.
      * @param stakingRewards Amount of staking rewards to reward pool.
      */
     function distributeRewards(
-        uint256 epoch,
-        uint256 startTimestamp,
-        uint256 endTimestamp,
+        uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
         uint256[] calldata requestBonuses,

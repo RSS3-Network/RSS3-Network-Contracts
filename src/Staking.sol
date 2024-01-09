@@ -266,9 +266,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function distributeRewards(
-        uint256 epoch,
-        uint256 startTimestamp,
-        uint256 endTimestamp,
+        uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
         uint256[] calldata requestBonuses,
@@ -281,19 +279,25 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             nodeAddrs.length != stakingRewards.length
         ) revert InvalidArrayLength();
 
-        if (epoch != ++_currentEpoch) revert InvalidEpoch(_currentEpoch, epoch);
+        if (epochInfo[0] != ++_currentEpoch) revert InvalidEpoch(_currentEpoch, epochInfo[0]);
 
         // distribute rewards for public pool
         uint256 publicPoolTax = _distributePublicPoolRewards(publicPoolReward);
-        emit Events.PublicGoodRewardDistributed(epoch, startTimestamp, endTimestamp, publicPoolReward, publicPoolTax);
+        emit Events.PublicGoodRewardDistributed(
+            epochInfo[0],
+            epochInfo[1],
+            epochInfo[2],
+            publicPoolReward,
+            publicPoolTax
+        );
 
         // distribute rewards for other nodes
         uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, requestFees, requestBonuses, stakingRewards);
 
         emit Events.RewardDistributed(
-            epoch,
-            startTimestamp,
-            endTimestamp,
+            epochInfo[0],
+            epochInfo[1],
+            epochInfo[2],
             nodeAddrs,
             requestFees,
             requestBonuses,

@@ -421,9 +421,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             taxAmounts
         );
         _staking.distributeRewards(
-            1,
-            startTime,
-            endTime,
+            [1, startTime, endTime],
             nodeAddrs,
             requestFees,
             requestBonuses,

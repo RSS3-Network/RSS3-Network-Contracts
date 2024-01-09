@@ -76,9 +76,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         uint256 endTimestamp = block.timestamp;
 
         IStaking(_staking).distributeRewards(
-            _epoch,
-            _startTimestamp,
-            endTimestamp,
+            [_epoch, _startTimestamp, endTimestamp],
             nodeAddrs,
             requestFees,
             requestBonuses,
