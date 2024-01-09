@@ -17,8 +17,6 @@ library DataTypes {
         string name;
         /// @notice description of the node
         string description;
-        /// @notice API endpoint of the node
-        string endpoint;
         /// @notice total tokens of operator pool
         uint256 operatingPool;
         /// @notice total tokens of reward pool
@@ -80,15 +78,13 @@ interface IStaking {
      * @param description Description of node.
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
-     * @param endpoint API endpoint of node.
      */
     function createNode(
         address to,
         string calldata name,
         string calldata description,
         uint64 taxFraction,
-        bool publicGood,
-        string calldata endpoint
+        bool publicGood
     ) external;
 
     /**
@@ -103,7 +99,6 @@ interface IStaking {
      * @param description Description of node.
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
-     * @param endpoint API endpoint of node.
      * @param amount Amount of tokens to deposit.
      */
     function createNodeAndDeposit(
@@ -111,7 +106,6 @@ interface IStaking {
         string calldata description,
         uint64 taxFraction,
         bool publicGood,
-        string calldata endpoint,
         uint256 amount
     ) external;
 
@@ -231,25 +225,11 @@ interface IStaking {
     function withdraw2Treasury() external;
 
     /**
-     *
-     * @return total tokens in operator pool
-     * @return total tokens in reward pool
-     * @return total tokens for treasury
-     */
-    function getPoolInfo() external returns (uint256, uint256, uint256);
-
-    /**
-     * @notice The minimum amount of tokens to deposit for a node.
-     */
-    function getMinDeposit() external view returns (uint256);
-
-    /**
      * @notice Returns the pending withdrawal request by `requestId`.
      * @param requestId The id of withdrawal request.
      * @return DataTypes.WithdrawalRequest The pending withdrawal request.
      */
     function getPendingWithdrawal(uint256 requestId) external view returns (DataTypes.WithdrawalRequest memory);
-
     /**
      * @notice Returns the pending unstake request by `requestId`.
      * @param requestId The id of unstake request.
@@ -297,6 +277,22 @@ interface IStaking {
      * @param limit The limit of nodes to query.
      */
     function getNodes(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
+
+    /**
+     *
+     * @return totalOperatingPool Total tokens in operator pool
+     * @return totalStakingPool Total tokens in reward pool
+     * @return treasuryAmount Total tokens for treasury
+     */
+    function getPoolInfo()
+        external
+        view
+        returns (uint256 totalOperatingPool, uint256 totalStakingPool, uint256 treasuryAmount);
+
+    /**
+     * @notice The minimum amount of tokens to deposit for a node.
+     */
+    function getMinDeposit() external view returns (uint256);
 
     /**
      * @notice Returns the current epoch number.
@@ -437,16 +433,8 @@ library Events {
      * @param description Description of node.
      * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
-     * @param endpoint API endpoint of node.
      */
-    event NodeCreated(
-        address indexed nodeAddr,
-        string name,
-        string description,
-        uint64 taxFraction,
-        bool publicGood,
-        string endpoint
-    );
+    event NodeCreated(address indexed nodeAddr, string name, string description, uint64 taxFraction, bool publicGood);
 
     /**
      * @dev Emitted on deleteNode()
@@ -4609,7 +4597,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function initialize(address chips, address pauseAccount, address oracleAccount) external override reinitializer(2) {
+    function initialize(address chips, address pauseAccount, address oracleAccount) external override initializer {
         _chips = chips;
 
         _grantRole(PAUSE_ROLE, pauseAccount);
@@ -4635,10 +4623,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         string calldata name,
         string calldata description,
         uint64 taxFraction,
-        bool publicGood,
-        string calldata endpoint
+        bool publicGood
     ) external override {
-        _createNode(to, name, description, taxFraction, publicGood, endpoint);
+        _createNode(to, name, description, taxFraction, publicGood);
     }
 
     /// @inheritdoc IStaking
@@ -4662,12 +4649,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         string calldata description,
         uint64 taxFraction,
         bool publicGood,
-        string calldata endpoint,
         uint256 amount
     ) external override whenNotPaused {
         if (publicGood) revert PublicGoodNodeNotDeposited();
 
-        _createNode(msg.sender, name, description, taxFraction, publicGood, endpoint);
+        _createNode(msg.sender, name, description, taxFraction, publicGood);
         _deposit(msg.sender, amount);
     }
 
@@ -4886,8 +4872,20 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function getPoolInfo() external view override returns (uint256, uint256, uint256) {
-        return (_totalOperatingPool, _totalStakingPool, _getTreasuryAmount());
+    function getPoolInfo()
+        external
+        view
+        override
+        returns (uint256 totalOperatingPool, uint256 totalStakingPool, uint256 treasuryAmount)
+    {
+        totalOperatingPool = _totalOperatingPool;
+        totalStakingPool = _totalStakingPool;
+        treasuryAmount = _getTreasuryAmount();
+    }
+
+    /// @inheritdoc IStaking
+    function getMinDeposit() external view override returns (uint256) {
+        return MIN_DEPOSIT;
     }
 
     /// @inheritdoc IStaking
@@ -4903,11 +4901,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
         return _chips;
-    }
-
-    /// @inheritdoc IStaking
-    function getMinDeposit() external view override returns (uint256) {
-        return MIN_DEPOSIT;
     }
 
     function _increaseOperatingPool(DataTypes.Node storage node, uint256 amount) internal {
@@ -5020,8 +5013,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         string calldata name,
         string calldata description,
         uint64 taxFraction,
-        bool publicGood,
-        string calldata endpoint
+        bool publicGood
     ) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
@@ -5031,12 +5023,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         node.description = description;
         node.taxFraction = taxFraction;
         node.publicGood = publicGood;
-        node.endpoint = endpoint;
 
         // add to node list
         _nodeAddrs.add(nodeAddr);
 
-        emit Events.NodeCreated(nodeAddr, name, description, taxFraction, publicGood, endpoint);
+        emit Events.NodeCreated(nodeAddr, name, description, taxFraction, publicGood);
     }
 
     function _deposit(address nodeAddr, uint256 amount) internal {
@@ -5120,8 +5111,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     function _getTreasuryAmount() internal view returns (uint256) {
         uint256 balance = IERC20(TOKEN).balanceOf(address(this));
-        uint256 amount = balance - _totalOperatingPool - _totalStakingPool;
-        return amount;
+        return balance - _totalOperatingPool - _totalStakingPool;
     }
 
     /// @dev get minimal tokens to stake for a node
