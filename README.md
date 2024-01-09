@@ -1,5 +1,6 @@
 # RSS3-Network-Contracts
 
+[![codecov](https://codecov.io/gh/NaturalSelectionLabs/RSS3-Network-Contracts/graph/badge.svg?token=9TUYUQOCA5)](https://codecov.io/gh/NaturalSelectionLabs/RSS3-Network-Contracts)
 
 ## Usage
 
