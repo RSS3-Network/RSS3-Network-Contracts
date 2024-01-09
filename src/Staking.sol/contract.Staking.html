@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/80db58e3b85e4b3a454da74c258cd5a5bd1fdb09/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/db3440a9793fe7c3c86d81cddd9f3b9bd6a7dceb/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -474,9 +474,7 @@ Requirements:</p>
 <li>The caller must have the <code>ORACLE_ROLE</code>.*</li>
 </ul>
 <pre><code class="language-solidity">function distributeRewards(
-    uint256 epoch,
-    uint256 startTimestamp,
-    uint256 endTimestamp,
+    uint256[3] calldata epochInfo,
     address[] calldata nodeAddrs,
     uint256[] calldata requestFees,
     uint256[] calldata requestBonuses,
@@ -486,9 +484,7 @@ Requirements:</p>
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch id.</td></tr>
-<tr><td><code>startTimestamp</code></td><td><code>uint256</code></td><td>The start timestamp of the current epoch.</td></tr>
-<tr><td><code>endTimestamp</code></td><td><code>uint256</code></td><td>The end timestamp of the current epoch.</td></tr>
+<tr><td><code>epochInfo</code></td><td><code>uint256[3]</code></td><td>The current epoch info. - epochInfo[0]: The current epoch number. - epochInfo[1]: The start timestamp of the current epoch. - epochInfo[2]: The end timestamp of the current epoch.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
 <tr><td><code>requestBonuses</code></td><td><code>uint256[]</code></td><td>Amounts of request bonuses.</td></tr>
