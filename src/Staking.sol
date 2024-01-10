@@ -373,11 +373,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
-        return _nodes[nodeAddr];
-    }
-
-    /// @inheritdoc IStaking
     function getPublicPool() external view override returns (DataTypes.Node memory) {
         return _publicPool;
     }
@@ -388,7 +383,23 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function getNodes(uint256 offset, uint256 limit) external view override returns (DataTypes.Node[] memory nodes) {
+    function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
+        return _nodes[nodeAddr];
+    }
+
+    /// @inheritdoc IStaking
+    function getNodes(address[] calldata nodeAddrs) external view override returns (DataTypes.Node[] memory nodes) {
+        nodes = new DataTypes.Node[](nodeAddrs.length);
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            nodes[i] = _nodes[nodeAddrs[i]];
+        }
+    }
+
+    /// @inheritdoc IStaking
+    function getNodesWithPagination(
+        uint256 offset,
+        uint256 limit
+    ) external view override returns (DataTypes.Node[] memory nodes) {
         uint256 totalNodes = _nodeAddrs.length();
         uint256 len = (totalNodes - offset).min(limit);
         nodes = new DataTypes.Node[](len);

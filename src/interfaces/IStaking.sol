@@ -207,13 +207,6 @@ interface IStaking {
     function getChipsInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens);
 
     /**
-     * @notice Gets node info by node address.
-     * @param nodeAddr Node address to query.
-     * @return DataTypes.Node Node info.
-     */
-    function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
-
-    /**
      * @notice Gets public pool info.
      * @return DataTypes.Node public pool info.
      */
@@ -226,11 +219,25 @@ interface IStaking {
     function getNodeCount() external view returns (uint256);
 
     /**
+     * @notice Gets node info by node address.
+     * @param nodeAddr Node address to query.
+     * @return DataTypes.Node Node info.
+     */
+    function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
+
+    /**
+     * @notice Gets nodes info by node addresses.
+     * @param nodeAddrs Node addresses to query.
+     * @return DataTypes.Node[] Nodes info.
+     */
+    function getNodes(address[] calldata nodeAddrs) external view returns (DataTypes.Node[] memory);
+
+    /**
      * @notice Gets nodes info by offset and limit.
      * @param offset The offset of nodes to query.
      * @param limit The limit of nodes to query.
      */
-    function getNodes(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
+    function getNodesWithPagination(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
 
     /**
      *

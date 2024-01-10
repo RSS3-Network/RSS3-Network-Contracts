@@ -40,7 +40,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _checkNode(alice, name, description, taxFraction, publicGood);
         assertEq(_staking.getNodeCount(), 1);
 
-        DataTypes.Node[] memory nodes = _staking.getNodes(0, 2);
+        DataTypes.Node[] memory nodes = _staking.getNodesWithPagination(0, 2);
         assertEq(nodes.length, 1);
         _checkNode(nodes[0].account, nodes[0].name, nodes[0].description, nodes[0].taxFraction, nodes[0].publicGood);
     }
