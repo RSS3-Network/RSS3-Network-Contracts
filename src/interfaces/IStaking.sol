@@ -71,7 +71,7 @@ interface IStaking {
     function deposit(uint256 amount) external;
 
     /**
-     * @notice Requests withdraw tokens from operator pool for node operator.
+     * @notice Requests withdraw tokens from operating pool for node operator.
      * @param amount Amount of tokens to withdraw.
      * @return requestId The created withdraw request id
      */
@@ -154,7 +154,7 @@ interface IStaking {
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param requestFees Amounts of request fees.
      * @param requestBonuses Amounts of request bonuses.
-     * @param stakingRewards Amount of staking rewards to reward pool.
+     * @param stakingRewards Amount of staking rewards to staking pool.
      */
     function distributeRewards(
         uint256[3] calldata epochInfo,
@@ -184,6 +184,7 @@ interface IStaking {
      * @return DataTypes.WithdrawalRequest The pending withdrawal request.
      */
     function getPendingWithdrawal(uint256 requestId) external view returns (DataTypes.WithdrawalRequest memory);
+
     /**
      * @notice Returns the pending unstake request by `requestId`.
      * @param requestId The id of unstake request.
@@ -241,8 +242,8 @@ interface IStaking {
 
     /**
      *
-     * @return totalOperatingPoolTokens Total tokens in operator pool
-     * @return totalStakingPoolTokens Total tokens in reward pool
+     * @return totalOperatingPoolTokens Total tokens in operating pool
+     * @return totalStakingPoolTokens Total tokens in staking pool
      * @return treasuryAmount Total tokens for treasury
      */
     function getPoolInfo()

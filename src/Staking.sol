@@ -328,11 +328,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) revert NodeNotExists();
 
-            // slash operator pool tokens
+            // slash operating pool tokens
             uint256 slashedOperatingPool = (node.operatingPoolTokens * NODE_SLASH_FRACTION) / _denominator();
             _decreaseOperatingPool(node, slashedOperatingPool);
 
-            // slash reward pool tokens
+            // slash staking pool tokens
+            // TODO: here the staking pool tokens will be decreased...
             uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_FRACTION) / _denominator();
             _decreaseStakingPool(node, slashedStakingPool);
 
@@ -488,7 +489,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
                 continue;
             }
 
-            // request bonus and staking rewards are sent to reward pool
+            // request bonus and staking rewards are sent to staking pool
             uint256 rewards = requestBonuses[i] + stakingRewards[i];
 
             uint256 fullTax;
@@ -501,14 +502,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             );
             rewards -= fullTax;
 
-            // request fee and tax are sent to operator pool
+            // request fee and tax are sent to operating pool
             uint256 operatingPool = requestFees[i] + receivedTax;
             taxAmounts[i] = receivedTax;
             remainedTax += fullTax - receivedTax;
 
             // update node
             _increaseOperatingPool(node, operatingPool);
-            // all after-tax rewards and request bonus are sent to the reward pool
+            // all after-tax rewards and request bonus are sent to the staking pool
             _increaseStakingPool(node, rewards);
         }
         return taxAmounts;
@@ -519,21 +520,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256[] calldata chipsIds,
         bool isPublicNode
     ) internal returns (uint256 requestId) {
+        _checkUnstakeConditions(nodeAddr, chipsIds, isPublicNode);
+
         DataTypes.Node storage node = isPublicNode ? _publicPool : _nodes[nodeAddr];
-
-        // check and burn chips
-        for (uint256 i = 0; i < chipsIds.length; i++) {
-            uint256 tokenId = chipsIds[i];
-            if (IERC721(_chips).ownerOf(tokenId) != msg.sender && IERC721(_chips).getApproved(tokenId) != msg.sender)
-                revert ChipNotAuthorized(tokenId);
-
-            if (isPublicNode) {
-                nodeAddr = _issuerOf(tokenId);
-                if (!_nodes[nodeAddr].publicGood) revert ChipNotPublicGood(tokenId);
-            } else if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
-
-            IChips(_chips).burn(tokenId);
-        }
 
         requestId = ++_pendingUnstakeCounter;
 
@@ -549,6 +538,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         req.owner = msg.sender;
         req.nodeAddr = node.account;
         req.unstakeAmount = unstakeAmount;
+
+        for (uint256 i = 0; i < chipsIds.length; i++) {
+            IChips(_chips).burn(chipsIds[i]);
+        }
 
         emit Events.UnstakeRequested(msg.sender, node.account, requestId, chipsIds);
     }
@@ -580,10 +573,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
 
-        // update operator pool
         _increaseOperatingPool(node, amount);
 
-        // transfer tokens
         IERC20(TOKEN).safeTransferFrom(nodeAddr, address(this), amount);
 
         emit Events.Deposited(nodeAddr, amount);
@@ -598,8 +589,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 shares = _tokensToShares(amount, node.stakingPoolTokens, node.totalShares);
         uint256 chipsCount = shares / SHARES_PER_CHIP;
         if (chipsCount == 0) revert AmountTooSmall(amount);
-        // mint chips
-        (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
 
         // update stakedAmount
         uint256 stakedAmount = _sharesToTokens(chipsCount * SHARES_PER_CHIP, node.totalShares, node.stakingPoolTokens);
@@ -610,7 +599,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // transfer tokens
         IERC20(TOKEN).safeTransferFrom(msg.sender, address(this), stakedAmount);
 
-        // update chips issuers
+        (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
+
         _families.push(endTokenId.toUint96(), uint160(nodeAddr));
 
         emit Events.Staked(msg.sender, node.account, stakedAmount, startTokenId, endTokenId);
@@ -623,11 +613,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         if (block.timestamp < req.timestamp + STAKE_UNBONDING_PERIOD) revert ClaimTimeNotReady();
 
-        // transfer
-        IERC20(TOKEN).safeTransfer(req.owner, req.unstakeAmount);
-
-        // delete request
         delete _pendingUnstake[requestId];
+
+        IERC20(TOKEN).safeTransfer(req.owner, req.unstakeAmount);
 
         emit Events.UnstakeClaimed(requestId, req.nodeAddr, req.owner, req.unstakeAmount);
     }
@@ -640,13 +628,28 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         if (block.timestamp < req.timestamp + DEPOSIT_UNBONDING_PERIOD) revert ClaimTimeNotReady();
 
-        // transfer staked tokens
-        IERC20(TOKEN).safeTransfer(req.owner, req.amount);
-
-        // delete request
         delete _pendingWithdrawals[requestId];
 
+        IERC20(TOKEN).safeTransfer(req.owner, req.amount);
+
         emit Events.WithdrawalClaimed(requestId);
+    }
+
+    function _checkAuthorized(uint256 tokenId, address user) internal view returns (bool) {
+        return (IERC721(_chips).ownerOf(tokenId) == user || IERC721(_chips).getApproved(tokenId) == user);
+    }
+
+    function _checkUnstakeConditions(address nodeAddr, uint256[] calldata chipsIds, bool isPublicNode) internal view {
+        // check conditions
+        for (uint256 i = 0; i < chipsIds.length; i++) {
+            uint256 tokenId = chipsIds[i];
+            if (!_checkAuthorized(tokenId, msg.sender)) revert ChipNotAuthorized(tokenId);
+
+            if (isPublicNode) {
+                nodeAddr = _issuerOf(tokenId);
+                if (!_nodes[nodeAddr].publicGood) revert ChipNotPublicGood(tokenId);
+            } else if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
+        }
     }
 
     function _issuerOf(uint256 tokenId) internal view returns (address) {
@@ -674,25 +677,25 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
      * @dev get tax amount
      *  For a node operator to receive its full tax,
      * it needs to stake at least 1/25 of the tokens staked by external delegators,
-     * or the exceeding part of the tax will be sent to the reward pool.
+     * or the exceeding part of the tax will be sent to the staking pool.
      */
     function _getTax(
         uint256 rewards,
         uint64 taxFraction,
         uint256 operatingPool,
-        uint256 rewardPool
+        uint256 stakingPool
     ) internal view returns (uint256, uint256) {
         uint256 fullTax = _getFullTax(rewards, taxFraction);
 
         if (operatingPool < MIN_DEPOSIT) {
             // node will receive no tax
             return (fullTax, 0);
-        } else if (operatingPool >= MIN_DEPOSIT && operatingPool * STAKE_RATIO >= rewardPool) {
+        } else if (operatingPool >= MIN_DEPOSIT && operatingPool * STAKE_RATIO >= stakingPool) {
             // node will receive its full tax
             return (fullTax, fullTax);
         } else {
             // node will receive part of its tax
-            uint256 partialTax = (fullTax * operatingPool * STAKE_RATIO) / rewardPool;
+            uint256 partialTax = (fullTax * operatingPool * STAKE_RATIO) / stakingPool;
             return (fullTax, partialTax);
         }
     }

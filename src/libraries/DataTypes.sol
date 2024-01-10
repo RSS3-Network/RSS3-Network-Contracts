@@ -17,9 +17,9 @@ library DataTypes {
         string name;
         /// @notice description of the node
         string description;
-        /// @notice total tokens of operator pool
+        /// @notice total tokens of operating pool
         uint256 operatingPoolTokens;
-        /// @notice total tokens of reward pool
+        /// @notice total tokens of staking pool
         uint256 stakingPoolTokens;
         /// @notice total shares of the pool
         uint256 totalShares;

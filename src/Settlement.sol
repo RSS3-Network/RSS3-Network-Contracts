@@ -87,7 +87,8 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         _startTimestamp = endTimestamp;
         _epoch++;
 
-        IERC20(_token).transfer(_staking, _totalStakingRewardsPerEpoch + _totalRequestBonusPerEpoch);
+        bool success = IERC20(_token).transfer(_staking, _totalStakingRewardsPerEpoch + _totalRequestBonusPerEpoch);
+        if (!success) revert RewardDistributionFailed();
     }
 
     /// @inheritdoc ISettlement
@@ -125,10 +126,14 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     function _updateRewardsRatio(uint256 requestBonusPercent) internal {
-        uint256 rewardsPerEpoch = TOTAL_REWARDS_PER_YEAR / (365 days / EPOCH_DURATION);
+        // rewardsPerEpoch = TOTAL_REWARDS_PER_YEAR / (365 days / EPOCH_DURATION)
+        // requestBonusPerEpoch = rewardsPerEpoch * (requestBonusPercent / 100)%
+        // stakingBonusPerEpoch = rewardsPerEpoch *  (1 - (requestBonusPercent / 100))%
 
-        _totalRequestBonusPerEpoch = (rewardsPerEpoch * requestBonusPercent) / 100;
-        _totalStakingRewardsPerEpoch = (rewardsPerEpoch * (100 - requestBonusPercent)) / 100;
+        _totalRequestBonusPerEpoch = (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * requestBonusPercent) / (100 * 365 days);
+        _totalStakingRewardsPerEpoch =
+            ((TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION) * (100 - requestBonusPercent)) /
+            (100 * 365 days);
     }
 
     /// @dev returns staking rewards

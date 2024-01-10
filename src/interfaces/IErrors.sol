@@ -68,4 +68,7 @@ interface IErrors {
 
     /// @dev Chips id overflow
     error ChipsIdOverflow();
+
+    /// @dev Reward distribution failed
+    error RewardDistributionFailed();
 }
