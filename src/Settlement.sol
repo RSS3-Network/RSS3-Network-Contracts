@@ -10,10 +10,12 @@ import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using SafeCast for uint256;
+    using SafeERC20 for IERC20;
 
     /// @dev Duration of an epoch.
     uint256 public constant EPOCH_DURATION = 18 hours;
@@ -87,8 +89,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         _startTimestamp = endTimestamp;
         _epoch++;
 
-        bool success = IERC20(_token).transfer(_staking, _totalStakingRewardsPerEpoch + _totalRequestBonusPerEpoch);
-        if (!success) revert RewardDistributionFailed();
+        IERC20(_token).safeTransfer(_staking, _totalStakingRewardsPerEpoch + _totalRequestBonusPerEpoch);
     }
 
     /// @inheritdoc ISettlement

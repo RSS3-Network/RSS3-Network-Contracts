@@ -210,12 +210,12 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.startPrank(bob);
         _rss3.approve(address(_staking), amount);
 
+        expectEmit();
+        emit Transfer(bob, address(_staking), expectedStakedAmount);
         for (uint256 i = 1; i <= chipsCount; i++) {
             expectEmit();
             emit TestEvents.Transfer(address(0), bob, i);
         }
-        expectEmit();
-        emit Transfer(bob, address(_staking), expectedStakedAmount);
         expectEmit();
         emit Events.Staked(bob, alice, expectedStakedAmount, 1, chipsCount);
         _staking.stake(alice, amount);
@@ -472,7 +472,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _settlement.distributeRewards(nodeAddrs, requestFees, requestCounts);
 
         (uint256 operatingPool, uint256 stakingPool, uint256 treasury) = _staking.getPoolInfo();
-
         assertEq(operatingPool, 0);
         assert(treasury > 0);
         assert(stakingPool > 0);
