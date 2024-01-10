@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1021dfada4ba30c0e4e08273f220d4de6ca4d2de/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c790704642f0d83e8101d9cd33d44c90fcec3741/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -250,11 +250,11 @@ node operator can receive its full tax if it stakes at least 10,000 tokens</em><
 <p><em>public pool</em></p>
 <pre><code class="language-solidity">DataTypes.Node internal _publicPool;
 </code></pre>
-<h3 id="_totaloperatingpool"><a class="header" href="#_totaloperatingpool">_totalOperatingPool</a></h3>
-<pre><code class="language-solidity">uint256 internal _totalOperatingPool;
+<h3 id="_totaloperatingpooltokens"><a class="header" href="#_totaloperatingpooltokens">_totalOperatingPoolTokens</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalOperatingPoolTokens;
 </code></pre>
-<h3 id="_totalstakingpool"><a class="header" href="#_totalstakingpool">_totalStakingPool</a></h3>
-<pre><code class="language-solidity">uint256 internal _totalStakingPool;
+<h3 id="_totalstakingpooltokens"><a class="header" href="#_totalstakingpooltokens">_totalStakingPoolTokens</a></h3>
+<pre><code class="language-solidity">uint256 internal _totalStakingPoolTokens;
 </code></pre>
 <h3 id="_families"><a class="header" href="#_families">_families</a></h3>
 <p><em>the issuers of chips</em></p>
@@ -666,12 +666,12 @@ Requirements:</p>
     external
     view
     override
-    returns (uint256 totalOperatingPool, uint256 totalStakingPool, uint256 treasuryAmount);
+    returns (uint256 totalOperatingPoolTokens, uint256 totalStakingPoolTokens, uint256 treasuryAmount);
 </code></pre>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>totalOperatingPool</code></td><td><code>uint256</code></td><td>Total tokens in operator pool</td></tr>
-<tr><td><code>totalStakingPool</code></td><td><code>uint256</code></td><td>Total tokens in reward pool</td></tr>
+<tr><td><code>totalOperatingPoolTokens</code></td><td><code>uint256</code></td><td>Total tokens in operator pool</td></tr>
+<tr><td><code>totalStakingPoolTokens</code></td><td><code>uint256</code></td><td>Total tokens in reward pool</td></tr>
 <tr><td><code>treasuryAmount</code></td><td><code>uint256</code></td><td>Total tokens for treasury</td></tr>
 </tbody></table>
 </div>
