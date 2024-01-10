@@ -18,13 +18,13 @@ library DataTypes {
         /// @notice description of the node
         string description;
         /// @notice total tokens of operator pool
-        uint256 operatingPool;
+        uint256 operatingPoolTokens;
         /// @notice total tokens of reward pool
-        uint256 stakingPool;
+        uint256 stakingPoolTokens;
         /// @notice total shares of the pool
         uint256 totalShares;
         /// @notice total amount of slashed tokens
-        uint256 slashedAmount;
+        uint256 slashedTokens;
     }
 
     struct WithdrawalRequest {

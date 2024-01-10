@@ -61,7 +61,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.operatingPool, amount);
+        assertEq(node.operatingPoolTokens, amount);
     }
 
     function testDeleteNode(address nodeAddr) public {
@@ -101,7 +101,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         // check node info
         DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.operatingPool, 0);
+        assertEq(node.operatingPoolTokens, 0);
     }
 
     function testMultipleDepositAndRequestWithdrawal() public {
@@ -222,7 +222,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.stakingPool, expectedStakedAmount);
+        assertEq(node.stakingPoolTokens, expectedStakedAmount);
         assertEq(node.totalShares, chipsCount * _staking.SHARES_PER_CHIP());
 
         // stake to public pool will fail
@@ -251,7 +251,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         _staking.getNode(alice);
 
-        assertEq(_staking.getPublicPool().stakingPool, amount);
+        assertEq(_staking.getPublicPool().stakingPoolTokens, amount);
         assertEq(_staking.getPublicPool().totalShares, chipsCount * _staking.SHARES_PER_CHIP());
 
         // stake to public pool with non public good node will fail
@@ -307,7 +307,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         // check node info
         DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.stakingPool, 0);
+        assertEq(node.stakingPoolTokens, 0);
         assertEq(node.totalShares, 0);
     }
 
@@ -576,10 +576,10 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node memory node = _staking.getNode(nodeAddrs[i]);
             uint256 newOperatingPool = amount + requestFees[i] + taxAmounts[i];
-            assertEq(node.operatingPool, newOperatingPool);
+            assertEq(node.operatingPoolTokens, newOperatingPool);
 
             uint256 newstakingPool = amount + requestBonuses[i] + stakingRewards[i] - taxAmounts[i];
-            assertEq(node.stakingPool, newstakingPool);
+            assertEq(node.stakingPoolTokens, newstakingPool);
         }
     }
 

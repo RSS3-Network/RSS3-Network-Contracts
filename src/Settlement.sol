@@ -145,12 +145,12 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         uint256[] memory nodeStakings = new uint256[](len);
         for (uint256 i = 0; i < len; i++) {
-            nodeStakings[i] = IStaking(_staking).getNode(nodeAddrs[i]).stakingPool;
+            nodeStakings[i] = IStaking(_staking).getNode(nodeAddrs[i]).stakingPoolTokens;
         }
 
         // get staking rewards for public pool and all nodes
         DataTypes.Node memory publicPool = IStaking(_staking).getPublicPool();
-        publicPoolReward = (publicPool.stakingPool * totalRewards) / totalStaking;
+        publicPoolReward = (publicPool.stakingPoolTokens * totalRewards) / totalStaking;
 
         nodesReward = new uint256[](len);
         for (uint256 i = 0; i < len; i++) {

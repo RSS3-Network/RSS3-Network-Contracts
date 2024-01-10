@@ -192,18 +192,17 @@ interface IStaking {
      * @dev periodically called.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param epoch The current epoch id.
-     * @param startTimestamp The start timestamp of the current epoch.
-     * @param endTimestamp The end timestamp of the current epoch.
+     * @param epochInfo The current epoch info.
+     * - epochInfo[0]: The current epoch number.
+     * - epochInfo[1]: The start timestamp of the current epoch.
+     * - epochInfo[2]: The end timestamp of the current epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param requestFees Amounts of request fees.
      * @param requestBonuses Amounts of request bonuses.
      * @param stakingRewards Amount of staking rewards to reward pool.
      */
     function distributeRewards(
-        uint256 epoch,
-        uint256 startTimestamp,
-        uint256 endTimestamp,
+        uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
         uint256[] calldata requestBonuses,
@@ -253,13 +252,6 @@ interface IStaking {
     function getChipsInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens);
 
     /**
-     * @notice Gets node info by node address.
-     * @param nodeAddr Node address to query.
-     * @return DataTypes.Node Node info.
-     */
-    function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
-
-    /**
      * @notice Gets public pool info.
      * @return DataTypes.Node public pool info.
      */
@@ -272,11 +264,25 @@ interface IStaking {
     function getNodeCount() external view returns (uint256);
 
     /**
+     * @notice Gets node info by node address.
+     * @param nodeAddr Node address to query.
+     * @return DataTypes.Node Node info.
+     */
+    function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
+
+    /**
+     * @notice Gets nodes info by node addresses.
+     * @param nodeAddrs Node addresses to query.
+     * @return DataTypes.Node[] Nodes info.
+     */
+    function getNodes(address[] calldata nodeAddrs) external view returns (DataTypes.Node[] memory);
+
+    /**
      * @notice Gets nodes info by offset and limit.
      * @param offset The offset of nodes to query.
      * @param limit The limit of nodes to query.
      */
-    function getNodes(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
+    function getNodesWithPagination(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
 
     /**
      *
@@ -4740,9 +4746,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function distributeRewards(
-        uint256 epoch,
-        uint256 startTimestamp,
-        uint256 endTimestamp,
+        uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
         uint256[] calldata requestBonuses,
@@ -4755,19 +4759,25 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             nodeAddrs.length != stakingRewards.length
         ) revert InvalidArrayLength();
 
-        if (epoch != ++_currentEpoch) revert InvalidEpoch(_currentEpoch, epoch);
+        if (epochInfo[0] != ++_currentEpoch) revert InvalidEpoch(_currentEpoch, epochInfo[0]);
 
         // distribute rewards for public pool
         uint256 publicPoolTax = _distributePublicPoolRewards(publicPoolReward);
-        emit Events.PublicGoodRewardDistributed(epoch, startTimestamp, endTimestamp, publicPoolReward, publicPoolTax);
+        emit Events.PublicGoodRewardDistributed(
+            epochInfo[0],
+            epochInfo[1],
+            epochInfo[2],
+            publicPoolReward,
+            publicPoolTax
+        );
 
         // distribute rewards for other nodes
         uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, requestFees, requestBonuses, stakingRewards);
 
         emit Events.RewardDistributed(
-            epoch,
-            startTimestamp,
-            endTimestamp,
+            epochInfo[0],
+            epochInfo[1],
+            epochInfo[2],
             nodeAddrs,
             requestFees,
             requestBonuses,
@@ -4843,11 +4853,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
-        return _nodes[nodeAddr];
-    }
-
-    /// @inheritdoc IStaking
     function getPublicPool() external view override returns (DataTypes.Node memory) {
         return _publicPool;
     }
@@ -4858,7 +4863,23 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function getNodes(uint256 offset, uint256 limit) external view override returns (DataTypes.Node[] memory nodes) {
+    function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
+        return _nodes[nodeAddr];
+    }
+
+    /// @inheritdoc IStaking
+    function getNodes(address[] calldata nodeAddrs) external view override returns (DataTypes.Node[] memory nodes) {
+        nodes = new DataTypes.Node[](nodeAddrs.length);
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            nodes[i] = _nodes[nodeAddrs[i]];
+        }
+    }
+
+    /// @inheritdoc IStaking
+    function getNodesWithPagination(
+        uint256 offset,
+        uint256 limit
+    ) external view override returns (DataTypes.Node[] memory nodes) {
         uint256 totalNodes = _nodeAddrs.length();
         uint256 len = (totalNodes - offset).min(limit);
         nodes = new DataTypes.Node[](len);
