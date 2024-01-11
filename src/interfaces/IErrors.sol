@@ -6,6 +6,9 @@ interface IErrors {
     /// @dev Caller is not staking contract
     error CallerNotStaking();
 
+    /// @dev Create node to zero address
+    error CreateNodeToZeroAddress();
+
     /// @dev Node already exists
     error NodeExists();
 

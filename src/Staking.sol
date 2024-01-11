@@ -554,6 +554,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint64 taxFraction,
         bool publicGood
     ) internal {
+        if (nodeAddr == address(0)) revert CreateNodeToZeroAddress();
+
         DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
         if (address(0) != node.account) revert NodeExists();

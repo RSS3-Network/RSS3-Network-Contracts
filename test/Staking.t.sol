@@ -45,6 +45,12 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _checkNode(nodes[0].account, nodes[0].name, nodes[0].description, nodes[0].taxFraction, nodes[0].publicGood);
     }
 
+    function testCreateNodeToZeroAddressFail() public {
+        // create node to address(0) will fail
+        vm.expectRevert(abi.encodeWithSelector(CreateNodeToZeroAddress.selector));
+        _createNode(address(0));
+    }
+
     function testDeposit(uint256 amount) public {
         vm.assume(amount > 10000 ether && amount < _initialAmount);
 
@@ -65,18 +71,18 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testDeleteNode(address nodeAddr) public {
+        vm.assume(nodeAddr != proxyAdmin && nodeAddr != address(0));
+
         _createNode(nodeAddr);
 
-        vm.startPrank(nodeAddr);
         expectEmit();
         emit Events.NodeDeleted(nodeAddr);
+        vm.prank(nodeAddr);
         _staking.deleteNode(nodeAddr);
-        vm.stopPrank();
-
-        assertEq(_staking.getNodeCount(), 0);
 
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.account, address(0));
+        assertEq(_staking.getNodeCount(), 0);
     }
 
     function testRequestWithdrawal() public {
