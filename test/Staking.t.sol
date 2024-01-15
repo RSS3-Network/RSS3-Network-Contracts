@@ -204,6 +204,33 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(node.taxFraction, taxFraction);
     }
 
+    function testSetTaxFraction4PublicPool(uint64 expectedTaxFraction) public {
+        vm.assume(expectedTaxFraction <= _denominator());
+
+        vm.startPrank(oracleAccount);
+        expectEmit();
+        emit Events.PublicPoolTaxFractionSet(expectedTaxFraction);
+        _staking.setTaxFraction4PublicPool(expectedTaxFraction);
+        vm.stopPrank();
+
+        uint64 realTaxFraction = _staking.getPublicPool().taxFraction;
+
+        assertEq(realTaxFraction, expectedTaxFraction);
+    }
+
+    function testSetTaxFractionError(uint64 taxFraction) public {
+        vm.assume(taxFraction > _denominator());
+        vm.startPrank(alice);
+        vm.expectRevert(abi.encodeWithSelector(TaxFractionTooLarge.selector));
+        _staking.setTaxFraction4Node(alice, taxFraction);
+        vm.stopPrank();
+
+        vm.startPrank(oracleAccount);
+        vm.expectRevert(abi.encodeWithSelector(TaxFractionTooLarge.selector));
+        _staking.setTaxFraction4PublicPool(taxFraction);
+        vm.stopPrank();
+    }
+
     function testStake(uint256 amount) public {
         vm.assume(amount > 500 ether && amount <= 1000000 ether);
         amount = 200000 ether;
@@ -357,20 +384,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.claimUnstake(requestIds);
 
         vm.stopPrank();
-    }
-
-    function testSetTaxFraction4PublicPool(uint64 expectedTaxFraction) public {
-        vm.assume(expectedTaxFraction <= _denominator());
-
-        vm.startPrank(oracleAccount);
-        expectEmit();
-        emit Events.PublicPoolTaxFractionSet(expectedTaxFraction);
-        _staking.setTaxFraction4PublicPool(expectedTaxFraction);
-        vm.stopPrank();
-
-        uint64 realTaxFraction = _staking.getPublicPool().taxFraction;
-
-        assertEq(realTaxFraction, expectedTaxFraction);
     }
 
     function testDistributeRewards() public {

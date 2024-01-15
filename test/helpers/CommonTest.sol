@@ -10,6 +10,7 @@ import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
 import {TransparentUpgradeableProxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {InternalStaking} from "./InternalStaking.sol";
 import {InternalSettlement} from "./InternalSettlement.sol";
+import {InternalChips} from "./InternalChips.sol";
 
 contract CommonTest is Utils {
     address public constant alice = address(0x111);
@@ -45,6 +46,7 @@ contract CommonTest is Utils {
     Settlement internal _settlement;
     InternalStaking internal _internalStakingTest;
     InternalSettlement internal _internalSettlementTest;
+    InternalChips internal _internalChipsTest;
 
     function _setUp() internal {
         // deploy rss3 token
@@ -65,6 +67,8 @@ contract CommonTest is Utils {
             minDeposit
         );
         _internalStakingTest.initialize(address(_chips), pauseAccount, oracleAccount);
+
+        _internalChipsTest = new InternalChips();
 
         // deploy and init Staking contract
         Staking stakingImpl = new Staking(
@@ -93,6 +97,7 @@ contract CommonTest is Utils {
 
         // init chips token
         _chips.initialize(chipsName, chipsSymbol, address(_staking));
+        _internalChipsTest.initialize(chipsName, chipsSymbol, address(_staking));
 
         // init account oracle
         uint256 totalRewards = (3 * _rss3.totalSupply()) / 100;

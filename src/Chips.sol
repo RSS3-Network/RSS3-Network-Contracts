@@ -17,6 +17,10 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     /// @dev Total supply of tokens.
     uint256 internal _totalSupply;
 
+    uint256 internal _randomTraitCount;
+
+    mapping(uint256 tokenId => uint256[] randomNumbers) internal _chipImageSeeds;
+
     modifier onlyStaking() {
         if (msg.sender != _staking) revert CallerNotStaking();
         _;
@@ -27,6 +31,8 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         _staking = staking_;
 
         __ERC721_init(name_, symbol_);
+
+        _randomTraitCount = 3; // TODO: CHANGE ME WHEN DEPLOY
     }
 
     /// @inheritdoc IChips
@@ -36,6 +42,8 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
 
         // update total supply
         ++_totalSupply;
+
+        _setRandomTraits(tokenId);
     }
 
     /// @inheritdoc IChips
@@ -50,6 +58,10 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
 
         // mint tokens with consecutive token IDs
         _mintConsecutive(to, startTokenId, endTokenId);
+
+        for (uint256 id = startTokenId; id <= endTokenId; id++) {
+            _setRandomTraits(id);
+        }
 
         // update token counter
         _counter += batchSize;
@@ -72,13 +84,16 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         return _totalSupply;
     }
 
-    /// @inheritdoc IERC721Metadata
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        (address issuer, ) = IStaking(_staking).getChipsInfo(tokenId);
-        if (issuer == address(0)) {
-            // TODO: set a default token URI for chips minted from public pool
-            return "default token URI";
+    function _setRandomTraits(uint256 tokenId) internal {
+        for (uint256 i = 0; i < _randomTraitCount; i++) {
+            uint256 n = uint256(keccak256(abi.encodePacked(block.prevrandao, block.timestamp, tokenId, i)));
+            // TODO: if gas is too much, we can save block.prevrandao, block.timestamp and tokenId
+            // and calculate in _getRandomTraits
+            _chipImageSeeds[tokenId].push(n);
         }
-        return super.tokenURI(tokenId);
+    }
+
+    function _getRandomTraits(uint256 tokenId) internal view returns (uint256[] memory) {
+        return _chipImageSeeds[tokenId];
     }
 }
