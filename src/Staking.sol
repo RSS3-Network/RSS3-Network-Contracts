@@ -41,7 +41,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     uint256 public immutable USER_SLASH_FRACTION;
 
     /// @dev the minimal tokens for deposit, 10,000 by default.
-    /// node operator can receive its full tax if it stakes at least 10,000 tokens
+    /// node operator can receive tax if it stakes at least 10,000 tokens, otherwise nothing
     uint256 public immutable MIN_DEPOSIT;
 
     /// @dev the period of time that node operator can't withdraw staked tokens
