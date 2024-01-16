@@ -67,7 +67,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.operatingPoolTokens, amount);
+        assertEq(node.operationPoolTokens, amount);
     }
 
     function testDeleteNode(address nodeAddr) public {
@@ -107,7 +107,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         // check node info
         DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.operatingPoolTokens, 0);
+        assertEq(node.operationPoolTokens, 0);
     }
 
     function testMultipleDepositAndRequestWithdrawal() public {
@@ -490,15 +490,15 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         _settlement.distributeRewards(nodeAddrs, requestFees, requestCounts);
 
-        (uint256 operatingPool, uint256 stakingPool, uint256 treasury) = _staking.getPoolInfo();
-        assertEq(operatingPool, 0);
+        (uint256 operationPool, uint256 stakingPool, uint256 treasury) = _staking.getPoolInfo();
+        assertEq(operationPool, 0);
         assert(treasury > 0);
         assert(stakingPool > 0);
     }
 
-    function testCalcTax1(uint256 operatingPool) public {
+    function testCalcTax1(uint256 operationPool) public {
         // case 1: receives no tax rewards
-        vm.assume(operatingPool < 10000 ether);
+        vm.assume(operationPool < 10000 ether);
 
         uint256 rewards = 10000 ether;
         uint256 stakingPool = 1000 ether;
@@ -507,7 +507,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         (uint256 tax1, uint256 partialTax1) = _internalStakingTest.calculateReward(
             rewards,
             taxFraction,
-            operatingPool,
+            operationPool,
             stakingPool
         );
 
@@ -517,11 +517,11 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
     function testCalcTax2() public {
         // case 2: receives full tax rewards
-        uint256 operatingPool = minDeposit;
+        uint256 operationPool = minDeposit;
         uint256 stakeRatio;
         vm.assume(stakeRatio < 25);
 
-        uint256 stakingPool = operatingPool * stakeRatio;
+        uint256 stakingPool = operationPool * stakeRatio;
 
         uint256 rewards = 10000 ether;
         uint64 taxFraction = _defaultTaxFraction;
@@ -529,7 +529,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
             rewards,
             taxFraction,
-            operatingPool,
+            operationPool,
             stakingPool
         );
 
@@ -538,9 +538,9 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
     function testCalcTax3(uint256 stakingPool) public view {
         // case 2: receives partial tax rewards
-        uint256 operatingPool = minDeposit;
+        uint256 operationPool = minDeposit;
 
-        vm.assume(stakingPool > 25 * operatingPool && stakeRatio < 100 * operatingPool);
+        vm.assume(stakingPool > 25 * operationPool && stakeRatio < 100 * operationPool);
 
         uint256 rewards = 10000 ether;
         uint64 taxFraction = _defaultTaxFraction;
@@ -548,16 +548,16 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
             rewards,
             taxFraction,
-            operatingPool,
+            operationPool,
             stakingPool
         );
 
         // partialTax has precision 1
         assert(
-            tax * operatingPool * 25 >= partialTax * stakingPool &&
-                tax * operatingPool * 25 < (partialTax + 1) * stakingPool
+            tax * operationPool * 25 >= partialTax * stakingPool &&
+                tax * operationPool * 25 < (partialTax + 1) * stakingPool
         );
-        // assert(tax / partialTax >= stakingPool / (operatingPool * 25));
+        // assert(tax / partialTax >= stakingPool / (operationPool * 25));
     }
 
     function _unstakeAndCheckAmount(
@@ -593,8 +593,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         // status check
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node memory node = _staking.getNode(nodeAddrs[i]);
-            uint256 newOperatingPool = amount + requestFees[i] + taxAmounts[i];
-            assertEq(node.operatingPoolTokens, newOperatingPool);
+            uint256 newOperationPool = amount + requestFees[i] + taxAmounts[i];
+            assertEq(node.operationPoolTokens, newOperationPool);
 
             uint256 newstakingPool = amount + requestBonuses[i] + stakingRewards[i] - taxAmounts[i];
             assertEq(node.stakingPoolTokens, newstakingPool);
