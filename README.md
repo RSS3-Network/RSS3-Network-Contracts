@@ -32,5 +32,6 @@ forge script script/Deploy.s.sol:Deploy \
 --verify \
 --broadcast --ffi -vvvv #--resume
 
+# generate easily readable abi to /deployments
 forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy --ffi
 ```
