@@ -50,6 +50,11 @@ storage-layout:
 	@echo " > \033[32mChecking contract storage layout...\033[0m"
 	./tools/checkStorageLayout.sh
 
+# [DANGEROUS] regenerate upgradeable contract storage layout
+regenerate-storage-layout:
+	@echo " > \033[32m[DANGEROUS]Regenerating storage layout...\033[0m"
+	rm ./tools/storageLayout/* && ./tools/checkStorageLayout.sh
+
 # Lints
 lint :; npx prettier --plugin=prettier-plugin-solidity  --write "{src,test,script}/**/*.sol"
 
