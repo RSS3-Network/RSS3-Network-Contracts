@@ -14,12 +14,6 @@ if [ $? -ne 0 ]; then
   cd ..
 fi
 
-# copy .env file
-if [ ! -f ".env" ]; then
-  cp ".env.example" ".env"
-fi
-
-
 # create tmp files
 file1=$(mktemp /tmp/contracts-slither-check.XXXXX) || exit 2
 file2=$(mktemp /tmp/contracts-slither-check.XXXXX) || exit 2
