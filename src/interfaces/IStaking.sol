@@ -71,7 +71,7 @@ interface IStaking {
     function deposit(uint256 amount) external;
 
     /**
-     * @notice Requests withdraw tokens from operating pool for node operator.
+     * @notice Requests withdraw tokens from operation pool for node operator.
      * @param amount Amount of tokens to withdraw.
      * @return requestId The created withdraw request id
      */
@@ -242,14 +242,14 @@ interface IStaking {
 
     /**
      *
-     * @return totalOperatingPoolTokens Total tokens in operating pool
+     * @return totalOperationPoolTokens Total tokens in operation pool
      * @return totalStakingPoolTokens Total tokens in staking pool
      * @return treasuryAmount Total tokens for treasury
      */
     function getPoolInfo()
         external
         view
-        returns (uint256 totalOperatingPoolTokens, uint256 totalStakingPoolTokens, uint256 treasuryAmount);
+        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 treasuryAmount);
 
     /**
      * @notice The minimum amount of tokens to deposit for a node.

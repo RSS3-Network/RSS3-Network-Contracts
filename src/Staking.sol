@@ -70,7 +70,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev public pool
     DataTypes.Node internal _publicPool;
 
-    uint256 internal _totalOperatingPoolTokens;
+    uint256 internal _totalOperationPoolTokens;
 
     uint256 internal _totalStakingPoolTokens;
 
@@ -161,7 +161,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (msg.sender != node.account) revert CallerNotNodeOwner();
 
         // can't delete a node with staked or deposited tokens
-        if (node.operatingPoolTokens > 0 || node.stakingPoolTokens > 0) revert NodeStakedOrDeposited();
+        if (node.operationPoolTokens > 0 || node.stakingPoolTokens > 0) revert NodeStakedOrDeposited();
 
         delete _nodes[nodeAddr];
         _nodeAddrs.remove(nodeAddr);
@@ -194,9 +194,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (node.account == address(0)) revert NodeNotExists();
 
         //  deposited tokens has been slashed completely
-        if (amount > node.operatingPoolTokens) revert DepositedTokensSlashedAll();
+        if (amount > node.operationPoolTokens) revert DepositedTokensSlashedAll();
 
-        _decreaseOperatingPool(node, amount);
+        _decreaseOperationPool(node, amount);
 
         requestId = ++_pendingWithdrawalCounter;
 
@@ -328,18 +328,18 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) revert NodeNotExists();
 
-            // slash operating pool tokens
-            uint256 slashedOperatingPool = (node.operatingPoolTokens * NODE_SLASH_FRACTION) / _denominator();
-            _decreaseOperatingPool(node, slashedOperatingPool);
+            // slash operation pool tokens
+            uint256 slashedOperationPool = (node.operationPoolTokens * NODE_SLASH_FRACTION) / _denominator();
+            _decreaseOperationPool(node, slashedOperationPool);
 
             // slash staking pool tokens
             // TODO: here the staking pool tokens will be decreased...
             uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_FRACTION) / _denominator();
             _decreaseStakingPool(node, slashedStakingPool);
 
-            node.slashedTokens += slashedOperatingPool + slashedStakingPool;
+            node.slashedTokens += slashedOperationPool + slashedStakingPool;
 
-            emit Events.NodeSlashed(nodeAddrs[i], slashedOperatingPool, slashedStakingPool);
+            emit Events.NodeSlashed(nodeAddrs[i], slashedOperationPool, slashedStakingPool);
         }
     }
 
@@ -418,9 +418,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         external
         view
         override
-        returns (uint256 totalOperatingPoolTokens, uint256 totalStakingPoolTokens, uint256 treasuryAmount)
+        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 treasuryAmount)
     {
-        totalOperatingPoolTokens = _totalOperatingPoolTokens;
+        totalOperationPoolTokens = _totalOperationPoolTokens;
         totalStakingPoolTokens = _totalStakingPoolTokens;
         treasuryAmount = _getTreasuryAmount();
     }
@@ -445,14 +445,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return _chips;
     }
 
-    function _increaseOperatingPool(DataTypes.Node storage node, uint256 amount) internal {
-        node.operatingPoolTokens += amount;
-        _totalOperatingPoolTokens += amount;
+    function _increaseOperationPool(DataTypes.Node storage node, uint256 amount) internal {
+        node.operationPoolTokens += amount;
+        _totalOperationPoolTokens += amount;
     }
 
-    function _decreaseOperatingPool(DataTypes.Node storage node, uint256 amount) internal {
-        node.operatingPoolTokens -= amount;
-        _totalOperatingPoolTokens -= amount;
+    function _decreaseOperationPool(DataTypes.Node storage node, uint256 amount) internal {
+        node.operationPoolTokens -= amount;
+        _totalOperationPoolTokens -= amount;
     }
 
     function _increaseStakingPool(DataTypes.Node storage node, uint256 amount) internal {
@@ -497,18 +497,18 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             (fullTax, receivedTax) = _getTax(
                 rewards,
                 node.taxFraction,
-                node.operatingPoolTokens,
+                node.operationPoolTokens,
                 node.stakingPoolTokens
             );
             rewards -= fullTax;
 
-            // request fee and tax are sent to operating pool
-            uint256 operatingPool = requestFees[i] + receivedTax;
+            // request fee and tax are sent to operation pool
+            uint256 operationPool = requestFees[i] + receivedTax;
             taxAmounts[i] = receivedTax;
             remainedTax += fullTax - receivedTax;
 
             // update node
-            _increaseOperatingPool(node, operatingPool);
+            _increaseOperationPool(node, operationPool);
             // all after-tax rewards and request bonus are sent to the staking pool
             _increaseStakingPool(node, rewards);
         }
@@ -576,7 +576,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
 
-        _increaseOperatingPool(node, amount);
+        _increaseOperationPool(node, amount);
 
         IERC20(TOKEN).safeTransferFrom(nodeAddr, address(this), amount);
 
@@ -663,7 +663,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     function _getTreasuryAmount() internal view returns (uint256) {
         uint256 balance = IERC20(TOKEN).balanceOf(address(this));
-        return balance - _totalOperatingPoolTokens - _totalStakingPoolTokens;
+        return balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
     }
 
     /// @dev get minimal tokens to stake for a node
@@ -685,20 +685,20 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function _getTax(
         uint256 rewards,
         uint64 taxFraction,
-        uint256 operatingPool,
+        uint256 operationPool,
         uint256 stakingPool
     ) internal view returns (uint256, uint256) {
         uint256 fullTax = _getFullTax(rewards, taxFraction);
 
-        if (operatingPool < MIN_DEPOSIT) {
+        if (operationPool < MIN_DEPOSIT) {
             // node will receive no tax
             return (fullTax, 0);
-        } else if (operatingPool >= MIN_DEPOSIT && operatingPool * STAKE_RATIO >= stakingPool) {
+        } else if (operationPool >= MIN_DEPOSIT && operationPool * STAKE_RATIO >= stakingPool) {
             // node will receive its full tax
             return (fullTax, fullTax);
         } else {
             // node will receive part of its tax
-            uint256 partialTax = (fullTax * operatingPool * STAKE_RATIO) / stakingPool;
+            uint256 partialTax = (fullTax * operationPool * STAKE_RATIO) / stakingPool;
             return (fullTax, partialTax);
         }
     }
