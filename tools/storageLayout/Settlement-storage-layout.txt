@@ -1,10 +1,10 @@
-| Name                         | Type                                                | Slot | Offset | Bytes | Contract                      |
-|------------------------------|-----------------------------------------------------|------|--------|-------|-------------------------------|
-| _roles                       | mapping(bytes32 => struct AccessControl.RoleData)   | 0    | 0      | 32    | src/Settlement.sol:Settlement |
-| _roleMembers                 | mapping(bytes32 => struct EnumerableSet.AddressSet) | 1    | 0      | 32    | src/Settlement.sol:Settlement |
-| _staking                     | address                                             | 2    | 0      | 20    | src/Settlement.sol:Settlement |
-| _token                       | contract IERC20                                     | 3    | 0      | 20    | src/Settlement.sol:Settlement |
-| _totalStakingRewardsPerEpoch | uint256                                             | 4    | 0      | 32    | src/Settlement.sol:Settlement |
-| _totalRequestBonusPerEpoch   | uint256                                             | 5    | 0      | 32    | src/Settlement.sol:Settlement |
-| _epoch                       | uint256                                             | 6    | 0      | 32    | src/Settlement.sol:Settlement |
-| _startTimestamp              | uint256                                             | 7    | 0      | 32    | src/Settlement.sol:Settlement |
+| Name                           | Type                                                | Slot | Offset | Bytes | Contract                      |
+|--------------------------------|-----------------------------------------------------|------|--------|-------|-------------------------------|
+| _roles                         | mapping(bytes32 => struct AccessControl.RoleData)   | 0    | 0      | 32    | src/Settlement.sol:Settlement |
+| _roleMembers                   | mapping(bytes32 => struct EnumerableSet.AddressSet) | 1    | 0      | 32    | src/Settlement.sol:Settlement |
+| _staking                       | address                                             | 2    | 0      | 20    | src/Settlement.sol:Settlement |
+| _token                         | contract IERC20                                     | 3    | 0      | 20    | src/Settlement.sol:Settlement |
+| _totalStakingRewardsPerEpoch   | uint256                                             | 4    | 0      | 32    | src/Settlement.sol:Settlement |
+| _totalOperationRewardsPerEpoch | uint256                                             | 5    | 0      | 32    | src/Settlement.sol:Settlement |
+| _epoch                         | uint256                                             | 6    | 0      | 32    | src/Settlement.sol:Settlement |
+| _startTimestamp                | uint256                                             | 7    | 0      | 32    | src/Settlement.sol:Settlement |
