@@ -31,14 +31,14 @@ interface IStaking {
      * @param to Address of node operator.
      * @param name Human-readable name.
      * @param description Description of node.
-     * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
+     * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
      */
     function createNode(
         address to,
         string calldata name,
         string calldata description,
-        uint64 taxFraction,
+        uint64 taxRateBasisPoints,
         bool publicGood
     ) external;
 
@@ -52,14 +52,14 @@ interface IStaking {
      * @notice Creates a node and deposits tokens.
      * @param name Human-readable name.
      * @param description Description of node.
-     * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
+     * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
      * @param amount Amount of tokens to deposit.
      */
     function createNodeAndDeposit(
         string calldata name,
         string calldata description,
-        uint64 taxFraction,
+        uint64 taxRateBasisPoints,
         bool publicGood,
         uint256 amount
     ) external;
@@ -78,20 +78,20 @@ interface IStaking {
     function requestWithdrawal(uint256 amount) external returns (uint256 requestId);
 
     /**
-     * @notice Changes tax fraction of the node.
+     * @notice Changes tax rate of the node.
      * @param nodeAddr The address of node to change.
-     * @param taxFraction The tax fraction to set.
-     * Tax percentage measured in basis points. Each basis point represents 0.01%.
+     * @param taxRateBasisPoints The basis points of tax rate to set for the node.
+     * Each basis point represents 0.01%.
      */
-    function setTaxFraction4Node(address nodeAddr, uint64 taxFraction) external;
+    function setTaxRateBasisPoints4Node(address nodeAddr, uint64 taxRateBasisPoints) external;
 
     /**
-     * @notice Sets tax fraction for public pool.
+     * @notice Sets tax rate for public pool.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param taxFraction The tax fraction to set.
+     * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool.
      */
-    function setTaxFraction4PublicPool(uint64 taxFraction) external;
+    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 
     /**
      * @notice Claims a batch of withdrawal requests.

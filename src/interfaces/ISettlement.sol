@@ -39,7 +39,7 @@ interface ISettlement {
      * - The caller must have the `ORACLE_ROLE`.
      * @param nodeAddrs The addresses of active nodes.
      */
-    function setTaxFraction4PublicPool(address[] calldata nodeAddrs) external;
+    function setTaxRateBasisPoints4PublicPool(address[] calldata nodeAddrs) external;
 
     /**
      * @notice Sets request bonus percentage.

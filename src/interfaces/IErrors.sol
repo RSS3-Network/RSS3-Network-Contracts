@@ -57,8 +57,8 @@ interface IErrors {
     /// @dev Public good node cannot be staked
     error PublicGoodNodeNotStaked(address nodeAddr);
 
-    /// @dev Tax fraction too large
-    error TaxFractionTooLarge();
+    /// @dev Basis points of tax rate too large
+    error TaxRateBasisPointsTooLarge();
 
     /// @dev Batch size is zero
     error BatchSizeZero();

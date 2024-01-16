@@ -29,8 +29,8 @@ contract CommonTest is Utils {
 
     uint256 internal _initialAmount = 100000000 ether;
 
-    uint256 public constant nodeSlashFraction = 200;
-    uint256 public constant userSlashFraction = 100;
+    uint256 public constant nodeSlashRateBasisPoints = 200;
+    uint256 public constant userSlashRateBasisPoints = 100;
     uint256 public constant stakeRatio = 25;
     uint256 public constant minDeposit = 10000 ether;
     address public constant treasury = address(0xaaa);
@@ -38,7 +38,7 @@ contract CommonTest is Utils {
     string public constant chipsName = "RSS3 Chips";
     string public constant chipsSymbol = "Chips";
 
-    uint64 internal constant _defaultTaxFraction = uint64(1000);
+    uint64 internal constant _defaultTaxRateBasisPoints = uint64(1000);
 
     RSS3Token internal _rss3;
     Staking internal _staking;
@@ -62,8 +62,8 @@ contract CommonTest is Utils {
             stakeRatio,
             stakeUnbondingPeriod,
             depositUnbondingPeriod,
-            nodeSlashFraction,
-            userSlashFraction,
+            nodeSlashRateBasisPoints,
+            userSlashRateBasisPoints,
             minDeposit
         );
         _internalStakingTest.initialize(address(_chips), pauseAccount, oracleAccount);
@@ -77,8 +77,8 @@ contract CommonTest is Utils {
             stakeRatio,
             stakeUnbondingPeriod,
             depositUnbondingPeriod,
-            nodeSlashFraction,
-            userSlashFraction,
+            nodeSlashRateBasisPoints,
+            userSlashRateBasisPoints,
             minDeposit
         );
 
@@ -128,11 +128,11 @@ contract CommonTest is Utils {
 
     function _createNode(address to) internal {
         vm.prank(to);
-        _staking.createNode(to, "Name", "Description", _defaultTaxFraction, false);
+        _staking.createNode(to, "Name", "Description", _defaultTaxRateBasisPoints, false);
     }
 
     function _createPublicGoodNode(address to) internal {
         vm.prank(to);
-        _staking.createNode(to, "Name", "Description", _defaultTaxFraction, true);
+        _staking.createNode(to, "Name", "Description", _defaultTaxRateBasisPoints, true);
     }
 }

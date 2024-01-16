@@ -9,8 +9,8 @@ library DataTypes {
     struct Node {
         /// @notice address of the node operator
         address account;
-        /// @notice tax percentage measured in basis points.
-        uint64 taxFraction;
+        /// @notice tax rate measured in basis points.
+        uint64 taxRateBasisPoints;
         /// @notice flag indicating if the node is a public good
         bool publicGood;
         /// @notice name of the node

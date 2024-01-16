@@ -11,8 +11,8 @@ contract InternalStaking is Staking {
         uint256 stakeRatio,
         uint256 stakeUnbondingPeriod,
         uint256 depositUnbondingPeriod,
-        uint256 nodeSlashFraction,
-        uint256 userSlashFraction,
+        uint256 nodeSlashRateBasisPoints,
+        uint256 userSlashRateBasisPoints,
         uint256 minDeposit
     )
         Staking(
@@ -21,18 +21,18 @@ contract InternalStaking is Staking {
             stakeRatio,
             stakeUnbondingPeriod,
             depositUnbondingPeriod,
-            nodeSlashFraction,
-            userSlashFraction,
+            nodeSlashRateBasisPoints,
+            userSlashRateBasisPoints,
             minDeposit
         )
     {}
 
     function calculateReward(
         uint256 rewards,
-        uint64 taxFraction,
+        uint64 taxRateBasisPoints,
         uint256 operationPool,
         uint256 stakingPool
     ) external view returns (uint256, uint256) {
-        return super._getTax(rewards, taxFraction, operationPool, stakingPool);
+        return super._getTax(rewards, taxRateBasisPoints, operationPool, stakingPool);
     }
 }

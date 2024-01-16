@@ -98,8 +98,8 @@ contract Deploy is Deployer {
             cfg.stakeRatio(),
             cfg.stakeUnbondingPeriod(),
             cfg.depositUnbondingPeriod(),
-            cfg.nodeSlashFraction(),
-            cfg.userSlashFraction(),
+            cfg.nodeSlashRateBasisPoints(),
+            cfg.userSlashRateBasisPoints(),
             cfg.depositBaseline()
         );
 

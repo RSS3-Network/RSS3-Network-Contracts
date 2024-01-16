@@ -25,24 +25,30 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _rss3.transfer(address(_settlement), 30000000 ether);
     }
 
-    function testCreateNode(uint64 taxFraction, bool publicGood) public {
-        vm.assume(taxFraction <= 10000);
+    function testCreateNode(uint64 taxRateBasisPoints, bool publicGood) public {
+        vm.assume(taxRateBasisPoints <= 10000);
 
         string memory name = "Alice";
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(alice, name, description, taxFraction, publicGood);
+        emit Events.NodeCreated(alice, name, description, taxRateBasisPoints, publicGood);
         vm.prank(alice);
-        _staking.createNode(alice, name, description, taxFraction, publicGood);
+        _staking.createNode(alice, name, description, taxRateBasisPoints, publicGood);
 
         // check node info
-        _checkNode(alice, name, description, taxFraction, publicGood);
+        _checkNode(alice, name, description, taxRateBasisPoints, publicGood);
         assertEq(_staking.getNodeCount(), 1);
 
         DataTypes.Node[] memory nodes = _staking.getNodesWithPagination(0, 2);
         assertEq(nodes.length, 1);
-        _checkNode(nodes[0].account, nodes[0].name, nodes[0].description, nodes[0].taxFraction, nodes[0].publicGood);
+        _checkNode(
+            nodes[0].account,
+            nodes[0].name,
+            nodes[0].description,
+            nodes[0].taxRateBasisPoints,
+            nodes[0].publicGood
+        );
     }
 
     function testCreateNodeToZeroAddressFail() public {
@@ -189,45 +195,45 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.stopPrank();
     }
 
-    function testSetTaxFraction4Node(uint64 taxFraction) public {
-        vm.assume(taxFraction <= _denominator());
+    function testSetTaxRate4Node(uint64 taxRateBasisPoints) public {
+        vm.assume(taxRateBasisPoints <= _denominator());
 
         _createNode(alice);
 
         vm.startPrank(alice);
         expectEmit();
-        emit Events.NodeTaxFractionSet(alice, taxFraction);
-        _staking.setTaxFraction4Node(alice, taxFraction);
+        emit Events.NodeTaxRateBasisPointsSet(alice, taxRateBasisPoints);
+        _staking.setTaxRateBasisPoints4Node(alice, taxRateBasisPoints);
         vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.taxFraction, taxFraction);
+        assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
     }
 
-    function testSetTaxFraction4PublicPool(uint64 expectedTaxFraction) public {
-        vm.assume(expectedTaxFraction <= _denominator());
+    function testSetTaxRate4PublicPool(uint64 expectedTaxRateBasisPoints) public {
+        vm.assume(expectedTaxRateBasisPoints <= _denominator());
 
         vm.startPrank(oracleAccount);
         expectEmit();
-        emit Events.PublicPoolTaxFractionSet(expectedTaxFraction);
-        _staking.setTaxFraction4PublicPool(expectedTaxFraction);
+        emit Events.PublicPoolTaxRateBasisPointsSet(expectedTaxRateBasisPoints);
+        _staking.setTaxRateBasisPoints4PublicPool(expectedTaxRateBasisPoints);
         vm.stopPrank();
 
-        uint64 realTaxFraction = _staking.getPublicPool().taxFraction;
+        uint64 realTaxRateBasisPoints = _staking.getPublicPool().taxRateBasisPoints;
 
-        assertEq(realTaxFraction, expectedTaxFraction);
+        assertEq(realTaxRateBasisPoints, expectedTaxRateBasisPoints);
     }
 
-    function testSetTaxFractionError(uint64 taxFraction) public {
-        vm.assume(taxFraction > _denominator());
+    function testSetTaxRateError(uint64 taxRateBasisPoints) public {
+        vm.assume(taxRateBasisPoints > _denominator());
         vm.startPrank(alice);
-        vm.expectRevert(abi.encodeWithSelector(TaxFractionTooLarge.selector));
-        _staking.setTaxFraction4Node(alice, taxFraction);
+        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
+        _staking.setTaxRateBasisPoints4Node(alice, taxRateBasisPoints);
         vm.stopPrank();
 
         vm.startPrank(oracleAccount);
-        vm.expectRevert(abi.encodeWithSelector(TaxFractionTooLarge.selector));
-        _staking.setTaxFraction4PublicPool(taxFraction);
+        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
+        _staking.setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
         vm.stopPrank();
     }
 
@@ -426,7 +432,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         nodeAddrs[0] = alice;
 
         uint256[] memory taxAmounts = new uint256[](1);
-        taxAmounts[0] = _getFullTax(requestFees[0] + stakingRewards[0], _defaultTaxFraction);
+        taxAmounts[0] = _getFullTax(requestFees[0] + stakingRewards[0], _defaultTaxRateBasisPoints);
         expectEmit();
 
         emit Events.RewardDistributed(
@@ -502,16 +508,16 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         uint256 rewards = 10000 ether;
         uint256 stakingPool = 1000 ether;
-        uint64 taxFraction = _defaultTaxFraction;
+        uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
         (uint256 tax1, uint256 partialTax1) = _internalStakingTest.calculateReward(
             rewards,
-            taxFraction,
+            taxRateBasisPoints,
             operationPool,
             stakingPool
         );
 
-        assertEq(tax1, _getFullTax(rewards, taxFraction));
+        assertEq(tax1, _getFullTax(rewards, taxRateBasisPoints));
         assertEq(partialTax1, 0);
     }
 
@@ -524,11 +530,11 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 stakingPool = operationPool * stakeRatio;
 
         uint256 rewards = 10000 ether;
-        uint64 taxFraction = _defaultTaxFraction;
+        uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
         (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
             rewards,
-            taxFraction,
+            taxRateBasisPoints,
             operationPool,
             stakingPool
         );
@@ -543,11 +549,11 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.assume(stakingPool > 25 * operationPool && stakeRatio < 100 * operationPool);
 
         uint256 rewards = 10000 ether;
-        uint64 taxFraction = _defaultTaxFraction;
+        uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
         (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
             rewards,
-            taxFraction,
+            taxRateBasisPoints,
             operationPool,
             stakingPool
         );
@@ -605,13 +611,13 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         address nodeAddr,
         string memory name,
         string memory description,
-        uint64 taxFraction,
+        uint64 taxRateBasisPoints,
         bool publicGood
     ) internal {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.name, name);
         assertEq(node.description, description);
-        assertEq(node.taxFraction, taxFraction);
+        assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
         assertEq(node.publicGood, publicGood);
     }
 
@@ -619,7 +625,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         return 10000;
     }
 
-    function _getFullTax(uint256 rewards, uint64 taxFraction) internal pure returns (uint256) {
-        return (rewards * taxFraction) / _denominator();
+    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
+        return (rewards * taxRateBasisPoints) / _denominator();
     }
 }

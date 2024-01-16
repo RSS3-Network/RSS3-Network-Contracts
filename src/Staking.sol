@@ -36,9 +36,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
     address public immutable TREASURY; // solhint-disable-line private-vars-leading-underscore
 
-    /// @dev slash fraction
-    uint256 public immutable NODE_SLASH_FRACTION;
-    uint256 public immutable USER_SLASH_FRACTION;
+    /// @dev slash rate
+    uint256 public immutable NODE_SLASH_RATE_BASIS_POINTS;
+    uint256 public immutable USER_SLASH_RATE_BASIS_POINTS;
 
     /// @dev the minimal tokens for deposit, 10,000 by default.
     /// node operator can receive tax if it stakes at least 10,000 tokens, otherwise nothing
@@ -93,8 +93,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
      * @param stakeRatio The stake ratio of the node operator.
      * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
      * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its deposit.
-     * @param nodeSlashFraction Slash fraction for node operator.
-     * @param userSlashFraction Slash fraction for user.
+     * @param nodeSlashRateBasisPoints Slash rate in basis points for node operator.
+     * @param userSlashRateBasisPoints Slash rate measured in basis points for user.
      * @param stakeRatio The stake ratio of the node operator.
      * @param minDeposit The deposit base line of the node operator.
      */
@@ -104,8 +104,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 stakeRatio,
         uint256 stakeUnbondingPeriod,
         uint256 depositUnbondingPeriod,
-        uint256 nodeSlashFraction,
-        uint256 userSlashFraction,
+        uint256 nodeSlashRateBasisPoints,
+        uint256 userSlashRateBasisPoints,
         uint256 minDeposit
     ) {
         TOKEN = token;
@@ -116,8 +116,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         STAKE_UNBONDING_PERIOD = stakeUnbondingPeriod;
         DEPOSIT_UNBONDING_PERIOD = depositUnbondingPeriod;
 
-        NODE_SLASH_FRACTION = nodeSlashFraction;
-        USER_SLASH_FRACTION = userSlashFraction;
+        NODE_SLASH_RATE_BASIS_POINTS = nodeSlashRateBasisPoints;
+        USER_SLASH_RATE_BASIS_POINTS = userSlashRateBasisPoints;
 
         MIN_DEPOSIT = minDeposit;
     }
@@ -148,10 +148,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         address to,
         string calldata name,
         string calldata description,
-        uint64 taxFraction,
+        uint64 taxRateBasisPoints,
         bool publicGood
     ) external override {
-        _createNode(to, name, description, taxFraction, publicGood);
+        _createNode(to, name, description, taxRateBasisPoints, publicGood);
     }
 
     /// @inheritdoc IStaking
@@ -173,13 +173,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function createNodeAndDeposit(
         string calldata name,
         string calldata description,
-        uint64 taxFraction,
+        uint64 taxRateBasisPoints,
         bool publicGood,
         uint256 amount
     ) external override whenNotPaused {
         if (publicGood) revert PublicGoodNodeNotDeposited();
 
-        _createNode(msg.sender, name, description, taxFraction, publicGood);
+        _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
         _deposit(msg.sender, amount);
     }
 
@@ -209,24 +209,24 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function setTaxFraction4Node(address nodeAddr, uint64 taxFraction) external override {
-        if (taxFraction > _denominator()) revert TaxFractionTooLarge();
+    function setTaxRateBasisPoints4Node(address nodeAddr, uint64 taxRateBasisPoints) external override {
+        if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (msg.sender != node.account) revert CallerNotNodeOwner();
 
-        node.taxFraction = taxFraction;
+        node.taxRateBasisPoints = taxRateBasisPoints;
 
-        emit Events.NodeTaxFractionSet(nodeAddr, taxFraction);
+        emit Events.NodeTaxRateBasisPointsSet(nodeAddr, taxRateBasisPoints);
     }
 
     /// @inheritdoc IStaking
-    function setTaxFraction4PublicPool(uint64 taxFraction) external override onlyRole(ORACLE_ROLE) {
-        if (taxFraction > _denominator()) revert TaxFractionTooLarge();
+    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external override onlyRole(ORACLE_ROLE) {
+        if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
-        _publicPool.taxFraction = taxFraction;
+        _publicPool.taxRateBasisPoints = taxRateBasisPoints;
 
-        emit Events.PublicPoolTaxFractionSet(taxFraction);
+        emit Events.PublicPoolTaxRateBasisPointsSet(taxRateBasisPoints);
     }
 
     /// @inheritdoc IStaking
@@ -329,12 +329,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             if (node.account == address(0)) revert NodeNotExists();
 
             // slash operation pool tokens
-            uint256 slashedOperationPool = (node.operationPoolTokens * NODE_SLASH_FRACTION) / _denominator();
+            uint256 slashedOperationPool = (node.operationPoolTokens * NODE_SLASH_RATE_BASIS_POINTS) / _denominator();
             _decreaseOperationPool(node, slashedOperationPool);
 
             // slash staking pool tokens
             // TODO: here the staking pool tokens will be decreased...
-            uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_FRACTION) / _denominator();
+            uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_RATE_BASIS_POINTS) / _denominator();
             _decreaseStakingPool(node, slashedStakingPool);
 
             node.slashedTokens += slashedOperationPool + slashedStakingPool;
@@ -467,7 +467,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     function _distributePublicPoolRewards(uint256 publicPoolReward) internal returns (uint256) {
         // rewards for public pool
-        uint256 tax = _getFullTax(publicPoolReward, _publicPool.taxFraction);
+        uint256 tax = _getFullTax(publicPoolReward, _publicPool.taxRateBasisPoints);
 
         _increaseStakingPool(_publicPool, publicPoolReward - tax);
 
@@ -496,7 +496,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             uint256 receivedTax;
             (fullTax, receivedTax) = _getTax(
                 rewards,
-                node.taxFraction,
+                node.taxRateBasisPoints,
                 node.operationPoolTokens,
                 node.stakingPoolTokens
             );
@@ -551,11 +551,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         address nodeAddr,
         string calldata name,
         string calldata description,
-        uint64 taxFraction,
+        uint64 taxRateBasisPoints,
         bool publicGood
     ) internal {
         if (nodeAddr == address(0)) revert CreateNodeToZeroAddress();
-        if (taxFraction > _denominator()) revert TaxFractionTooLarge();
+        if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
         DataTypes.Node storage node = _nodes[nodeAddr];
         // can't delete a non-exist node
@@ -563,13 +563,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         node.account = nodeAddr;
         node.name = name;
         node.description = description;
-        node.taxFraction = taxFraction;
+        node.taxRateBasisPoints = taxRateBasisPoints;
         node.publicGood = publicGood;
 
         // add to node list
         _nodeAddrs.add(nodeAddr);
 
-        emit Events.NodeCreated(nodeAddr, name, description, taxFraction, publicGood);
+        emit Events.NodeCreated(nodeAddr, name, description, taxRateBasisPoints, publicGood);
     }
 
     function _deposit(address nodeAddr, uint256 amount) internal {
@@ -684,11 +684,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
      */
     function _getTax(
         uint256 rewards,
-        uint64 taxFraction,
+        uint64 taxRateBasisPoints,
         uint256 operationPool,
         uint256 stakingPool
     ) internal view returns (uint256, uint256) {
-        uint256 fullTax = _getFullTax(rewards, taxFraction);
+        uint256 fullTax = _getFullTax(rewards, taxRateBasisPoints);
 
         if (operationPool < MIN_DEPOSIT) {
             // node will receive no tax
@@ -703,8 +703,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
-    function _getFullTax(uint256 rewards, uint64 taxFraction) internal pure returns (uint256) {
-        return (rewards * taxFraction) / _denominator();
+    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
+        return (rewards * taxRateBasisPoints) / _denominator();
     }
 
     /// @dev convert shares to equivalent tokens

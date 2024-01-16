@@ -8,10 +8,16 @@ library Events {
      * @param nodeAddr Address of node operator.
      * @param name Human-readable name.
      * @param description Description of node.
-     * @param taxFraction Tax percentage measured in basis points. Each basis point represents 0.01%.
+     * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
      */
-    event NodeCreated(address indexed nodeAddr, string name, string description, uint64 taxFraction, bool publicGood);
+    event NodeCreated(
+        address indexed nodeAddr,
+        string name,
+        string description,
+        uint64 taxRateBasisPoints,
+        bool publicGood
+    );
 
     /**
      * @dev Emitted on deleteNode()
@@ -35,16 +41,16 @@ library Events {
     event WithdrawRequested(address indexed nodeAddr, uint256 indexed amount, uint256 indexed requestId);
 
     /**
-     * @dev Emitted on setNodeTaxFraction().
+     * @dev Emitted on setTaxRateBasisPoints4Node().
      * @param nodeAddr Address of node operator.
-     * @param taxFraction The new tax fraction of node operator.
+     * @param taxRateBasisPoints The new tax rate measured in basis points of node operator.
      */
-    event NodeTaxFractionSet(address indexed nodeAddr, uint64 indexed taxFraction);
+    event NodeTaxRateBasisPointsSet(address indexed nodeAddr, uint64 indexed taxRateBasisPoints);
     /**
-     * @dev Emitted on setTaxFraction4PublicPool().
-     * @param taxFraction The new tax fraction of public pool.
+     * @dev Emitted on setTaxRateBasisPoints4PublicPool().
+     * @param taxRateBasisPoints The new tax rate measured in basis points of public pool.
      */
-    event PublicPoolTaxFractionSet(uint64 indexed taxFraction);
+    event PublicPoolTaxRateBasisPointsSet(uint64 indexed taxRateBasisPoints);
 
     /**
      * @dev Emitted on distributeRewards()
