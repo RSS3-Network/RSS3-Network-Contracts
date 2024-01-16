@@ -202,50 +202,6 @@ forge build
 
 forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy --ffi
 </code></pre>
-<h3 id="contracts"><a class="header" href="#contracts">Contracts</a></h3>
-<p>Params need to be configured during initialization.</p>
-<ul>
-<li>pauseAccount: Address who can pause/unpause the Staking contract.</li>
-<li>oracleAccount: Address who can distribute rewards to the Staking contract.</li>
-<li>chips: Chips contract.</li>
-<li>token: Staking token contract.</li>
-<li>stakeUnbondingPeriod: Time in seconds user need to wait to unstake its stake.</li>
-<li>depositUnbondingPeriod: Time in seconds node operator need to wait to withdraw its deposit.</li>
-<li>nodeSlashFraction: Slash fraction for node operator.</li>
-<li>userSlashFraction: Slash fraction for user.</li>
-<li>stakeRatio: The stake ratio of the node operator.</li>
-<li>stakeBaseline: The stake base line of the node operator.</li>
-<li>depositBaseline: The deposit base line of the node operator.</li>
-<li>treasury: The treasury address.</li>
-</ul>
-<p>For a node operator, available methods are:</p>
-<ul>
-<li>createNodeAndDeposit: start either a public good node or a normal node. </li>
-<li>createNode</li>
-<li>deleteNode(only node operator)</li>
-<li>deposit(only node operator)</li>
-<li>requestWithdrawal(only node operator)</li>
-<li>claimWithdrawal(only node operator)</li>
-<li>setNodeTaxFraction(only node operator)</li>
-</ul>
-<p>For all users,</p>
-<ul>
-<li>stake</li>
-<li>requestUnstake</li>
-<li>claimUnstake</li>
-<li>stakeToPublicPool</li>
-<li>requestUnstakeFromPublicPool</li>
-<li>delegate</li>
-<li>undelegate</li>
-</ul>
-<p>For admin,</p>
-<ul>
-<li>setTaxFraction4PublicPool</li>
-<li>distributeRewards</li>
-<li>pause</li>
-<li>unpause</li>
-<li>slashNodes</li>
-</ul>
 
                     </main>
 
