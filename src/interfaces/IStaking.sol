@@ -153,14 +153,14 @@ interface IStaking {
      * - epochInfo[2]: The end timestamp of the current epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param requestFees Amounts of request fees.
-     * @param requestBonuses Amounts of request bonuses.
+     * @param operationRewards Amounts of request bonuses.
      * @param stakingRewards Amount of staking rewards to staking pool.
      */
     function distributeRewards(
         uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
-        uint256[] calldata requestBonuses,
+        uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
         uint256 publicPoolReward
     ) external;

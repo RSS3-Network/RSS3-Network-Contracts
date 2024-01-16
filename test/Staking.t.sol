@@ -415,8 +415,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256[] memory requestFees = new uint256[](1);
         requestFees[0] = 1 ether;
 
-        uint256[] memory requestBonuses = new uint256[](1);
-        requestBonuses[0] = 1 ether;
+        uint256[] memory operationRewards = new uint256[](1);
+        operationRewards[0] = 1 ether;
 
         uint256[] memory stakingRewards = new uint256[](1);
         stakingRewards[0] = 1 ether;
@@ -441,7 +441,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             endTime,
             nodeAddrs,
             requestFees,
-            requestBonuses,
+            operationRewards,
             stakingRewards,
             taxAmounts
         );
@@ -449,14 +449,14 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             [1, startTime, endTime],
             nodeAddrs,
             requestFees,
-            requestBonuses,
+            operationRewards,
             stakingRewards,
             1 ether // public pool reward
         );
 
         vm.stopPrank();
 
-        _checkDistribution(amount, nodeAddrs, taxAmounts, requestFees, requestBonuses, stakingRewards);
+        _checkDistribution(amount, nodeAddrs, taxAmounts, requestFees, operationRewards, stakingRewards);
 
         uint256[] memory tokenIds = new uint256[](chipsCount);
         for (uint256 i = startTokenId; i <= endTokenId; i++) {
@@ -472,7 +472,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         vm.stopPrank();
 
-        _unstakeAndCheckAmount(bob, amount, tokenIds, taxAmounts, requestBonuses, stakingRewards);
+        _unstakeAndCheckAmount(bob, amount, tokenIds, taxAmounts, operationRewards, stakingRewards);
     }
 
     function testWithdraw2Treasury() public {
@@ -571,7 +571,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 amount,
         uint256[] memory tokenIds,
         uint256[] memory taxAmounts,
-        uint256[] memory requestBonuses,
+        uint256[] memory operationRewards,
         uint256[] memory stakingRewards
     ) internal {
         vm.startPrank(sender);
@@ -582,7 +582,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256[] memory requestIds = new uint256[](1);
         requestIds[0] = requestId;
         expectEmit();
-        uint256 allRewards = amount + requestBonuses[0] + stakingRewards[0] - taxAmounts[0];
+        uint256 allRewards = amount + operationRewards[0] + stakingRewards[0] - taxAmounts[0];
         emit Transfer(address(_staking), bob, allRewards);
         _staking.claimUnstake(requestIds);
         vm.stopPrank();
@@ -593,7 +593,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         address[] memory nodeAddrs,
         uint256[] memory taxAmounts,
         uint256[] memory requestFees,
-        uint256[] memory requestBonuses,
+        uint256[] memory operationRewards,
         uint256[] memory stakingRewards
     ) internal {
         // status check
@@ -602,7 +602,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             uint256 newOperationPool = amount + requestFees[i] + taxAmounts[i];
             assertEq(node.operationPoolTokens, newOperationPool);
 
-            uint256 newstakingPool = amount + requestBonuses[i] + stakingRewards[i] - taxAmounts[i];
+            uint256 newstakingPool = amount + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
             assertEq(node.stakingPoolTokens, newstakingPool);
         }
     }

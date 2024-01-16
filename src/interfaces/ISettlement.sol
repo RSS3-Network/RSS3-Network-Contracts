@@ -7,7 +7,7 @@ interface ISettlement {
      * @param staking Address of the Staking contract.
      * @param oracleAccount Address who makes settlement with the Staking contract.
      * @param startTime The start time of the first epoch.
-     * @param requestBonusPercent The percentage of the total rewards to be allocated to the request bonus.
+     * @param operationRewardsPercent The percentage of the total rewards to be allocated to the request bonus.
      * Others will be allocated to the staking rewards.
      * @param startEpoch The start epoch.
      */
@@ -15,7 +15,7 @@ interface ISettlement {
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 requestBonusPercent,
+        uint256 operationRewardsPercent,
         uint256 startEpoch
     ) external;
 
@@ -70,7 +70,7 @@ interface ISettlement {
 
     /**
      * @notice  Returns the bonus info.
-     * @return (requestBonusPerEpoch, stakingRewardsPerEpoch) The amount of request bonus per epoch.
+     * @return (operationRewardsPerEpoch, stakingRewardsPerEpoch) The amount of request bonus per epoch.
      */
     function getBonusInfo() external view returns (uint256, uint256);
 }

@@ -59,7 +59,7 @@ library Events {
      * @param endTimestamp The end timestamp of the epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param requestFees Amount of request fees to operation pool.
-     * @param requestBonuses Amount of bonuses to staking pool.
+     * @param operationRewards Amount of bonuses to staking pool.
      * @param stakingRewards Amount of rewards to staking pool.
      * @param taxAmounts Amount of tax to node operator.
      */
@@ -69,7 +69,7 @@ library Events {
         uint256 endTimestamp,
         address[] nodeAddrs,
         uint256[] requestFees,
-        uint256[] requestBonuses,
+        uint256[] operationRewards,
         uint256[] stakingRewards,
         uint256[] taxAmounts
     );

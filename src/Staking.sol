@@ -269,13 +269,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
-        uint256[] calldata requestBonuses,
+        uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
         uint256 publicPoolReward
     ) external override onlyRole(ORACLE_ROLE) {
         if (
             nodeAddrs.length != requestFees.length ||
-            nodeAddrs.length != requestBonuses.length ||
+            nodeAddrs.length != operationRewards.length ||
             nodeAddrs.length != stakingRewards.length
         ) revert InvalidArrayLength();
 
@@ -292,7 +292,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         );
 
         // distribute rewards for other nodes
-        uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, requestFees, requestBonuses, stakingRewards);
+        uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, requestFees, operationRewards, stakingRewards);
 
         emit Events.RewardDistributed(
             epochInfo[0],
@@ -300,7 +300,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             epochInfo[2],
             nodeAddrs,
             requestFees,
-            requestBonuses,
+            operationRewards,
             stakingRewards,
             taxAmounts
         );
@@ -477,7 +477,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function _distributeNodesRewards(
         address[] memory nodeAddrs,
         uint256[] memory requestFees,
-        uint256[] memory requestBonuses,
+        uint256[] memory operationRewards,
         uint256[] memory stakingRewards
     ) internal returns (uint256[] memory) {
         uint256 remainedTax;
@@ -490,7 +490,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             }
 
             // request bonus and staking rewards are sent to staking pool
-            uint256 rewards = requestBonuses[i] + stakingRewards[i];
+            uint256 rewards = operationRewards[i] + stakingRewards[i];
 
             uint256 fullTax;
             uint256 receivedTax;

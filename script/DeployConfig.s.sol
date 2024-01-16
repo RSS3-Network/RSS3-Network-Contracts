@@ -29,7 +29,7 @@ contract DeployConfig is Script {
     string public chipsName;
     string public chipsSymbol;
     uint256 public settlementStartTime;
-    uint256 public requsetBonusPercent;
+    uint256 public operationRewardsPercent;
     uint256 public startEpoch;
 
     constructor(string memory _path) {
@@ -59,7 +59,7 @@ contract DeployConfig is Script {
         chipsName = stdJson.readString(_json, "$.chipsName");
         chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");
         settlementStartTime = stdJson.readUint(_json, "$.settlementStartTime");
-        requsetBonusPercent = stdJson.readUint(_json, "$.requsetBonusPercent");
+        operationRewardsPercent = stdJson.readUint(_json, "$.operationRewardsPercent");
         startEpoch = stdJson.readUint(_json, "$.startEpoch");
     }
 }

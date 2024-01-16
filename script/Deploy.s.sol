@@ -165,7 +165,7 @@ contract Deploy is Deployer {
             stakingProxy,
             cfg.oracleAccount(),
             cfg.settlementStartTime(),
-            cfg.requsetBonusPercent(),
+            cfg.operationRewardsPercent(),
             cfg.startEpoch()
         );
 

@@ -32,10 +32,10 @@ contract SettlementTest is CommonTest {
         _createNode(alice);
         _createNode(bob);
 
-        (uint256 requestBonusPerEpoch, uint256 stakingRewardPerEpoch) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 stakingRewardPerEpoch) = _settlement.getBonusInfo();
 
         expectEmit();
-        emit Transfer(address(_settlement), address(_staking), requestBonusPerEpoch + stakingRewardPerEpoch);
+        emit Transfer(address(_settlement), address(_staking), operationRewardsPerEpoch + stakingRewardPerEpoch);
         vm.prank(oracleAccount);
         _settlement.distributeRewards(
             array(alice, bob), // node addresses

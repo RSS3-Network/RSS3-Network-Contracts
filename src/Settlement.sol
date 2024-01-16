@@ -30,7 +30,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     IERC20 internal _token;
 
     uint256 internal _totalStakingRewardsPerEpoch;
-    uint256 internal _totalRequestBonusPerEpoch;
+    uint256 internal _totalOperationRewardsPerEpoch;
 
     /// @dev The current epoch.
     uint256 internal _epoch;
@@ -45,7 +45,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 requestBonusPercent,
+        uint256 operationRewardsPercent,
         uint256 startEpoch // set as param for upgradeability
     ) external override initializer {
         _staking = staking;
@@ -53,13 +53,13 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         _epoch = startEpoch;
         _startTimestamp = startTime;
 
-        _updateRewardsRatio(requestBonusPercent);
+        _updateRewardsRatio(operationRewardsPercent);
 
         _grantRole(ORACLE_ROLE, oracleAccount);
     }
 
-    function updateRewardsRatio(uint256 requestBonusPercent) external override onlyRole(ORACLE_ROLE) {
-        _updateRewardsRatio(requestBonusPercent);
+    function updateRewardsRatio(uint256 operationRewardsPercent) external override onlyRole(ORACLE_ROLE) {
+        _updateRewardsRatio(operationRewardsPercent);
     }
 
     /// @inheritdoc ISettlement
@@ -71,7 +71,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         if (nodeAddrs.length != requestFees.length || nodeAddrs.length != requestCounts.length)
             revert InvalidArrayLength();
 
-        uint256[] memory requestBonuses = _getRequestBonuses(_totalRequestBonusPerEpoch, requestCounts);
+        uint256[] memory operationRewards = _getOperationRewards(_totalOperationRewardsPerEpoch, requestCounts);
 
         (uint256 publicPoolReward, uint256[] memory stakingRewards) = _getStakingRewards(nodeAddrs);
 
@@ -81,7 +81,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             [_epoch, _startTimestamp, endTimestamp],
             nodeAddrs,
             requestFees,
-            requestBonuses,
+            operationRewards,
             stakingRewards,
             publicPoolReward
         );
@@ -89,7 +89,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         _startTimestamp = endTimestamp;
         _epoch++;
 
-        IERC20(_token).safeTransfer(_staking, _totalStakingRewardsPerEpoch + _totalRequestBonusPerEpoch);
+        IERC20(_token).safeTransfer(_staking, _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch);
     }
 
     /// @inheritdoc ISettlement
@@ -123,17 +123,19 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @inheritdoc ISettlement
     function getBonusInfo() external view override returns (uint256, uint256) {
-        return (_totalRequestBonusPerEpoch, _totalStakingRewardsPerEpoch);
+        return (_totalOperationRewardsPerEpoch, _totalStakingRewardsPerEpoch);
     }
 
-    function _updateRewardsRatio(uint256 requestBonusPercent) internal {
+    function _updateRewardsRatio(uint256 operationRewardsPercent) internal {
         // rewardsPerEpoch = TOTAL_REWARDS_PER_YEAR / (365 days / EPOCH_DURATION)
-        // requestBonusPerEpoch = rewardsPerEpoch * (requestBonusPercent / 100)%
-        // stakingBonusPerEpoch = rewardsPerEpoch *  (1 - (requestBonusPercent / 100))%
+        // operationRewardsPerEpoch = rewardsPerEpoch * (operationRewardsPercent / 100)%
+        // stakingBonusPerEpoch = rewardsPerEpoch *  (1 - (operationRewardsPercent / 100))%
 
-        _totalRequestBonusPerEpoch = (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * requestBonusPercent) / (100 * 365 days);
+        _totalOperationRewardsPerEpoch =
+            (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) /
+            (100 * 365 days);
         _totalStakingRewardsPerEpoch =
-            ((TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION) * (100 - requestBonusPercent)) /
+            ((TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION) * (100 - operationRewardsPercent)) /
             (100 * 365 days);
     }
 
@@ -165,7 +167,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @dev returns request bonuses
-    function _getRequestBonuses(
+    function _getOperationRewards(
         uint256 totalBonus,
         uint256[] memory requestCounts
     ) internal pure returns (uint256[] memory) {
