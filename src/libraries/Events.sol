@@ -52,7 +52,7 @@ library Events {
      * @param startTimestamp The start timestamp of the epoch.
      * @param endTimestamp The end timestamp of the epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
-     * @param requestFees Amount of request fees to operating pool.
+     * @param requestFees Amount of request fees to operation pool.
      * @param requestBonuses Amount of bonuses to staking pool.
      * @param stakingRewards Amount of rewards to staking pool.
      * @param taxAmounts Amount of tax to node operator.
@@ -151,12 +151,12 @@ library Events {
     /**
      * @dev Emitted on slashNode()
      * @param nodeAddr The address of node to slash.
-     * @param slashedOperatingPool Amount of operating pool tokens slashed.
+     * @param slashedOperationPool Amount of operation pool tokens slashed.
      * @param slashedStakingPool Amount of staking pool tokens slashed.
      */
     event NodeSlashed(
         address indexed nodeAddr,
-        uint256 indexed slashedOperatingPool,
+        uint256 indexed slashedOperationPool,
         uint256 indexed slashedStakingPool
     );
 }

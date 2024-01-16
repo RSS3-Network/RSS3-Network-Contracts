@@ -30,9 +30,9 @@ contract InternalStaking is Staking {
     function calculateReward(
         uint256 rewards,
         uint64 taxFraction,
-        uint256 operatingPool,
+        uint256 operationPool,
         uint256 stakingPool
     ) external view returns (uint256, uint256) {
-        return super._getTax(rewards, taxFraction, operatingPool, stakingPool);
+        return super._getTax(rewards, taxFraction, operationPool, stakingPool);
     }
 }
