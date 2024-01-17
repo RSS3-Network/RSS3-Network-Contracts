@@ -23,7 +23,6 @@ contract DeployConfig is Script {
     uint256 public nodeSlashRateBasisPoints;
     uint256 public userSlashRateBasisPoints;
     uint256 public stakeRatio;
-    uint256 public stakeBaseline;
     uint256 public depositBaseline;
     address public treasury;
     string public chipsName;
@@ -53,7 +52,6 @@ contract DeployConfig is Script {
         nodeSlashRateBasisPoints = stdJson.readUint(_json, "$.nodeSlashRateBasisPoints");
         userSlashRateBasisPoints = stdJson.readUint(_json, "$.userSlashRateBasisPoints");
         stakeRatio = stdJson.readUint(_json, "$.stakeRatio");
-        stakeBaseline = stdJson.readUint(_json, "$.stakeBaseline");
         depositBaseline = stdJson.readUint(_json, "$.depositBaseline");
         treasury = stdJson.readAddress(_json, "$.treasury");
         chipsName = stdJson.readString(_json, "$.chipsName");
