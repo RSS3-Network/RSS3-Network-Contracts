@@ -74,4 +74,10 @@ interface IErrors {
 
     /// @dev Reward distribution failed
     error RewardDistributionFailed();
+
+    /// @dev Inffucient value to stake
+    error InsufficientValue();
+
+    /// @dev Transfer failed
+    error TransferFailed();
 }

@@ -62,13 +62,13 @@ interface IStaking {
         uint64 taxRateBasisPoints,
         bool publicGood,
         uint256 amount
-    ) external;
+    ) external payable;
 
     /**
      * @notice Deposits tokens for node operator.
      * @param amount Amount of tokens to deposit.
      */
-    function deposit(uint256 amount) external;
+    function deposit(uint256 amount) external payable;
 
     /**
      * @notice Requests withdraw tokens from operation pool for node operator.
@@ -105,7 +105,10 @@ interface IStaking {
      * @return startTokenId The start of new minted chips token ids.
      * @return endTokenId The end of new minted chips token ids.
      */
-    function stake(address nodeAddr, uint256 amount) external returns (uint256 startTokenId, uint256 endTokenId);
+    function stake(
+        address nodeAddr,
+        uint256 amount
+    ) external payable returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
      * @notice Requests unstake tokens from a node operator.
@@ -124,15 +127,14 @@ interface IStaking {
 
     /**
      * @notice Stakes tokens to public pool.
-     * @param nodeAddr The address of node to like.
-     * @param amount Amount of tokens to stake.
+     * @param nodeAddr The address of node to like. msg.value carries the amount of tokens to stake.
      * @return startTokenId The start of new minted chips token ids.
      * @return endTokenId The end of new minted chips token ids.
      */
     function stakeToPublicPool(
         address nodeAddr,
         uint256 amount
-    ) external returns (uint256 startTokenId, uint256 endTokenId);
+    ) external payable returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
      * @notice Requests unstake tokens from public pool.

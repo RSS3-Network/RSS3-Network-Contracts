@@ -122,6 +122,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         MIN_DEPOSIT = minDeposit;
     }
 
+    receive() external payable {}
+
     /// @inheritdoc IStaking
     function initialize(address chips, address pauseAccount, address oracleAccount) external override initializer {
         _chips = chips;
@@ -176,15 +178,19 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint64 taxRateBasisPoints,
         bool publicGood,
         uint256 amount
-    ) external override whenNotPaused {
+    ) external payable override whenNotPaused {
         if (publicGood) revert PublicGoodNodeNotDeposited();
+
+        if (msg.value < amount) revert InsufficientValue();
 
         _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
         _deposit(msg.sender, amount);
     }
 
     /// @inheritdoc IStaking
-    function deposit(uint256 amount) external override whenNotPaused {
+    function deposit(uint256 amount) external payable override whenNotPaused {
+        if (msg.value < amount) revert InsufficientValue();
+
         _deposit(msg.sender, amount);
     }
 
@@ -240,13 +246,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function stake(
         address nodeAddr,
         uint256 amount
-    ) external override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
+    ) external payable override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // validate node
         if (node.account == address(0)) revert NodeNotExists();
         if (node.publicGood) revert PublicGoodNodeNotStaked(nodeAddr);
+        if (msg.value < amount) revert InsufficientValue();
 
-        (startTokenId, endTokenId) = _stakeToNode(node, amount, nodeAddr);
+        (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr); // TODO: use amount or msg.value?
     }
 
     /// @inheritdoc IStaking
@@ -315,11 +322,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function stakeToPublicPool(
         address nodeAddr,
         uint256 amount
-    ) external override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
+    ) external payable override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
-        (startTokenId, endTokenId) = _stakeToNode(_publicPool, amount, nodeAddr);
+        if (msg.value < amount) revert InsufficientValue();
+
+        (startTokenId, endTokenId) = _stakeToNode(_publicPool, msg.value, nodeAddr); // TODO: use amount or msg.value?
     }
 
     /// @inheritdoc IStaking
@@ -346,7 +355,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 amount = _getTreasuryAmount();
-        IERC20(TOKEN).safeTransfer(TREASURY, amount);
+        (bool success, ) = address(TREASURY).call{value: amount}("");
+        if (!success) revert TransferFailed();
     }
 
     /// @inheritdoc IStaking
@@ -578,8 +588,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         _increaseOperationPool(node, amount);
 
-        IERC20(TOKEN).safeTransferFrom(nodeAddr, address(this), amount);
-
         emit Events.Deposited(nodeAddr, amount);
     }
 
@@ -595,16 +603,20 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         // update stakedAmount
         uint256 stakedAmount = _sharesToTokens(chipsCount * SHARES_PER_CHIP, node.totalShares, node.stakingPoolTokens);
+
         _increaseStakingPool(node, stakedAmount);
 
         // update total shares
         node.totalShares += (chipsCount * SHARES_PER_CHIP);
-        // transfer tokens
-        IERC20(TOKEN).safeTransferFrom(msg.sender, address(this), stakedAmount);
 
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
 
         _families.push(endTokenId.toUint96(), uint160(nodeAddr));
+
+        if (amount - stakedAmount > 0) {
+            (bool success, ) = address(msg.sender).call{value: amount - stakedAmount}(""); // refund?
+            if (!success) revert TransferFailed();
+        }
 
         emit Events.Staked(msg.sender, node.account, stakedAmount, startTokenId, endTokenId);
     }
@@ -618,7 +630,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         delete _pendingUnstake[requestId];
 
-        IERC20(TOKEN).safeTransfer(req.owner, req.unstakeAmount);
+        (bool success, ) = address(req.owner).call{value: req.unstakeAmount}("");
+        if (!success) revert TransferFailed();
 
         emit Events.UnstakeClaimed(requestId, req.nodeAddr, req.owner, req.unstakeAmount);
     }
@@ -633,7 +646,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         delete _pendingWithdrawals[requestId];
 
-        IERC20(TOKEN).safeTransfer(req.owner, req.amount);
+        (bool success, ) = address(req.owner).call{value: req.amount}("");
+        if (!success) revert TransferFailed();
 
         emit Events.WithdrawalClaimed(requestId);
     }
@@ -662,7 +676,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     function _getTreasuryAmount() internal view returns (uint256) {
-        uint256 balance = IERC20(TOKEN).balanceOf(address(this));
+        uint256 balance = address(this).balance;
         return balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
     }
 

@@ -23,6 +23,10 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _rss3.transfer(bob, _initialAmount);
         // transfer tokens to settlement contract
         _rss3.transfer(address(_settlement), 30000000 ether);
+
+        vm.deal(alice, _initialAmount);
+        vm.deal(bob, _initialAmount);
+        vm.deal(address(_settlement), 30000000 ether);
     }
 
     function testCreateNode(uint64 taxRateBasisPoints, bool publicGood) public {
@@ -66,10 +70,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _rss3.approve(address(_staking), amount);
 
         expectEmit();
-        emit Transfer(alice, address(_staking), amount);
-        expectEmit();
         emit Events.Deposited(alice, amount);
-        _staking.deposit(amount);
+        _staking.deposit{value: amount}(amount);
         vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
@@ -96,7 +98,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         vm.startPrank(alice);
         _rss3.approve(address(_staking), amount);
-        _staking.createNodeAndDeposit("Alice", "Alice's node", uint64(100), false, amount);
+        _staking.createNodeAndDeposit{value: amount}("Alice", "Alice's node", uint64(100), false, amount);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
@@ -121,10 +123,10 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         vm.startPrank(alice);
         _rss3.approve(address(_staking), amount);
-        _staking.createNodeAndDeposit("Alice", "Alice's node", uint64(100), false, amount);
+        _staking.createNodeAndDeposit{value: amount}("Alice", "Alice's node", uint64(100), false, amount);
 
         _rss3.approve(address(_staking), amount);
-        _staking.deposit(amount);
+        _staking.deposit{value: amount}(amount);
 
         uint256 requestId = _staking.requestWithdrawal(2 * amount);
         vm.stopPrank();
@@ -142,8 +144,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _createNode(alice);
 
         vm.startPrank(alice);
-        _rss3.approve(address(_staking), amount);
-        _staking.deposit(amount);
+        _staking.deposit{value: amount}(amount);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
@@ -155,8 +156,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         skip(depositUnbondingPeriod);
 
-        expectEmit();
-        emit Transfer(address(_staking), alice, amount);
         expectEmit();
         emit Events.WithdrawalClaimed(requestId);
         _staking.claimWithdrawal(requestIds);
@@ -174,8 +173,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
-        _rss3.approve(address(_staking), amount);
-        _staking.deposit(amount);
+        _staking.deposit{value: amount}(amount);
 
         uint256 value = 100 ether;
         assertEq(amount % value, 0);
@@ -247,17 +245,15 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _createNode(alice);
 
         vm.startPrank(bob);
-        _rss3.approve(address(_staking), amount);
 
-        expectEmit();
-        emit Transfer(bob, address(_staking), expectedStakedAmount);
         for (uint256 i = 1; i <= chipsCount; i++) {
             expectEmit();
             emit TestEvents.Transfer(address(0), bob, i);
         }
         expectEmit();
         emit Events.Staked(bob, alice, expectedStakedAmount, 1, chipsCount);
-        _staking.stake(alice, amount);
+
+        _staking.stake{value: expectedStakedAmount}(alice, amount);
         vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
@@ -269,7 +265,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         vm.startPrank(alice);
         vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeNotStaked.selector, bob));
-        _staking.stake(bob, amount);
+        _staking.stake{value: amount}(bob, amount);
         vm.stopPrank();
     }
 
@@ -281,11 +277,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 chipsCount = amount / _staking.SHARES_PER_CHIP();
 
         vm.startPrank(alice);
-        _rss3.approve(address(_staking), amount);
 
-        expectEmit();
-        emit Transfer(alice, address(_staking), amount);
-        _staking.stakeToPublicPool(alice, amount);
+        _staking.stakeToPublicPool{value: amount}(alice, amount);
         vm.stopPrank();
 
         _staking.getNode(alice);
@@ -297,13 +290,13 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _createNode(bob);
         vm.startPrank(alice);
         vm.expectRevert(abi.encodeWithSelector(NodeNotPublicGood.selector, bob));
-        _staking.stakeToPublicPool(bob, amount);
+        _staking.stakeToPublicPool{value: amount}(bob, amount);
         vm.stopPrank();
 
         // stake to public pool with empty node addr will fail
         vm.startPrank(alice);
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.stakeToPublicPool(address(0xabc), amount);
+        _staking.stakeToPublicPool{value: amount}(address(0xabc), amount);
         vm.stopPrank();
     }
 
@@ -315,8 +308,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         // stake
         vm.startPrank(bob);
 
-        _rss3.approve(address(_staking), amount);
-        (uint256 startTokenId, uint256 endTokenId) = _staking.stake(alice, amount);
+        (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice, amount);
 
         // request unstake
         uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
@@ -358,8 +350,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         // stake
         vm.startPrank(bob);
 
-        _rss3.approve(address(_staking), amount);
-        (uint256 startTokenId, uint256 endTokenId) = _staking.stake(alice, amount);
+        (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice, amount);
 
         // request unstake
         uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
@@ -379,8 +370,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         skip(stakeUnbondingPeriod);
 
         expectEmit();
-        emit Transfer(address(_staking), bob, amount);
-        expectEmit();
         emit Events.UnstakeClaimed(requestId, alice, bob, amount);
 
         _staking.claimUnstake(requestIds);
@@ -398,15 +387,13 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _createNode(alice);
 
         vm.startPrank(alice);
-        _rss3.approve(address(_staking), amount);
-        _staking.deposit(amount);
+        _staking.deposit{value: amount}(amount);
         vm.stopPrank();
 
         // stake
         vm.startPrank(bob);
 
-        _rss3.approve(address(_staking), amount);
-        (uint256 startTokenId, uint256 endTokenId) = _staking.stake(alice, amount);
+        (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice, amount);
         uint256 chipsCount = endTokenId - startTokenId + 1;
 
         vm.stopPrank();
@@ -480,8 +467,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         uint256 amount = 10000 ether;
         vm.startPrank(bob);
-        _rss3.approve(address(_staking), amount);
-        _staking.stake(alice, amount);
+        _staking.stake{value: amount}(alice, amount);
         vm.stopPrank();
 
         vm.startPrank(oracleAccount);
@@ -581,10 +567,17 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         uint256[] memory requestIds = new uint256[](1);
         requestIds[0] = requestId;
-        expectEmit();
+
         uint256 allRewards = amount + operationRewards[0] + stakingRewards[0] - taxAmounts[0];
-        emit Transfer(address(_staking), bob, allRewards);
+
+        uint256 balBefore = sender.balance;
+
         _staking.claimUnstake(requestIds);
+
+        uint256 balAfter = sender.balance;
+
+        assertEq(balAfter - balBefore, allRewards);
+
         vm.stopPrank();
     }
 

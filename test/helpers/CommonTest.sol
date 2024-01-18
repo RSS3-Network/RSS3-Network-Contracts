@@ -93,7 +93,7 @@ contract CommonTest is Utils {
                 oracleAccount
             )
         );
-        _staking = Staking(address(proxy));
+        _staking = Staking(payable(proxy));
 
         // init chips token
         _chips.initialize(chipsName, chipsSymbol, address(_staking));

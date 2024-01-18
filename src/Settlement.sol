@@ -89,7 +89,10 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         _startTimestamp = endTimestamp;
         _epoch++;
 
-        IERC20(_token).safeTransfer(_staking, _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch);
+        (bool success, ) = address(_staking).call{value: _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch}(
+            ""
+        );
+        if (!success) revert TransferFailed();
     }
 
     /// @inheritdoc ISettlement
@@ -148,7 +151,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         // get total staking of all nodes
         (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
-
         if (totalStaking == 0) return (0, new uint256[](len));
 
         uint256[] memory nodeStakings = new uint256[](len);

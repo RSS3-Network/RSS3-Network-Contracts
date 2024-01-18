@@ -2,7 +2,7 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-//import {console2 as console} from "forge-std/console2.sol";
+import {console} from "forge-std/console.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 
 contract SettlementTest is CommonTest {
@@ -19,6 +19,12 @@ contract SettlementTest is CommonTest {
 
         // transfer tokens to settlement contract
         _rss3.transfer(address(_settlement), 30000000 ether);
+
+        vm.deal(alice, 100000 ether);
+        vm.deal(bob, 100000 ether);
+        vm.deal(carol, 100000 ether);
+        vm.deal(dave, 100000 ether);
+        vm.deal(address(_settlement), 30000000 ether);
     }
 
     function testCheckSetupStatus() public {
@@ -34,14 +40,21 @@ contract SettlementTest is CommonTest {
 
         (uint256 operationRewardsPerEpoch, uint256 stakingRewardPerEpoch) = _settlement.getBonusInfo();
 
-        expectEmit();
-        emit Transfer(address(_settlement), address(_staking), operationRewardsPerEpoch + stakingRewardPerEpoch);
         vm.prank(oracleAccount);
+
+        uint256 balBefore = address(_staking).balance;
+
         _settlement.distributeRewards(
             array(alice, bob), // node addresses
             array(1 ether, 2 ether), // request fees
             array(100, 300) // request counts
         );
+
+        uint256 balAfter = address(_staking).balance;
+
+        console.log(balAfter - balBefore);
+
+        assertEq(balAfter - balBefore, operationRewardsPerEpoch + stakingRewardPerEpoch);
 
         // TODO: check status
     }
@@ -55,28 +68,23 @@ contract SettlementTest is CommonTest {
         _createPublicGoodNode(carol);
 
         vm.startPrank(alice);
-        _rss3.approve(address(_staking), stakingAmount);
-        _staking.stakeToPublicPool(carol, stakingAmount);
+        _staking.stakeToPublicPool{value: stakingAmount}(carol, stakingAmount);
         vm.stopPrank();
 
         vm.startPrank(bob);
-        _rss3.approve(address(_staking), 10000 ether);
-        _staking.stake(alice, 10000 ether);
+        _staking.stake{value: 10000 ether}(alice, 10000 ether);
         vm.stopPrank();
 
         vm.startPrank(carol);
-        _rss3.approve(address(_staking), 8000 ether);
-        _staking.stake(alice, 8000 ether);
+        _staking.stake{value: 8000 ether}(alice, 8000 ether);
         vm.stopPrank();
 
         vm.startPrank(alice);
-        _rss3.approve(address(_staking), stakingAmount);
-        _staking.stake(bob, stakingAmount);
+        _staking.stake{value: stakingAmount}(bob, stakingAmount);
         vm.stopPrank();
 
-        vm.startPrank(carol);
-        _rss3.approve(address(_staking), 9000 ether);
-        _staking.stake(bob, 9000 ether);
+        vm.startPrank(dave);
+        _staking.stake{value: 9000 ether}(bob, 9000 ether);
         vm.stopPrank();
 
         address[] memory nodeAddrs = array(alice, bob);
