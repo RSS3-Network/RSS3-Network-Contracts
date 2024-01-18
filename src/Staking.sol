@@ -122,6 +122,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         MIN_DEPOSIT = minDeposit;
     }
 
+    // solhint-disable-next-line
     receive() external payable {}
 
     /// @inheritdoc IStaking
