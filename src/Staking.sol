@@ -115,9 +115,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         MIN_DEPOSIT = minDeposit;
     }
 
-    // solhint-disable-next-line
-    receive() external payable {}
-
     /// @inheritdoc IStaking
     function initialize(address chips, address pauseAccount, address oracleAccount) external override initializer {
         _chips = chips;
@@ -149,6 +146,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (publicGood && msg.value > 0) revert PublicGoodNodeNotDeposited();
 
         _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
+
         if (msg.value > 0) _deposit(msg.sender, msg.value);
     }
 
@@ -540,7 +538,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
         DataTypes.Node storage node = _nodes[nodeAddr];
-        // can't delete a non-exist node
         if (address(0) != node.account) revert NodeExists();
         node.account = nodeAddr;
         node.name = name;

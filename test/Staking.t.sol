@@ -8,6 +8,7 @@ import "forge-std/console.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {TestEvents} from "test/helpers/TestEvents.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
+import {Staking} from "../src/Staking.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {IErrors} from "../src/interfaces/IErrors.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
@@ -24,6 +25,39 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.deal(address(_settlement), 30000000 ether);
     }
 
+    function testSetUpState() public {
+        assertEq(_staking.getNodeCount(), 0);
+        assertEq(_staking.getMinDeposit(), minDeposit);
+        assertEq(_staking.currentEpoch(), 0);
+        assertEq(_staking.chipsContract(), address(_chips));
+
+        assertEq(_staking.STAKE_UNBONDING_PERIOD(), stakeUnbondingPeriod);
+        assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), depositUnbondingPeriod);
+        assertEq(_staking.NODE_SLASH_RATE_BASIS_POINTS(), nodeSlashRateBasisPoints);
+        assertEq(_staking.USER_SLASH_RATE_BASIS_POINTS(), userSlashRateBasisPoints);
+        assertEq(_staking.STAKE_RATIO(), stakeRatio);
+        assertEq(_staking.TREASURY(), treasury);
+        assertEq(_staking.SHARES_PER_CHIP(), 500 ether);
+
+        vm.mockCall(
+            address(_staking),
+            abi.encodeWithSelector(Staking.getPublicPool.selector),
+            abi.encode(
+                DataTypes.Node({
+                    account: address(0),
+                    taxRateBasisPoints: 0,
+                    publicGood: false,
+                    name: "",
+                    description: "",
+                    operationPoolTokens: 0,
+                    stakingPoolTokens: 0,
+                    totalShares: 0,
+                    slashedTokens: 0
+                })
+            )
+        );
+    }
+
     function testCreateNode(uint64 taxRateBasisPoints, bool publicGood) public {
         vm.assume(taxRateBasisPoints <= 10000);
 
@@ -36,24 +70,53 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.createNode(name, description, taxRateBasisPoints, publicGood);
 
         // check node info
-        _checkNode(alice, name, description, taxRateBasisPoints, publicGood);
+        _checkNode(alice, name, description, taxRateBasisPoints, 0, publicGood);
         assertEq(_staking.getNodeCount(), 1);
-
-        DataTypes.Node[] memory nodes = _staking.getNodesWithPagination(0, 2);
-        assertEq(nodes.length, 1);
-        _checkNode(
-            nodes[0].account,
-            nodes[0].name,
-            nodes[0].description,
-            nodes[0].taxRateBasisPoints,
-            nodes[0].publicGood
-        );
     }
 
-    function testCreateNodeToZeroAddressFail() public {
+    function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
+        vm.assume(taxRateBasisPoints <= 10000);
+        vm.assume(amount > 1 && amount < _initialAmount);
+
+        string memory name = "Alice";
+        string memory description = "Alice's node";
+
+        expectEmit();
+        emit Events.NodeCreated(alice, name, description, taxRateBasisPoints, false);
+        expectEmit();
+        emit Events.Deposited(alice, amount);
+
+        vm.prank(alice);
+        _staking.createNode{value: amount}(name, description, taxRateBasisPoints, false);
+
+        // check node info
+        _checkNode(alice, name, description, taxRateBasisPoints, amount, false);
+        assertEq(_staking.getNodeCount(), 1);
+    }
+
+    function testCreateNodeFailWithMultipleNodes() public {
+        _createNode(alice);
+
+        vm.expectRevert(abi.encodeWithSelector(NodeExists.selector));
+        _createNode(alice);
+    }
+
+    function testCreateNodeFailToZeroAddress() public {
         // create node to address(0) will fail
         vm.expectRevert(abi.encodeWithSelector(CreateNodeToZeroAddress.selector));
         _createNode(address(0));
+    }
+
+    function testCreateNodeFailWithLargeTaxRate(uint64 taxRateBasisPoints) public {
+        vm.assume(taxRateBasisPoints > 10000);
+
+        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
+        _staking.createNode("Alice", "Alice's node", taxRateBasisPoints, false);
+    }
+
+    function testCreateNodeFailWithPublicGoodNodeDeposited() public {
+        vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeNotDeposited.selector));
+        _staking.createNode{value: 1}("Alice", "Alice's node", uint64(100), true);
     }
 
     function testDeposit(uint256 amount) public {
@@ -61,15 +124,23 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         _createNode(alice);
 
-        vm.startPrank(alice);
-
         expectEmit();
         emit Events.Deposited(alice, amount);
+        vm.prank(alice);
         _staking.deposit{value: amount}();
-        vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
         assertEq(node.operationPoolTokens, amount);
+    }
+
+    function testDepositFailWithNonExistentNode() public {
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.deposit{value: 1}();
+    }
+
+    function testDepositFailWithZeroAmount() public {
+        vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
+        _staking.deposit{value: 0}();
     }
 
     function testDeleteNode(address nodeAddr) public {
@@ -85,6 +156,43 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.account, address(0));
         assertEq(_staking.getNodeCount(), 0);
+    }
+
+    function testDeleteNodeFailWithNonNodeOwner(address nodeAddr) public {
+        vm.assume(nodeAddr != proxyAdmin && nodeAddr != address(0));
+
+        _createNode(nodeAddr);
+
+        vm.expectRevert(abi.encodeWithSelector(CallerNotNodeOwner.selector));
+        _staking.deleteNode(nodeAddr);
+    }
+
+    function testDeleteNodeFailWithNodeDeposited(address nodeAddr) public {
+        vm.assume(nodeAddr != proxyAdmin && nodeAddr != address(0));
+
+        _createNode(nodeAddr);
+
+        vm.deal(nodeAddr, 100 ether);
+
+        vm.startPrank(nodeAddr);
+        _staking.deposit{value: 100 ether}();
+
+        vm.expectRevert(abi.encodeWithSelector(NodeStakedOrDeposited.selector));
+        _staking.deleteNode(nodeAddr);
+        vm.stopPrank();
+    }
+
+    function testDeleteNodeFailWithNodeStaked(address nodeAddr) public {
+        vm.assume(nodeAddr != proxyAdmin && nodeAddr != address(0));
+
+        _createNode(nodeAddr);
+
+        vm.prank(alice);
+        _staking.stake{value: 1000 ether}(nodeAddr);
+
+        vm.expectRevert(abi.encodeWithSelector(NodeStakedOrDeposited.selector));
+        vm.prank(nodeAddr);
+        _staking.deleteNode(nodeAddr);
     }
 
     function testRequestWithdrawal() public {
@@ -613,12 +721,14 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         string memory name,
         string memory description,
         uint64 taxRateBasisPoints,
+        uint256 operationPoolTokens,
         bool publicGood
     ) internal {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.name, name);
         assertEq(node.description, description);
         assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
+        assertEq(node.operationPoolTokens, operationPoolTokens);
         assertEq(node.publicGood, publicGood);
     }
 
