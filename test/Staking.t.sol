@@ -375,28 +375,36 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         uint256 chipsCount = amount / _staking.SHARES_PER_CHIP();
 
-        vm.startPrank(alice);
-
+        vm.prank(alice);
         _staking.stakeToPublicPool{value: amount}(alice);
-        vm.stopPrank();
-
-        _staking.getNode(alice);
 
         assertEq(_staking.getPublicPool().stakingPoolTokens, amount);
         assertEq(_staking.getPublicPool().totalShares, chipsCount * _staking.SHARES_PER_CHIP());
-
+    }
+    function testStakeToPublicPoolFailToNonPublicGoodNode() public {
         // stake to public pool with non public good node will fail
         _createNode(bob);
-        vm.startPrank(alice);
-        vm.expectRevert(abi.encodeWithSelector(NodeNotPublicGood.selector, bob));
-        _staking.stakeToPublicPool{value: amount}(bob);
-        vm.stopPrank();
 
+        vm.expectRevert(abi.encodeWithSelector(NodeNotPublicGood.selector, bob));
+        _staking.stakeToPublicPool{value: 1}(bob);
+    }
+
+    function testStakeToPublicPoolFailToNonExistentNode() public {
         // stake to public pool with empty node addr will fail
-        vm.startPrank(alice);
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.stakeToPublicPool{value: amount}(address(0xabc));
-        vm.stopPrank();
+        _staking.stakeToPublicPool{value: 1}(address(0xabc));
+    }
+
+    function testStakeToPublicPoolFailWithInsufficientValue() public {
+        _createPublicGoodNode(alice);
+
+        // stake to public pool with zero amount will fail
+        vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
+        _staking.stakeToPublicPool{value: 0}(alice);
+
+        // stake to public pool with insufficient value will fail
+        vm.expectRevert(abi.encodeWithSelector(AmountTooSmall.selector, 400 ether));
+        _staking.stakeToPublicPool{value: 400 ether}(alice);
     }
 
     function testStakeFailToNonExistentNode() public {
