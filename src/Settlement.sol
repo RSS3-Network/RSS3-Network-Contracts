@@ -26,9 +26,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     /// @dev Staking contract address.
     address internal _staking;
 
-    /// @dev Staking token contract.
-    IERC20 internal _token;
-
     uint256 internal _totalStakingRewardsPerEpoch;
     uint256 internal _totalOperationRewardsPerEpoch;
 
@@ -49,7 +46,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         uint256 startEpoch // set as param for upgradeability
     ) external override initializer {
         _staking = staking;
-        _token = IERC20(IStaking(staking).stakingToken());
         _epoch = startEpoch;
         _startTimestamp = startTime;
 

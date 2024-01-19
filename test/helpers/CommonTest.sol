@@ -57,7 +57,6 @@ contract CommonTest is Utils {
         _settlement = new Settlement();
 
         _internalStakingTest = new InternalStaking(
-            address(_rss3),
             treasury,
             stakeRatio,
             stakeUnbondingPeriod,
@@ -72,7 +71,6 @@ contract CommonTest is Utils {
 
         // deploy and init Staking contract
         Staking stakingImpl = new Staking(
-            address(_rss3),
             treasury,
             stakeRatio,
             stakeUnbondingPeriod,

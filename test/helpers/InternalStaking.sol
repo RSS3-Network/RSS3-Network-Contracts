@@ -6,7 +6,6 @@ import {Staking} from "../../src/Staking.sol";
 
 contract InternalStaking is Staking {
     constructor(
-        address token,
         address treasury,
         uint256 stakeRatio,
         uint256 stakeUnbondingPeriod,
@@ -16,7 +15,6 @@ contract InternalStaking is Staking {
         uint256 minDeposit
     )
         Staking(
-            token,
             treasury,
             stakeRatio,
             stakeUnbondingPeriod,

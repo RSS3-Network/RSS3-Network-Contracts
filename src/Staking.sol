@@ -26,9 +26,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 
-    /// @dev the staking token contract
-    address public immutable TOKEN; // solhint-disable-line private-vars-leading-underscore
-
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
     /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
     uint256 public immutable STAKE_RATIO; // solhint-disable-line private-vars-leading-underscore
@@ -88,7 +85,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /**
      * @notice constructor.
-     * @param token The address of staking token.
      * @param treasury The address of treasury.
      * @param stakeRatio The stake ratio of the node operator.
      * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
@@ -99,7 +95,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
      * @param minDeposit The deposit base line of the node operator.
      */
     constructor(
-        address token,
         address treasury,
         uint256 stakeRatio,
         uint256 stakeUnbondingPeriod,
@@ -108,8 +103,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 userSlashRateBasisPoints,
         uint256 minDeposit
     ) {
-        TOKEN = token;
-
         TREASURY = treasury;
         STAKE_RATIO = stakeRatio;
 
@@ -427,11 +420,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function currentEpoch() external view override returns (uint256) {
         return _currentEpoch;
-    }
-
-    /// @inheritdoc IStaking
-    function stakingToken() external view override returns (address) {
-        return TOKEN;
     }
 
     /// @inheritdoc IStaking

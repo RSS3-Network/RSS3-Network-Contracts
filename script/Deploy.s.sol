@@ -93,7 +93,6 @@ contract Deploy is Deployer {
 
     function deployStaking() public broadcast returns (address addr_) {
         Staking staking = new Staking(
-            cfg.rss3Token(),
             cfg.treasury(),
             cfg.stakeRatio(),
             cfg.stakeUnbondingPeriod(),
@@ -143,7 +142,6 @@ contract Deploy is Deployer {
         // check states
         require(stakingProxy.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "check pause role error");
         require(stakingProxy.hasRole(ORACLE_ROLE, settlementProxy), "check oracle role error");
-        require(stakingProxy.stakingToken() == cfg.rss3Token(), "check staking token error");
         require(stakingProxy.chipsContract() == chipsProxy, "check chips token error");
     }
 
