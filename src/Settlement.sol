@@ -54,6 +54,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         _grantRole(ORACLE_ROLE, oracleAccount);
     }
 
+    /// @inheritdoc ISettlement
     function updateRewardsRatio(uint256 operationRewardsPercent) external override onlyRole(ORACLE_ROLE) {
         _updateRewardsRatio(operationRewardsPercent);
     }
@@ -190,7 +191,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         return result;
     }
 
-    /// @dev  log2(requestCount/totalCount +1) * G , where G = ln(2)
+    /// @dev log2(requestCount/totalCount +1) * G , where G = ln(2)
     function _getWeight(uint256 requestCount, uint256 totalCount) internal pure returns (uint256) {
         // scale with scalar to keep more precision
         uint256 scalar = type(uint64).max;
