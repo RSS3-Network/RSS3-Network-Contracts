@@ -340,8 +340,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 amount = _getTreasuryAmount();
-        (bool success, ) = address(TREASURY).call{value: amount}("");
-        if (!success) revert TransferFailed();
+        _transfer(TREASURY, amount);
     }
 
     /// @inheritdoc IStaking
@@ -598,10 +597,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         _families.push(endTokenId.toUint96(), uint160(nodeAddr));
 
-        if (amount - stakedAmount > 0) {
-            (bool success, ) = address(msg.sender).call{value: amount - stakedAmount}(""); // refund?
-            if (!success) revert TransferFailed();
-        }
+        // refund the exceeding part
+        _transfer(msg.sender, amount - stakedAmount);
 
         emit Events.Staked(msg.sender, node.account, stakedAmount, startTokenId, endTokenId);
     }
@@ -615,8 +612,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         delete _pendingUnstake[requestId];
 
-        (bool success, ) = address(req.owner).call{value: req.unstakeAmount}("");
-        if (!success) revert TransferFailed();
+        // transfer tokens
+        _transfer(req.owner, req.unstakeAmount);
 
         emit Events.UnstakeClaimed(requestId, req.nodeAddr, req.owner, req.unstakeAmount);
     }
@@ -631,10 +628,20 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         delete _pendingWithdrawals[requestId];
 
-        (bool success, ) = address(req.owner).call{value: req.amount}("");
-        if (!success) revert TransferFailed();
+        // transfer tokens
+        _transfer(req.owner, req.amount);
 
         emit Events.WithdrawalClaimed(requestId);
+    }
+
+    /// @dev transfer native tokens by a low-level call.
+    /// _transfer should always be at the end of the function,
+    /// to apply the checks-effects-interactions pattern
+    function _transfer(address to, uint256 amount) internal {
+        if (amount > 0) {
+            (bool success, ) = address(to).call{value: amount}("");
+            if (!success) revert TransferFailed();
+        }
     }
 
     function _checkAuthorized(uint256 tokenId, address user) internal view returns (bool) {
