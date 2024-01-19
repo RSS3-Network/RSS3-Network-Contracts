@@ -15,7 +15,7 @@ contract SettlementTest is CommonTest {
         vm.deal(bob, 100000 ether);
         vm.deal(carol, 100000 ether);
         vm.deal(dave, 100000 ether);
-        vm.deal(address(_settlement), 30000000 ether); // TODO: transfer
+        vm.deal(address(_settlement), 30000000 ether);
     }
 
     function testCheckSetupStatus() public {

@@ -27,22 +27,6 @@ interface IStaking {
     function unpause() external;
 
     /**
-     * @notice Creates a node.
-     * @param to Address of node operator.
-     * @param name Human-readable name.
-     * @param description Description of node.
-     * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents 0.01%.
-     * @param publicGood Flag indicating if the node is a public good.
-     */
-    function createNode(
-        address to,
-        string calldata name,
-        string calldata description,
-        uint64 taxRateBasisPoints,
-        bool publicGood
-    ) external;
-
-    /**
      * @notice Deletes a node.
      * @param addr The address of node to delete.
      */
@@ -56,7 +40,7 @@ interface IStaking {
      * @param publicGood Flag indicating if the node is a public good.
      * msg.value carries the amount of tokens to deposit.
      */
-    function createNodeAndDeposit(
+    function createNode(
         string calldata name,
         string calldata description,
         uint64 taxRateBasisPoints,
@@ -161,7 +145,7 @@ interface IStaking {
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
         uint256 publicPoolReward
-    ) external;
+    ) external payable;
 
     /**
      * @notice Slashes nodes.

@@ -33,7 +33,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         expectEmit();
         emit Events.NodeCreated(alice, name, description, taxRateBasisPoints, publicGood);
         vm.prank(alice);
-        _staking.createNode(alice, name, description, taxRateBasisPoints, publicGood);
+        _staking.createNode(name, description, taxRateBasisPoints, publicGood);
 
         // check node info
         _checkNode(alice, name, description, taxRateBasisPoints, publicGood);
@@ -91,7 +91,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
-        _staking.createNodeAndDeposit{value: amount}("Alice", "Alice's node", uint64(100), false);
+        _staking.createNode{value: amount}("Alice", "Alice's node", uint64(100), false);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
@@ -115,7 +115,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
-        _staking.createNodeAndDeposit{value: amount}("Alice", "Alice's node", uint64(100), false);
+        _staking.createNode{value: amount}("Alice", "Alice's node", uint64(100), false);
 
         _staking.deposit{value: amount}();
 

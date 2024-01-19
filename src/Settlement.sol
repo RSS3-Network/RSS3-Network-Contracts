@@ -77,7 +77,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         uint256 endTimestamp = block.timestamp;
 
-        IStaking(_staking).distributeRewards(
+        IStaking(_staking).distributeRewards{value: _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch}(
             [_epoch, _startTimestamp, endTimestamp],
             nodeAddrs,
             requestFees,
@@ -88,11 +88,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         _startTimestamp = endTimestamp;
         _epoch++;
-
-        (bool success, ) = address(_staking).call{value: _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch}(
-            ""
-        );
-        if (!success) revert TransferFailed();
     }
 
     /// @inheritdoc ISettlement

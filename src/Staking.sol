@@ -148,13 +148,15 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function createNode(
-        address to,
         string calldata name,
         string calldata description,
         uint64 taxRateBasisPoints,
         bool publicGood
-    ) external override {
-        _createNode(to, name, description, taxRateBasisPoints, publicGood);
+    ) external payable override whenNotPaused {
+        if (publicGood && msg.value > 0) revert PublicGoodNodeNotDeposited();
+
+        _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
+        if (msg.value > 0) _deposit(msg.sender, msg.value);
     }
 
     /// @inheritdoc IStaking
@@ -170,21 +172,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _nodeAddrs.remove(nodeAddr);
 
         emit Events.NodeDeleted(nodeAddr);
-    }
-
-    /// @inheritdoc IStaking
-    function createNodeAndDeposit(
-        string calldata name,
-        string calldata description,
-        uint64 taxRateBasisPoints,
-        bool publicGood
-    ) external payable override whenNotPaused {
-        if (publicGood) revert PublicGoodNodeNotDeposited();
-
-        if (msg.value == 0) revert InsufficientValue();
-
-        _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
-        _deposit(msg.sender, msg.value);
     }
 
     /// @inheritdoc IStaking
@@ -278,7 +265,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
         uint256 publicPoolReward
-    ) external override onlyRole(ORACLE_ROLE) {
+    ) external payable override onlyRole(ORACLE_ROLE) {
         if (
             nodeAddrs.length != requestFees.length ||
             nodeAddrs.length != operationRewards.length ||

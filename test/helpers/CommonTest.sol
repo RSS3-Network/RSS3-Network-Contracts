@@ -127,11 +127,11 @@ contract CommonTest is Utils {
 
     function _createNode(address to) internal {
         vm.prank(to);
-        _staking.createNode(to, "Name", "Description", _defaultTaxRateBasisPoints, false);
+        _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, false);
     }
 
     function _createPublicGoodNode(address to) internal {
         vm.prank(to);
-        _staking.createNode(to, "Name", "Description", _defaultTaxRateBasisPoints, true);
+        _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, true);
     }
 }
