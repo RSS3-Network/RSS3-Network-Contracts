@@ -55,7 +55,7 @@ interface IErrors {
     error PublicGoodNodeNotDeposited();
 
     /// @dev Public good node cannot be staked
-    error PublicGoodNodeNotStaked(address nodeAddr);
+    error StakeToPublicGoodNode(address nodeAddr);
 
     /// @dev Basis points of tax rate too large
     error TaxRateBasisPointsTooLarge();

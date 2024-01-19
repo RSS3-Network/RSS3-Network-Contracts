@@ -162,7 +162,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @dev returns request bonuses
     function _getOperationRewards(
-        uint256 totalBonus,
+        uint256 totalRewards,
         uint256[] memory requestCounts
     ) internal pure returns (uint256[] memory) {
         uint256[] memory result = new uint256[](requestCounts.length);
@@ -185,7 +185,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         // get bonus for each node
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            result[i] = (totalBonus * weights[i]) / sumWeight;
+            result[i] = (totalRewards * weights[i]) / sumWeight;
         }
 
         return result;

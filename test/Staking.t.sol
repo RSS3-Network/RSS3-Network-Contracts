@@ -237,7 +237,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(req.amount, 2 * amount);
     }
 
-    function testClaimWithdrawl() public {
+    function testClaimWithdrawal() public {
         uint256 amount = 10000 ether;
 
         _createNode(alice);
@@ -266,7 +266,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.stopPrank();
     }
 
-    function testMultipleRequestAndClaimWithdrawl() public {
+    function testMultipleRequestAndClaimWithdrawal() public {
         _createNode(alice);
 
         uint256 amount = 10000 ether;
@@ -363,7 +363,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _createPublicGoodNode(bob);
 
         vm.startPrank(alice);
-        vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeNotStaked.selector, bob));
+        vm.expectRevert(abi.encodeWithSelector(StakeToPublicGoodNode.selector, bob));
         _staking.stake{value: amount}(bob);
         vm.stopPrank();
     }
@@ -397,6 +397,28 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
         _staking.stakeToPublicPool{value: amount}(address(0xabc));
         vm.stopPrank();
+    }
+
+    function testStakeFailToNonExistentNode() public {
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.stake{value: 1}(alice);
+    }
+
+    function testStakeFailToPublicGoodNode() public {
+        _createPublicGoodNode(alice);
+
+        vm.expectRevert(abi.encodeWithSelector(StakeToPublicGoodNode.selector, alice));
+        _staking.stake{value: 1}(alice);
+    }
+
+    function testStakeFailWithInsufficientValue() public {
+        _createNode(alice);
+
+        vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
+        _staking.stake{value: 0}(alice);
+
+        vm.expectRevert(abi.encodeWithSelector(AmountTooSmall.selector, 400 ether));
+        _staking.stake{value: 400 ether}(alice);
     }
 
     function testRequestUnstake() public {

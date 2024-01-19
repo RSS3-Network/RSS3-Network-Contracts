@@ -227,7 +227,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.Node storage node = _nodes[nodeAddr];
         // validate node
         if (node.account == address(0)) revert NodeNotExists();
-        if (node.publicGood) revert PublicGoodNodeNotStaked(nodeAddr);
+        if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
         if (msg.value == 0) revert InsufficientValue();
 
         (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr);
