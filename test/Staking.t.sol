@@ -298,7 +298,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         // stake
         vm.startPrank(bob);
-
         (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice);
 
         // request unstake
@@ -306,18 +305,14 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         for (uint256 i = startTokenId; i <= endTokenId; i++) {
             tokenIds[i - startTokenId] = i;
         }
-
         // chips should be burnt
         for (uint256 i = startTokenId; i <= endTokenId; i++) {
             expectEmit();
             emit TestEvents.Transfer(bob, address(0), i);
         }
-
+        expectEmit();
+        emit Events.UnstakeRequested(bob, alice, 1, amount, tokenIds);
         uint256 requestId = _staking.requestUnstake(alice, tokenIds);
-
-        // requestUnstake again will fail
-        vm.expectRevert(abi.encodeWithSelector(ERC721NonexistentToken.selector, tokenIds[0]));
-        _staking.requestUnstake(alice, tokenIds);
 
         vm.stopPrank();
 
@@ -331,6 +326,30 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         DataTypes.Node memory node = _staking.getNode(alice);
         assertEq(node.stakingPoolTokens, 0);
         assertEq(node.totalShares, 0);
+    }
+
+    function testRequestUnstakeFailWithBurnedChip() public {
+        uint256 amount = 10000 ether;
+
+        _createNode(alice);
+
+        // stake
+        vm.startPrank(bob);
+
+        (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice);
+
+        // request unstake
+        uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
+        for (uint256 i = startTokenId; i <= endTokenId; i++) {
+            tokenIds[i - startTokenId] = i;
+        }
+        _staking.requestUnstake(alice, tokenIds);
+
+        // requestUnstake again will fail
+        vm.expectRevert(abi.encodeWithSelector(ERC721NonexistentToken.selector, tokenIds[0]));
+        _staking.requestUnstake(alice, tokenIds);
+
+        vm.stopPrank();
     }
 
     function testClaimUnstake() public {

@@ -537,7 +537,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             IChips(_chips).burn(chipsIds[i]);
         }
 
-        emit Events.UnstakeRequested(msg.sender, node.account, requestId, chipsIds);
+        emit Events.UnstakeRequested(msg.sender, node.account, requestId, unstakeAmount, chipsIds);
     }
 
     /// @dev create a node

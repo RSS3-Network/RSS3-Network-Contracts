@@ -117,12 +117,14 @@ library Events {
      * @param user Address of user who unstake tokens.
      * @param nodeAddr The address of node to unstake.
      * @param requestId The created unstake request id.
+     * @param unstakeAmount Amount of tokens to unstake.
      * @param chipsIds The chips token ids to unstake.
      */
     event UnstakeRequested(
         address indexed user,
         address indexed nodeAddr,
         uint256 indexed requestId,
+        uint256 unstakeAmount,
         uint256[] chipsIds
     );
     /**
