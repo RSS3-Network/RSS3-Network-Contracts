@@ -54,21 +54,21 @@ interface IStaking {
      * @param description Description of node.
      * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
-     * @param amount Amount of tokens to deposit.
+     * msg.value carries the amount of tokens to deposit.
      */
     function createNodeAndDeposit(
         string calldata name,
         string calldata description,
         uint64 taxRateBasisPoints,
-        bool publicGood,
-        uint256 amount
+        bool publicGood
     ) external payable;
 
     /**
      * @notice Deposits tokens for node operator.
-     * @param amount Amount of tokens to deposit.
+     * msg.value carries the amount of tokens to deposit.
+     *
      */
-    function deposit(uint256 amount) external payable;
+    function deposit() external payable;
 
     /**
      * @notice Requests withdraw tokens from operation pool for node operator.
@@ -101,14 +101,11 @@ interface IStaking {
     /**
      * @notice Stakes tokens to a node operator.
      * @param nodeAddr The address of node to stake.
-     * @param amount Amount of tokens to stake.
      * @return startTokenId The start of new minted chips token ids.
      * @return endTokenId The end of new minted chips token ids.
+     * msg.value carries the amount of tokens to stake.
      */
-    function stake(
-        address nodeAddr,
-        uint256 amount
-    ) external payable returns (uint256 startTokenId, uint256 endTokenId);
+    function stake(address nodeAddr) external payable returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
      * @notice Requests unstake tokens from a node operator.
@@ -127,14 +124,13 @@ interface IStaking {
 
     /**
      * @notice Stakes tokens to public pool.
-     * @param nodeAddr The address of node to like. msg.value carries the amount of tokens to stake.
+     * @param nodeAddr The address of node to like.
      * @return startTokenId The start of new minted chips token ids.
      * @return endTokenId The end of new minted chips token ids.
+     * msg.value carries the amount of tokens to stake.
+     *
      */
-    function stakeToPublicPool(
-        address nodeAddr,
-        uint256 amount
-    ) external payable returns (uint256 startTokenId, uint256 endTokenId);
+    function stakeToPublicPool(address nodeAddr) external payable returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
      * @notice Requests unstake tokens from public pool.

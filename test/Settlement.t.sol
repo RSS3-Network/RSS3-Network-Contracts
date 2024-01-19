@@ -11,20 +11,11 @@ contract SettlementTest is CommonTest {
     function setUp() public {
         _setUp();
 
-        // transfer tokens
-        _rss3.transfer(alice, 100000 ether);
-        _rss3.transfer(bob, 100000 ether);
-        _rss3.transfer(carol, 100000 ether);
-        _rss3.transfer(dave, 100000 ether);
-
-        // transfer tokens to settlement contract
-        _rss3.transfer(address(_settlement), 30000000 ether);
-
         vm.deal(alice, 100000 ether);
         vm.deal(bob, 100000 ether);
         vm.deal(carol, 100000 ether);
         vm.deal(dave, 100000 ether);
-        vm.deal(address(_settlement), 30000000 ether);
+        vm.deal(address(_settlement), 30000000 ether); // TODO: transfer
     }
 
     function testCheckSetupStatus() public {
@@ -68,23 +59,23 @@ contract SettlementTest is CommonTest {
         _createPublicGoodNode(carol);
 
         vm.startPrank(alice);
-        _staking.stakeToPublicPool{value: stakingAmount}(carol, stakingAmount);
+        _staking.stakeToPublicPool{value: stakingAmount}(carol);
         vm.stopPrank();
 
         vm.startPrank(bob);
-        _staking.stake{value: 10000 ether}(alice, 10000 ether);
+        _staking.stake{value: 10000 ether}(alice);
         vm.stopPrank();
 
         vm.startPrank(carol);
-        _staking.stake{value: 8000 ether}(alice, 8000 ether);
+        _staking.stake{value: 8000 ether}(alice);
         vm.stopPrank();
 
         vm.startPrank(alice);
-        _staking.stake{value: stakingAmount}(bob, stakingAmount);
+        _staking.stake{value: stakingAmount}(bob);
         vm.stopPrank();
 
         vm.startPrank(dave);
-        _staking.stake{value: 9000 ether}(bob, 9000 ether);
+        _staking.stake{value: 9000 ether}(bob);
         vm.stopPrank();
 
         address[] memory nodeAddrs = array(alice, bob);

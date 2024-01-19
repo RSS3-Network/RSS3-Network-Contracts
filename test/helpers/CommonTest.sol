@@ -110,7 +110,6 @@ contract CommonTest is Utils {
         vm.stopPrank();
 
         _internalSettlementTest = new InternalSettlement();
-        _rss3.approve(address(_internalSettlementTest), totalRewards);
 
         _internalSettlementTest.initialize(address(_staking), oracleAccount, 0, 0, 1);
 

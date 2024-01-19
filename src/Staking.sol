@@ -177,22 +177,21 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         string calldata name,
         string calldata description,
         uint64 taxRateBasisPoints,
-        bool publicGood,
-        uint256 amount
+        bool publicGood
     ) external payable override whenNotPaused {
         if (publicGood) revert PublicGoodNodeNotDeposited();
 
-        if (msg.value < amount) revert InsufficientValue();
+        if (msg.value == 0) revert InsufficientValue();
 
         _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
-        _deposit(msg.sender, amount);
+        _deposit(msg.sender, msg.value);
     }
 
     /// @inheritdoc IStaking
-    function deposit(uint256 amount) external payable override whenNotPaused {
-        if (msg.value < amount) revert InsufficientValue();
+    function deposit() external payable override whenNotPaused {
+        if (msg.value == 0) revert InsufficientValue();
 
-        _deposit(msg.sender, amount);
+        _deposit(msg.sender, msg.value);
     }
 
     /// @inheritdoc IStaking
@@ -245,16 +244,15 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function stake(
-        address nodeAddr,
-        uint256 amount
+        address nodeAddr
     ) external payable override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // validate node
         if (node.account == address(0)) revert NodeNotExists();
         if (node.publicGood) revert PublicGoodNodeNotStaked(nodeAddr);
-        if (msg.value < amount) revert InsufficientValue();
+        if (msg.value == 0) revert InsufficientValue();
 
-        (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr); // TODO: use amount or msg.value?
+        (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -321,15 +319,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function stakeToPublicPool(
-        address nodeAddr,
-        uint256 amount
+        address nodeAddr
     ) external payable override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
-        if (msg.value < amount) revert InsufficientValue();
+        if (msg.value == 0) revert InsufficientValue();
 
-        (startTokenId, endTokenId) = _stakeToNode(_publicPool, msg.value, nodeAddr); // TODO: use amount or msg.value?
+        (startTokenId, endTokenId) = _stakeToNode(_publicPool, msg.value, nodeAddr);
     }
 
     /// @inheritdoc IStaking
