@@ -48,8 +48,8 @@ interface IErrors {
     /// @dev Node is not public good node.
     error NodeNotPublicGood(address nodeAddr);
 
-    /// @dev Deposited tokens was slashed completely
-    error DepositedTokensSlashedAll();
+    /// @dev Excess withdrawal amount.
+    error ExcessWithdrawalAmount();
 
     /// @dev Deposit is not allowed for public good node.
     error PublicGoodNodeNotDeposited();

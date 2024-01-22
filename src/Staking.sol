@@ -177,8 +177,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert NodeNotExists();
 
-        //  deposited tokens has been slashed completely
-        if (amount > node.operationPoolTokens) revert DepositedTokensSlashedAll();
+        //  withdrawal amount should not exceed the operation pool tokens
+        if (amount > node.operationPoolTokens) revert ExcessWithdrawalAmount();
 
         _decreaseOperationPool(node, amount);
 

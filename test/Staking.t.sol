@@ -208,7 +208,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 requestId = _staking.requestWithdrawal(amount);
 
         // requestWithdrawl again will fail
-        vm.expectRevert(abi.encodeWithSelector(DepositedTokensSlashedAll.selector));
+        vm.expectRevert(abi.encodeWithSelector(ExcessWithdrawalAmount.selector));
         _staking.requestWithdrawal(amount);
         vm.stopPrank();
 
@@ -239,6 +239,24 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(req.owner, alice);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.amount, 2 * amount);
+    }
+
+    function testRequestWithdrawalFailWithInsufficientTokens() public {
+        uint256 amount = 10000 ether;
+
+        _createNode(alice);
+
+        vm.startPrank(alice);
+        _staking.deposit{value: amount}();
+
+        vm.expectRevert(abi.encodeWithSelector(ExcessWithdrawalAmount.selector));
+        _staking.requestWithdrawal(amount + 1);
+        vm.stopPrank();
+    }
+
+    function testRequestWithdrawalFailWithNonExistentNode() public {
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.requestWithdrawal(1 ether);
     }
 
     function testClaimWithdrawal() public {
