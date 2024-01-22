@@ -139,24 +139,19 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         address[] calldata nodeAddrs
     ) internal view returns (uint256 publicPoolReward, uint256[] memory nodesReward) {
         uint256 len = nodeAddrs.length;
-        uint256 totalRewards = _totalStakingRewardsPerEpoch;
+        nodesReward = new uint256[](len);
 
         // get total staking of all nodes
         (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
-        if (totalStaking == 0) return (0, new uint256[](len));
-
-        uint256[] memory nodeStakings = new uint256[](len);
-        for (uint256 i = 0; i < len; i++) {
-            nodeStakings[i] = IStaking(_staking).getNode(nodeAddrs[i]).stakingPoolTokens;
-        }
+        if (totalStaking == 0) return (0, nodesReward);
 
         // get staking rewards for public pool and all nodes
         DataTypes.Node memory publicPool = IStaking(_staking).getPublicPool();
-        publicPoolReward = (publicPool.stakingPoolTokens * totalRewards) / totalStaking;
+        publicPoolReward = (publicPool.stakingPoolTokens * _totalStakingRewardsPerEpoch) / totalStaking;
 
-        nodesReward = new uint256[](len);
         for (uint256 i = 0; i < len; i++) {
-            nodesReward[i] = (nodeStakings[i] * totalRewards) / totalStaking;
+            uint256 nodeStakings = IStaking(_staking).getNode(nodeAddrs[i]).stakingPoolTokens;
+            nodesReward[i] = (nodeStakings * _totalStakingRewardsPerEpoch) / totalStaking;
         }
     }
 

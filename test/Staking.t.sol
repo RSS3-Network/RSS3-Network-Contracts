@@ -26,6 +26,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testSetUpState() public {
+        assertEq(_staking.paused(), false);
+
         assertEq(_staking.getNodeCount(), 0);
         assertEq(_staking.getMinDeposit(), minDeposit);
         assertEq(_staking.currentEpoch(), 0);
