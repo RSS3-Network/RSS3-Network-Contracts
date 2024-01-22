@@ -318,7 +318,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             _decreaseOperationPool(node, slashedOperationPool);
 
             // slash staking pool tokens
-            // TODO: here the staking pool tokens will be decreased...
             uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_RATE_BASIS_POINTS) / _denominator();
             _decreaseStakingPool(node, slashedStakingPool);
 

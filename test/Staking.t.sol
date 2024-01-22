@@ -22,6 +22,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         vm.deal(alice, _initialAmount);
         vm.deal(bob, _initialAmount);
+        vm.deal(carol, _initialAmount);
+
         vm.deal(address(_settlement), 30000000 ether);
     }
 
@@ -383,6 +385,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(_staking.getPublicPool().stakingPoolTokens, amount);
         assertEq(_staking.getPublicPool().totalShares, chipsCount * _staking.SHARES_PER_CHIP());
     }
+
     function testStakeToPublicPoolFailToNonPublicGoodNode() public {
         // stake to public pool with non public good node will fail
         _createNode(bob);
@@ -634,6 +637,58 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(operationPool, 0);
         assert(treasury > 0);
         assert(stakingPool > 0);
+    }
+
+    function testSlashNodes() public {
+        _createNode(alice);
+        _createNode(bob);
+
+        uint256 depositedTokens = 10000 ether;
+        uint256 stakedTokens = 40000 ether;
+
+        vm.startPrank(alice);
+        _staking.deposit{value: depositedTokens}();
+        vm.stopPrank();
+
+        vm.startPrank(bob);
+        _staking.deposit{value: depositedTokens}();
+        vm.stopPrank();
+
+        vm.startPrank(carol);
+        _staking.stake{value: stakedTokens}(alice);
+        _staking.stake{value: stakedTokens}(bob);
+        vm.stopPrank();
+
+        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
+        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
+
+        vm.startPrank(oracleAccount);
+
+        address[] memory nodeAddrs = new address[](2);
+        nodeAddrs[0] = alice;
+        nodeAddrs[1] = bob;
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            expectEmit();
+            emit Events.NodeSlashed(
+                nodeAddrs[i],
+                expectedSlashedTokensOnOperationPool,
+                expectedSlashedTokensOnStakingPool
+            );
+        }
+        _staking.slashNodes(nodeAddrs);
+        vm.stopPrank();
+
+        DataTypes.Node memory node = _staking.getNode(alice);
+        assertEq(node.slashedTokens, expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool);
+
+        node = _staking.getNode(bob);
+        assertEq(node.slashedTokens, expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool);
+
+        (uint256 totalOperationTokens, uint256 totalStakingTokens, uint256 treasuryAmount) = _staking.getPoolInfo();
+        assertEq(totalOperationTokens, 2 * depositedTokens - 2 * expectedSlashedTokensOnOperationPool);
+        assertEq(totalStakingTokens, 2 * stakedTokens - 2 * expectedSlashedTokensOnStakingPool);
+        assertEq(treasuryAmount, (expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) * 2);
     }
 
     function testCalcTax1(uint256 operationPool) public {
