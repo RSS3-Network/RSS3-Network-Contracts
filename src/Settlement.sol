@@ -159,31 +159,32 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     function _getOperationRewards(
         uint256 totalRewards,
         uint256[] memory requestCounts
-    ) internal pure returns (uint256[] memory) {
-        uint256[] memory result = new uint256[](requestCounts.length);
+    ) internal pure returns (uint256[] memory operationRewards) {
+        operationRewards = new uint256[](requestCounts.length);
 
-        /// @dev sum of log2 of each element in `requestCounts`
-        uint256 sum;
+        // no operation rewards
+        if (totalRewards == 0) return operationRewards;
+
+        uint256 totalRequestCount;
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            sum += requestCounts[i];
+            totalRequestCount += requestCounts[i];
         }
 
-        if (sum == 0) return result;
+        // no request
+        if (totalRequestCount == 0) return operationRewards;
 
         // get weights for bonus
         uint256[] memory weights = new uint256[](requestCounts.length);
         uint256 sumWeight;
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            weights[i] = _getWeight(requestCounts[i], sum);
+            weights[i] = _getWeight(requestCounts[i], totalRequestCount);
             sumWeight += weights[i];
         }
 
         // get bonus for each node
         for (uint256 i = 0; i < requestCounts.length; i++) {
-            result[i] = (totalRewards * weights[i]) / sumWeight;
+            operationRewards[i] = (totalRewards * weights[i]) / sumWeight;
         }
-
-        return result;
     }
 
     /// @dev log2(requestCount/totalCount +1) * G , where G = ln(2)
