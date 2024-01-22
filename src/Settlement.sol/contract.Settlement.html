@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/530ba36752975a1e34e667a09d94ca3a9e64eb80/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e9cec582bcbdd46870b30c3ab5da29937f51c01a/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -325,10 +325,9 @@ Requirements:</p>
 <pre><code class="language-solidity">function _getOperationRewards(uint256 totalRewards, uint256[] memory requestCounts)
     internal
     pure
-    returns (uint256[] memory);
+    returns (uint256[] memory operationRewards);
 </code></pre>
 <h3 id="_getweight"><a class="header" href="#_getweight">_getWeight</a></h3>
-<p><em>sum of log2 of each element in <code>requestCounts</code></em></p>
 <p><em>log2(requestCount/totalCount +1) * G , where G = ln(2)</em></p>
 <pre><code class="language-solidity">function _getWeight(uint256 requestCount, uint256 totalCount) internal pure returns (uint256);
 </code></pre>
