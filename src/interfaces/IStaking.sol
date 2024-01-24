@@ -117,14 +117,6 @@ interface IStaking {
     function stakeToPublicPool(address nodeAddr) external payable returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
-     * @notice Requests unstake tokens from public pool.
-     * @dev This will burn the chips tokens.
-     * @param chipsIds The chips token ids for unstake.
-     * @return requestId THe created unstake request id.
-     */
-    function requestUnstakeFromPublicPool(uint256[] calldata chipsIds) external returns (uint256 requestId);
-
-    /**
      * @notice Updates accounting stats and distribute rewards.
      * @dev periodically called.
      * Requirements:

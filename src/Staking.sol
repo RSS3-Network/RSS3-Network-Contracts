@@ -238,7 +238,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         address nodeAddr,
         uint256[] calldata chipsIds
     ) external override whenNotPaused returns (uint256 requestId) {
-        return _unstakeFromNode(nodeAddr, chipsIds, false);
+        return _unstakeFromNode(nodeAddr, chipsIds);
     }
 
     /// @inheritdoc IStaking
@@ -288,11 +288,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             stakingRewards,
             taxAmounts
         );
-    }
-
-    /// @inheritdoc IStaking
-    function requestUnstakeFromPublicPool(uint256[] calldata chipsIds) external override returns (uint256 requestId) {
-        return _unstakeFromNode(address(0), chipsIds, true);
     }
 
     /// @inheritdoc IStaking
@@ -494,14 +489,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return taxAmounts;
     }
 
-    function _unstakeFromNode(
-        address nodeAddr,
-        uint256[] calldata chipsIds,
-        bool isPublicNode
-    ) internal returns (uint256 requestId) {
-        _checkUnstakeConditions(nodeAddr, chipsIds, isPublicNode);
+    function _unstakeFromNode(address nodeAddr, uint256[] calldata chipsIds) internal returns (uint256 requestId) {
+        _checkUnstakeConditions(nodeAddr, chipsIds);
 
-        DataTypes.Node storage node = isPublicNode ? _publicPool : _nodes[nodeAddr];
+        DataTypes.Node storage node = _nodes[nodeAddr].publicGood ? _publicPool : _nodes[nodeAddr];
 
         requestId = ++_pendingUnstakeCounter;
 
@@ -515,14 +506,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
         req.timestamp = block.timestamp;
         req.owner = msg.sender;
-        req.nodeAddr = node.account;
+        req.nodeAddr = nodeAddr;
         req.unstakeAmount = unstakeAmount;
 
         for (uint256 i = 0; i < chipsIds.length; i++) {
             IChips(_chips).burn(chipsIds[i]);
         }
 
-        emit Events.UnstakeRequested(msg.sender, node.account, requestId, unstakeAmount, chipsIds);
+        emit Events.UnstakeRequested(msg.sender, nodeAddr, requestId, unstakeAmount, chipsIds);
     }
 
     /// @dev create a node
@@ -632,16 +623,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return (IERC721(_chips).ownerOf(tokenId) == user || IERC721(_chips).getApproved(tokenId) == user);
     }
 
-    function _checkUnstakeConditions(address nodeAddr, uint256[] calldata chipsIds, bool isPublicNode) internal view {
+    function _checkUnstakeConditions(address nodeAddr, uint256[] calldata chipsIds) internal view {
         // check conditions
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
             if (!_checkAuthorized(tokenId, msg.sender)) revert ChipNotAuthorized(tokenId);
 
-            if (isPublicNode) {
-                nodeAddr = _issuerOf(tokenId);
-                if (!_nodes[nodeAddr].publicGood) revert ChipNotPublicGood(tokenId);
-            } else if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
+            if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
         }
     }
 

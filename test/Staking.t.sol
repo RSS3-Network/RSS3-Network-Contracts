@@ -452,41 +452,14 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.stake{value: 400 ether}(alice);
     }
 
+    function testRequestUnstakeFromPublic() public {
+        _createPublicGoodNode(alice);
+        _testRequestUnstakeFromNode(alice, true);
+    }
+
     function testRequestUnstake() public {
-        uint256 amount = 10000 ether;
-
         _createNode(alice);
-
-        // stake
-        vm.startPrank(bob);
-        (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice);
-
-        // request unstake
-        uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            tokenIds[i - startTokenId] = i;
-        }
-        // chips should be burnt
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            expectEmit();
-            emit TestEvents.Transfer(bob, address(0), i);
-        }
-        expectEmit();
-        emit Events.UnstakeRequested(bob, alice, 1, amount, tokenIds);
-        uint256 requestId = _staking.requestUnstake(alice, tokenIds);
-
-        vm.stopPrank();
-
-        // check status
-        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
-        assertEq(req.owner, bob);
-        assertEq(req.timestamp, block.timestamp);
-        assertEq(req.unstakeAmount, amount);
-
-        // check node info
-        DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.stakingPoolTokens, 0);
-        assertEq(node.totalShares, 0);
+        _testRequestUnstakeFromNode(alice, false);
     }
 
     function testRequestUnstakeFailWithBurnedChip() public {
@@ -771,6 +744,43 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
                 tax * operationPool * 25 < (partialTax + 1) * stakingPool
         );
         // assert(tax / partialTax >= stakingPool / (operationPool * 25));
+    }
+
+    function _testRequestUnstakeFromNode(address nodeAddr, bool isPublicGood) internal {
+        uint256 amount = 10000 ether;
+
+        // stake
+        vm.startPrank(bob);
+        (uint256 startTokenId, uint256 endTokenId) = isPublicGood
+            ? _staking.stakeToPublicPool{value: amount}(nodeAddr)
+            : _staking.stake{value: amount}(nodeAddr);
+
+        // request unstake
+        uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
+        for (uint256 i = startTokenId; i <= endTokenId; i++) {
+            tokenIds[i - startTokenId] = i;
+        }
+        // chips should be burnt
+        for (uint256 i = startTokenId; i <= endTokenId; i++) {
+            expectEmit();
+            emit TestEvents.Transfer(bob, address(0), i);
+        }
+        expectEmit();
+        emit Events.UnstakeRequested(bob, nodeAddr, 1, amount, tokenIds);
+        uint256 requestId = _staking.requestUnstake(nodeAddr, tokenIds);
+
+        vm.stopPrank();
+
+        // check status
+        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        assertEq(req.owner, bob);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.unstakeAmount, amount);
+
+        // check node info
+        DataTypes.Node memory node = _staking.getNode(nodeAddr);
+        assertEq(node.stakingPoolTokens, 0);
+        assertEq(node.totalShares, 0);
     }
 
     function _unstakeAndCheckAmount(
