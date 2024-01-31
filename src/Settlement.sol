@@ -205,9 +205,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             return n * 10000;
         }
 
-        uint256 powNex = 1 << (n + 1);
-        uint256 fraction = ((x - pow) * 10000) / (powNex - pow);
-
-        return n * 10000 + fraction;
+        uint256 frac = ((x - pow) * 10000) / ((pow << 1) - pow);
+        return n * 10000 + frac;
     }
 }
