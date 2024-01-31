@@ -94,7 +94,7 @@ interface IStaking {
     /**
      * @notice Requests unstake tokens from a node operator.
      * @dev This will burn the chips tokens.
-     * @param nodeAddr Address of node operator to unstake.
+     * @param nodeAddr Address of node operator to unstake. For public pool, the nodeAddress is address(0).
      * @param chipsIds The chips token ids for unstake.
      * @return requestId THe created unstake request id.
      */
