@@ -199,19 +199,15 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     /// @dev log2(x) with precision 4
     function _log2(uint256 x) internal pure returns (uint256) {
         uint256 n = x.log2();
-        x = x >> n;
+        uint256 pow = 1 << (n);
 
-        uint256 frac = 0;
-        uint256 base = 1;
-        for (uint256 i = 0; i < 32; i++) {
-            base *= 2;
-            x *= x;
-            if (x >= base) {
-                frac += 10000 >> (i + 1);
-                x >>= 1;
-            }
+        if (x == pow) {
+            return n * 10000;
         }
 
-        return n * 10000 + frac;
+        uint256 powNex = 1 << (n + 1);
+        uint256 fraction = ((x - pow) * 10000) / (powNex - pow);
+
+        return n * 10000 + fraction;
     }
 }
