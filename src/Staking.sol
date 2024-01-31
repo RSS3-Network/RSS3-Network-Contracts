@@ -647,6 +647,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev get minimal tokens to stake for a node
     function _minTokensToStake(address nodeAddr) internal view returns (uint256) {
         DataTypes.Node storage node = _nodes[nodeAddr];
+        if (node.publicGood) {
+            node = _publicPool;
+        }
+
         if (node.totalShares == 0) {
             return SHARES_PER_CHIP;
         }
