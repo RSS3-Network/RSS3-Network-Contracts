@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="erc721"><a class="header" href="#erc721">ERC721</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1057a27ac2244744ec7b034d63d61e3b76e83f2c/src/base/ERC721.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/973d5db9b1e8b5f999ce23646de8a5870c8688bf/src/base/ERC721.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Context, ERC165, IERC721, IERC721Metadata, <a href="/src/interfaces/IERC721Errors.sol/interface.IERC721Errors.html">IERC721Errors</a></p>
 <p><em>Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
@@ -209,15 +209,15 @@ the Metadata extension, but not including the Enumerable extension, which is ava
 <pre><code class="language-solidity">function __ERC721_init(string memory name_, string memory symbol_) internal;
 </code></pre>
 <h3 id="supportsinterface"><a class="header" href="#supportsinterface">supportsInterface</a></h3>
-<p><em>See <a href="/lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#supportsinterface">IERC165-supportsInterface</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC165.sol/interface.IERC165.html#supportsinterface">IERC165-supportsInterface</a>.</em></p>
 <pre><code class="language-solidity">function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool);
 </code></pre>
 <h3 id="balanceof"><a class="header" href="#balanceof">balanceOf</a></h3>
-<p><em>See <a href="/lib/forge-std/test/StdCheats.t.sol/contract.BarERC1155.html#balanceof">IERC721-balanceOf</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#balanceof">IERC721-balanceOf</a>.</em></p>
 <pre><code class="language-solidity">function balanceOf(address owner) public view virtual returns (uint256);
 </code></pre>
 <h3 id="ownerof"><a class="header" href="#ownerof">ownerOf</a></h3>
-<p><em>See <a href="/lib/forge-std/test/StdCheats.t.sol/contract.BarERC721.html#ownerof">IERC721-ownerOf</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721.html#ownerof">IERC721-ownerOf</a>.</em></p>
 <pre><code class="language-solidity">function ownerOf(uint256 tokenId) public view virtual returns (address);
 </code></pre>
 <h3 id="name"><a class="header" href="#name">name</a></h3>
@@ -229,7 +229,7 @@ the Metadata extension, but not including the Enumerable extension, which is ava
 <pre><code class="language-solidity">function symbol() public view virtual returns (string memory);
 </code></pre>
 <h3 id="tokenuri"><a class="header" href="#tokenuri">tokenURI</a></h3>
-<p><em>See <a href="/lib/forge-std/test/mocks/MockERC721.t.sol/contract.Token_ERC721.html#tokenuri">IERC721Metadata-tokenURI</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721Metadata.html#tokenuri">IERC721Metadata-tokenURI</a>.</em></p>
 <pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view virtual returns (string memory);
 </code></pre>
 <h3 id="_baseuri"><a class="header" href="#_baseuri">_baseURI</a></h3>
@@ -239,7 +239,7 @@ by default, can be overridden in child contracts.</em></p>
 <pre><code class="language-solidity">function _baseURI() internal view virtual returns (string memory);
 </code></pre>
 <h3 id="approve"><a class="header" href="#approve">approve</a></h3>
-<p><em>See <a href="/lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#approve">IERC721-approve</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721.html#approve">IERC721-approve</a>.</em></p>
 <pre><code class="language-solidity">function approve(address to, uint256 tokenId) public virtual;
 </code></pre>
 <h3 id="getapproved"><a class="header" href="#getapproved">getApproved</a></h3>
@@ -247,23 +247,23 @@ by default, can be overridden in child contracts.</em></p>
 <pre><code class="language-solidity">function getApproved(uint256 tokenId) public view virtual returns (address);
 </code></pre>
 <h3 id="setapprovalforall"><a class="header" href="#setapprovalforall">setApprovalForAll</a></h3>
-<p><em>See <a href="/lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#setapprovalforall">IERC721-setApprovalForAll</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#setapprovalforall">IERC721-setApprovalForAll</a>.</em></p>
 <pre><code class="language-solidity">function setApprovalForAll(address operator, bool approved) public virtual;
 </code></pre>
 <h3 id="isapprovedforall"><a class="header" href="#isapprovedforall">isApprovedForAll</a></h3>
-<p><em>See <a href="/lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721.html#isapprovedforall">IERC721-isApprovedForAll</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#isapprovedforall">IERC721-isApprovedForAll</a>.</em></p>
 <pre><code class="language-solidity">function isApprovedForAll(address owner, address operator) public view virtual returns (bool);
 </code></pre>
 <h3 id="transferfrom"><a class="header" href="#transferfrom">transferFrom</a></h3>
-<p><em>See <a href="/lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#transferfrom">IERC721-transferFrom</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721.html#transferfrom">IERC721-transferFrom</a>.</em></p>
 <pre><code class="language-solidity">function transferFrom(address from, address to, uint256 tokenId) public virtual;
 </code></pre>
 <h3 id="safetransferfrom"><a class="header" href="#safetransferfrom">safeTransferFrom</a></h3>
-<p><em>See <a href="/lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
 <pre><code class="language-solidity">function safeTransferFrom(address from, address to, uint256 tokenId) public;
 </code></pre>
 <h3 id="safetransferfrom-1"><a class="header" href="#safetransferfrom-1">safeTransferFrom</a></h3>
-<p><em>See <a href="/lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
+<p><em>See <a href="/lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
 <pre><code class="language-solidity">function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public virtual;
 </code></pre>
 <h3 id="_ownerof"><a class="header" href="#_ownerof">_ownerOf</a></h3>
@@ -331,7 +331,7 @@ Emits a {Transfer} event.*</li>
 Requirements:</p>
 <ul>
 <li><code>tokenId</code> must not exist.</li>
-<li>If <code>to</code> refers to a smart contract, it must implement <a href="/lib/forge-std/test/mocks/MockERC721.t.sol/contract.ERC721Recipient.html#onerc721received">IERC721Receiver-onERC721Received</a>,
+<li>If <code>to</code> refers to a smart contract, it must implement <a href="/lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721TokenReceiver.html#onerc721received">IERC721Receiver-onERC721Received</a>,
 which is called upon a safe transfer.
 Emits a {Transfer} event.*</li>
 </ul>
@@ -383,7 +383,7 @@ Emits a {Transfer} event.*</li>
 <pre><code class="language-solidity">function _safeTransfer(address from, address to, uint256 tokenId) internal;
 </code></pre>
 <h3 id="_safetransfer-1"><a class="header" href="#_safetransfer-1">_safeTransfer</a></h3>
-<p><em>Same as <a href="/node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol/abstract.ERC721.html#_safetransfer"><code>_safeTransfer</code></a>,
+<p><em>Same as <a href="/node_modules/@openzeppelin/contracts-4/token/ERC721/ERC721.sol/contract.ERC721.html#_safetransfer"><code>_safeTransfer</code></a>,
 with an additional <code>data</code> parameter which is forwarded in {IERC721Receiver-onERC721Received}
 to contract recipients.</em></p>
 <pre><code class="language-solidity">function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal virtual;
@@ -417,7 +417,7 @@ Overrides to ownership logic should be done to <a href="/src/base/ERC721.sol/abs
 <pre><code class="language-solidity">function _requireOwned(uint256 tokenId) internal view returns (address);
 </code></pre>
 <h3 id="_checkonerc721received"><a class="header" href="#_checkonerc721received">_checkOnERC721Received</a></h3>
-<p><em>Private function to invoke <a href="/lib/forge-std/test/mocks/MockERC721.t.sol/contract.ERC721Recipient.html#onerc721received">IERC721Receiver-onERC721Received</a> on a target address. This will revert if the
+<p><em>Private function to invoke <a href="/lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721TokenReceiver.html#onerc721received">IERC721Receiver-onERC721Received</a> on a target address. This will revert if the
 recipient doesn't accept the token transfer. The call is not executed if the target address is not a contract.</em></p>
 <pre><code class="language-solidity">function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory data) private;
 </code></pre>
