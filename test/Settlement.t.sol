@@ -4,8 +4,9 @@ pragma solidity 0.8.20;
 
 import {console} from "forge-std/console.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
+import {IErrors} from "../src/interfaces/IErrors.sol";
 
-contract SettlementTest is CommonTest {
+contract SettlementTest is CommonTest, IErrors {
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     function setUp() public {
@@ -31,10 +32,11 @@ contract SettlementTest is CommonTest {
 
         (uint256 operationRewardsPerEpoch, uint256 stakingRewardPerEpoch) = _settlement.getBonusInfo();
 
-        vm.prank(oracleAccount);
+        skip(18 hours);
 
         uint256 balBefore = address(_staking).balance;
 
+        vm.prank(oracleAccount);
         _settlement.distributeRewards(
             array(alice, bob), // node addresses
             array(1 ether, 2 ether), // request fees
@@ -48,6 +50,20 @@ contract SettlementTest is CommonTest {
         assertEq(balAfter - balBefore, operationRewardsPerEpoch + stakingRewardPerEpoch);
 
         // TODO: check status
+    }
+
+    function testDistributeRewardsFailSubmissionIntervalNotElapsed() public {
+        _createNode(alice);
+
+        skip(16 hours);
+
+        vm.expectRevert(abi.encodeWithSelector(SubmissionIntervalNotElapsed.selector));
+        vm.prank(oracleAccount);
+        _settlement.distributeRewards(
+            array(alice), // node addresses
+            array(1 ether), // request fees
+            array(100) // request counts
+        );
     }
 
     function testStakingRewards(uint256 stakingAmount) public {

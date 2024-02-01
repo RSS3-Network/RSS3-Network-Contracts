@@ -17,7 +17,6 @@ contract DeployConfig is Script {
     address public proxyAdminOwner;
     address public pauseAccount;
     address public oracleAccount;
-    address public rss3Token;
     uint256 public depositUnbondingPeriod;
     uint256 public stakeUnbondingPeriod;
     uint256 public nodeSlashRateBasisPoints;
@@ -46,7 +45,6 @@ contract DeployConfig is Script {
         proxyAdminOwner = stdJson.readAddress(_json, "$.proxyAdminOwner");
         pauseAccount = stdJson.readAddress(_json, "$.pauseAccount");
         oracleAccount = stdJson.readAddress(_json, "$.oracleAccount");
-        rss3Token = stdJson.readAddress(_json, "$.rss3Token");
         depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
         stakeUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
         nodeSlashRateBasisPoints = stdJson.readUint(_json, "$.nodeSlashRateBasisPoints");

@@ -24,6 +24,9 @@ interface IErrors {
     /// @dev Invalid array length
     error InvalidArrayLength();
 
+    /// @dev Submission interval has not elapsed
+    error SubmissionIntervalNotElapsed();
+
     /// @dev Request already claimed
     error AlreadyClaimed();
 

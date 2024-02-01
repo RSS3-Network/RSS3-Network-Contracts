@@ -13,6 +13,6 @@
   "chipsName": "RSS3 Chips",
   "chipsSymbol": "Chips",
   "settlementStartTime": "1620000000",
-  "requsetBonusPercent": "0",
+  "operationRewardsPercent": 0,
   "startEpoch": "1"
 }

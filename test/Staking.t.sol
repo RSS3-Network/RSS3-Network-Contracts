@@ -530,17 +530,13 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         _createNode(alice);
 
-        vm.startPrank(alice);
+        vm.prank(alice);
         _staking.deposit{value: amount}();
-        vm.stopPrank();
 
         // stake
-        vm.startPrank(bob);
-
+        vm.prank(bob);
         (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice);
         uint256 chipsCount = endTokenId - startTokenId + 1;
-
-        vm.stopPrank();
 
         // distribute rewards
         uint256[] memory requestFees = new uint256[](1);
@@ -552,10 +548,9 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256[] memory stakingRewards = new uint256[](1);
         stakingRewards[0] = 1 ether;
 
-        vm.startPrank(oracleAccount);
         uint256 startTime = block.timestamp;
 
-        skip(18 hours);
+        skip(19 hours);
 
         uint256 endTime = block.timestamp;
 
@@ -576,6 +571,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             stakingRewards,
             taxAmounts
         );
+        vm.prank(oracleAccount);
         _staking.distributeRewards(
             [1, startTime, endTime],
             nodeAddrs,
@@ -584,8 +580,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             stakingRewards,
             1 ether // public pool reward
         );
-
-        vm.stopPrank();
 
         _checkDistribution(amount, nodeAddrs, taxAmounts, requestFees, operationRewards, stakingRewards);
 
@@ -608,11 +602,9 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _createNode(alice);
 
         uint256 amount = 10000 ether;
-        vm.startPrank(bob);
+        vm.prank(bob);
         _staking.stake{value: amount}(alice);
-        vm.stopPrank();
 
-        vm.startPrank(oracleAccount);
         address[] memory nodeAddrs = new address[](1);
         nodeAddrs[0] = alice;
 
@@ -622,6 +614,9 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256[] memory requestCounts = new uint256[](1);
         requestCounts[0] = 0;
 
+        skip(18 hours);
+
+        vm.prank(oracleAccount);
         _settlement.distributeRewards(nodeAddrs, requestFees, requestCounts);
 
         (uint256 operationPool, uint256 stakingPool, uint256 treasury) = _staking.getPoolInfo();

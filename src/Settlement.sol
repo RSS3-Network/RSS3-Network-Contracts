@@ -68,6 +68,10 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         if (nodeAddrs.length != requestFees.length || nodeAddrs.length != requestCounts.length)
             revert InvalidArrayLength();
 
+        // check submission interval
+        uint256 submissionInterval = EPOCH_DURATION - 1 hours;
+        if (block.timestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+
         uint256[] memory operationRewards = _getOperationRewards(_totalOperationRewardsPerEpoch, requestCounts);
 
         (uint256 publicPoolReward, uint256[] memory stakingRewards) = _getStakingRewards(nodeAddrs);
