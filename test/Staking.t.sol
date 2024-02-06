@@ -155,20 +155,11 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         expectEmit();
         emit Events.NodeDeleted(nodeAddr);
         vm.prank(nodeAddr);
-        _staking.deleteNode(nodeAddr);
+        _staking.deleteNode();
 
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.account, address(0));
         assertEq(_staking.getNodeCount(), 0);
-    }
-
-    function testDeleteNodeFailWithNonNodeOwner(address nodeAddr) public {
-        vm.assume(nodeAddr != proxyAdmin && nodeAddr != address(0));
-
-        _createNode(nodeAddr);
-
-        vm.expectRevert(abi.encodeWithSelector(CallerNotNodeOwner.selector));
-        _staking.deleteNode(nodeAddr);
     }
 
     function testDeleteNodeFailWithNodeDeposited(address nodeAddr) public {
@@ -182,7 +173,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.deposit{value: 100 ether}();
 
         vm.expectRevert(abi.encodeWithSelector(NodeStakedOrDeposited.selector));
-        _staking.deleteNode(nodeAddr);
+        _staking.deleteNode();
         vm.stopPrank();
     }
 
@@ -196,7 +187,13 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         vm.expectRevert(abi.encodeWithSelector(NodeStakedOrDeposited.selector));
         vm.prank(nodeAddr);
-        _staking.deleteNode(nodeAddr);
+        _staking.deleteNode();
+    }
+
+    function testDeleteNodeFailWithNonExistentNode() public {
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.prank(dave);
+        _staking.deleteNode();
     }
 
     function testRequestWithdrawal() public {
@@ -322,7 +319,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.startPrank(alice);
         expectEmit();
         emit Events.NodeTaxRateBasisPointsSet(alice, taxRateBasisPoints);
-        _staking.setTaxRateBasisPoints4Node(alice, taxRateBasisPoints);
+        _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
         vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
@@ -345,15 +342,19 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
     function testSetTaxRateError(uint64 taxRateBasisPoints) public {
         vm.assume(taxRateBasisPoints > _denominator());
-        vm.startPrank(alice);
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
-        _staking.setTaxRateBasisPoints4Node(alice, taxRateBasisPoints);
-        vm.stopPrank();
+        vm.prank(alice);
+        _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
 
-        vm.startPrank(oracleAccount);
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
+        vm.prank(oracleAccount);
         _staking.setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
-        vm.stopPrank();
+    }
+
+    function testSetTaxRateFailWithNonExistentNode() public {
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.prank(dave);
+        _staking.setTaxRateBasisPoints4Node(100);
     }
 
     function testStake(uint256 amount) public {

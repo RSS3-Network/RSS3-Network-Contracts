@@ -151,18 +151,18 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function deleteNode(address nodeAddr) external override {
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        // can't delete a node not operated by msg.sender
-        if (msg.sender != node.account) revert CallerNotNodeOwner();
+    function deleteNode() external override {
+        address addr = msg.sender;
+        DataTypes.Node storage node = _nodes[addr];
+        if (address(0) == node.account) revert NodeNotExists();
 
         // can't delete a node with staked or deposited tokens
         if (node.operationPoolTokens > 0 || node.stakingPoolTokens > 0) revert NodeStakedOrDeposited();
 
-        delete _nodes[nodeAddr];
-        _nodeAddrs.remove(nodeAddr);
+        delete _nodes[addr];
+        _nodeAddrs.remove(addr);
 
-        emit Events.NodeDeleted(nodeAddr);
+        emit Events.NodeDeleted(addr);
     }
 
     /// @inheritdoc IStaking
@@ -193,15 +193,15 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function setTaxRateBasisPoints4Node(address nodeAddr, uint64 taxRateBasisPoints) external override {
+    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override {
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        if (msg.sender != node.account) revert CallerNotNodeOwner();
+        DataTypes.Node storage node = _nodes[msg.sender];
+        if (address(0) == node.account) revert NodeNotExists();
 
         node.taxRateBasisPoints = taxRateBasisPoints;
 
-        emit Events.NodeTaxRateBasisPointsSet(nodeAddr, taxRateBasisPoints);
+        emit Events.NodeTaxRateBasisPointsSet(msg.sender, taxRateBasisPoints);
     }
 
     /// @inheritdoc IStaking

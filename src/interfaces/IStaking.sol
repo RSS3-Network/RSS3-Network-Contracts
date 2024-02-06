@@ -28,9 +28,9 @@ interface IStaking {
 
     /**
      * @notice Deletes a node.
-     * @param addr The address of node to delete.
+     * @dev Only node operator can call to delete a node for itself.
      */
-    function deleteNode(address addr) external;
+    function deleteNode() external;
 
     /**
      * @notice Creates a node and deposits tokens.
@@ -63,11 +63,11 @@ interface IStaking {
 
     /**
      * @notice Changes tax rate of the node.
-     * @param nodeAddr The address of node to change.
+     * @dev Only node operator can call to set tax rate for itself.
      * @param taxRateBasisPoints The basis points of tax rate to set for the node.
      * Each basis point represents 0.01%.
      */
-    function setTaxRateBasisPoints4Node(address nodeAddr, uint64 taxRateBasisPoints) external;
+    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external;
 
     /**
      * @notice Sets tax rate for public pool.

@@ -18,9 +18,6 @@ interface IErrors {
     /// @dev Node not exists
     error NodeNotExists();
 
-    /// @dev Caller is not node owner
-    error CallerNotNodeOwner();
-
     /// @dev Invalid array length
     error InvalidArrayLength();
 
