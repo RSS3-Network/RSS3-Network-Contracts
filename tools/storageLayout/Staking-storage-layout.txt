@@ -14,4 +14,3 @@
 | _totalOperationPoolTokens | uint256                                                | 18   | 0      | 32    | src/Staking.sol:Staking |
 | _totalStakingPoolTokens   | uint256                                                | 19   | 0      | 32    | src/Staking.sol:Staking |
 | _families                 | struct Checkpoints.Trace160                            | 20   | 0      | 32    | src/Staking.sol:Staking |
-| _currentEpoch             | uint256                                                | 21   | 0      | 32    | src/Staking.sol:Staking |

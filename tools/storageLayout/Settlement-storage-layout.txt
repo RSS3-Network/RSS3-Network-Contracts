@@ -5,5 +5,6 @@
 | _staking                       | address                                             | 2    | 0      | 20    | src/Settlement.sol:Settlement |
 | _totalStakingRewardsPerEpoch   | uint256                                             | 3    | 0      | 32    | src/Settlement.sol:Settlement |
 | _totalOperationRewardsPerEpoch | uint256                                             | 4    | 0      | 32    | src/Settlement.sol:Settlement |
-| _epoch                         | uint256                                             | 5    | 0      | 32    | src/Settlement.sol:Settlement |
+| _currentEpoch                  | uint256                                             | 5    | 0      | 32    | src/Settlement.sol:Settlement |
 | _startTimestamp                | uint256                                             | 6    | 0      | 32    | src/Settlement.sol:Settlement |
+| _endTimestamp                  | uint256                                             | 7    | 0      | 32    | src/Settlement.sol:Settlement |
