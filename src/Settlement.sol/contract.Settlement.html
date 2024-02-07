@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/7aca473a5957347c4a64806f9380f980ce89dc8d/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/4e28db7856e8517cf6bfcef80423f963ed8aff84/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -200,15 +200,18 @@
 <h3 id="_totaloperationrewardsperepoch"><a class="header" href="#_totaloperationrewardsperepoch">_totalOperationRewardsPerEpoch</a></h3>
 <pre><code class="language-solidity">uint256 internal _totalOperationRewardsPerEpoch;
 </code></pre>
-<h3 id="_epoch"><a class="header" href="#_epoch">_epoch</a></h3>
+<h3 id="_currentepoch"><a class="header" href="#_currentepoch">_currentEpoch</a></h3>
 <p><em>The current epoch.</em></p>
-<pre><code class="language-solidity">uint256 internal _epoch;
+<pre><code class="language-solidity">uint256 internal _currentEpoch;
 </code></pre>
 <h3 id="oracle_role"><a class="header" href="#oracle_role">ORACLE_ROLE</a></h3>
 <pre><code class="language-solidity">bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 </code></pre>
 <h3 id="_starttimestamp"><a class="header" href="#_starttimestamp">_startTimestamp</a></h3>
 <pre><code class="language-solidity">uint256 internal _startTimestamp;
+</code></pre>
+<h3 id="_endtimestamp"><a class="header" href="#_endtimestamp">_endTimestamp</a></h3>
+<pre><code class="language-solidity">uint256 internal _endTimestamp;
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
@@ -243,16 +246,18 @@
 <p>Updates accounting stats and distribute rewards.</p>
 <p><em>periodically called.</em></p>
 <pre><code class="language-solidity">function distributeRewards(
+    uint256 epoch,
     address[] calldata nodeAddrs,
     uint256[] calldata requestFees,
-    uint256[] calldata requestCounts
+    uint256[] calldata operationRewards
 ) external override onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>epoch</code></td><td><code>uint256</code></td><td>The current epoch number.</td></tr>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>requestFees</code></td><td><code>uint256[]</code></td><td>Amounts of request fees.</td></tr>
-<tr><td><code>requestCounts</code></td><td><code>uint256[]</code></td><td>Amounts of requests handled by each node.</td></tr>
+<tr><td><code>operationRewards</code></td><td><code>uint256[]</code></td><td>Amounts of operation rewards.</td></tr>
 </tbody></table>
 </div>
 <h3 id="settaxratebasispoints4publicpool"><a class="header" href="#settaxratebasispoints4publicpool">setTaxRateBasisPoints4PublicPool</a></h3>
@@ -319,21 +324,6 @@ Requirements:</p>
     internal
     view
     returns (uint256 publicPoolReward, uint256[] memory nodesReward);
-</code></pre>
-<h3 id="_getoperationrewards"><a class="header" href="#_getoperationrewards">_getOperationRewards</a></h3>
-<p><em>returns request bonuses</em></p>
-<pre><code class="language-solidity">function _getOperationRewards(uint256 totalRewards, uint256[] memory requestCounts)
-    internal
-    pure
-    returns (uint256[] memory operationRewards);
-</code></pre>
-<h3 id="_getweight"><a class="header" href="#_getweight">_getWeight</a></h3>
-<p><em>log2(requestCount/totalCount +1) * G , where G = ln(2)</em></p>
-<pre><code class="language-solidity">function _getWeight(uint256 requestCount, uint256 totalCount) internal pure returns (uint256);
-</code></pre>
-<h3 id="_log2"><a class="header" href="#_log2">_log2</a></h3>
-<p><em>log2(x) with precision 4</em></p>
-<pre><code class="language-solidity">function _log2(uint256 x) internal pure returns (uint256);
 </code></pre>
 
                     </main>
