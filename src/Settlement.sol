@@ -137,22 +137,22 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         // stakingBonusPerEpoch = rewardsPerEpoch *  (1 - (operationRewardsPercent / 100))%
 
         _totalOperationRewardsPerEpoch =
-            (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) / (100 * 365 days);
+            (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) /
+            (100 * 365 days);
         _totalStakingRewardsPerEpoch =
-            ((TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION) * (100 - operationRewardsPercent)) / (100 * 365 days);
+            ((TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION) * (100 - operationRewardsPercent)) /
+            (100 * 365 days);
     }
 
     /// @dev returns staking rewards
-    function _getStakingRewards(address[] calldata nodeAddrs)
-        internal
-        view
-        returns (uint256 publicPoolReward, uint256[] memory nodesReward)
-    {
+    function _getStakingRewards(
+        address[] calldata nodeAddrs
+    ) internal view returns (uint256 publicPoolReward, uint256[] memory nodesReward) {
         uint256 len = nodeAddrs.length;
         nodesReward = new uint256[](len);
 
         // get total staking of all nodes
-        (, uint256 totalStaking,) = IStaking(_staking).getPoolInfo();
+        (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
         if (totalStaking == 0) return (0, nodesReward);
 
         // get staking rewards for public pool and all nodes
