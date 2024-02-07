@@ -9,5 +9,12 @@
 | _staking           | address                                      | 6    | 0      | 20    | src/Chips.sol:Chips |
 | _counter           | uint256                                      | 7    | 0      | 32    | src/Chips.sol:Chips |
 | _totalSupply       | uint256                                      | 8    | 0      | 32    | src/Chips.sol:Chips |
-| _randomTraitCount  | uint256                                      | 9    | 0      | 32    | src/Chips.sol:Chips |
-| _chipImageSeeds    | mapping(uint256 => uint256[])                | 10   | 0      | 32    | src/Chips.sol:Chips |
+| _colorCount        | uint8                                        | 9    | 0      | 1     | src/Chips.sol:Chips |
+| _frameCount        | uint8                                        | 9    | 1      | 1     | src/Chips.sol:Chips |
+| _chipDetailCount   | uint8                                        | 9    | 2      | 1     | src/Chips.sol:Chips |
+| _chipCornerCount   | uint8                                        | 9    | 3      | 1     | src/Chips.sol:Chips |
+| _eyeCount          | uint8                                        | 9    | 4      | 1     | src/Chips.sol:Chips |
+| _mouthCount        | uint8                                        | 9    | 5      | 1     | src/Chips.sol:Chips |
+| _headShapeCount    | uint8                                        | 9    | 6      | 1     | src/Chips.sol:Chips |
+| _headDetailCount   | uint8                                        | 9    | 7      | 1     | src/Chips.sol:Chips |
+| _svgGenerator      | address                                      | 9    | 8      | 20    | src/Chips.sol:Chips |

@@ -53,7 +53,7 @@ library DataTypes {
         uint8 chipDetailColor;
         uint8 chipDetailId;
         // uint8 chipCornerId; // TODO: in the future
-        bool pgCorner; // ture: public good node corner; false: alpha node corner
+        bool pgCorner; // true: public good node corner; false: alpha node corner
     }
 
     struct ChipTraits {
