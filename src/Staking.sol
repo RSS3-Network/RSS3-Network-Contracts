@@ -74,9 +74,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev the issuers of chips
     Checkpoints.Trace160 internal _families;
 
-    /// @dev current epoch
-    uint256 internal _currentEpoch;
-
     /// ACL
     // keccak256("PAUSE_ROLE");
     bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
@@ -263,8 +260,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             nodeAddrs.length != stakingRewards.length
         ) revert InvalidArrayLength();
 
-        if (epochInfo[0] != ++_currentEpoch) revert InvalidEpoch(_currentEpoch, epochInfo[0]);
-
         // distribute rewards for public pool
         uint256 publicPoolTax = _distributePublicPoolRewards(publicPoolReward);
         emit Events.PublicGoodRewardDistributed(
@@ -407,11 +402,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function getMinDeposit() external view override returns (uint256) {
         return MIN_DEPOSIT;
-    }
-
-    /// @inheritdoc IStaking
-    function currentEpoch() external view override returns (uint256) {
-        return _currentEpoch;
     }
 
     /// @inheritdoc IStaking

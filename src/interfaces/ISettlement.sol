@@ -22,14 +22,16 @@ interface ISettlement {
     /**
      * @notice Updates accounting stats and distribute rewards.
      * @dev periodically called.
+     * @param epoch The current epoch number.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param requestFees Amounts of request fees.
-     * @param requestCounts Amounts of requests handled by each node.
+     * @param operationRewards Amounts of operation rewards.
      */
     function distributeRewards(
+        uint256 epoch,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
-        uint256[] calldata requestCounts
+        uint256[] calldata operationRewards
     ) external;
 
     /**
