@@ -32,7 +32,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         assertEq(_staking.getNodeCount(), 0);
         assertEq(_staking.getMinDeposit(), minDeposit);
-        assertEq(_staking.currentEpoch(), 0);
         assertEq(_staking.chipsContract(), address(_chips));
 
         assertEq(_staking.STAKE_UNBONDING_PERIOD(), stakeUnbondingPeriod);
@@ -618,7 +617,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         skip(18 hours);
 
         vm.prank(oracleAccount);
-        _settlement.distributeRewards(nodeAddrs, requestFees, requestCounts);
+        _settlement.distributeRewards(1, nodeAddrs, requestFees, requestCounts);
 
         (uint256 operationPool, uint256 stakingPool, uint256 treasury) = _staking.getPoolInfo();
         assertEq(operationPool, 0);

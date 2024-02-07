@@ -30,12 +30,13 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     uint256 internal _totalOperationRewardsPerEpoch;
 
     /// @dev The current epoch.
-    uint256 internal _epoch;
+    uint256 internal _currentEpoch;
 
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
     uint256 internal _startTimestamp;
+    uint256 internal _endTimestamp;
 
     /// @inheritdoc ISettlement
     function initialize(
@@ -46,7 +47,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         uint256 startEpoch // set as param for upgradeability
     ) external override initializer {
         _staking = staking;
-        _epoch = startEpoch;
+        _currentEpoch = startEpoch;
         _startTimestamp = startTime;
 
         _updateRewardsRatio(operationRewardsPercent);
@@ -61,34 +62,38 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @inheritdoc ISettlement
     function distributeRewards(
+        uint256 epoch,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
-        uint256[] calldata requestCounts
+        uint256[] calldata operationRewards
     ) external override onlyRole(ORACLE_ROLE) {
-        if (nodeAddrs.length != requestFees.length || nodeAddrs.length != requestCounts.length)
+        if (nodeAddrs.length != requestFees.length || nodeAddrs.length != operationRewards.length)
             revert InvalidArrayLength();
 
-        // check submission interval
-        uint256 submissionInterval = EPOCH_DURATION - 1 hours;
-        if (block.timestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+        if (epoch < _currentEpoch) {
+            revert InvalidEpochNumber();
+        }
+        if (epoch == _currentEpoch + 1) {
+            // check submission interval
+            uint256 submissionInterval = EPOCH_DURATION - 1 hours;
+            if (block.timestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
 
-        uint256[] memory operationRewards = _getOperationRewards(_totalOperationRewardsPerEpoch, requestCounts);
+            // update current epoch
+            _currentEpoch = epoch;
+
+            _startTimestamp = _endTimestamp;
+            _endTimestamp = block.timestamp;
+        }
 
         (uint256 publicPoolReward, uint256[] memory stakingRewards) = _getStakingRewards(nodeAddrs);
-
-        uint256 endTimestamp = block.timestamp;
-
         IStaking(_staking).distributeRewards{value: _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch}(
-            [_epoch, _startTimestamp, endTimestamp],
+            [epoch, _startTimestamp, _endTimestamp],
             nodeAddrs,
             requestFees,
             operationRewards,
             stakingRewards,
             publicPoolReward
         );
-
-        _startTimestamp = endTimestamp;
-        _epoch++;
     }
 
     /// @inheritdoc ISettlement
@@ -117,7 +122,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @inheritdoc ISettlement
     function currentEpoch() external view override returns (uint256) {
-        return _epoch;
+        return _currentEpoch;
     }
 
     /// @inheritdoc ISettlement
@@ -157,59 +162,5 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             uint256 nodeStakings = IStaking(_staking).getNode(nodeAddrs[i]).stakingPoolTokens;
             nodesReward[i] = (nodeStakings * _totalStakingRewardsPerEpoch) / totalStaking;
         }
-    }
-
-    /// @dev returns request bonuses
-    function _getOperationRewards(
-        uint256 totalRewards,
-        uint256[] memory requestCounts
-    ) internal pure returns (uint256[] memory operationRewards) {
-        operationRewards = new uint256[](requestCounts.length);
-
-        // no operation rewards
-        if (totalRewards == 0) return operationRewards;
-
-        uint256 totalRequestCount;
-        for (uint256 i = 0; i < requestCounts.length; i++) {
-            totalRequestCount += requestCounts[i];
-        }
-
-        // no request
-        if (totalRequestCount == 0) return operationRewards;
-
-        // get weights for bonus
-        uint256[] memory weights = new uint256[](requestCounts.length);
-        uint256 sumWeight;
-        for (uint256 i = 0; i < requestCounts.length; i++) {
-            weights[i] = _getWeight(requestCounts[i], totalRequestCount);
-            sumWeight += weights[i];
-        }
-
-        // get bonus for each node
-        for (uint256 i = 0; i < requestCounts.length; i++) {
-            operationRewards[i] = (totalRewards * weights[i]) / sumWeight;
-        }
-    }
-
-    /// @dev log2(requestCount/totalCount +1) * G , where G = ln(2)
-    function _getWeight(uint256 requestCount, uint256 totalCount) internal pure returns (uint256) {
-        // scale with scalar to keep more precision
-        uint256 scalar = type(uint64).max;
-        uint256 scaledA = (requestCount + totalCount) * scalar;
-        uint256 res = _log2(scaledA / totalCount) - 630000; // log2(scalar) = 630000
-        return (res * 693147) / 1000000; // ln 2 = 693147 / 1000000
-    }
-
-    /// @dev log2(x) with precision 4
-    function _log2(uint256 x) internal pure returns (uint256) {
-        uint256 n = x.log2();
-        uint256 pow = 1 << (n);
-
-        if (x == pow) {
-            return n * 10000;
-        }
-
-        uint256 frac = ((x - pow) * 10000) / ((pow << 1) - pow);
-        return n * 10000 + frac;
     }
 }

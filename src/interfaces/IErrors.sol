@@ -21,6 +21,9 @@ interface IErrors {
     /// @dev Invalid array length
     error InvalidArrayLength();
 
+    /// @dev Invalid epoch number.
+    error InvalidEpochNumber();
+
     /// @dev Submission interval has not elapsed
     error SubmissionIntervalNotElapsed();
 

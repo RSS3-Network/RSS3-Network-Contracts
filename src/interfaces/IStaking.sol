@@ -232,12 +232,6 @@ interface IStaking {
     function getMinDeposit() external view returns (uint256);
 
     /**
-     * @notice Returns the current epoch number.
-     * @return uint256 The current epoch number.
-     */
-    function currentEpoch() external view returns (uint256);
-
-    /**
      * @notice Returns the address of the chips contract.
      * @return address The address of the chips contract.
      */

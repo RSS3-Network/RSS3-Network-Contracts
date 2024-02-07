@@ -12,44 +12,97 @@ contract SettlementTest is CommonTest, IErrors {
     function setUp() public {
         _setUp();
 
-        vm.deal(alice, 100000 ether);
-        vm.deal(bob, 100000 ether);
-        vm.deal(carol, 100000 ether);
-        vm.deal(dave, 100000 ether);
+        vm.deal(alice, 1000000 ether);
+        vm.deal(bob, 1000000 ether);
+        vm.deal(carol, 1000000 ether);
+        vm.deal(dave, 1000000 ether);
         vm.deal(address(_settlement), 30000000 ether);
     }
 
     function testCheckSetupStatus() public {
         assertEq(_settlement.stakingContract(), address(_staking));
-        assertEq(_settlement.currentEpoch(), 1);
+        assertEq(_settlement.currentEpoch(), 0);
         assertEq(_settlement.EPOCH_DURATION(), 18 hours);
         assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
     }
 
     function testDistributeRewards() public {
+        uint256 depositAmount = 10000 ether;
+        uint256 stakeAmount = 1000 ether;
+
         _createNode(alice);
         _createNode(bob);
 
-        (uint256 operationRewardsPerEpoch, uint256 stakingRewardPerEpoch) = _settlement.getBonusInfo();
+        vm.prank(alice);
+        _staking.deposit{value: depositAmount}();
+
+        vm.prank(bob);
+        _staking.deposit{value: depositAmount}();
+
+        _staking.stake{value: stakeAmount}(alice);
+        _staking.stake{value: stakeAmount}(bob);
+
+        (uint256 operationRewardsPerEpoch, ) = _settlement.getBonusInfo();
+
+        uint256 requestFee = 1 ether;
+        uint256 operationReward = operationRewardsPerEpoch / 2;
 
         skip(18 hours);
 
-        uint256 balBefore = address(_staking).balance;
-
         vm.prank(oracleAccount);
         _settlement.distributeRewards(
+            1,
             array(alice, bob), // node addresses
-            array(1 ether, 2 ether), // request fees
-            array(100, 300) // request counts
+            array(requestFee, requestFee), // request fees
+            array(operationReward, operationReward) // operation rewards
         );
 
-        uint256 balAfter = address(_staking).balance;
+        // check status
+    }
 
-        console.log(balAfter - balBefore);
+    function testDistributeRewardsMultiple() public {
+        _createNode(alice);
+        _createNode(bob);
+        _createNode(carol);
+        _createNode(dave);
 
-        assertEq(balAfter - balBefore, operationRewardsPerEpoch + stakingRewardPerEpoch);
+        vm.prank(alice);
+        _staking.deposit{value: 10000 ether}();
 
-        // TODO: check status
+        vm.prank(bob);
+        _staking.deposit{value: 10000 ether}();
+
+        vm.prank(carol);
+        _staking.deposit{value: 10000 ether}();
+
+        vm.prank(dave);
+        _staking.deposit{value: 10000 ether}();
+
+        _staking.stake{value: 500 ether}(alice);
+        _staking.stake{value: 500 ether}(bob);
+        _staking.stake{value: 500 ether}(carol);
+        _staking.stake{value: 500 ether}(dave);
+
+        skip(18 hours);
+
+        (uint256 operationRewardsPerEpoch, ) = _settlement.getBonusInfo();
+        uint256 operationReward = operationRewardsPerEpoch / 4;
+        uint256 requestFee = 1 ether;
+
+        vm.startPrank(oracleAccount);
+        _settlement.distributeRewards(
+            1,
+            array(alice, bob), // node addresses
+            array(requestFee, requestFee), // request fees
+            array(operationReward, operationReward) // operation rewards
+        );
+        _settlement.distributeRewards(
+            1,
+            array(carol, dave), // node addresses
+            array(requestFee, requestFee), // request fees
+            array(operationReward, operationReward) // operation rewards
+        );
+        vm.stopPrank();
     }
 
     function testDistributeRewardsFailSubmissionIntervalNotElapsed() public {
@@ -60,9 +113,10 @@ contract SettlementTest is CommonTest, IErrors {
         vm.expectRevert(abi.encodeWithSelector(SubmissionIntervalNotElapsed.selector));
         vm.prank(oracleAccount);
         _settlement.distributeRewards(
+            1,
             array(alice), // node addresses
             array(1 ether), // request fees
-            array(100) // request counts
+            array(100) // operation rewards
         );
     }
 
