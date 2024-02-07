@@ -46,4 +46,22 @@ library DataTypes {
         /// @notice amount of tokens to unstake
         uint256 unstakeAmount;
     }
+
+    struct NodeTraits {
+        uint8 frameColor;
+        uint8 frameId;
+        uint8 chipDetailColor;
+        uint8 chipDetailId;
+        // uint8 chipCornerId; // TODO: in the future
+        bool pgCorner; // ture: public good node corner; false: alpha node corner
+    }
+
+    struct ChipTraits {
+        uint8 eyesId;
+        uint8 mouthId;
+        uint8 headShapeColor;
+        uint8 headShapeId;
+        uint8 headDetailColor;
+        uint8 headDetailId;
+    }
 }

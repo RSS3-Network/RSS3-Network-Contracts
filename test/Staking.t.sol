@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable comprehensive-interface,no-console
+// solhint-disable comprehensive-interface
 pragma solidity 0.8.20;
 
-import "forge-std/console.sol";
-
-// import {console2} from "forge-std/console2.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {TestEvents} from "test/helpers/TestEvents.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";

@@ -5,3 +5,6 @@ slither/
 .env
 broadcast
 deployments
+.DS_Store
+rss3-chips
+utils

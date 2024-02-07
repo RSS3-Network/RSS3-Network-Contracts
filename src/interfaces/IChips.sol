@@ -7,8 +7,9 @@ interface IChips {
      * @param name_ Name of the token.
      * @param symbol_ Symbol of the token.
      * @param staking_ Address of the Staking contract.
+     * @param svgGenerator_ Address of the svg Generator contract.
      */
-    function initialize(string memory name_, string memory symbol_, address staking_) external;
+    function initialize(string memory name_, string memory symbol_, address staking_, address svgGenerator_) external;
 
     /**
      * @notice Mints a token to `account`.
