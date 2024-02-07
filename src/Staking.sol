@@ -112,6 +112,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         MIN_DEPOSIT = minDeposit;
     }
 
+    // solhint-disable comprehensive-interface
+    receive() external payable {}
+
     /// @inheritdoc IStaking
     function initialize(address chips, address pauseAccount, address oracleAccount) external override initializer {
         _chips = chips;
