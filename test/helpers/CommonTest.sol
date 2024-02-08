@@ -3,6 +3,7 @@
 pragma solidity 0.8.20;
 
 import {Utils} from "./Utils.sol";
+import {DataTypes} from "../../src/libraries/DataTypes.sol";
 import {Staking} from "../../src/Staking.sol";
 import {SVGGenerator} from "../../src/SVGGenerator.sol";
 import {Chips} from "../../src/Chips.sol";
@@ -130,5 +131,33 @@ contract CommonTest is Utils {
     function _createPublicGoodNode(address to) internal {
         vm.prank(to);
         _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, true);
+    }
+
+    function _checkDistribution(
+        uint256[] memory depositAmounts,
+        uint256[] memory stakeAmounts,
+        address[] memory nodeAddrs,
+        uint256[] memory taxAmounts,
+        uint256[] memory requestFees,
+        uint256[] memory operationRewards,
+        uint256[] memory stakingRewards
+    ) internal {
+        // status check
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            DataTypes.Node memory node = _staking.getNode(nodeAddrs[i]);
+            uint256 newOperationPool = depositAmounts[i] + requestFees[i] + taxAmounts[i];
+            assertEq(node.operationPoolTokens, newOperationPool, "check operation pool failed");
+
+            uint256 newStakingPool = stakeAmounts[i] + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
+            assertEq(node.stakingPoolTokens, newStakingPool, "check staking pool failed");
+        }
+    }
+
+    function _denominator() internal pure virtual returns (uint96) {
+        return 10000;
+    }
+
+    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
+        return (rewards * taxRateBasisPoints) / _denominator();
     }
 }

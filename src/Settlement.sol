@@ -38,6 +38,13 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     uint256 internal _startTimestamp;
     uint256 internal _endTimestamp;
 
+    // total staking for each epoch
+    mapping(uint256 epoch => uint256 totalStaking) internal _totalStakings;
+    // distributed staking rewards for each epoch
+    mapping(uint256 epoch => uint256 stakingRewards) internal _distributedStakingRewards;
+    // distributed operation rewards for each epoch
+    mapping(uint256 epoch => uint256 operationRewards) internal _distributedOperationRewards;
+
     /// @inheritdoc ISettlement
     function initialize(
         address staking,
@@ -71,9 +78,13 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             revert InvalidArrayLength();
         }
 
+        // check epoch number
         if (epoch < _currentEpoch) {
             revert InvalidEpochNumber();
         }
+
+        uint256 publicPoolRewards;
+        uint256 amountToTransfer;
         if (epoch == _currentEpoch + 1) {
             // check submission interval
             uint256 submissionInterval = EPOCH_DURATION - 1 hours;
@@ -81,20 +92,61 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
             // update current epoch
             _currentEpoch = epoch;
-
+            // update epoch timestamp
             _startTimestamp = _endTimestamp;
             _endTimestamp = block.timestamp;
+
+            // send operationRewards and stakingRewards to staking contract
+            amountToTransfer = _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch;
+
+            // public pool rewards will be settled only at the start of each epoch
+            publicPoolRewards = _getPublicPoolStakingRewards();
+
+            // save totalStaking for current epoch
+            (, _totalStakings[_currentEpoch], ) = IStaking(_staking).getPoolInfo();
         }
 
-        (uint256 publicPoolReward, uint256[] memory stakingRewards) = _getStakingRewards(nodeAddrs);
-        IStaking(_staking).distributeRewards{value: _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch}(
+        uint256[] memory stakingRewards = _getStakingRewards(nodeAddrs);
+
+        _checkRewards(nodeAddrs, operationRewards, stakingRewards);
+
+        IStaking(_staking).distributeRewards{value: amountToTransfer}(
             [epoch, _startTimestamp, _endTimestamp],
             nodeAddrs,
             requestFees,
             operationRewards,
             stakingRewards,
-            publicPoolReward
+            publicPoolRewards
         );
+    }
+
+    /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch
+    function _checkRewards(
+        address[] memory nodeAddrs,
+        uint256[] memory operationRewards,
+        uint256[] memory stakingRewards
+    ) internal {
+        uint256 distributedOperationRewards = _distributedOperationRewards[_currentEpoch];
+        uint256 distributedStakingRewards = _distributedStakingRewards[_currentEpoch];
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            distributedOperationRewards += operationRewards[i];
+            distributedStakingRewards += stakingRewards[i];
+        }
+
+        if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardExceeds();
+        if (distributedStakingRewards > _totalStakingRewardsPerEpoch) revert StakingRewardExceeds();
+
+        _distributedOperationRewards[_currentEpoch] = distributedOperationRewards;
+        _distributedStakingRewards[_currentEpoch] = distributedStakingRewards;
+    }
+
+    /// @dev Returns staking rewards per epoch for public pool
+    function _getPublicPoolStakingRewards() internal view returns (uint256) {
+        (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
+        if (totalStaking == 0) return 0;
+
+        uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
+        return (publicPoolTokens * _totalStakingRewardsPerEpoch) / totalStaking;
     }
 
     /// @inheritdoc ISettlement
@@ -145,23 +197,25 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @dev returns staking rewards
-    function _getStakingRewards(
-        address[] calldata nodeAddrs
-    ) internal view returns (uint256 publicPoolReward, uint256[] memory nodesReward) {
+    function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256[] memory nodeRewards) {
         uint256 len = nodeAddrs.length;
-        nodesReward = new uint256[](len);
+        nodeRewards = new uint256[](len);
 
         // get total staking of all nodes
-        (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
-        if (totalStaking == 0) return (0, nodesReward);
-
-        // get staking rewards for public pool and all nodes
-        DataTypes.Node memory publicPool = IStaking(_staking).getPublicPool();
-        publicPoolReward = (publicPool.stakingPoolTokens * _totalStakingRewardsPerEpoch) / totalStaking;
+        uint256 totalStaking = _getTotalStaking();
+        if (totalStaking == 0) return nodeRewards;
 
         for (uint256 i = 0; i < len; i++) {
             uint256 nodeStakings = IStaking(_staking).getNode(nodeAddrs[i]).stakingPoolTokens;
-            nodesReward[i] = (nodeStakings * _totalStakingRewardsPerEpoch) / totalStaking;
+            nodeRewards[i] = (nodeStakings * _totalStakingRewardsPerEpoch) / totalStaking;
+        }
+    }
+
+    /// @dev returns amount of total staking tokens
+    function _getTotalStaking() internal view returns (uint256 totalStaking) {
+        totalStaking = _totalStakings[_currentEpoch];
+        if (totalStaking == 0) {
+            (, totalStaking, ) = IStaking(_staking).getPoolInfo();
         }
     }
 }

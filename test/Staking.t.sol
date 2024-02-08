@@ -523,103 +523,85 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testDistributeRewards() public {
-        uint256 amount = 10000 ether;
+        uint256 depositAmount = 10000 ether;
+        uint256 stakeAmount = 1000 ether;
 
+        // create node
         _createNode(alice);
+        _createNode(bob);
 
+        // deposit
         vm.prank(alice);
-        _staking.deposit{value: amount}();
+        _staking.deposit{value: depositAmount}();
+
+        vm.prank(bob);
+        _staking.deposit{value: depositAmount}();
 
         // stake
-        vm.prank(bob);
-        (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice);
-        uint256 chipsCount = endTokenId - startTokenId + 1;
+        _staking.stake{value: stakeAmount}(alice);
+        _staking.stake{value: stakeAmount}(bob);
+
+        uint256 requestFee = 11 ether;
+        uint256 operationReward = 200 ether;
+        uint256 stakingReward = 800 ether;
 
         // distribute rewards
-        uint256[] memory requestFees = new uint256[](1);
-        requestFees[0] = 1 ether;
-
-        uint256[] memory operationRewards = new uint256[](1);
-        operationRewards[0] = 1 ether;
-
-        uint256[] memory stakingRewards = new uint256[](1);
-        stakingRewards[0] = 1 ether;
-
         uint256 startTime = block.timestamp;
-
-        skip(19 hours);
-
+        skip(18 hours);
         uint256 endTime = block.timestamp;
 
-        address[] memory nodeAddrs = new address[](1);
-        nodeAddrs[0] = alice;
+        uint256[] memory taxAmounts = new uint256[](2);
+        taxAmounts[0] = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
+        taxAmounts[1] = taxAmounts[0];
 
-        uint256[] memory taxAmounts = new uint256[](1);
-        taxAmounts[0] = _getFullTax(requestFees[0] + stakingRewards[0], _defaultTaxRateBasisPoints);
         expectEmit();
 
         emit Events.RewardDistributed(
             1,
             startTime,
             endTime,
-            nodeAddrs,
-            requestFees,
-            operationRewards,
-            stakingRewards,
+            array(alice, bob),
+            array(requestFee, requestFee),
+            array(operationReward, operationReward),
+            array(stakingReward, stakingReward),
             taxAmounts
         );
         vm.prank(oracleAccount);
         _staking.distributeRewards(
             [1, startTime, endTime],
-            nodeAddrs,
-            requestFees,
-            operationRewards,
-            stakingRewards,
+            array(alice, bob),
+            array(requestFee, requestFee),
+            array(operationReward, operationReward),
+            array(stakingReward, stakingReward),
             1 ether // public pool reward
         );
 
-        _checkDistribution(amount, nodeAddrs, taxAmounts, requestFees, operationRewards, stakingRewards);
-
-        uint256[] memory tokenIds = new uint256[](chipsCount);
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            tokenIds[i - startTokenId] = i;
-        }
+        // check status
+        _checkDistribution(
+            array(depositAmount, depositAmount),
+            array(stakeAmount, stakeAmount),
+            array(alice, bob),
+            taxAmounts,
+            array(requestFee, requestFee),
+            array(operationReward, operationReward),
+            array(stakingReward, stakingReward)
+        );
 
         // new stake and price will goes up
-        vm.startPrank(bob);
         uint256 minTokens = _staking.minTokensToStake(alice);
         assert(minTokens > _staking.SHARES_PER_CHIP());
-
-        vm.stopPrank();
-
-        _unstakeAndCheckAmount(bob, amount, tokenIds, taxAmounts, operationRewards, stakingRewards);
     }
 
-    function testWithdraw2Treasury() public {
-        _createNode(alice);
+    function testWithdraw2Treasury(uint256 amount) public {
+        vm.assume(amount > 0);
 
-        uint256 amount = 10000 ether;
-        vm.prank(bob);
-        _staking.stake{value: amount}(alice);
+        vm.deal(address(_staking), amount);
 
-        address[] memory nodeAddrs = new address[](1);
-        nodeAddrs[0] = alice;
+        (, , uint256 treasuryAmount) = _staking.getPoolInfo();
+        assertEq(treasuryAmount, amount);
 
-        uint256[] memory requestFees = new uint256[](1);
-        requestFees[0] = 0 ether;
-
-        uint256[] memory requestCounts = new uint256[](1);
-        requestCounts[0] = 0;
-
-        skip(18 hours);
-
-        vm.prank(oracleAccount);
-        _settlement.distributeRewards(1, nodeAddrs, requestFees, requestCounts);
-
-        (uint256 operationPool, uint256 stakingPool, uint256 treasury) = _staking.getPoolInfo();
-        assertEq(operationPool, 0);
-        assert(treasury > 0);
-        assert(stakingPool > 0);
+        _staking.withdraw2Treasury();
+        assertEq(treasury.balance, amount);
     }
 
     function testSlashNodes() public {
@@ -804,25 +786,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.stopPrank();
     }
 
-    function _checkDistribution(
-        uint256 amount,
-        address[] memory nodeAddrs,
-        uint256[] memory taxAmounts,
-        uint256[] memory requestFees,
-        uint256[] memory operationRewards,
-        uint256[] memory stakingRewards
-    ) internal {
-        // status check
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            DataTypes.Node memory node = _staking.getNode(nodeAddrs[i]);
-            uint256 newOperationPool = amount + requestFees[i] + taxAmounts[i];
-            assertEq(node.operationPoolTokens, newOperationPool);
-
-            uint256 newstakingPool = amount + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
-            assertEq(node.stakingPoolTokens, newstakingPool);
-        }
-    }
-
     function _checkNode(
         address nodeAddr,
         string memory name,
@@ -837,13 +800,5 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
         assertEq(node.operationPoolTokens, operationPoolTokens);
         assertEq(node.publicGood, publicGood);
-    }
-
-    function _denominator() internal pure virtual returns (uint96) {
-        return 10000;
-    }
-
-    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
-        return (rewards * taxRateBasisPoints) / _denominator();
     }
 }

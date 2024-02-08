@@ -79,14 +79,14 @@ library Events {
      * @param epoch The current epoch number.
      * @param startTimestamp The start timestamp of the epoch.
      * @param endTimestamp The end timestamp of the epoch.
-     * @param publicPoolReward Amount of rewards to public pool.
+     * @param publicPoolRewards Amount of rewards to public pool.
      * @param publicPoolTax Amount of tax to public pool.
      */
     event PublicGoodRewardDistributed(
         uint256 indexed epoch,
         uint256 startTimestamp,
         uint256 endTimestamp,
-        uint256 publicPoolReward,
+        uint256 publicPoolRewards,
         uint256 publicPoolTax
     );
 

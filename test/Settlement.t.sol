@@ -42,10 +42,11 @@ contract SettlementTest is CommonTest, IErrors {
         _staking.stake{value: stakeAmount}(alice);
         _staking.stake{value: stakeAmount}(bob);
 
-        (uint256 operationRewardsPerEpoch, ) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
 
-        uint256 requestFee = 1 ether;
+        uint256 requestFee = 10 ether;
         uint256 operationReward = operationRewardsPerEpoch / 2;
+        uint256 stakingReward = totalStakingRewardsPerEpoch / 2;
 
         skip(18 hours);
 
@@ -57,37 +58,54 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward) // operation rewards
         );
 
+        uint256[] memory taxAmounts = new uint256[](2);
+        taxAmounts[0] = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
+        taxAmounts[1] = taxAmounts[0];
+
         // check status
+        _checkDistribution(
+            array(depositAmount, depositAmount),
+            array(stakeAmount, stakeAmount),
+            array(alice, bob),
+            taxAmounts,
+            array(requestFee, requestFee),
+            array(operationReward, operationReward),
+            array(stakingReward, stakingReward)
+        );
     }
 
     function testDistributeRewardsMultiple() public {
+        uint256 depositAmount = 10000 ether;
+        uint256 stakeAmount = 1000 ether;
+
         _createNode(alice);
         _createNode(bob);
         _createNode(carol);
         _createNode(dave);
 
         vm.prank(alice);
-        _staking.deposit{value: 10000 ether}();
+        _staking.deposit{value: depositAmount}();
 
         vm.prank(bob);
-        _staking.deposit{value: 10000 ether}();
+        _staking.deposit{value: depositAmount}();
 
         vm.prank(carol);
-        _staking.deposit{value: 10000 ether}();
+        _staking.deposit{value: depositAmount}();
 
         vm.prank(dave);
-        _staking.deposit{value: 10000 ether}();
+        _staking.deposit{value: depositAmount}();
 
-        _staking.stake{value: 500 ether}(alice);
-        _staking.stake{value: 500 ether}(bob);
-        _staking.stake{value: 500 ether}(carol);
-        _staking.stake{value: 500 ether}(dave);
+        _staking.stake{value: stakeAmount}(alice);
+        _staking.stake{value: stakeAmount}(bob);
+        _staking.stake{value: stakeAmount}(carol);
+        _staking.stake{value: stakeAmount}(dave);
 
         skip(18 hours);
 
-        (uint256 operationRewardsPerEpoch, ) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        uint256 requestFee = 100 ether;
         uint256 operationReward = operationRewardsPerEpoch / 4;
-        uint256 requestFee = 1 ether;
+        uint256 stakingReward = totalStakingRewardsPerEpoch / 4;
 
         vm.startPrank(oracleAccount);
         _settlement.distributeRewards(
@@ -103,6 +121,28 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward) // operation rewards
         );
         vm.stopPrank();
+
+        uint256 taxAmount = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
+
+        // check status
+        _checkDistribution(
+            array(depositAmount, depositAmount),
+            array(stakeAmount, stakeAmount),
+            array(alice, bob),
+            array(taxAmount, taxAmount),
+            array(requestFee, requestFee),
+            array(operationReward, operationReward),
+            array(stakingReward, stakingReward)
+        );
+        _checkDistribution(
+            array(depositAmount, depositAmount),
+            array(stakeAmount, stakeAmount),
+            array(carol, dave),
+            array(taxAmount, taxAmount),
+            array(requestFee, requestFee),
+            array(operationReward, operationReward),
+            array(stakingReward, stakingReward)
+        );
     }
 
     function testDistributeRewardsFailSubmissionIntervalNotElapsed() public {
@@ -120,6 +160,116 @@ contract SettlementTest is CommonTest, IErrors {
         );
     }
 
+    function testDistributeRewardsFailInvalidEpochNumber() public {
+        _createNode(alice);
+        skip(18 hours);
+
+        vm.startPrank(oracleAccount);
+        _settlement.distributeRewards(
+            1,
+            array(alice), // node addresses
+            array(1 ether), // request fees
+            array(100) // operation rewards
+        );
+
+        skip(18 hours);
+
+        vm.expectRevert(abi.encodeWithSelector(InvalidEpochNumber.selector));
+        _settlement.distributeRewards(
+            0,
+            array(alice), // node addresses
+            array(1 ether), // request fees
+            array(100) // operation rewards
+        );
+        vm.stopPrank();
+    }
+
+    function testDistributeRewardsFailWithOperationRewardsExceedsLimit() public {
+        uint256 depositAmount = 10000 ether;
+        uint256 stakeAmount = 1000 ether;
+
+        // create node
+        _createNode(alice);
+        _createNode(bob);
+
+        // deposit
+        vm.prank(alice);
+        _staking.deposit{value: depositAmount}();
+
+        vm.prank(bob);
+        _staking.deposit{value: depositAmount}();
+
+        // stake
+        _staking.stake{value: stakeAmount}(alice);
+        _staking.stake{value: stakeAmount}(bob);
+
+        (uint256 operationRewardsPerEpoch, ) = _settlement.getBonusInfo();
+        uint256 operationReward = operationRewardsPerEpoch / 2;
+
+        skip(18 hours);
+
+        vm.startPrank(oracleAccount);
+        _settlement.distributeRewards(
+            1,
+            array(alice, bob), // node addresses
+            array(1 ether, 1 ether), // request fees
+            array(operationReward, operationReward) // operation rewards
+        );
+
+        skip(18 hours);
+
+        vm.expectRevert(abi.encodeWithSelector(OperationRewardExceeds.selector));
+        _settlement.distributeRewards(
+            1,
+            array(alice, bob), // node addresses
+            array(1 ether, 1 ether), // request fees
+            array(operationReward, operationReward) // operation rewards
+        );
+        vm.stopPrank();
+    }
+
+    function testDistributeRewardsFailWithStakingRewardsExceedsLimit() public {
+        uint256 depositAmount = 10000 ether;
+        uint256 stakeAmount = 1000 ether;
+
+        // create node
+        _createNode(alice);
+        _createNode(bob);
+
+        // deposit
+        vm.prank(alice);
+        _staking.deposit{value: depositAmount}();
+
+        vm.prank(bob);
+        _staking.deposit{value: depositAmount}();
+
+        // stake
+        _staking.stake{value: stakeAmount}(alice);
+        _staking.stake{value: stakeAmount}(bob);
+
+        (uint256 operationRewardsPerEpoch, ) = _settlement.getBonusInfo();
+        uint256 operationReward = operationRewardsPerEpoch / 16;
+
+        vm.startPrank(oracleAccount);
+        skip(18 hours);
+        _settlement.distributeRewards(
+            1,
+            array(alice, bob), // node addresses
+            array(1 ether, 1 ether), // request fees
+            array(operationReward, operationReward) // operation rewards
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(StakingRewardExceeds.selector));
+        skip(18 hours);
+        _settlement.distributeRewards(
+            1,
+            array(alice, bob), // node addresses
+            array(1 ether, 1 ether), // request fees
+            array(operationReward, operationReward) // operation rewards
+        );
+        vm.stopPrank();
+    }
+
     function testStakingRewards(uint256 stakingAmount) public {
         vm.assume(stakingAmount > 5000 && stakingAmount < 10000);
         stakingAmount = stakingAmount * 1 ether;
@@ -128,38 +278,30 @@ contract SettlementTest is CommonTest, IErrors {
         _createNode(bob);
         _createPublicGoodNode(carol);
 
-        vm.startPrank(alice);
+        vm.prank(alice);
         _staking.stakeToPublicPool{value: stakingAmount}(carol);
-        vm.stopPrank();
 
-        vm.startPrank(bob);
+        vm.prank(bob);
         _staking.stake{value: 10000 ether}(alice);
-        vm.stopPrank();
 
-        vm.startPrank(carol);
+        vm.prank(carol);
         _staking.stake{value: 8000 ether}(alice);
-        vm.stopPrank();
 
-        vm.startPrank(alice);
+        vm.prank(alice);
         _staking.stake{value: stakingAmount}(bob);
-        vm.stopPrank();
 
-        vm.startPrank(dave);
+        vm.prank(dave);
         _staking.stake{value: 9000 ether}(bob);
-        vm.stopPrank();
 
         address[] memory nodeAddrs = array(alice, bob);
-        (uint256 publicPoolReward, uint256[] memory nodeRewards) = _internalSettlementTest.getStakingRewards(nodeAddrs);
+        uint256 publicPoolReward = _internalSettlementTest.getPublicPoolStakingRewards();
+        uint256[] memory nodeRewards = _internalSettlementTest.getStakingRewards(nodeAddrs);
 
         uint256 sum = publicPoolReward;
         for (uint256 i = 0; i < nodeRewards.length; i++) {
             sum += nodeRewards[i];
         }
 
-        //  we use `nodeRewards.length` here because each node's reward may have the 1wei roundup caused by truncation
-        assert(
-            sum <= _internalSettlementTest.getTotalStakingRewardsPerEpoch() &&
-                sum >= _internalSettlementTest.getTotalStakingRewardsPerEpoch() - nodeRewards.length
-        );
+        assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
     }
 }
