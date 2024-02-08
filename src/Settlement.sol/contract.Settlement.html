@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/8208c94b1a0301f78232bbff077afdd2e6b78b72/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/86cb7f9399b57eefb5a069b243f4b22855f2701d/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -225,13 +225,10 @@
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the Settlement contract.</p>
-<pre><code class="language-solidity">function initialize(
-    address staking,
-    address oracleAccount,
-    uint256 startTime,
-    uint256 operationRewardsPercent,
-    uint256 startEpoch
-) external override initializer;
+<pre><code class="language-solidity">function initialize(address staking, address oracleAccount, uint256 startTime, uint256 operationRewardsPercent)
+    external
+    override
+    initializer;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -239,7 +236,6 @@
 <tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who makes settlement with the Staking contract.</td></tr>
 <tr><td><code>startTime</code></td><td><code>uint256</code></td><td>The start time of the first epoch.</td></tr>
 <tr><td><code>operationRewardsPercent</code></td><td><code>uint256</code></td><td>The percentage of the total rewards to be allocated to the request bonus. Others will be allocated to the staking rewards.</td></tr>
-<tr><td><code>startEpoch</code></td><td><code>uint256</code></td><td>The start epoch.</td></tr>
 </tbody></table>
 </div>
 <h3 id="updaterewardsratio"><a class="header" href="#updaterewardsratio">updateRewardsRatio</a></h3>
@@ -259,7 +255,7 @@
     address[] calldata nodeAddrs,
     uint256[] calldata requestFees,
     uint256[] calldata operationRewards
-) external override onlyRole(ORACLE_ROLE);
+) external payable override onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -269,6 +265,13 @@
 <tr><td><code>operationRewards</code></td><td><code>uint256[]</code></td><td>Amounts of operation rewards.</td></tr>
 </tbody></table>
 </div>
+<h3 id="_checksubmissioninterval"><a class="header" href="#_checksubmissioninterval">_checkSubmissionInterval</a></h3>
+<p><em>check submission interval</em></p>
+<pre><code class="language-solidity">function _checkSubmissionInterval() internal view;
+</code></pre>
+<h3 id="_updateepochinfo"><a class="header" href="#_updateepochinfo">_updateEpochInfo</a></h3>
+<pre><code class="language-solidity">function _updateEpochInfo(uint256 epoch) internal;
+</code></pre>
 <h3 id="_checkrewards"><a class="header" href="#_checkrewards">_checkRewards</a></h3>
 <p><em>check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch</em></p>
 <pre><code class="language-solidity">function _checkRewards(address[] memory nodeAddrs, uint256[] memory operationRewards, uint256[] memory stakingRewards)
