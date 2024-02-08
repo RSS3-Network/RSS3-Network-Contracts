@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/c8146a280102f9212992238f8bf2cbe64467c1e0/src/Chips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/8208c94b1a0301f78232bbff077afdd2e6b78b72/src/Chips.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, <a href="/src/base/ERC721.sol/abstract.ERC721.html">ERC721</a></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -193,30 +193,6 @@
 <h3 id="_totalsupply"><a class="header" href="#_totalsupply">_totalSupply</a></h3>
 <p><em>Total supply of tokens.</em></p>
 <pre><code class="language-solidity">uint256 internal _totalSupply;
-</code></pre>
-<h3 id="_colorcount"><a class="header" href="#_colorcount">_colorCount</a></h3>
-<pre><code class="language-solidity">uint8 internal _colorCount;
-</code></pre>
-<h3 id="_framecount"><a class="header" href="#_framecount">_frameCount</a></h3>
-<pre><code class="language-solidity">uint8 internal _frameCount;
-</code></pre>
-<h3 id="_chipdetailcount"><a class="header" href="#_chipdetailcount">_chipDetailCount</a></h3>
-<pre><code class="language-solidity">uint8 internal _chipDetailCount;
-</code></pre>
-<h3 id="_chipcornercount"><a class="header" href="#_chipcornercount">_chipCornerCount</a></h3>
-<pre><code class="language-solidity">uint8 internal _chipCornerCount;
-</code></pre>
-<h3 id="_eyecount"><a class="header" href="#_eyecount">_eyeCount</a></h3>
-<pre><code class="language-solidity">uint8 internal _eyeCount;
-</code></pre>
-<h3 id="_mouthcount"><a class="header" href="#_mouthcount">_mouthCount</a></h3>
-<pre><code class="language-solidity">uint8 internal _mouthCount;
-</code></pre>
-<h3 id="_headshapecount"><a class="header" href="#_headshapecount">_headShapeCount</a></h3>
-<pre><code class="language-solidity">uint8 internal _headShapeCount;
-</code></pre>
-<h3 id="_headdetailcount"><a class="header" href="#_headdetailcount">_headDetailCount</a></h3>
-<pre><code class="language-solidity">uint8 internal _headDetailCount;
 </code></pre>
 <h3 id="_svggenerator"><a class="header" href="#_svggenerator">_svgGenerator</a></h3>
 <pre><code class="language-solidity">address internal _svgGenerator;
@@ -309,6 +285,9 @@
     internal
     view
     returns (DataTypes.NodeTraits memory, DataTypes.ChipTraits memory);
+</code></pre>
+<h3 id="_getchiptraits"><a class="header" href="#_getchiptraits">_getChipTraits</a></h3>
+<pre><code class="language-solidity">function _getChipTraits(uint256 tokenId) internal view returns (DataTypes.ChipTraits memory);
 </code></pre>
 <h3 id="_generatesvgimage"><a class="header" href="#_generatesvgimage">_generateSVGImage</a></h3>
 <pre><code class="language-solidity">function _generateSVGImage(DataTypes.NodeTraits memory nodeTraits, DataTypes.ChipTraits memory chipTraits)
