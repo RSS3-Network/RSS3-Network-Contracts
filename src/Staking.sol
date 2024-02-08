@@ -320,8 +320,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 balance = address(this).balance;
-        uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens; // TODO: check arithmetic underflow or overflow error
-
+        // TODO: check arithmetic underflow or overflow error
+        uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
         _transfer(TREASURY, amount);
     }
 
