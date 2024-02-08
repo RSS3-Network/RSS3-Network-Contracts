@@ -6,7 +6,7 @@ import {Settlement} from "../../src/Settlement.sol";
 
 contract InternalSettlement is Settlement {
     function getPublicPoolStakingRewards() external view returns (uint256) {
-        return super._getPublicPoolStakingReward();
+        return super._getPublicPoolStakingRewards();
     }
 
     function getStakingRewards(address[] calldata nodeAddrs) external view returns (uint256[] memory) {

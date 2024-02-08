@@ -432,11 +432,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _totalStakingPoolTokens -= amount;
     }
 
-    function _distributePublicPoolRewards(uint256 publicPoolReward) internal returns (uint256) {
+    function _distributePublicPoolRewards(uint256 publicPoolRewards) internal returns (uint256) {
         // rewards for public pool
-        uint256 tax = _getFullTax(publicPoolReward, _publicPool.taxRateBasisPoints);
+        uint256 tax = _getFullTax(publicPoolRewards, _publicPool.taxRateBasisPoints);
 
-        _increaseStakingPool(_publicPool, publicPoolReward - tax);
+        _increaseStakingPool(_publicPool, publicPoolRewards - tax);
 
         return tax;
     }

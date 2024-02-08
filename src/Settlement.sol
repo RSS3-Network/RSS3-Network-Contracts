@@ -82,7 +82,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             revert InvalidEpochNumber();
         }
 
-        uint256 publicPoolReward;
+        uint256 publicPoolRewards;
         if (epoch == _currentEpoch + 1) {
             // check submission interval
             uint256 submissionInterval = EPOCH_DURATION - 1 hours;
@@ -99,7 +99,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             payable(_staking).transfer(_totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch);
 
             // public pool rewards will be settled only at the start of each epoch
-            publicPoolReward = _getPublicPoolStakingReward();
+            publicPoolRewards = _getPublicPoolStakingRewards();
 
             // save totalStaking for current epoch
             (, _totalStakings[_currentEpoch], ) = IStaking(_staking).getPoolInfo();
@@ -115,7 +115,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             requestFees,
             operationRewards,
             stakingRewards,
-            publicPoolReward
+            publicPoolRewards
         );
     }
 
@@ -140,7 +140,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @dev Returns staking rewards per epoch for public pool
-    function _getPublicPoolStakingReward() internal view returns (uint256) {
+    function _getPublicPoolStakingRewards() internal view returns (uint256) {
         (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
         if (totalStaking == 0) return 0;
 
@@ -196,17 +196,17 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @dev returns staking rewards
-    function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256[] memory nodesReward) {
+    function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256[] memory nodeRewards) {
         uint256 len = nodeAddrs.length;
-        nodesReward = new uint256[](len);
+        nodeRewards = new uint256[](len);
 
         // get total staking of all nodes
         uint256 totalStaking = _getTotalStaking();
-        if (totalStaking == 0) return nodesReward;
+        if (totalStaking == 0) return nodeRewards;
 
         for (uint256 i = 0; i < len; i++) {
             uint256 nodeStakings = IStaking(_staking).getNode(nodeAddrs[i]).stakingPoolTokens;
-            nodesReward[i] = (nodeStakings * _totalStakingRewardsPerEpoch) / totalStaking;
+            nodeRewards[i] = (nodeStakings * _totalStakingRewardsPerEpoch) / totalStaking;
         }
     }
 
