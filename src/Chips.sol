@@ -20,15 +20,6 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     /// @dev Total supply of tokens.
     uint256 internal _totalSupply;
 
-    uint8 internal _colorCount;
-    uint8 internal _frameCount;
-    uint8 internal _chipDetailCount;
-    uint8 internal _chipCornerCount;
-    uint8 internal _eyeCount;
-    uint8 internal _mouthCount;
-    uint8 internal _headShapeCount;
-    uint8 internal _headDetailCount;
-
     address internal _svgGenerator;
 
     modifier onlyStaking() {
@@ -48,11 +39,6 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         __ERC721_init(name_, symbol_);
 
         _svgGenerator = svgGenerator_;
-
-        (_colorCount, _frameCount, _chipCornerCount, _chipDetailCount) = ISVGGenerator(svgGenerator_)
-            .getNodeTraitsCount();
-
-        (_eyeCount, _mouthCount, _headShapeCount, _headDetailCount) = ISVGGenerator(svgGenerator_).getChipTraitsCount();
     }
 
     /// @inheritdoc IChips
@@ -121,63 +107,70 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         (address nodeAddr, ) = IStaking(_staking).getChipsInfo(tokenId);
         DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddr);
 
-        uint256 nodeTraitCount = uint256(_frameCount) *
-            uint256(_colorCount) *
-            uint256(_chipDetailCount) *
-            uint256(_colorCount) *
-            uint256(_chipCornerCount);
+        (uint8 colorCount, uint8 frameCount, uint8 chipCornerCount, uint8 chipDetailCount) = ISVGGenerator(
+            _svgGenerator
+        ).getNodeTraitsCount();
 
-        uint256 nodeTraitId = uint256(keccak256(abi.encodePacked(tokenId, nodeAddr))) % nodeTraitCount; // add nodeAddr?
+        uint256 nodeTraitCount = uint256(frameCount) *
+            uint256(colorCount) *
+            uint256(chipDetailCount) *
+            uint256(colorCount) *
+            uint256(chipCornerCount);
+
+        uint256 nodeTraitId = uint256(keccak256(abi.encodePacked(nodeAddr))) % nodeTraitCount;
 
         DataTypes.NodeTraits memory nodeTraits = DataTypes.NodeTraits({
             frameId: _calTraitId(
                 nodeTraitId,
-                _frameCount,
-                uint256(_colorCount) * uint256(_chipDetailCount) * uint256(_colorCount) * uint256(_chipCornerCount)
+                frameCount,
+                uint256(colorCount) * uint256(chipDetailCount) * uint256(colorCount) * uint256(chipCornerCount)
             ),
             frameColor: _calTraitId(
                 nodeTraitId,
-                _colorCount,
-                uint256(_chipDetailCount) * uint256(_colorCount) * uint256(_chipCornerCount)
+                colorCount,
+                uint256(chipDetailCount) * uint256(colorCount) * uint256(chipCornerCount)
             ),
-            chipDetailColor: _calTraitId(nodeTraitId, _colorCount, uint256(_chipDetailCount) * uint256(_colorCount)),
-            chipDetailId: _calTraitId(nodeTraitId, _chipDetailCount, _colorCount),
+            chipDetailColor: _calTraitId(nodeTraitId, colorCount, uint256(chipDetailCount) * uint256(colorCount)),
+            chipDetailId: _calTraitId(nodeTraitId, chipDetailCount, colorCount),
             // chipCornerId: uint8(nodeTraitId % _chip_corner_count) // TODO: in the future
             pgCorner: node.publicGood
         });
 
-        uint256 chipTraitCount = uint256(_eyeCount) *
-            uint256(_mouthCount) *
-            uint256(_headShapeCount) *
-            uint256(_colorCount) *
-            uint256(_headDetailCount) *
-            uint256(_colorCount);
+        (uint8 eyeCount, uint8 mouthCount, uint8 headShapeCount, uint8 headDetailCount) = ISVGGenerator(_svgGenerator)
+            .getChipTraitsCount();
+
+        uint256 chipTraitCount = uint256(eyeCount) *
+            uint256(mouthCount) *
+            uint256(headShapeCount) *
+            uint256(colorCount) *
+            uint256(headDetailCount) *
+            uint256(colorCount);
 
         uint256 chipTraitId = uint256(keccak256(abi.encodePacked(tokenId))) % chipTraitCount;
 
         DataTypes.ChipTraits memory chipTraits = DataTypes.ChipTraits({
             eyesId: _calTraitId(
                 chipTraitId,
-                _eyeCount,
-                uint256(_mouthCount) *
-                    uint256(_headShapeCount) *
-                    uint256(_colorCount) *
-                    uint256(_headDetailCount) *
-                    uint256(_colorCount)
+                eyeCount,
+                uint256(mouthCount) *
+                    uint256(headShapeCount) *
+                    uint256(colorCount) *
+                    uint256(headDetailCount) *
+                    uint256(colorCount)
             ),
             mouthId: _calTraitId(
                 chipTraitId,
-                _mouthCount,
-                uint256(_headShapeCount) * uint256(_colorCount) * uint256(_headDetailCount) * uint256(_colorCount)
+                mouthCount,
+                uint256(headShapeCount) * uint256(colorCount) * uint256(headDetailCount) * uint256(colorCount)
             ),
             headShapeColor: _calTraitId(
                 chipTraitId,
-                _colorCount,
-                uint256(_colorCount) * uint256(_headDetailCount) * uint256(_colorCount)
+                colorCount,
+                uint256(colorCount) * uint256(headDetailCount) * uint256(colorCount)
             ),
-            headShapeId: _calTraitId(chipTraitId, _headShapeCount, _colorCount * _headDetailCount),
-            headDetailColor: _calTraitId(chipTraitId, _colorCount, _headDetailCount),
-            headDetailId: uint8(chipTraitId % _headDetailCount)
+            headShapeId: _calTraitId(chipTraitId, headShapeCount, colorCount * headDetailCount),
+            headDetailColor: _calTraitId(chipTraitId, colorCount, headDetailCount),
+            headDetailId: uint8(chipTraitId % headDetailCount)
         });
 
         return (nodeTraits, chipTraits);
