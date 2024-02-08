@@ -50,11 +50,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 operationRewardsPercent,
-        uint256 startEpoch // set as param for upgradeability
+        uint256 operationRewardsPercent
     ) external override initializer {
         _staking = staking;
-        _currentEpoch = startEpoch;
         _startTimestamp = startTime;
 
         _updateRewardsRatio(operationRewardsPercent);
@@ -73,7 +71,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
         uint256[] calldata operationRewards
-    ) external override onlyRole(ORACLE_ROLE) {
+    ) external payable override onlyRole(ORACLE_ROLE) {
         if (nodeAddrs.length != requestFees.length || nodeAddrs.length != operationRewards.length) {
             revert InvalidArrayLength();
         }
@@ -83,21 +81,22 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             revert InvalidEpochNumber();
         }
 
-        uint256 publicPoolRewards;
-        uint256 amountToTransfer;
-        if (epoch == _currentEpoch + 1) {
-            // check submission interval
-            uint256 submissionInterval = EPOCH_DURATION - 1 hours;
-            if (block.timestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+        // check requestFees
+        uint256 amountToSend;
+        for (uint256 i = 0; i < requestFees.length; i++) {
+            amountToSend += requestFees[i];
+        }
+        if (amountToSend > msg.value) revert InsufficientRequestFees();
 
-            // update current epoch
-            _currentEpoch = epoch;
-            // update epoch timestamp
-            _startTimestamp = _endTimestamp;
-            _endTimestamp = block.timestamp;
+        // start of a new epoch
+        uint256 publicPoolRewards;
+        if (epoch == _currentEpoch + 1) {
+            _checkSubmissionInterval();
+
+            _updateEpochInfo(epoch);
 
             // send operationRewards and stakingRewards to staking contract
-            amountToTransfer = _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch;
+            amountToSend += _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch;
 
             // public pool rewards will be settled only at the start of each epoch
             publicPoolRewards = _getPublicPoolStakingRewards();
@@ -107,10 +106,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         }
 
         uint256[] memory stakingRewards = _getStakingRewards(nodeAddrs);
-
         _checkRewards(nodeAddrs, operationRewards, stakingRewards);
 
-        IStaking(_staking).distributeRewards{value: amountToTransfer}(
+        IStaking(_staking).distributeRewards{value: amountToSend}(
             [epoch, _startTimestamp, _endTimestamp],
             nodeAddrs,
             requestFees,
@@ -118,6 +116,20 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             stakingRewards,
             publicPoolRewards
         );
+    }
+
+    /// @dev check submission interval
+    function _checkSubmissionInterval() internal view {
+        uint256 submissionInterval = EPOCH_DURATION - 1 hours;
+        if (block.timestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+    }
+
+    function _updateEpochInfo(uint256 epoch) internal {
+        // update current epoch
+        _currentEpoch = epoch;
+        // update epoch timestamp
+        _startTimestamp = _endTimestamp;
+        _endTimestamp = block.timestamp;
     }
 
     /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch

@@ -9,14 +9,12 @@ interface ISettlement {
      * @param startTime The start time of the first epoch.
      * @param operationRewardsPercent The percentage of the total rewards to be allocated to the request bonus.
      * Others will be allocated to the staking rewards.
-     * @param startEpoch The start epoch.
      */
     function initialize(
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 operationRewardsPercent,
-        uint256 startEpoch
+        uint256 operationRewardsPercent
     ) external;
 
     /**
@@ -32,7 +30,7 @@ interface ISettlement {
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
         uint256[] calldata operationRewards
-    ) external;
+    ) external payable;
 
     /**
      * @notice Sets tax fraction for public pool.

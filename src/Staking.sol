@@ -261,14 +261,16 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         ) revert InvalidArrayLength();
 
         // distribute rewards for public pool
-        uint256 publicPoolTax = _distributePublicPoolRewards(publicPoolReward);
-        emit Events.PublicGoodRewardDistributed(
-            epochInfo[0],
-            epochInfo[1],
-            epochInfo[2],
-            publicPoolReward,
-            publicPoolTax
-        );
+        if (publicPoolReward > 0) {
+            uint256 publicPoolTax = _distributePublicPoolRewards(publicPoolReward);
+            emit Events.PublicGoodRewardDistributed(
+                epochInfo[0],
+                epochInfo[1],
+                epochInfo[2],
+                publicPoolReward,
+                publicPoolTax
+            );
+        }
 
         // distribute rewards for other nodes
         uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, requestFees, operationRewards, stakingRewards);

@@ -175,14 +175,13 @@ contract Deploy is Deployer {
             stakingProxy,
             cfg.oracleAccount(),
             cfg.settlementStartTime(),
-            cfg.operationRewardsPercent(),
-            cfg.startEpoch()
+            cfg.operationRewardsPercent()
         );
 
         // check states
         require(settlementProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");
         require(settlementProxy.stakingContract() == stakingProxy, "check settlement contract error");
-        require(settlementProxy.currentEpoch() == cfg.startEpoch(), "check start epoch error");
+        require(settlementProxy.currentEpoch() == 0, "check start epoch error");
         require(settlementProxy.EPOCH_DURATION() == 18 hours, "check start epoch error");
         require(settlementProxy.TOTAL_REWARDS_PER_YEAR() == 30000000 ether, "check start epoch error");
     }
