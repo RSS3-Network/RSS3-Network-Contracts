@@ -8,3 +8,6 @@
 | _currentEpoch                  | uint256                                             | 5    | 0      | 32    | src/Settlement.sol:Settlement |
 | _startTimestamp                | uint256                                             | 6    | 0      | 32    | src/Settlement.sol:Settlement |
 | _endTimestamp                  | uint256                                             | 7    | 0      | 32    | src/Settlement.sol:Settlement |
+| _totalStakings                 | mapping(uint256 => uint256)                         | 8    | 0      | 32    | src/Settlement.sol:Settlement |
+| _distributedStakingRewards     | mapping(uint256 => uint256)                         | 9    | 0      | 32    | src/Settlement.sol:Settlement |
+| _distributedOperationRewards   | mapping(uint256 => uint256)                         | 10   | 0      | 32    | src/Settlement.sol:Settlement |
