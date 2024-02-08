@@ -17,6 +17,7 @@ contract SettlementTest is CommonTest, IErrors {
         vm.deal(carol, 1000000 ether);
         vm.deal(dave, 1000000 ether);
         vm.deal(address(_settlement), 30000000 ether);
+        vm.deal(oracleAccount, 30000000 ether);
     }
 
     function testCheckSetupStatus() public {
@@ -51,7 +52,7 @@ contract SettlementTest is CommonTest, IErrors {
         skip(18 hours);
 
         vm.prank(oracleAccount);
-        _settlement.distributeRewards(
+        _settlement.distributeRewards{value: requestFee * 2}(
             1,
             array(alice, bob), // node addresses
             array(requestFee, requestFee), // request fees
@@ -108,13 +109,13 @@ contract SettlementTest is CommonTest, IErrors {
         uint256 stakingReward = totalStakingRewardsPerEpoch / 4;
 
         vm.startPrank(oracleAccount);
-        _settlement.distributeRewards(
+        _settlement.distributeRewards{value: requestFee * 2}(
             1,
             array(alice, bob), // node addresses
             array(requestFee, requestFee), // request fees
             array(operationReward, operationReward) // operation rewards
         );
-        _settlement.distributeRewards(
+        _settlement.distributeRewards{value: requestFee * 2}(
             1,
             array(carol, dave), // node addresses
             array(requestFee, requestFee), // request fees
@@ -146,16 +147,18 @@ contract SettlementTest is CommonTest, IErrors {
     }
 
     function testDistributeRewardsFailSubmissionIntervalNotElapsed() public {
+        uint256 requestFee = 1 ether;
+
         _createNode(alice);
 
         skip(16 hours);
 
         vm.expectRevert(abi.encodeWithSelector(SubmissionIntervalNotElapsed.selector));
         vm.prank(oracleAccount);
-        _settlement.distributeRewards(
+        _settlement.distributeRewards{value: requestFee}(
             1,
             array(alice), // node addresses
-            array(1 ether), // request fees
+            array(requestFee), // request fees
             array(100) // operation rewards
         );
     }
@@ -164,11 +167,13 @@ contract SettlementTest is CommonTest, IErrors {
         _createNode(alice);
         skip(18 hours);
 
+        uint256 requestFee = 1 ether;
+
         vm.startPrank(oracleAccount);
-        _settlement.distributeRewards(
+        _settlement.distributeRewards{value: requestFee}(
             1,
             array(alice), // node addresses
-            array(1 ether), // request fees
+            array(requestFee), // request fees
             array(100) // operation rewards
         );
 
@@ -187,6 +192,8 @@ contract SettlementTest is CommonTest, IErrors {
     function testDistributeRewardsFailWithOperationRewardsExceedsLimit() public {
         uint256 depositAmount = 10000 ether;
         uint256 stakeAmount = 1000 ether;
+
+        uint256 requestFee = 1 ether;
 
         // create node
         _createNode(alice);
@@ -209,20 +216,20 @@ contract SettlementTest is CommonTest, IErrors {
         skip(18 hours);
 
         vm.startPrank(oracleAccount);
-        _settlement.distributeRewards(
+        _settlement.distributeRewards{value: requestFee * 2}(
             1,
             array(alice, bob), // node addresses
-            array(1 ether, 1 ether), // request fees
+            array(requestFee, requestFee), // request fees
             array(operationReward, operationReward) // operation rewards
         );
 
         skip(18 hours);
 
         vm.expectRevert(abi.encodeWithSelector(OperationRewardsExceed.selector));
-        _settlement.distributeRewards(
+        _settlement.distributeRewards{value: requestFee * 2}(
             1,
             array(alice, bob), // node addresses
-            array(1 ether, 1 ether), // request fees
+            array(requestFee, requestFee), // request fees
             array(operationReward, operationReward) // operation rewards
         );
         vm.stopPrank();
@@ -231,6 +238,8 @@ contract SettlementTest is CommonTest, IErrors {
     function testDistributeRewardsFailWithStakingRewardsExceedsLimit() public {
         uint256 depositAmount = 10000 ether;
         uint256 stakeAmount = 1000 ether;
+
+        uint256 requestFee = 1 ether;
 
         // create node
         _createNode(alice);
@@ -252,19 +261,19 @@ contract SettlementTest is CommonTest, IErrors {
 
         vm.startPrank(oracleAccount);
         skip(18 hours);
-        _settlement.distributeRewards(
+        _settlement.distributeRewards{value: requestFee * 2}(
             1,
             array(alice, bob), // node addresses
-            array(1 ether, 1 ether), // request fees
+            array(requestFee, requestFee), // request fees
             array(operationReward, operationReward) // operation rewards
         );
 
         vm.expectRevert(abi.encodeWithSelector(StakingRewardsExceed.selector));
         skip(18 hours);
-        _settlement.distributeRewards(
+        _settlement.distributeRewards{value: requestFee * 2}(
             1,
             array(alice, bob), // node addresses
-            array(1 ether, 1 ether), // request fees
+            array(requestFee, requestFee), // request fees
             array(operationReward, operationReward) // operation rewards
         );
         vm.stopPrank();

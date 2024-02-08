@@ -89,4 +89,7 @@ interface IErrors {
 
     /// @dev Distributed operation rewards exceed limit
     error OperationRewardsExceed();
+
+    /// @dev Insufficient requestFees
+    error InsufficientRequestFees();
 }
