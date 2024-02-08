@@ -77,6 +77,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         if (nodeAddrs.length != requestFees.length || nodeAddrs.length != operationRewards.length)
             revert InvalidArrayLength();
 
+        // check epoch number
         if (epoch < _currentEpoch) {
             revert InvalidEpochNumber();
         }
@@ -97,7 +98,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             // solhint-disable reentrancy
             payable(_staking).transfer(_totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch);
 
-            // public pool rewards will be settled at the start of each epoch
+            // public pool rewards will be settled only at the start of each epoch
             publicPoolReward = _getPublicPoolStakingReward();
 
             // save totalStaking for current epoch
@@ -124,23 +125,24 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         uint256[] memory operationRewards,
         uint256[] memory stakingRewards
     ) internal {
-        uint256 totalOperationRewards = _distributedOperationRewards[_currentEpoch];
-        uint256 totalStakingRewards = _distributedStakingRewards[_currentEpoch];
+        uint256 distributedOperationRewards = _distributedOperationRewards[_currentEpoch];
+        uint256 distributedStakingRewards = _distributedStakingRewards[_currentEpoch];
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            totalOperationRewards += operationRewards[i];
-            totalStakingRewards += stakingRewards[i];
+            distributedOperationRewards += operationRewards[i];
+            distributedStakingRewards += stakingRewards[i];
         }
 
-        if (totalOperationRewards > _totalOperationRewardsPerEpoch) revert DistributedRewardExceeds();
-        if (totalStakingRewards > _totalStakingRewardsPerEpoch) revert DistributedRewardExceeds();
+        if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardExceeds();
+        if (distributedStakingRewards > _totalStakingRewardsPerEpoch) revert StakingRewardExceeds();
 
-        _distributedOperationRewards[_currentEpoch] = totalOperationRewards;
-        _distributedStakingRewards[_currentEpoch] = totalStakingRewards;
+        _distributedOperationRewards[_currentEpoch] = distributedOperationRewards;
+        _distributedStakingRewards[_currentEpoch] = distributedStakingRewards;
     }
 
     /// @dev Returns staking rewards per epoch for public pool
     function _getPublicPoolStakingReward() internal view returns (uint256) {
         (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
+        if (totalStaking == 0) return 0;
 
         uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
         return (publicPoolTokens * _totalStakingRewardsPerEpoch) / totalStaking;

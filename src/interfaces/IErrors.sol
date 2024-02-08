@@ -84,6 +84,9 @@ interface IErrors {
     /// @dev Transfer failed
     error TransferFailed();
 
-    /// @dev Distributed rewards exceed limit
-    error DistributedRewardExceeds();
+    /// @dev Distributed staking rewards exceed limit
+    error StakingRewardExceeds();
+
+    /// @dev Distributed operation rewards exceed limit
+    error OperationRewardExceeds();
 }
