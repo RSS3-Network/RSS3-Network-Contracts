@@ -117,6 +117,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             uint256(colorCount) *
             uint256(chipCornerCount);
 
+        // Chips from the same node will have the same traits
         uint256 nodeTraitId = uint256(keccak256(abi.encodePacked(nodeAddr))) % nodeTraitCount;
 
         DataTypes.NodeTraits memory nodeTraits = DataTypes.NodeTraits({
@@ -136,8 +137,16 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             pgCorner: node.publicGood
         });
 
+        DataTypes.ChipTraits memory chipTraits = _getChipTraits(tokenId);
+
+        return (nodeTraits, chipTraits);
+    }
+
+    function _getChipTraits(uint256 tokenId) internal view returns (DataTypes.ChipTraits memory) {
         (uint8 eyeCount, uint8 mouthCount, uint8 headShapeCount, uint8 headDetailCount) = ISVGGenerator(_svgGenerator)
             .getChipTraitsCount();
+
+        (uint8 colorCount, , , ) = ISVGGenerator(_svgGenerator).getNodeTraitsCount();
 
         uint256 chipTraitCount = uint256(eyeCount) *
             uint256(mouthCount) *
@@ -173,7 +182,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             headDetailId: uint8(chipTraitId % headDetailCount)
         });
 
-        return (nodeTraits, chipTraits);
+        return chipTraits;
     }
 
     function _generateSVGImage(
