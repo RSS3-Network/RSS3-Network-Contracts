@@ -319,7 +319,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
-        uint256 amount = _getTreasuryAmount();
+        uint256 balance = address(this).balance;
+        uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens; // TODO: check arithmetic underflow or overflow error
+
         _transfer(TREASURY, amount);
     }
 
@@ -392,11 +394,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         external
         view
         override
-        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 treasuryAmount)
+        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens)
     {
         totalOperationPoolTokens = _totalOperationPoolTokens;
         totalStakingPoolTokens = _totalStakingPoolTokens;
-        treasuryAmount = _getTreasuryAmount();
+        // treasuryAmount = _getTreasuryAmount();
     }
 
     /// @inheritdoc IStaking
@@ -629,10 +631,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return address(_families.lowerLookup(tokenId.toUint96()));
     }
 
-    function _getTreasuryAmount() internal view returns (uint256) {
-        uint256 balance = address(this).balance;
-        return balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
-    }
+    // function _getTreasuryAmount() internal view returns (uint256) {
+    //     uint256 balance = address(this).balance;
+    //     return balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
+    // }
 
     /// @dev get minimal tokens to stake for a node
     function _minTokensToStake(address nodeAddr) internal view returns (uint256) {

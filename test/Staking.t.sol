@@ -597,8 +597,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         vm.deal(address(_staking), amount);
 
-        (, , uint256 treasuryAmount) = _staking.getPoolInfo();
-        assertEq(treasuryAmount, amount);
+        // (, , uint256 treasuryAmount) = _staking.getPoolInfo();
+        // assertEq(treasuryAmount, amount);
 
         _staking.withdraw2Treasury();
         assertEq(treasury.balance, amount);
@@ -650,10 +650,10 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         node = _staking.getNode(bob);
         assertEq(node.slashedTokens, expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool);
 
-        (uint256 totalOperationTokens, uint256 totalStakingTokens, uint256 treasuryAmount) = _staking.getPoolInfo();
+        (uint256 totalOperationTokens, uint256 totalStakingTokens) = _staking.getPoolInfo();
         assertEq(totalOperationTokens, 2 * depositedTokens - 2 * expectedSlashedTokensOnOperationPool);
         assertEq(totalStakingTokens, 2 * stakedTokens - 2 * expectedSlashedTokensOnStakingPool);
-        assertEq(treasuryAmount, (expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) * 2);
+        // assertEq(treasuryAmount, (expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) * 2);
     }
 
     function testCalcTax1(uint256 operationPool) public {

@@ -103,7 +103,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             publicPoolRewards = _getPublicPoolStakingRewards();
 
             // save totalStaking for current epoch
-            (, _totalStakings[_currentEpoch], ) = IStaking(_staking).getPoolInfo();
+            (, _totalStakings[_currentEpoch]) = IStaking(_staking).getPoolInfo();
         }
 
         uint256[] memory stakingRewards = _getStakingRewards(nodeAddrs);
@@ -142,7 +142,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @dev Returns staking rewards per epoch for public pool
     function _getPublicPoolStakingRewards() internal view returns (uint256) {
-        (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
+        (, uint256 totalStaking) = IStaking(_staking).getPoolInfo();
         if (totalStaking == 0) return 0;
 
         uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
@@ -215,7 +215,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     function _getTotalStaking() internal view returns (uint256 totalStaking) {
         totalStaking = _totalStakings[_currentEpoch];
         if (totalStaking == 0) {
-            (, totalStaking, ) = IStaking(_staking).getPoolInfo();
+            (, totalStaking) = IStaking(_staking).getPoolInfo();
         }
     }
 }

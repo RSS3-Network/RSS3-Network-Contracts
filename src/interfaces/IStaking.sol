@@ -219,12 +219,8 @@ interface IStaking {
      *
      * @return totalOperationPoolTokens Total tokens in operation pool
      * @return totalStakingPoolTokens Total tokens in staking pool
-     * @return treasuryAmount Total tokens for treasury
      */
-    function getPoolInfo()
-        external
-        view
-        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 treasuryAmount);
+    function getPoolInfo() external view returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens);
 
     /**
      * @notice The minimum amount of tokens to deposit for a node.
