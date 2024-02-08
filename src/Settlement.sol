@@ -83,6 +83,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         }
 
         uint256 publicPoolRewards;
+        uint256 amountToTransfer;
         if (epoch == _currentEpoch + 1) {
             // check submission interval
             uint256 submissionInterval = EPOCH_DURATION - 1 hours;
@@ -95,8 +96,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             _endTimestamp = block.timestamp;
 
             // send operationRewards and stakingRewards to staking contract
-            // solhint-disable reentrancy
-            payable(_staking).transfer(_totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch);
+            amountToTransfer = _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch;
 
             // public pool rewards will be settled only at the start of each epoch
             publicPoolRewards = _getPublicPoolStakingRewards();
@@ -109,7 +109,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         _checkRewards(nodeAddrs, operationRewards, stakingRewards);
 
-        IStaking(_staking).distributeRewards(
+        IStaking(_staking).distributeRewards{value: amountToTransfer}(
             [epoch, _startTimestamp, _endTimestamp],
             nodeAddrs,
             requestFees,
