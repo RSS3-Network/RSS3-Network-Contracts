@@ -133,8 +133,8 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             distributedStakingRewards += stakingRewards[i];
         }
 
-        if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardExceeds();
-        if (distributedStakingRewards > _totalStakingRewardsPerEpoch) revert StakingRewardExceeds();
+        if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardsExceed();
+        if (distributedStakingRewards > _totalStakingRewardsPerEpoch) revert StakingRewardsExceed();
 
         _distributedOperationRewards[_currentEpoch] = distributedOperationRewards;
         _distributedStakingRewards[_currentEpoch] = distributedStakingRewards;

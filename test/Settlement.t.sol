@@ -218,7 +218,7 @@ contract SettlementTest is CommonTest, IErrors {
 
         skip(18 hours);
 
-        vm.expectRevert(abi.encodeWithSelector(OperationRewardExceeds.selector));
+        vm.expectRevert(abi.encodeWithSelector(OperationRewardsExceed.selector));
         _settlement.distributeRewards(
             1,
             array(alice, bob), // node addresses
@@ -259,7 +259,7 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward) // operation rewards
         );
 
-        vm.expectRevert(abi.encodeWithSelector(StakingRewardExceeds.selector));
+        vm.expectRevert(abi.encodeWithSelector(StakingRewardsExceed.selector));
         skip(18 hours);
         _settlement.distributeRewards(
             1,
