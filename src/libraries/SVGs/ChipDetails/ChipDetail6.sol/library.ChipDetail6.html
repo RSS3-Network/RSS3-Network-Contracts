@@ -1,0 +1,496 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>ChipDetail6</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../../../../favicon.svg">
+        <link rel="shortcut icon" href="../../../../../favicon.png">
+        <link rel="stylesheet" href="../../../../../css/variables.css">
+        <link rel="stylesheet" href="../../../../../css/general.css">
+        <link rel="stylesheet" href="../../../../../css/chrome.css">
+        <link rel="stylesheet" href="../../../../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../../../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../../../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../../../../highlight.css">
+        <link rel="stylesheet" href="../../../../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../../../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../../../../book.css">
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../../../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item "><a href="../../../../../index.html">Home</a></li><li class="chapter-item affix "><li class="part-title">src</li><li class="chapter-item "><a href="../../../../../src/base/index.html">❱ base</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../../../src/base/ERC721.sol/abstract.ERC721.html">ERC721</a></li></ol></li><li class="chapter-item "><a href="../../../../../src/interfaces/index.html">❱ interfaces</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../../../src/interfaces/IChips.sol/interface.IChips.html">IChips</a></li><li class="chapter-item "><a href="../../../../../src/interfaces/IERC721Errors.sol/interface.IERC721Errors.html">IERC721Errors</a></li><li class="chapter-item "><a href="../../../../../src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a></li><li class="chapter-item "><a href="../../../../../src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a></li><li class="chapter-item "><a href="../../../../../src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li></ol></li><li class="chapter-item expanded "><a href="../../../../../src/libraries/index.html">❱ libraries</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../../../src/libraries/SVGs/index.html">❱ SVGs</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../../../../src/libraries/SVGs/ChipDetails/index.html">❱ ChipDetails</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail.sol/library.ChipDetail.html">ChipDetail</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail10to11.sol/library.ChipDetail10to11.html">ChipDetail10to11</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail1to2.sol/library.ChipDetail1to2.html">ChipDetail1to2</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail3to4.sol/library.ChipDetail3to4.html">ChipDetail3to4</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail5.sol/library.ChipDetail5.html">ChipDetail5</a></li><li class="chapter-item expanded "><a href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail6.sol/library.ChipDetail6.html" class="active">ChipDetail6</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail7.sol/library.ChipDetail7.html">ChipDetail7</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail8to9.sol/library.ChipDetail8to9.html">ChipDetail8to9</a></li></ol></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/Corners.sol/library.Corners.html">Corners</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/Eyes.sol/library.Eyes.html">Eyes</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/Eyes10to18.sol/library.Eyes10to18.html">Eyes10to18</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/Eyes1to9.sol/library.Eyes1to9.html">Eyes1to9</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/Frame.sol/library.Frame.html">Frame</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/Head.sol/library.Head.html">Head</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGs/Mouths.sol/library.Mouths.html">Mouths</a></li></ol></li><li class="chapter-item "><a href="../../../../../src/libraries/DataTypes.sol/library.DataTypes.html">DataTypes</a></li><li class="chapter-item "><a href="../../../../../src/libraries/Events.sol/library.Events.html">Events</a></li><li class="chapter-item "><a href="../../../../../src/libraries/SVGGenerator.sol/library.SVGGenerator.html">SVGGenerator</a></li></ol></li><li class="chapter-item "><a href="../../../../../src/mocks/index.html">❱ mocks</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../../../src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li></ol></li><li class="chapter-item "><a href="../../../../../src/upgradeability/index.html">❱ upgradeability</a><a class="toggle"><div>❱</div></a></li><li><ol class="section"><li class="chapter-item "><a href="../../../../../src/upgradeability/TransparentUpgradeableProxy.sol/interface.ITransparentUpgradeableProxy.html">ITransparentUpgradeableProxy</a></li><li class="chapter-item "><a href="../../../../../src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li></ol></li><li class="chapter-item "><a href="../../../../../src/Chips.sol/contract.Chips.html">Chips</a></li><li class="chapter-item "><a href="../../../../../src/Settlement.sol/contract.Settlement.html">Settlement</a></li><li class="chapter-item "><a href="../../../../../src/Staking.sol/contract.Staking.html">Staking</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="../../../../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chipdetail6"><a class="header" href="#chipdetail6">ChipDetail6</a></h1>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2b58fcaedbad2ebb44a69e3dcfc1af965104a646/src/libraries/SVGs/ChipDetails/ChipDetail6.sol">Git Source</a></p>
+<h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
+<h3 id="chipdetailsvgs6"><a class="header" href="#chipdetailsvgs6">chipDetailSVGs6</a></h3>
+<pre><code class="language-solidity">string public constant chipDetailSVGs6 =
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 24 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 24 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 26 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 36 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 46 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 56 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 34 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 44 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 54 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 64 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 24 84)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 28 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 38 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 48 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 58 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 30 84)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 46 84)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 56 84)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 40 84)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 50 84)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 60 84)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 32 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 42 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 52 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 62 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;76&quot; y=&quot;82&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;76&quot; y=&quot;80&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;74&quot; y=&quot;80&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;64&quot; y=&quot;80&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;54&quot; y=&quot;80&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;44&quot; y=&quot;80&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;66&quot; y=&quot;80&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;56&quot; y=&quot;80&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;46&quot; y=&quot;80&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;36&quot; y=&quot;80&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;76&quot; y=&quot;84&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;72&quot; y=&quot;82&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;62&quot; y=&quot;82&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;52&quot; y=&quot;82&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;42&quot; y=&quot;82&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;70&quot; y=&quot;84&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;60&quot; y=&quot;84&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;50&quot; y=&quot;84&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;40&quot; y=&quot;84&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;68&quot; y=&quot;82&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;58&quot; y=&quot;82&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;48&quot; y=&quot;82&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;38&quot; y=&quot;82&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 22 78)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 22 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 -8.74228e-08 -8.74228e-08 1 20 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;84&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;16&quot; y=&quot;82&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;14&quot; y=&quot;80&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;16&quot; y=&quot;78&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;78&quot; y=&quot;78&quot;/&gt;' '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;78&quot; y=&quot;82&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;80&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 8.74228e-08 8.74228e-08 1 82 84)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 8.74228e-08 8.74228e-08 1 84 82)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 8.74228e-08 8.74228e-08 1 86 80)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(-1 8.74228e-08 8.74228e-08 1 84 78)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 24 18)&quot; width=&quot;2&quot; x=&quot;24&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 24 20)&quot; width=&quot;2&quot; x=&quot;24&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 26 20)&quot; width=&quot;2&quot; x=&quot;26&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 36 20)&quot; width=&quot;2&quot; x=&quot;36&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 46 20)&quot; width=&quot;2&quot; x=&quot;46&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 56 20)&quot; width=&quot;2&quot; x=&quot;56&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 34 20)&quot; width=&quot;2&quot; x=&quot;34&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 44 20)&quot; width=&quot;2&quot; x=&quot;44&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 54 20)&quot; width=&quot;2&quot; x=&quot;54&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 64 20)&quot; width=&quot;2&quot; x=&quot;64&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 24 16)&quot; width=&quot;2&quot; x=&quot;24&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 28 18)&quot; width=&quot;2&quot; x=&quot;28&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 38 18)&quot; width=&quot;2&quot; x=&quot;38&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 48 18)&quot; width=&quot;2&quot; x=&quot;48&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 58 18)&quot; width=&quot;2&quot; x=&quot;58&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 30 16)&quot; width=&quot;2&quot; x=&quot;30&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 46 16)&quot; width=&quot;2&quot; x=&quot;46&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 56 16)&quot; width=&quot;2&quot; x=&quot;56&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 40 16)&quot; width=&quot;2&quot; x=&quot;40&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 50 16)&quot; width=&quot;2&quot; x=&quot;50&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 60 16)&quot; width=&quot;2&quot; x=&quot;60&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 32 18)&quot; width=&quot;2&quot; x=&quot;32&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 42 18)&quot; width=&quot;2&quot; x=&quot;42&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 52 18)&quot; width=&quot;2&quot; x=&quot;52&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 62 18)&quot; width=&quot;2&quot; x=&quot;62&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 76 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 76 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 74 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 64 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 54 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 44 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 66 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 56 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 46 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 36 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 76 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 72 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 62 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 52 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 42 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 70 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 60 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 50 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 40 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 68 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 58 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 48 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 38 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 24 18)&quot; width=&quot;2&quot; x=&quot;24&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 24 20)&quot; width=&quot;2&quot; x=&quot;24&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 26 20)&quot; width=&quot;2&quot; x=&quot;26&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 36 20)&quot; width=&quot;2&quot; x=&quot;36&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 46 20)&quot; width=&quot;2&quot; x=&quot;46&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 56 20)&quot; width=&quot;2&quot; x=&quot;56&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 34 20)&quot; width=&quot;2&quot; x=&quot;34&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 44 20)&quot; width=&quot;2&quot; x=&quot;44&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 54 20)&quot; width=&quot;2&quot; x=&quot;54&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 64 20)&quot; width=&quot;2&quot; x=&quot;64&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 24 16)&quot; width=&quot;2&quot; x=&quot;24&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 28 18)&quot; width=&quot;2&quot; x=&quot;28&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 38 18)&quot; width=&quot;2&quot; x=&quot;38&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 48 18)&quot; width=&quot;2&quot; x=&quot;48&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 58 18)&quot; width=&quot;2&quot; x=&quot;58&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 30 16)&quot; width=&quot;2&quot; x=&quot;30&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 46 16)&quot; width=&quot;2&quot; x=&quot;46&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 56 16)&quot; width=&quot;2&quot; x=&quot;56&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 40 16)&quot; width=&quot;2&quot; x=&quot;40&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 50 16)&quot; width=&quot;2&quot; x=&quot;50&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 60 16)&quot; width=&quot;2&quot; x=&quot;60&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 32 18)&quot; width=&quot;2&quot; x=&quot;32&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 42 18)&quot; width=&quot;2&quot; x=&quot;42&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 52 18)&quot; width=&quot;2&quot; x=&quot;52&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 62 18)&quot; width=&quot;2&quot; x=&quot;62&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 76 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 76 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 74 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 64 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 54 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 44 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 66 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 56 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 46 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 36 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 76 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 72 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 62 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 52 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 42 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 70 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 60 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 50 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 40 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 68 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 58 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 48 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 38 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 18 76)&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;76&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 20 76)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;76&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 20 74)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;74&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 20 64)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;64&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 20 54)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;54&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 20 44)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;44&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 20 66)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;66&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 20 56)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;56&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 20 46)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;46&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 20 36)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;36&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 16 76)&quot; width=&quot;2&quot; x=&quot;16&quot; y=&quot;76&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 18 72)&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;72&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 18 62)&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;62&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 18 52)&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;52&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 18 42)&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;42&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 16 70)&quot; width=&quot;2&quot; x=&quot;16&quot; y=&quot;70&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 16 54)&quot; width=&quot;2&quot; x=&quot;16&quot; y=&quot;54&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 16 44)&quot; width=&quot;2&quot; x=&quot;16&quot; y=&quot;44&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 16 60)&quot; width=&quot;2&quot; x=&quot;16&quot; y=&quot;60&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 16 50)&quot; width=&quot;2&quot; x=&quot;16&quot; y=&quot;50&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 16 40)&quot; width=&quot;2&quot; x=&quot;16&quot; y=&quot;40&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 18 68)&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;68&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 18 58)&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;58&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 18 48)&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;48&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(90 18 38)&quot; width=&quot;2&quot; x=&quot;18&quot; y=&quot;38&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 18 24)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 20 24)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 20 26)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 20 36)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 20 46)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 20 56)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 20 34)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 20 44)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 20 54)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 20 64)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 16 24)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 18 28)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 18 38)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 18 48)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 18 58)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 16 30)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 16 40)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 16 50)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 16 60)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 18 32)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 18 42)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 18 52)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(2.18557e-07 -1 -1 -2.18557e-07 18 62)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 82 76)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 80 76)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 80 74)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 80 64)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 80 54)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 80 44)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 80 66)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 80 56)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 80 46)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 80 36)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 84 76)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 82 72)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 82 62)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 82 52)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 82 42)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 84 70)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 84 54)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 84 44)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 84 60)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 84 50)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 84 40)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 82 68)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 82 58)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 82 48)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(4.37114e-08 1 1 -4.37114e-08 82 38)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 82 24)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;24&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 80 24)&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;24&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 80 26)&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;26&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 80 36)&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;36&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 80 46)&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;46&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 80 56)&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;56&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 80 34)&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;34&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 80 44)&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;44&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 80 54)&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;54&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 80 64)&quot; width=&quot;2&quot; x=&quot;80&quot; y=&quot;64&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 84 24)&quot; width=&quot;2&quot; x=&quot;84&quot; y=&quot;24&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 82 28)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;28&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 82 38)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;38&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 82 48)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;48&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 82 58)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;58&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 84 30)&quot; width=&quot;2&quot; x=&quot;84&quot; y=&quot;30&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 84 40)&quot; width=&quot;2&quot; x=&quot;84&quot; y=&quot;40&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 84 50)&quot; width=&quot;2&quot; x=&quot;84&quot; y=&quot;50&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 84 60)&quot; width=&quot;2&quot; x=&quot;84&quot; y=&quot;60&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 82 32)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;32&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 82 42)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;42&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 82 52)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;52&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-90 82 62)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;62&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 22 22)&quot; width=&quot;2&quot; x=&quot;22&quot; y=&quot;22&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 22 18)&quot; width=&quot;2&quot; x=&quot;22&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(180 20 20)&quot; width=&quot;2&quot; x=&quot;20&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 -8.74228e-08 -8.74228e-08 -1 18 16)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 -8.74228e-08 -8.74228e-08 -1 16 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 -8.74228e-08 -8.74228e-08 -1 14 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 -8.74228e-08 -8.74228e-08 -1 16 22)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 78 22)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 78 18)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;matrix(1 8.74228e-08 8.74228e-08 -1 80 20)&quot; width=&quot;2&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-180 82 16)&quot; width=&quot;2&quot; x=&quot;82&quot; y=&quot;16&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-180 84 18)&quot; width=&quot;2&quot; x=&quot;84&quot; y=&quot;18&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-180 86 20)&quot; width=&quot;2&quot; x=&quot;86&quot; y=&quot;20&quot;/&gt;'
+    '&lt;rect class=&quot;cd&quot; height=&quot;2&quot; transform=&quot;rotate(-180 84 22)&quot; width=&quot;2&quot; x=&quot;84&quot; y=&quot;22&quot;/&gt;';
+</code></pre>
+<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<h3 id="getchipdetail"><a class="header" href="#getchipdetail">getChipDetail</a></h3>
+<pre><code class="language-solidity">function getChipDetail(uint256 id) external pure returns (string memory);
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail5.sol/library.ChipDetail5.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail7.sol/library.ChipDetail7.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail5.sol/library.ChipDetail5.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../../../../src/libraries/SVGs/ChipDetails/ChipDetail7.sol/library.ChipDetail7.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../../../../elasticlunr.min.js"></script>
+        <script src="../../../../../mark.min.js"></script>
+        <script src="../../../../../searcher.js"></script>
+
+        <script src="../../../../../clipboard.min.js"></script>
+        <script src="../../../../../highlight.js"></script>
+        <script src="../../../../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../../../../solidity.min.js"></script>
+
+
+    </div>
+    </body>
+</html>
