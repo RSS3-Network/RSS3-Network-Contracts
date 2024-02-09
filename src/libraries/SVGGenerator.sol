@@ -42,8 +42,6 @@ library SVGGenerator {
 
         string memory corner = nodeTraits.pgCorner ? Frame.pgSVG : Frame.alphaSVG;
 
-        string[9] memory frameSVGs = Frame.getFrames();
-
         string[11] memory chipDetailSVGs = [
             ChipDetail.chipDetailSVGs1,
             ChipDetail.chipDetailSVGs2,
@@ -62,7 +60,7 @@ library SVGGenerator {
             abi.encodePacked(
                 baseSVGHead,
                 styleSVG,
-                frameSVGs[nodeTraits.frameId % 9],
+                Frame.getFrame(nodeTraits.frameId),
                 chipDetailSVGs[nodeTraits.chipDetailId % 11],
                 // chipDetailSVGs[nodeTraits.chipDetailId % chipDetailSVGs.length], chipCorner
                 corner
@@ -98,15 +96,12 @@ library SVGGenerator {
             Eyes2.eyesSVGs18
         ];
 
-        string[19] memory mouthsSVGs = Mouths.getMouths();
-        string[16] memory headSVGs = Head.getHeads();
-
         string memory innerSVG2 = string(
             abi.encodePacked(
                 baseHeadsSVGs[chipTraits.headShapeId % 3],
                 eyesSVGs[chipTraits.eyesId % 18],
-                mouthsSVGs[chipTraits.mouthId % 19],
-                headSVGs[chipTraits.headDetailId % 16],
+                Mouths.getMouth(chipTraits.mouthId),
+                Head.getHead(chipTraits.headDetailId),
                 baseSVGTail
             )
         );

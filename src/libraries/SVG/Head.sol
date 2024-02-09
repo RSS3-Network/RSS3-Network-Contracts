@@ -69,7 +69,7 @@ library Head {
         '<rect class="st-head" height="2" width="2" x="22" y="38"/>'
         '<rect class="st-head" height="2" width="2" x="76" y="38"/>';
 
-    function getHeads() external pure returns (string[16] memory) {
+    function getHead(uint256 id) external pure returns (string memory) {
         string[16] memory res = [
             headSVGs1,
             headSVGs2,
@@ -88,6 +88,6 @@ library Head {
             headSVGs15,
             headSVGs16
         ];
-        return res;
+        return res[id % 16];
     }
 }

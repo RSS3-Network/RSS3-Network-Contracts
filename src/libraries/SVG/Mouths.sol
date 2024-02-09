@@ -252,7 +252,7 @@ library Mouths {
         '<rect fill="black" height="2" transform="rotate(90 51 60)" width="7" x="51" y="60"/>'
         '<rect fill="black" height="2" width="12" x="44" y="65"/>';
 
-    function getMouths() external pure returns (string[19] memory) {
+    function getMouth(uint256 id) external pure returns (string memory) {
         string[19] memory res = [
             mouthsSVGs1,
             mouthsSVGs2,
@@ -274,6 +274,7 @@ library Mouths {
             mouthsSVGs18,
             mouthsSVGs19
         ];
-        return res;
+
+        return res[id % 9];
     }
 }
