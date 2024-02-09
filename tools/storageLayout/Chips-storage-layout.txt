@@ -9,4 +9,3 @@
 | _staking           | address                                      | 6    | 0      | 20    | src/Chips.sol:Chips |
 | _counter           | uint256                                      | 7    | 0      | 32    | src/Chips.sol:Chips |
 | _totalSupply       | uint256                                      | 8    | 0      | 32    | src/Chips.sol:Chips |
-| _svgGenerator      | address                                      | 9    | 0      | 20    | src/Chips.sol:Chips |
