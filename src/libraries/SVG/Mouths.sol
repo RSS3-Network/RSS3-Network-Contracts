@@ -251,4 +251,29 @@ library Mouths {
         '<rect fill="black" height="2" transform="rotate(90 56 60)" width="7" x="56" y="60"/>'
         '<rect fill="black" height="2" transform="rotate(90 51 60)" width="7" x="51" y="60"/>'
         '<rect fill="black" height="2" width="12" x="44" y="65"/>';
+
+    function getMouths() external pure returns (string[19] memory) {
+        string[19] memory res = [
+            mouthsSVGs1,
+            mouthsSVGs2,
+            mouthsSVGs3,
+            mouthsSVGs4,
+            mouthsSVGs5,
+            mouthsSVGs6,
+            mouthsSVGs7,
+            mouthsSVGs8,
+            mouthsSVGs9,
+            mouthsSVGs10,
+            mouthsSVGs11,
+            mouthsSVGs12,
+            mouthsSVGs13,
+            mouthsSVGs14,
+            mouthsSVGs15,
+            mouthsSVGs16,
+            mouthsSVGs17,
+            mouthsSVGs18,
+            mouthsSVGs19
+        ];
+        return res;
+    }
 }

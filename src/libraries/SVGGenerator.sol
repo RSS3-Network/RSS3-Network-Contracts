@@ -3,7 +3,8 @@
 pragma solidity 0.8.20;
 
 import {DataTypes} from "./DataTypes.sol";
-import {Eyes} from "./SVG/Eyes.sol";
+import {Eyes1} from "./SVG/Eyes1.sol";
+import {Eyes2} from "./SVG/Eyes2.sol";
 import {ChipDetail} from "./SVG/ChipDetail.sol";
 import {Head} from "./SVG/Head.sol";
 import {Mouths} from "./SVG/Mouths.sol";
@@ -41,17 +42,7 @@ library SVGGenerator {
 
         string memory corner = nodeTraits.pgCorner ? Frame.pgSVG : Frame.alphaSVG;
 
-        string[9] memory frameSVGs = [
-            Frame.frameSVGs1,
-            Frame.frameSVGs2,
-            Frame.frameSVGs3,
-            Frame.frameSVGs4,
-            Frame.frameSVGs5,
-            Frame.frameSVGs6,
-            Frame.frameSVGs7,
-            Frame.frameSVGs8,
-            Frame.frameSVGs9
-        ];
+        string[9] memory frameSVGs = Frame.getFrames();
 
         string[11] memory chipDetailSVGs = [
             ChipDetail.chipDetailSVGs1,
@@ -87,66 +78,28 @@ library SVGGenerator {
         string[3] memory baseHeadsSVGs = [baseHeadsSVGs1, baseHeadsSVGs2, baseHeadsSVGs3];
 
         string[18] memory eyesSVGs = [
-            Eyes.eyesSVGs1,
-            Eyes.eyesSVGs2,
-            Eyes.eyesSVGs3,
-            Eyes.eyesSVGs4,
-            Eyes.eyesSVGs5,
-            Eyes.eyesSVGs6,
-            Eyes.eyesSVGs7,
-            Eyes.eyesSVGs8,
-            Eyes.eyesSVGs9,
-            Eyes.eyesSVGs10,
-            Eyes.eyesSVGs11,
-            Eyes.eyesSVGs12,
-            Eyes.eyesSVGs13,
-            Eyes.eyesSVGs14,
-            Eyes.eyesSVGs15,
-            Eyes.eyesSVGs16,
-            Eyes.eyesSVGs17,
-            Eyes.eyesSVGs18
+            Eyes1.eyesSVGs1,
+            Eyes1.eyesSVGs2,
+            Eyes1.eyesSVGs3,
+            Eyes1.eyesSVGs4,
+            Eyes1.eyesSVGs5,
+            Eyes1.eyesSVGs6,
+            Eyes1.eyesSVGs7,
+            Eyes1.eyesSVGs8,
+            Eyes1.eyesSVGs9,
+            Eyes2.eyesSVGs10,
+            Eyes2.eyesSVGs11,
+            Eyes2.eyesSVGs12,
+            Eyes2.eyesSVGs13,
+            Eyes2.eyesSVGs14,
+            Eyes2.eyesSVGs15,
+            Eyes2.eyesSVGs16,
+            Eyes2.eyesSVGs17,
+            Eyes2.eyesSVGs18
         ];
 
-        string[19] memory mouthsSVGs = [
-            Mouths.mouthsSVGs1,
-            Mouths.mouthsSVGs2,
-            Mouths.mouthsSVGs3,
-            Mouths.mouthsSVGs4,
-            Mouths.mouthsSVGs5,
-            Mouths.mouthsSVGs6,
-            Mouths.mouthsSVGs7,
-            Mouths.mouthsSVGs8,
-            Mouths.mouthsSVGs9,
-            Mouths.mouthsSVGs10,
-            Mouths.mouthsSVGs11,
-            Mouths.mouthsSVGs12,
-            Mouths.mouthsSVGs13,
-            Mouths.mouthsSVGs14,
-            Mouths.mouthsSVGs15,
-            Mouths.mouthsSVGs16,
-            Mouths.mouthsSVGs17,
-            Mouths.mouthsSVGs18,
-            Mouths.mouthsSVGs19
-        ];
-
-        string[16] memory headSVGs = [
-            Head.headSVGs1,
-            Head.headSVGs2,
-            Head.headSVGs3,
-            Head.headSVGs4,
-            Head.headSVGs5,
-            Head.headSVGs6,
-            Head.headSVGs7,
-            Head.headSVGs8,
-            Head.headSVGs9,
-            Head.headSVGs10,
-            Head.headSVGs11,
-            Head.headSVGs12,
-            Head.headSVGs13,
-            Head.headSVGs14,
-            Head.headSVGs15,
-            Head.headSVGs16
-        ];
+        string[19] memory mouthsSVGs = Mouths.getMouths();
+        string[16] memory headSVGs = Head.getHeads();
 
         string memory innerSVG2 = string(
             abi.encodePacked(

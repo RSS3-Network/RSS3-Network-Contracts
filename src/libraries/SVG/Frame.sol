@@ -97,4 +97,19 @@ library Frame {
         '<polygon class="st-pg" points="96,6 96,10 94,10 94,12 92,12 92,14 90,14 90,12 88,12 88,10 86,10 86,6 88,6 88,4 90,4 90,6 92,6   92,4 94,4 94,6 "/>'
         '<polygon class="st-pg" points="14,88 14,92 12,92 12,94 10,94 10,96 8,96 8,94 6,94 6,92 4,92 4,88 6,88 6,86 8,86 8,88 10,88 10,86   12,86 12,88 "/>'
         '<polygon class="st-pg" points="96,88 96,92 94,92 94,94 92,94 92,96 90,96 90,94 88,94 88,92 86,92 86,88 88,88 88,86 90,86 90,88   92,88 92,86 94,86 94,88 "/>';
+
+    function getFrames() external pure returns (string[9] memory) {
+        string[9] memory frames = [
+            frameSVGs1,
+            frameSVGs2,
+            frameSVGs3,
+            frameSVGs4,
+            frameSVGs5,
+            frameSVGs6,
+            frameSVGs7,
+            frameSVGs8,
+            frameSVGs9
+        ];
+        return frames;
+    }
 }
