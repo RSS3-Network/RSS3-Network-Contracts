@@ -92,4 +92,7 @@ interface IErrors {
 
     /// @dev Insufficient requestFees
     error InsufficientRequestFees();
+
+    /// @dev Invalid trait id
+    error InvalidTraitId(uint256 traitId);
 }

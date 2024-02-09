@@ -38,4 +38,16 @@ library Corners {
         '<path class="st2" d="M12,94v-2h2v2H12z M12,88H8v4h4V88z M6,86v2h2v-2H6z M14,86h-2v2h2V86z M6,94h2v-2H6V94z"/>'
         '<path class="st2" d="M92,14v-2h2v2H92z M86,14h2v-2h-2V14z M94,6h-2v2h2V6z M92,8h-4v4h4V8z M86,6v2h2V6H86z"/>'
         '<path class="st2" d="M12,14v-2h2v2H12z M12,8H8v4h4V8z M6,6v2h2V6H6z M6,14h2v-2H6V14z M14,6h-2v2h2V6z"/>';
+
+    string public constant alphaSVG =
+        '<path class="st-alpha" d="M6,6V4h4v2H6z M10,6v2H6V6H4v6h2v-2h4v2h2V6H10z"/>'
+        '<path class="st-alpha" d="M94,4v2h-4V4H94z M94,6v2h-4V6h-2v6h2v-2h4v2h2V6H94z"/>'
+        '<path class="st-alpha" d="M10,88v2H6v-2H10z M10,90v2H6v-2H4v6h2v-2h4v2h2v-6H10z"/>'
+        '<path class="st-alpha" d="M94,88v2h-4v-2H94z M94,90v2h-4v-2h-2v6h2v-2h4v2h2v-6H94z"/>';
+
+    string public constant pgSVG =
+        '<polygon class="st-pg" points="14,6 14,10 12,10 12,12 10,12 10,14 8,14 8,12 6,12 6,10 4,10 4,6 6,6 6,4 8,4 8,6 10,6 10,4 12,4   12,6 "/>'
+        '<polygon class="st-pg" points="96,6 96,10 94,10 94,12 92,12 92,14 90,14 90,12 88,12 88,10 86,10 86,6 88,6 88,4 90,4 90,6 92,6   92,4 94,4 94,6 "/>'
+        '<polygon class="st-pg" points="14,88 14,92 12,92 12,94 10,94 10,96 8,96 8,94 6,94 6,92 4,92 4,88 6,88 6,86 8,86 8,88 10,88 10,86   12,86 12,88 "/>'
+        '<polygon class="st-pg" points="96,88 96,92 94,92 94,94 92,94 92,96 90,96 90,94 88,94 88,92 86,92 86,88 88,88 88,86 90,86 90,88   92,88 92,86 94,86 94,88 "/>';
 }

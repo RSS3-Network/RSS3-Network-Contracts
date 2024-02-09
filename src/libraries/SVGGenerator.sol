@@ -3,11 +3,11 @@
 pragma solidity 0.8.20;
 
 import {DataTypes} from "./DataTypes.sol";
-import {Eyes1} from "./SVG/Eyes1.sol";
-import {Eyes2} from "./SVG/Eyes2.sol";
+import {Eyes} from "./SVG/Eyes.sol";
 import {ChipDetail} from "./SVG/ChipDetail.sol";
 import {Head} from "./SVG/Head.sol";
 import {Mouths} from "./SVG/Mouths.sol";
+import {Corners} from "./SVG/Corners.sol";
 import {Frame} from "./SVG/Frame.sol";
 
 library SVGGenerator {
@@ -40,28 +40,14 @@ library SVGGenerator {
             chipTraits.headDetailColor
         );
 
-        string memory corner = nodeTraits.pgCorner ? Frame.pgSVG : Frame.alphaSVG;
-
-        string[11] memory chipDetailSVGs = [
-            ChipDetail.chipDetailSVGs1,
-            ChipDetail.chipDetailSVGs2,
-            ChipDetail.chipDetailSVGs3,
-            ChipDetail.chipDetailSVGs4,
-            ChipDetail.chipDetailSVGs5,
-            ChipDetail.chipDetailSVGs6,
-            ChipDetail.chipDetailSVGs7,
-            ChipDetail.chipDetailSVGs8,
-            ChipDetail.chipDetailSVGs9,
-            ChipDetail.chipDetailSVGs10,
-            ChipDetail.chipDetailSVGs11
-        ];
+        string memory corner = nodeTraits.pgCorner ? Corners.pgSVG : Corners.alphaSVG;
 
         string memory innerSVG1 = string(
             abi.encodePacked(
                 baseSVGHead,
                 styleSVG,
                 Frame.getFrame(nodeTraits.frameId),
-                chipDetailSVGs[nodeTraits.chipDetailId % 11],
+                ChipDetail.getChipDetail(nodeTraits.chipDetailId),
                 // chipDetailSVGs[nodeTraits.chipDetailId % chipDetailSVGs.length], chipCorner
                 corner
             )
@@ -75,31 +61,10 @@ library SVGGenerator {
     function getChipTraitsInnerSVG(DataTypes.ChipTraits memory chipTraits) internal pure returns (string memory) {
         string[3] memory baseHeadsSVGs = [baseHeadsSVGs1, baseHeadsSVGs2, baseHeadsSVGs3];
 
-        string[18] memory eyesSVGs = [
-            Eyes1.eyesSVGs1,
-            Eyes1.eyesSVGs2,
-            Eyes1.eyesSVGs3,
-            Eyes1.eyesSVGs4,
-            Eyes1.eyesSVGs5,
-            Eyes1.eyesSVGs6,
-            Eyes1.eyesSVGs7,
-            Eyes1.eyesSVGs8,
-            Eyes1.eyesSVGs9,
-            Eyes2.eyesSVGs10,
-            Eyes2.eyesSVGs11,
-            Eyes2.eyesSVGs12,
-            Eyes2.eyesSVGs13,
-            Eyes2.eyesSVGs14,
-            Eyes2.eyesSVGs15,
-            Eyes2.eyesSVGs16,
-            Eyes2.eyesSVGs17,
-            Eyes2.eyesSVGs18
-        ];
-
         string memory innerSVG2 = string(
             abi.encodePacked(
                 baseHeadsSVGs[chipTraits.headShapeId % 3],
-                eyesSVGs[chipTraits.eyesId % 18],
+                Eyes.getEyes(chipTraits.eyesId),
                 Mouths.getMouth(chipTraits.mouthId),
                 Head.getHead(chipTraits.headDetailId),
                 baseSVGTail
@@ -120,7 +85,7 @@ library SVGGenerator {
                 abi.encodePacked(
                     '<style type="text/css">.st-frames{fill:',
                     colors[frameColor],
-                    ";}.st-chip-detail{fill:",
+                    ";}.cd{fill:",
                     colors[chipDetailColor],
                     ";}.st-base-head{fill:",
                     colors[headShapeColor],

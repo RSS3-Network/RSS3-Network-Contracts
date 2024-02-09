@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
+import {IErrors} from "../../interfaces/IErrors.sol";
 
-library Eyes2 {
+library Eyes10to18 {
     string public constant eyesSVGs10 =
         '<rect fill="black" height="2" width="4" x="48" y="56"/>'
         '<rect fill="black" height="6" width="2" x="36" y="50"/>'
@@ -193,4 +194,24 @@ library Eyes2 {
         '<rect fill="black" height="0.5" transform="matrix(-2.40413e-07 1 1 5.68248e-07 62 49)" width="2"/>'
         '<rect fill="black" height="0.5" transform="matrix(-2.40413e-07 1 1 5.68248e-07 62.5 49)" width="2"/>'
         '<rect fill="black" height="1" transform="matrix(-2.40413e-07 1 1 5.68248e-07 63 49)" width="2"/>';
+
+    function getEyes(uint256 id) public pure returns (string memory) {
+        string[9] memory eyesSVGs = [
+            eyesSVGs10,
+            eyesSVGs11,
+            eyesSVGs12,
+            eyesSVGs13,
+            eyesSVGs14,
+            eyesSVGs15,
+            eyesSVGs16,
+            eyesSVGs17,
+            eyesSVGs18
+        ];
+
+        if (id < 18 && id >= 9) {
+            return eyesSVGs[id - 9];
+        } else {
+            revert IErrors.InvalidTraitId(id);
+        }
+    }
 }
