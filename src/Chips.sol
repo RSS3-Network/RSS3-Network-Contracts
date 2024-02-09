@@ -4,7 +4,8 @@ pragma solidity 0.8.20;
 
 import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
-import {ISVGGenerator} from "./interfaces/ISVGGenerator.sol";
+// import {ISVGGenerator} from "./interfaces/ISVGGenerator.sol";
+import {SVGGenerator} from "./libraries/SVGGenerator.sol";
 import {IErrors} from "./interfaces/IErrors.sol";
 import {ERC721} from "./base/ERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
@@ -20,7 +21,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     /// @dev Total supply of tokens.
     uint256 internal _totalSupply;
 
-    address internal _svgGenerator;
+    // address internal _svgGenerator;
 
     modifier onlyStaking() {
         if (msg.sender != _staking) revert CallerNotStaking();
@@ -31,14 +32,18 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     function initialize(
         string memory name_,
         string memory symbol_,
-        address staking_,
-        address svgGenerator_
-    ) external override initializer {
+        address staking_
+    )
+        external
+        override
+        // address svgGenerator_
+        initializer
+    {
         _staking = staking_;
 
         __ERC721_init(name_, symbol_);
 
-        _svgGenerator = svgGenerator_;
+        // _svgGenerator = svgGenerator_;
     }
 
     /// @inheritdoc IChips
@@ -107,9 +112,8 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         (address nodeAddr, ) = IStaking(_staking).getChipsInfo(tokenId);
         DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddr);
 
-        (uint8 colorCount, uint8 frameCount, uint8 chipCornerCount, uint8 chipDetailCount) = ISVGGenerator(
-            _svgGenerator
-        ).getNodeTraitsCount();
+        (uint8 colorCount, uint8 frameCount, uint8 chipCornerCount, uint8 chipDetailCount) = SVGGenerator
+            .getNodeTraitsCount();
 
         uint256 nodeTraitCount = uint256(frameCount) *
             uint256(colorCount) *
@@ -142,11 +146,11 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         return (nodeTraits, chipTraits);
     }
 
-    function _getChipTraits(uint256 tokenId) internal view returns (DataTypes.ChipTraits memory) {
-        (uint8 eyeCount, uint8 mouthCount, uint8 headShapeCount, uint8 headDetailCount) = ISVGGenerator(_svgGenerator)
+    function _getChipTraits(uint256 tokenId) internal pure returns (DataTypes.ChipTraits memory) {
+        (uint8 eyeCount, uint8 mouthCount, uint8 headShapeCount, uint8 headDetailCount) = SVGGenerator
             .getChipTraitsCount();
 
-        (uint8 colorCount, , , ) = ISVGGenerator(_svgGenerator).getNodeTraitsCount();
+        (uint8 colorCount, , , ) = SVGGenerator.getNodeTraitsCount();
 
         uint256 chipTraitCount = uint256(eyeCount) *
             uint256(mouthCount) *
@@ -188,9 +192,9 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     function _generateSVGImage(
         DataTypes.NodeTraits memory nodeTraits,
         DataTypes.ChipTraits memory chipTraits
-    ) internal view returns (string memory) {
-        ISVGGenerator svgGenerator = ISVGGenerator(_svgGenerator);
-        return svgGenerator.generateSVG(nodeTraits, chipTraits);
+    ) internal pure returns (string memory) {
+        // ISVGGenerator svgGenerator = ISVGGenerator(_svgGenerator);
+        return SVGGenerator.generateSVG(nodeTraits, chipTraits);
     }
 
     function _calTraitId(uint256 traitId, uint8 traitCount, uint256 divisionFactor) internal pure returns (uint8) {

@@ -6,7 +6,7 @@ import {Deployer} from "./Deployer.sol";
 import {DeployConfig} from "./DeployConfig.s.sol";
 import {Staking} from "../src/Staking.sol";
 import {Chips} from "../src/Chips.sol";
-import {SVGGenerator} from "../src/SVGGenerator.sol";
+// import {SVGGenerator} from "../src/SVGGenerator.sol";
 import {Settlement} from "../src/Settlement.sol";
 import {console2 as console} from "forge-std/console2.sol";
 import {TransparentUpgradeableProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
@@ -64,7 +64,7 @@ contract Deploy is Deployer {
         deployProxy("Staking");
         deployProxy("Chips");
         deployProxy("Settlement");
-        deployProxy("SVGGenerator");
+        // deployProxy("SVGGenerator");
     }
 
     /// @notice Deploy all of the logic contracts
@@ -72,7 +72,7 @@ contract Deploy is Deployer {
         deployStaking();
         deployChips();
         deploySettlement();
-        deploySVGGenerator();
+        // deploySVGGenerator();
     }
 
     function deployProxy(string memory _name) public broadcast returns (address addr_) {
@@ -124,13 +124,13 @@ contract Deploy is Deployer {
         addr_ = address(chips);
     }
 
-    function deploySVGGenerator() public broadcast returns (address addr_) {
-        SVGGenerator svgGenerator = new SVGGenerator();
+    // function deploySVGGenerator() public broadcast returns (address addr_) {
+    //     SVGGenerator svgGenerator = new SVGGenerator();
 
-        save("SVGGenerator", address(svgGenerator));
-        console.log("SVGGenerator deployed at %s", address(svgGenerator));
-        addr_ = address(svgGenerator);
-    }
+    //     save("SVGGenerator", address(svgGenerator));
+    //     console.log("SVGGenerator deployed at %s", address(svgGenerator));
+    //     addr_ = address(svgGenerator);
+    // }
 
     function deploySettlement() public broadcast returns (address addr_) {
         Settlement settlement = new Settlement();
@@ -159,9 +159,9 @@ contract Deploy is Deployer {
     function initializeChips() public broadcast {
         Chips chipsProxy = Chips(mustGetAddress("ChipsProxy"));
         address stakingProxy = mustGetAddress("StakingProxy");
-        address svgGeneratorProxy = mustGetAddress("SVGGenerator");
+        // address svgGeneratorProxy = mustGetAddress("SVGGenerator");
 
-        chipsProxy.initialize(cfg.chipsName(), cfg.chipsSymbol(), stakingProxy, svgGeneratorProxy);
+        chipsProxy.initialize(cfg.chipsName(), cfg.chipsSymbol(), stakingProxy);
 
         // check states
         require(chipsProxy.stakingContract() == stakingProxy, "check chip contract error");

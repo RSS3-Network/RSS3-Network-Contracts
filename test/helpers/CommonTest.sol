@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 import {Utils} from "./Utils.sol";
 import {DataTypes} from "../../src/libraries/DataTypes.sol";
 import {Staking} from "../../src/Staking.sol";
-import {SVGGenerator} from "../../src/SVGGenerator.sol";
+// import {SVGGenerator} from "../../src/SVGGenerator.sol";
 import {Chips} from "../../src/Chips.sol";
 import {Settlement} from "../../src/Settlement.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
@@ -47,7 +47,8 @@ contract CommonTest is Utils {
     Settlement internal _settlement;
     InternalStaking internal _internalStakingTest;
     InternalSettlement internal _internalSettlementTest;
-    SVGGenerator internal _svgGenerator;
+
+    // SVGGenerator internal _svgGenerator;
 
     function _setUp() internal {
         // deploy rss3 token
@@ -57,7 +58,7 @@ contract CommonTest is Utils {
         // deploy account oracle
         _settlement = new Settlement();
 
-        _svgGenerator = new SVGGenerator();
+        // _svgGenerator = new SVGGenerator();
 
         _internalStakingTest = new InternalStaking(
             treasury,
@@ -95,7 +96,7 @@ contract CommonTest is Utils {
         _staking = Staking(payable(proxy));
 
         // init chips token
-        _chips.initialize(chipsName, chipsSymbol, address(_staking), address(_svgGenerator));
+        _chips.initialize(chipsName, chipsSymbol, address(_staking));
 
         // init account oracle
         uint256 totalRewards = (3 * _rss3.totalSupply()) / 100;
