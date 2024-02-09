@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable comprehensive-interface,no-console
+// solhint-disable comprehensive-interface,no-console,max-line-length
 pragma solidity 0.8.20;
 
-//import {console2 as console} from "forge-std/console2.sol";
+import {console2 as console} from "forge-std/console2.sol";
+import {stdJson} from "forge-std/StdJson.sol";
+import {LibString} from "solady/utils/LibString.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
-import "forge-std/console.sol";
+import {Base64} from "solady/utils/Base64.sol";
 
 contract ChipsTest is CommonTest {
+    using stdJson for string;
+
     function setUp() public {
         _setUp();
     }
@@ -42,5 +46,24 @@ contract ChipsTest is CommonTest {
             string memory uri = _chips.tokenURI(tokenId);
             console.log("URI: %s", uri);
         }
+    }
+
+    function testTokenURI() public {
+        _createNode(alice);
+
+        vm.deal(alice, 100000 ether);
+
+        vm.prank(alice);
+        _staking.stake{value: 500 ether}(alice);
+
+        string memory tokenURI = _chips.tokenURI(1);
+        string memory base64prefix = "data:application/json;base64,";
+        string memory decodedTokenURI = string(Base64.decode(LibString.slice(tokenURI, bytes(base64prefix).length)));
+
+        assertEq(decodedTokenURI.readString(".name"), "Chip #1");
+        assertEq(
+            decodedTokenURI.readString(".description"),
+            "Chip is a unique NFT that represents a node in the network. It is generated based on the node's address and token ID."
+        );
     }
 }

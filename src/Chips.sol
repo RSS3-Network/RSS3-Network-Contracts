@@ -4,15 +4,18 @@ pragma solidity 0.8.20;
 
 import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
-// import {ISVGGenerator} from "./interfaces/ISVGGenerator.sol";
+import {DataTypes} from "./libraries/DataTypes.sol";
 import {SVGGenerator} from "./libraries/SVGGenerator.sol";
 import {IErrors} from "./interfaces/IErrors.sol";
 import {ERC721} from "./base/ERC721.sol";
 import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {DataTypes} from "./libraries/DataTypes.sol";
+import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract Chips is IChips, IErrors, Initializable, ERC721 {
+    using Strings for uint256;
+
     /// @dev Staking contract address.
     address internal _staking;
 
@@ -20,8 +23,6 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     uint256 internal _counter;
     /// @dev Total supply of tokens.
     uint256 internal _totalSupply;
-
-    // address internal _svgGenerator;
 
     modifier onlyStaking() {
         if (msg.sender != _staking) revert CallerNotStaking();
@@ -83,17 +84,17 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         DataTypes.NodeTraits memory nodeTraits;
         DataTypes.ChipTraits memory chipTraits;
         (nodeTraits, chipTraits) = _generateChipImage(id);
-        string memory json = string(
-            abi.encodePacked(
-                '{"name": "Chip #',
-                id,
-                '", "description": "Chip is a unique NFT that represents a node in the network.'
-                'It is generated based on the node\'s address.", "image": "data:image/svg+xml;utf8,',
-                _generateSVGImage(nodeTraits, chipTraits),
-                '"}'
-            )
+        string memory json = string.concat(
+            '{"name": "Chip #',
+            id.toString(),
+            '", "description": "Chip is a unique NFT that represents a node in the network. '
+            "It is generated based on the node's address and token ID.",
+            '","image":"data:image/svg+xml;base64,',
+            Base64.encode(bytes(_generateSVGImage(nodeTraits, chipTraits))),
+            '"}'
         );
-        return json;
+
+        return string.concat("data:application/json;base64,", Base64.encode(bytes(string.concat(json))));
     }
 
     /// @inheritdoc IChips

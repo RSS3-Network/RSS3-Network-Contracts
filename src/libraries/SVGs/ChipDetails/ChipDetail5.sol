@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
-import {IErrors} from "../../interfaces/IErrors.sol";
+import {IErrors} from "../../../interfaces/IErrors.sol";
 
 library ChipDetail5 {
     //cd
