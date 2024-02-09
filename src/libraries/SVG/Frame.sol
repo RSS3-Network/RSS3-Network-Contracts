@@ -1,0 +1,100 @@
+// SPDX-License-Identifier: MIT
+// solhint-disable quotes,max-line-length
+pragma solidity 0.8.20;
+
+library Frame {
+    //st-frames
+    string public constant frameSVGs1 =
+        '<path class="st-frames" d="M51,8h-2V6h2V8z M27,6h-2v2h2V6z M39,6h-2v2h2V6z M81,6v2h-2V6h-2v4h-6V6h-2v2h-2V6h-2v4h-6V6h-2v2h-2V6h-2v4  h-6V6h-2v2h-2V6h-2v4h-6V6h-2v2h-2V6h-2v4h-6V6h-2v2h-2V6h-3v6h68V6H81z M63,6h-2v2h2V6z M75,6h-2v2h2V6z"/>'
+        '<path class="st-frames" d="M8,63H6v-2h2V63z M8,73H6v2h2V73z M8,25H6v2h2V25z M8,49H6v2h2V49z M6,16v3h2v2H6v2h4v6H6v2h2v2H6v2h4v6H6v2h2  v2H6v2h4v6H6v2h2v2H6v2h4v6H6v2h2v2H6v2h4v6H6v2h2v2H6v3h6V16H6z M8,37H6v2h2V37z"/>'
+        '<path class="st-frames" d="M92,19v2h2v2h-4v6h4v2h-2v2h2v2h-4v6h4v2h-2v2h2v2h-4v6h4v2h-2v2h2v2h-4v6h4v2h-2v2h2v2h-4v6h4v2h-2v2h2v3h-6  V16h6v3H92z M92,39h2v-2h-2V39z M92,27h2v-2h-2V27z M92,51h2v-2h-2V51z M92,63h2v-2h-2V63z M92,75h2v-2h-2V75z"/>'
+        '<path class="st-frames" d="M37,92h2v2h-2V92z M16,88v6h3v-2h2v2h2v-4h6v4h2v-2h2v2h2v-4h6v4h2v-2h2v2h2v-4h6v4h2v-2h2v2h2v-4h6v4h2v-2h2v2  h2v-4h6v4h2v-2h2v2h3v-6H16z M49,94h2v-2h-2V94z M61,94h2v-2h-2V94z M73,94h2v-2h-2V94z M25,94h2v-2h-2V94z"/>';
+    string public constant frameSVGs2 =
+        '<path class="st-frames" d="M32,10v2H16V6h12v2H18v2h10V8h2v2H32z M32,10h4V8h-4V10z M36,12h2v-2h-2V12z M30,8h2V6h-2V8z M72,6v2h10v2H72V8  h-2v2h-2v2h16V6H72z M68,8h2V6h-2V8z M62,12h2v-2h-2V12z M64,8V6H51v2h5v2h-5V8h-2v2h-5V8h5V6H36v2h6v2h-2v2h20v-2h-2V8H64z M64,10  h4V8h-4V10z"/>'
+        '<path class="st-frames" d="M84,88v6H72v-2h10v-2H68v-2H84z M32,90h4v2h-4V90z M36,88h2v2h-2V88z M16,88v6h12v-2H18v-2h10v2h2v-2h2v-2H16z   M30,92h2v2h-2V92z M70,90v2h2v-2H70z M68,92h2v2h-2V92z M62,88h2v2h-2V88z M58,92v-2h2v-2H40v2h2v2h-6v2h13v-2h-5v-2h5v2h2v-2h5v2  h-5v2h13v-2H58z M64,90h4v2h-4V90z"/>'
+        '<path class="st-frames" d="M12,68v16H6V72h2v10h2V72H8v-2h2v-2H12z M6,16v12h2V18h2v10H8v2h2v2h2V16H6z M10,40v2H8v-6H6v13h2v-5h2v5H8v2h2  v5H8v-5H6v13h2v-6h2v2h2V40H10z M10,68v-4H8v4H10z M12,64v-2h-2v2H12z M8,70v-2H6v2H8z M8,32v-2H6v2H8z M12,38v-2h-2v2H12z M10,36  v-4H8v4H10z"/>'
+        '<path class="st-frames" d="M94,72v12h-6V68h2v2h2v2h-2v10h2V72H94z M88,16v16h2v-2h2v-2h-2V18h2v10h2V16H88z M90,49v-5h2v5h2V36h-2v6h-2  v-2h-2v20h2v-2h2v6h2V51h-2v5h-2v-5h2v-2H90z M90,68v-4h2v4H90z M88,64v-2h2v2H88z M92,70v-2h2v2H92z M92,32v-2h2v2H92z M88,38v-2h2  v2H88z M90,36v-4h2v4H90z"/>';
+    string public constant frameSVGs3 =
+        '<path class="st-frames" d="M16,10h68v2H16V10z M20,6h4v2h-4V6z M28,6h4v2h-4V6z M36,6h4v2h-4V6z M44,6h4v2h-4V6z M52,6h4v2h-4V6z M60,6h4  v2h-4V6z M68,6h4v2h-4V6z M76,6h4v2h-4V6z"/>'
+        '<path class="st-frames" d="M16,88h68v2H16V88z M20,92h4v2h-4V92z M28,92h4v2h-4V92z M36,92h4v2h-4V92z M44,92h4v2h-4V92z M52,92h4v2h-4V92  z M60,92h4v2h-4V92z M68,92h4v2h-4V92z M76,92h4v2h-4V92z"/>'
+        '<path class="st-frames" d="M90,16v68h-2V16H90z M94,20v4h-2v-4H94z M94,28v4h-2v-4H94z M94,36v4h-2v-4H94z M94,44v4h-2v-4H94z M94,52v4h-2  v-4H94z M94,60v4h-2v-4H94z M94,68v4h-2v-4H94z M94,76v4h-2v-4H94z"/>'
+        '<path class="st-frames" d="M12,16v68h-2V16H12z M8,20v4H6v-4H8z M8,28v4H6v-4H8z M8,36v4H6v-4H8z M8,44v4H6v-4H8z M8,52v4H6v-4H8z M8,60v4  H6v-4H8z M8,68v4H6v-4H8z M8,76v4H6v-4H8z"/>';
+    string public constant frameSVGs4 =
+        '<polygon class="st-frames" points="12,16 12,84 10,84 10,82 8,82 8,78 10,78 10,76 8,76 8,72 10,72 10,70 8,70 8,66 10,66 10,64 8,64   8,60 10,60 10,58 8,58 8,54 10,54 10,52 8,52 8,48 10,48 10,46 8,46 8,42 10,42 10,40 8,40 8,36 10,36 10,34 8,34 8,30 10,30 10,28   8,28 8,24 10,24 10,22 8,22 8,18 10,18 10,16 "/>'
+        '<polygon class="st-frames" points="90,22 90,24 92,24 92,28 90,28 90,30 92,30 92,34 90,34 90,36 92,36 92,40 90,40 90,42 92,42 92,46   90,46 90,48 92,48 92,52 90,52 90,54 92,54 92,58 90,58 90,60 92,60 92,64 90,64 90,66 92,66 92,70 90,70 90,72 92,72 92,76 90,76   90,78 92,78 92,82 90,82 90,84 88,84 88,16 90,16 90,18 92,18 92,22 "/>'
+        '<polygon class="st-frames" points="84,10 84,12 16,12 16,10 18,10 18,8 22,8 22,10 24,10 24,8 28,8 28,10 30,10 30,8 34,8 34,10 36,10   36,8 40,8 40,10 42,10 42,8 46,8 46,10 48,10 48,8 52,8 52,10 54,10 54,8 58,8 58,10 60,10 60,8 64,8 64,10 66,10 66,8 70,8 70,10   72,10 72,8 76,8 76,10 78,10 78,8 82,8 82,10 "/>'
+        '<polygon class="st-frames" points="84,88 84,90 82,90 82,92 78,92 78,90 76,90 76,92 72,92 72,90 70,90 70,92 66,92 66,90 64,90 64,92   60,92 60,90 58,90 58,92 54,92 54,90 52,90 52,92 48,92 48,90 46,90 46,92 42,92 42,90 40,90 40,92 36,92 36,90 34,90 34,92 30,92   30,90 28,90 28,92 24,92 24,90 22,90 22,92 18,92 18,90 16,90 16,88 "/>';
+    string public constant frameSVGs5 =
+        '<polygon class="st-frames" points="84,6 84,12 16,12 16,6 20,6 20,10 24,10 24,6 28,6 28,10 32,10 32,6 36,6 36,10 40,10 40,6 44,6 44,10   48,10 48,6 52,6 52,10 56,10 56,6 60,6 60,10 64,10 64,6 68,6 68,10 72,10 72,6 76,6 76,10 80,10 80,6 "/>'
+        '<polygon class="st-frames" points="90,20 90,24 94,24 94,28 90,28 90,32 94,32 94,36 90,36 90,40 94,40 94,44 90,44 90,48 94,48 94,52   90,52 90,56 94,56 94,60 90,60 90,64 94,64 94,68 90,68 90,72 94,72 94,76 90,76 90,80 94,80 94,84 88,84 88,16 94,16 94,20 "/>'
+        '<polygon class="st-frames" points="84,88 84,94 80,94 80,90 76,90 76,94 72,94 72,90 68,90 68,94 64,94 64,90 60,90 60,94 56,94 56,90   52,90 52,94 48,94 48,90 44,90 44,94 40,94 40,90 36,90 36,94 32,94 32,90 28,90 28,94 24,94 24,90 20,90 20,94 16,94 16,88 "/>'
+        '<polygon class="st-frames" points="12,16 12,84 6,84 6,80 10,80 10,76 6,76 6,72 10,72 10,68 6,68 6,64 10,64 10,60 6,60 6,56 10,56   10,52 6,52 6,48 10,48 10,44 6,44 6,40 10,40 10,36 6,36 6,32 10,32 10,28 6,28 6,24 10,24 10,20 6,20 6,16 "/>';
+    string public constant frameSVGs6 =
+        '<polygon class="st-frames" points="92,18 92,20 94,20 94,22 92,22 92,24 94,24 94,26 92,26 92,28 94,28 94,30 92,30 92,32 94,32 94,34   92,34 92,36 94,36 94,38 92,38 92,40 94,40 94,42 92,42 92,44 94,44 94,46 92,46 92,48 94,48 94,50 92,50 92,52 94,52 94,54 92,54   92,56 94,56 94,58 92,58 92,60 94,60 94,62 92,62 92,64 94,64 94,66 92,66 92,68 94,68 94,70 92,70 92,72 94,72 94,74 92,74 92,76   94,76 94,78 92,78 92,80 94,80 94,82 92,82 92,84 88,84 88,16 94,16 94,18 "/>'
+        '<polygon class="st-frames" points="12,16 12,84 6,84 6,82 8,82 8,80 6,80 6,78 8,78 8,76 6,76 6,74 8,74 8,72 6,72 6,70 8,70 8,68 6,68   6,66 8,66 8,64 6,64 6,62 8,62 8,60 6,60 6,58 8,58 8,56 6,56 6,54 8,54 8,52 6,52 6,50 8,50 8,48 6,48 6,46 8,46 8,44 6,44 6,42   8,42 8,40 6,40 6,38 8,38 8,36 6,36 6,34 8,34 8,32 6,32 6,30 8,30 8,28 6,28 6,26 8,26 8,24 6,24 6,22 8,22 8,20 6,20 6,18 8,18   8,16 "/>'
+        '<polygon class="st-frames" points="84,88 84,92 82,92 82,94 80,94 80,92 78,92 78,94 76,94 76,92 74,92 74,94 72,94 72,92 70,92 70,94   68,94 68,92 66,92 66,94 64,94 64,92 62,92 62,94 60,94 60,92 58,92 58,94 56,94 56,92 54,92 54,94 52,94 52,92 50,92 50,94 48,94   48,92 46,92 46,94 44,94 44,92 42,92 42,94 40,94 40,92 38,92 38,94 36,94 36,92 34,92 34,94 32,94 32,92 30,92 30,94 28,94 28,92   26,92 26,94 24,94 24,92 22,92 22,94 20,94 20,92 18,92 18,94 16,94 16,88 "/>'
+        '<polygon class="st-frames" points="84,6 84,12 16,12 16,8 18,8 18,6 20,6 20,8 22,8 22,6 24,6 24,8 26,8 26,6 28,6 28,8 30,8 30,6 32,6   32,8 34,8 34,6 36,6 36,8 38,8 38,6 40,6 40,8 42,8 42,6 44,6 44,8 46,8 46,6 48,6 48,8 50,8 50,6 52,6 52,8 54,8 54,6 56,6 56,8   58,8 58,6 60,6 60,8 62,8 62,6 64,6 64,8 66,8 66,6 68,6 68,8 70,8 70,6 72,6 72,8 74,8 74,6 76,6 76,8 78,8 78,6 80,6 80,8 82,8   82,6 "/>';
+    string public constant frameSVGs7 =
+        '<path class="st-frames" d="M6,16h4v8H6V16z M6,26h4v4H6V26z M6,32h4v10H6V32z M10,84H6v-8h4V84z M10,74H6v-4h4V74z M10,68H6V58h4V68z   M4,44v12h6V44H4z M8,54H6v-8h2V54z"/>'
+        '<path class="st-frames" d="M84,6v4h-8V6H84z M74,6v4h-4V6H74z M68,6v4H58V6H68z M16,10V6h8v4H16z M26,10V6h4v4H26z M32,10V6h10v4H32z   M44,4v6h12V4H44z M54,8h-8V6h8V8z"/>'
+        '<path class="st-frames" d="M16,94v-4h8v4H16z M26,94v-4h4v4H26z M32,94v-4h10v4H32z M84,90v4h-8v-4H84z M74,90v4h-4v-4H74z M68,90v4H58v-4  H68z M44,90v6h12v-6H44z M54,94h-8v-2h8V94z"/>'
+        '<path class="st-frames" d="M94,84h-4v-8h4V84z M94,74h-4v-4h4V74z M94,68h-4V58h4V68z M90,16h4v8h-4V16z M90,26h4v4h-4V26z M90,32h4v10h-4  V32z M90,44v12h6V44H90z M94,54h-2v-8h2V54z"/>';
+    string public constant frameSVGs8 =
+        '<polygon class="st-frames" points="92,18 92,20 94,20 94,24 92,24 92,26 94,26 94,28 92,28 92,30 94,30 94,34 92,34 92,36 94,36 94,40   92,40 92,42 94,42 94,44 92,44 92,46 94,46 94,54 92,54 92,56 94,56 94,58 92,58 92,60 94,60 94,64 92,64 92,66 94,66 94,68 92,68   92,70 94,70 94,74 92,74 92,76 94,76 94,80 92,80 92,82 94,82 94,84 90,84 90,16 94,16 94,18 "/>'
+        '<polygon class="st-frames" points="84,6 84,10 16,10 16,6 18,6 18,8 20,8 20,6 24,6 24,8 26,8 26,6 30,6 30,8 32,8 32,6 34,6 34,8 36,8   36,6 40,6 40,8 42,8 42,6 44,6 44,8 46,8 46,6 54,6 54,8 56,8 56,6 58,6 58,8 60,8 60,6 64,6 64,8 66,8 66,6 70,6 70,8 72,8 72,6   74,6 74,8 76,8 76,6 80,6 80,8 82,8 82,6 "/>'
+        '<polygon class="st-frames" points="84,90 84,94 82,94 82,92 80,92 80,94 76,94 76,92 74,92 74,94 72,94 72,92 70,92 70,94 66,94 66,92   64,92 64,94 60,94 60,92 58,92 58,94 56,94 56,92 54,92 54,94 46,94 46,92 44,92 44,94 42,94 42,92 40,92 40,94 36,94 36,92 34,92   34,94 32,94 32,92 30,92 30,94 26,94 26,92 24,92 24,94 20,94 20,92 18,92 18,94 16,94 16,90 "/>'
+        '<polygon class="st-frames" points="10,16 10,84 6,84 6,82 8,82 8,80 6,80 6,76 8,76 8,74 6,74 6,70 8,70 8,68 6,68 6,66 8,66 8,64 6,64   6,60 8,60 8,58 6,58 6,56 8,56 8,54 6,54 6,46 8,46 8,44 6,44 6,42 8,42 8,40 6,40 6,36 8,36 8,34 6,34 6,30 8,30 8,28 6,28 6,26   8,26 8,24 6,24 6,20 8,20 8,18 6,18 6,16 "/>';
+    string public constant frameSVGs9 =
+        '<path class="st-frames" d="M16,88h68v2H16V88z M16,92h4v2h-4V92z M22,92h2v2h-2V92z M26,92h6v2h-6V92z M38,92h6v2h-6V92z M46,92h3v2h-3V92  z M51,92h3v2h-3V92z M34,92h2v2h-2V92z M56,92h6v2h-6V92z M64,92h2v2h-2V92z M68,92h6v2h-6V92z M80,92h4v2h-4V92z M76,92h2v2h-2V92z  "/>'
+        '<path class="st-frames" d="M16,10h68v2H16V10z M16,6h4v2h-4V6z M22,6h2v2h-2V6z M26,6h6v2h-6V6z M38,6h6v2h-6V6z M46,6h3v2h-3V6z M51,6h3  v2h-3V6z M34,6h2v2h-2V6z M56,6h6v2h-6V6z M64,6h2v2h-2V6z M68,6h6v2h-6V6z M80,6h4v2h-4V6z M76,6h2v2h-2V6z"/>'
+        '<path class="st-frames" d="M12,16v68h-2V16H12z M6,84v-4h2v4H6z M6,78v-2h2v2H6z M6,74v-6h2v6H6z M6,62v-6h2v6H6z M6,54v-3h2v3H6z M6,49  v-3h2v3H6z M6,66v-2h2v2H6z M6,44v-6h2v6H6z M6,36v-2h2v2H6z M6,32v-6h2v6H6z M6,20v-4h2v4H6z M6,24v-2h2v2H6z"/>'
+        '<path class="st-frames" d="M90,16v68h-2V16H90z M92,84v-4h2v4H92z M92,78v-2h2v2H92z M92,74v-6h2v6H92z M92,62v-6h2v6H92z M92,54v-3h2v3  H92z M92,49v-3h2v3H92z M92,66v-2h2v2H92z M92,44v-6h2v6H92z M92,36v-2h2v2H92z M92,32v-6h2v6H92z M92,20v-4h2v4H92z M92,24v-2h2v2  H92z"/>';
+
+    string public constant cornerSVG1 =
+        '<rect class="st2" height="6" width="6" x="6" y="6"/>'
+        '<rect class="st2" height="6" width="6" x="88" y="6"/>'
+        '<rect class="st2" height="6" width="6" x="6" y="88"/>'
+        '<rect class="st2" height="6" width="6" x="88" y="88"/>';
+    string public constant cornerSVG2 =
+        '<path clip-rule="evenodd" d="M12 4V6L14 6V12H12V14H6L6 12H4V6H6L6 4H12ZM10 6H8V8H6L6 10H8V12H10V10H12V8H10V6Z" class="st2" fill-rule="evenodd"/>'
+        '<path clip-rule="evenodd" d="M94 4V6L96 6V12H94V14H88L88 12H86V6H88L88 4H94ZM92 6H90V8H88L88 10H90V12H92V10H94V8H92V6Z" class="st2" fill-rule="evenodd"/>'
+        '<path clip-rule="evenodd" d="M12 86V88L14 88V94H12V96H6L6 94H4V88H6L6 86H12ZM10 88H8V90H6L6 92H8V94H10V92H12V90H10V88Z" class="st2" fill-rule="evenodd"/>'
+        '<path clip-rule="evenodd" d="M94 86V88L96 88V94H94V96H88L88 94H86V88H88L88 86H94ZM92 88H90V90H88L88 92H90V94H92V92H94V90H92V88Z" class="st2" fill-rule="evenodd"/>';
+    string public constant cornerSVG3 =
+        '<path class="st2" d="M6,12h2v2H6V12z M8,10h2v2H8V10z M10,8h2v2h-2V8z M12,6h2v2h-2V6z M14,8h2v2h-2V8z M6,4v2H4v2h4V4H6z M10,4h2v2  h-2V4z M8,14h2v2H8V14z M4,10h2v2H4V10z"/>'
+        '<path class="st2" d="M94,12h-2v2h2V12z M92,10h-2v2h2V10z M90,8h-2v2h2V8z M88,6h-2v2h2V6z M86,8h-2v2h2V8z M96,6v2h-4V4h2v2H96z   M90,4h-2v2h2V4z M92,14h-2v2h2V14z M96,10h-2v2h2V10z"/>'
+        '<path class="st2" d="M6,88h2v-2H6V88z M8,90h2v-2H8V90z M10,92h2v-2h-2V92z M12,94h2v-2h-2V94z M14,92h2v-2h-2V92z M8,92v4H6v-2H4  v-2H8z M10,96h2v-2h-2V96z M8,86h2v-2H8V86z M4,90h2v-2H4V90z"/>'
+        '<path class="st2" d="M94,88h-2v-2h2V88z M92,90h-2v-2h2V90z M90,92h-2v-2h2V92z M88,94h-2v-2h2V94z M86,92h-2v-2h2V92z M92,92v4h2  v-2h2v-2H92z M90,96h-2v-2h2V96z M92,86h-2v-2h2V86z M96,90h-2v-2h2V90z"/>';
+    string public constant cornerSVG4 =
+        '<path clip-rule="evenodd" d="M12 4H4V12H12V4ZM6 6H10V8H8V10H6V6Z" class="st2" fill-rule="evenodd"/>'
+        '<path clip-rule="evenodd" d="M12 88H4V96H12V88ZM8 90V92H10V94H8H6V92V90H8Z" class="st2" fill-rule="evenodd"/>'
+        '<path clip-rule="evenodd" d="M88 4H96V12H88V4ZM94 6H92H90V8H92V10H94V8V6Z" class="st2" fill-rule="evenodd"/>'
+        '<path clip-rule="evenodd" d="M88 88H96V96H88V88ZM92 90V92H90V94H94V90H92Z" class="st2" fill-rule="evenodd"/>';
+    string public constant cornerSVG5 =
+        '<path class="st2" d="M16,84v4h-4v-4H16z M8,88v4h4v-4H8z M4,92v4h4v-4H4z"/>'
+        '<path class="st2" d="M88,88h-4v-4h4V88z M92,88h-4v4h4V88z M92,92v4h4v-4H92z"/>'
+        '<path class="st2" d="M88,12v4h-4v-4H88z M88,8v4h4V8H88z M92,4v4h4V4H92z"/>'
+        '<path class="st2" d="M12,8v4H8V8H12z M4,4v4h4V4H4z M12,12v4h4v-4H12z"/>';
+    string public constant cornerSVG6 =
+        '<path class="st2" d="M92,84v2h-4v-2H92z M92,88h2v-2h-2V88z M94,86h2v-2h-2V86z M84,86h2v-2h-2V86z M94,88v4h2v-4H94z M92,94h2v-2  h-2V94z M88,94v2h4v-2H88z M84,96h2v-2h-2V96z M94,96h2v-2h-2V96z M86,94h2v-2h-2V94z M84,88v4h2v-4H84z M86,88h2v-2h-2V88z"/>'
+        '<path class="st2" d="M12,4v2H8V4H12z M12,8h2V6h-2V8z M14,6h2V4h-2V6z M4,6h2V4H4V6z M14,8v4h2V8H14z M12,14h2v-2h-2V14z M8,14v2h4  v-2H8z M4,16h2v-2H4V16z M14,16h2v-2h-2V16z M6,14h2v-2H6V14z M4,8v4h2V8H4z M6,8h2V6H6V8z"/>'
+        '<path class="st2" d="M92,4v2h-4V4H92z M92,8h2V6h-2V8z M94,6h2V4h-2V6z M84,6h2V4h-2V6z M94,8v4h2V8H94z M92,14h2v-2h-2V14z M88,14  v2h4v-2H88z M84,16h2v-2h-2V16z M94,16h2v-2h-2V16z M86,14h2v-2h-2V14z M84,8v4h2V8H84z M86,8h2V6h-2V8z"/>'
+        '<path class="st2" d="M12,84v2H8v-2H12z M12,88h2v-2h-2V88z M14,86h2v-2h-2V86z M4,86h2v-2H4V86z M14,88v4h2v-4H14z M12,94h2v-2h-2  V94z M8,94v2h4v-2H8z M4,96h2v-2H4V96z M14,96h2v-2h-2V96z M6,94h2v-2H6V94z M4,88v4h2v-4H4z M6,88h2v-2H6V88z"/>';
+    string public constant cornerSVG7 =
+        '<path class="st2" d="M94,88h-2v-2h2V88z M92,88h-4v4h4V88z M94,94v-2h-2v2H94z M86,86v2h2v-2H86z M86,94h2v-2h-2V94z"/>'
+        '<path class="st2" d="M12,94v-2h2v2H12z M12,88H8v4h4V88z M6,86v2h2v-2H6z M14,86h-2v2h2V86z M6,94h2v-2H6V94z"/>'
+        '<path class="st2" d="M92,14v-2h2v2H92z M86,14h2v-2h-2V14z M94,6h-2v2h2V6z M92,8h-4v4h4V8z M86,6v2h2V6H86z"/>'
+        '<path class="st2" d="M12,14v-2h2v2H12z M12,8H8v4h4V8z M6,6v2h2V6H6z M6,14h2v-2H6V14z M14,6h-2v2h2V6z"/>';
+
+    string public constant alphaSVG =
+        '<path class="st-alpha" d="M6,6V4h4v2H6z M10,6v2H6V6H4v6h2v-2h4v2h2V6H10z"/>'
+        '<path class="st-alpha" d="M94,4v2h-4V4H94z M94,6v2h-4V6h-2v6h2v-2h4v2h2V6H94z"/>'
+        '<path class="st-alpha" d="M10,88v2H6v-2H10z M10,90v2H6v-2H4v6h2v-2h4v2h2v-6H10z"/>'
+        '<path class="st-alpha" d="M94,88v2h-4v-2H94z M94,90v2h-4v-2h-2v6h2v-2h4v2h2v-6H94z"/>';
+
+    string public constant pgSVG =
+        '<polygon class="st-pg" points="14,6 14,10 12,10 12,12 10,12 10,14 8,14 8,12 6,12 6,10 4,10 4,6 6,6 6,4 8,4 8,6 10,6 10,4 12,4   12,6 "/>'
+        '<polygon class="st-pg" points="96,6 96,10 94,10 94,12 92,12 92,14 90,14 90,12 88,12 88,10 86,10 86,6 88,6 88,4 90,4 90,6 92,6   92,4 94,4 94,6 "/>'
+        '<polygon class="st-pg" points="14,88 14,92 12,92 12,94 10,94 10,96 8,96 8,94 6,94 6,92 4,92 4,88 6,88 6,86 8,86 8,88 10,88 10,86   12,86 12,88 "/>'
+        '<polygon class="st-pg" points="96,88 96,92 94,92 94,94 92,94 92,96 90,96 90,94 88,94 88,92 86,92 86,88 88,88 88,86 90,86 90,88   92,88 92,86 94,86 94,88 "/>';
+}
