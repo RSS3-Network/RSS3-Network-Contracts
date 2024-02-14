@@ -84,6 +84,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         DataTypes.NodeTraits memory nodeTraits;
         DataTypes.ChipTraits memory chipTraits;
         (nodeTraits, chipTraits) = _generateChipImage(id);
+        // TODO: add attributes
         string memory json = string.concat(
             '{"name": "Chip #',
             id.toString(),
@@ -142,12 +143,12 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             pgCorner: node.publicGood
         });
 
-        DataTypes.ChipTraits memory chipTraits = _getChipTraits(tokenId);
+        DataTypes.ChipTraits memory chipTraits = _getChipTraits(nodeAddr, tokenId);
 
         return (nodeTraits, chipTraits);
     }
 
-    function _getChipTraits(uint256 tokenId) internal pure returns (DataTypes.ChipTraits memory) {
+    function _getChipTraits(address nodeAddr, uint256 tokenId) internal pure returns (DataTypes.ChipTraits memory) {
         (uint8 eyeCount, uint8 mouthCount, uint8 headShapeCount, uint8 headDetailCount) = SVGGenerator
             .getChipTraitsCount();
 
@@ -160,7 +161,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             uint256(headDetailCount) *
             uint256(colorCount);
 
-        uint256 chipTraitId = uint256(keccak256(abi.encodePacked(tokenId))) % chipTraitCount;
+        uint256 chipTraitId = uint256(keccak256(abi.encodePacked(nodeAddr, tokenId))) % chipTraitCount;
 
         DataTypes.ChipTraits memory chipTraits = DataTypes.ChipTraits({
             eyesId: _calTraitId(
