@@ -44,6 +44,8 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     mapping(uint256 epoch => uint256 stakingRewards) internal _distributedStakingRewards;
     // distributed operation rewards for each epoch
     mapping(uint256 epoch => uint256 operationRewards) internal _distributedOperationRewards;
+    // rewarded node addresses
+    mapping(uint256 epoch => mapping(address nodeAddr => bool rewarded)) internal _rewardedAddresses;
 
     /// @inheritdoc ISettlement
     function initialize(
@@ -106,7 +108,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         }
 
         uint256[] memory stakingRewards = _getStakingRewards(nodeAddrs);
-        _checkRewards(nodeAddrs, operationRewards, stakingRewards);
+        _checkRewards(epoch, nodeAddrs, operationRewards, stakingRewards);
 
         IStaking(_staking).distributeRewards{value: amountToSend}(
             [epoch, _startTimestamp, _endTimestamp],
@@ -134,6 +136,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch
     function _checkRewards(
+        uint256 epoch,
         address[] memory nodeAddrs,
         uint256[] memory operationRewards,
         uint256[] memory stakingRewards
@@ -141,6 +144,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         uint256 distributedOperationRewards = _distributedOperationRewards[_currentEpoch];
         uint256 distributedStakingRewards = _distributedStakingRewards[_currentEpoch];
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            if (_isRewarded(epoch, nodeAddrs[i])) revert RewardsAlreadyDistributed(nodeAddrs[i]);
+            _rewardedAddresses[epoch][nodeAddrs[i]] = true;
+
             distributedOperationRewards += operationRewards[i];
             distributedStakingRewards += stakingRewards[i];
         }
@@ -229,5 +235,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         if (totalStaking == 0) {
             (, totalStaking) = IStaking(_staking).getPoolInfo();
         }
+    }
+
+    function _isRewarded(uint256 epoch, address nodeAddr) internal view returns (bool) {
+        return _rewardedAddresses[epoch][nodeAddr];
     }
 }

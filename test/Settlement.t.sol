@@ -198,6 +198,7 @@ contract SettlementTest is CommonTest, IErrors {
         // create node
         _createNode(alice);
         _createNode(bob);
+        _createNode(carol);
 
         // deposit
         vm.prank(alice);
@@ -206,12 +207,16 @@ contract SettlementTest is CommonTest, IErrors {
         vm.prank(bob);
         _staking.deposit{value: depositAmount}();
 
+        vm.prank(carol);
+        _staking.deposit{value: depositAmount}();
+
         // stake
         _staking.stake{value: stakeAmount}(alice);
         _staking.stake{value: stakeAmount}(bob);
+        _staking.stake{value: stakeAmount}(carol);
 
         (uint256 operationRewardsPerEpoch, ) = _settlement.getBonusInfo();
-        uint256 operationReward = operationRewardsPerEpoch / 2;
+        uint256 operationReward = operationRewardsPerEpoch / 3;
 
         skip(18 hours);
 
@@ -226,16 +231,16 @@ contract SettlementTest is CommonTest, IErrors {
         skip(18 hours);
 
         vm.expectRevert(abi.encodeWithSelector(OperationRewardsExceed.selector));
-        _settlement.distributeRewards{value: requestFee * 2}(
+        _settlement.distributeRewards{value: requestFee}(
             1,
-            array(alice, bob), // node addresses
-            array(requestFee, requestFee), // request fees
-            array(operationReward, operationReward) // operation rewards
+            array(carol), // node addresses
+            array(requestFee), // request fees
+            array(operationReward * 2) // operation rewards
         );
         vm.stopPrank();
     }
 
-    function testDistributeRewardsFailWithStakingRewardsExceedsLimit() public {
+    function testDistributeRewardsFailWithDuplicatedNodeAddr() public {
         uint256 depositAmount = 10000 ether;
         uint256 stakeAmount = 1000 ether;
 
@@ -268,13 +273,13 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward) // operation rewards
         );
 
-        vm.expectRevert(abi.encodeWithSelector(StakingRewardsExceed.selector));
+        vm.expectRevert(abi.encodeWithSelector(RewardsAlreadyDistributed.selector, alice));
         skip(18 hours);
         _settlement.distributeRewards{value: requestFee * 2}(
             1,
-            array(alice, bob), // node addresses
-            array(requestFee, requestFee), // request fees
-            array(operationReward, operationReward) // operation rewards
+            array(alice), // node addresses
+            array(requestFee), // request fees
+            array(operationReward) // operation rewards
         );
         vm.stopPrank();
     }

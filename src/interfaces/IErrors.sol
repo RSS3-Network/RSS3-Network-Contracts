@@ -95,4 +95,7 @@ interface IErrors {
 
     /// @dev Invalid trait id
     error InvalidTraitId(uint256 traitId);
+
+    /// @dev Rewards already distributed
+    error RewardsAlreadyDistributed(address nodeAddr);
 }

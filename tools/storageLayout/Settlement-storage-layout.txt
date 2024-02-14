@@ -11,3 +11,4 @@
 | _totalStakings                 | mapping(uint256 => uint256)                         | 8    | 0      | 32    | src/Settlement.sol:Settlement |
 | _distributedStakingRewards     | mapping(uint256 => uint256)                         | 9    | 0      | 32    | src/Settlement.sol:Settlement |
 | _distributedOperationRewards   | mapping(uint256 => uint256)                         | 10   | 0      | 32    | src/Settlement.sol:Settlement |
+| _rewardedAddresses             | mapping(uint256 => mapping(address => bool))        | 11   | 0      | 32    | src/Settlement.sol:Settlement |
