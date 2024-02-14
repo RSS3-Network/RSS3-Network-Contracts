@@ -29,7 +29,7 @@ contract SettlementTest is CommonTest, IErrors {
 
     function testDistributeRewards() public {
         uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 1000 ether;
+        uint256 stakeAmount = 10000 ether;
 
         _createNode(alice);
         _createNode(bob);
@@ -77,7 +77,7 @@ contract SettlementTest is CommonTest, IErrors {
 
     function testDistributeRewardsMultiple() public {
         uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 1000 ether;
+        uint256 stakeAmount = 10000 ether;
 
         _createNode(alice);
         _createNode(bob);
@@ -191,7 +191,7 @@ contract SettlementTest is CommonTest, IErrors {
 
     function testDistributeRewardsFailWithOperationRewardsExceedsLimit() public {
         uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 1000 ether;
+        uint256 stakeAmount = 10000 ether;
 
         uint256 requestFee = 1 ether;
 
@@ -242,7 +242,7 @@ contract SettlementTest is CommonTest, IErrors {
 
     function testDistributeRewardsFailWithDuplicatedNodeAddr() public {
         uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 1000 ether;
+        uint256 stakeAmount = 10000 ether;
 
         uint256 requestFee = 1 ether;
 

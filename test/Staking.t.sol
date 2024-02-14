@@ -37,7 +37,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(_staking.USER_SLASH_RATE_BASIS_POINTS(), userSlashRateBasisPoints);
         assertEq(_staking.STAKE_RATIO(), stakeRatio);
         assertEq(_staking.TREASURY(), treasury);
-        assertEq(_staking.SHARES_PER_CHIP(), 500 ether);
+        assertEq(_staking.SHARES_PER_CHIP(), 5000 ether);
 
         vm.mockCall(
             address(_staking),
@@ -179,7 +179,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _createNode(nodeAddr);
 
         vm.prank(alice);
-        _staking.stake{value: 1000 ether}(nodeAddr);
+        _staking.stake{value: 10000 ether}(nodeAddr);
 
         vm.expectRevert(abi.encodeWithSelector(NodeStakedOrDeposited.selector));
         vm.prank(nodeAddr);
@@ -524,7 +524,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
     function testDistributeRewards() public {
         uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 1000 ether;
+        uint256 stakeAmount = 10000 ether;
 
         // create node
         _createNode(alice);
