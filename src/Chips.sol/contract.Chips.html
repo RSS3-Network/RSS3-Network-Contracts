@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2b58fcaedbad2ebb44a69e3dcfc1af965104a646/src/Chips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e81f4e40a68c87d8d62b698123e857aeadd9aee3/src/Chips.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, <a href="/src/base/ERC721.sol/abstract.ERC721.html">ERC721</a></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -280,7 +280,7 @@
     returns (DataTypes.NodeTraits memory, DataTypes.ChipTraits memory);
 </code></pre>
 <h3 id="_getchiptraits"><a class="header" href="#_getchiptraits">_getChipTraits</a></h3>
-<pre><code class="language-solidity">function _getChipTraits(uint256 tokenId) internal pure returns (DataTypes.ChipTraits memory);
+<pre><code class="language-solidity">function _getChipTraits(address nodeAddr, uint256 tokenId) internal pure returns (DataTypes.ChipTraits memory);
 </code></pre>
 <h3 id="_generatesvgimage"><a class="header" href="#_generatesvgimage">_generateSVGImage</a></h3>
 <pre><code class="language-solidity">function _generateSVGImage(DataTypes.NodeTraits memory nodeTraits, DataTypes.ChipTraits memory chipTraits)
