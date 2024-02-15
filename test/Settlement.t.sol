@@ -117,13 +117,19 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward), // operation rewards
             false
         );
+
+        assertEq(_staking.isSettlementPhase(), true);
+
         _settlement.distributeRewards{value: requestFee * 2}(
             1,
             array(carol, dave), // node addresses
             array(requestFee, requestFee), // request fees
             array(operationReward, operationReward), // operation rewards
-            false
+            true
         );
+
+        assertEq(_staking.isSettlementPhase(), false);
+
         vm.stopPrank();
 
         uint256 taxAmount = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);

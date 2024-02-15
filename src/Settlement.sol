@@ -144,7 +144,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch
     function _checkRewards(uint256 epoch, address[] memory nodeAddrs, uint256[] memory operationRewards) internal {
-        uint256 distributedOperationRewards = _distributedOperationRewards[_currentEpoch];
+        uint256 distributedOperationRewards = _distributedOperationRewards[epoch];
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             if (_isRewarded(epoch, nodeAddrs[i])) revert RewardsAlreadyDistributed(nodeAddrs[i]);
             _rewardedAddresses[epoch][nodeAddrs[i]] = true;
@@ -154,7 +154,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardsExceed();
 
-        _distributedOperationRewards[_currentEpoch] = distributedOperationRewards;
+        _distributedOperationRewards[epoch] = distributedOperationRewards;
     }
 
     /// @dev Returns staking rewards per epoch for public pool
