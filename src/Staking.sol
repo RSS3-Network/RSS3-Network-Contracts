@@ -84,7 +84,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
-    modifier whenNotInSettlementStage() {
+    modifier whenNotSettlementPhase() {
         if (_isSettlementPhase) revert SettlementPhase();
         _;
     }
@@ -234,7 +234,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         payable
         override
         whenNotPaused
-        whenNotInSettlementStage
+        whenNotSettlementPhase
         returns (uint256 startTokenId, uint256 endTokenId)
     {
         DataTypes.Node storage node = _nodes[nodeAddr];
@@ -250,7 +250,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function requestUnstake(
         address nodeAddr,
         uint256[] calldata chipsIds
-    ) external override whenNotPaused whenNotInSettlementStage returns (uint256 requestId) {
+    ) external override whenNotPaused whenNotSettlementPhase returns (uint256 requestId) {
         return _unstakeFromNode(nodeAddr, chipsIds);
     }
 
@@ -311,7 +311,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         payable
         override
         whenNotPaused
-        whenNotInSettlementStage
+        whenNotSettlementPhase
         returns (uint256 startTokenId, uint256 endTokenId)
     {
         DataTypes.Node storage node = _nodes[nodeAddr];
@@ -323,7 +323,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function slashNodes(address[] calldata nodeAddrs) external override whenNotInSettlementStage onlyRole(ORACLE_ROLE) {
+    function slashNodes(address[] calldata nodeAddrs) external override whenNotSettlementPhase onlyRole(ORACLE_ROLE) {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) revert NodeNotExists();

@@ -109,10 +109,10 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
             // start of the settlement, set settlement phase to true
             IStaking(_staking).setSettlementPhase(true);
-        } else if (isFinal) {
-            // end of the settlement, set settlement phase to false
-            IStaking(_staking).setSettlementPhase(false);
         }
+
+        // settlement phase
+        IStaking(_staking).setSettlementPhase(!isFinal);
 
         _checkRewards(epoch, nodeAddrs, operationRewards);
 
