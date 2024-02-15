@@ -4,6 +4,7 @@
 | _roles                    | mapping(bytes32 => struct AccessControl.RoleData)      | 1    | 0      | 32    | src/Staking.sol:Staking |
 | _roleMembers              | mapping(bytes32 => struct EnumerableSet.AddressSet)    | 2    | 0      | 32    | src/Staking.sol:Staking |
 | _chips                    | address                                                | 3    | 0      | 20    | src/Staking.sol:Staking |
+| _isSettlementPhase        | bool                                                   | 3    | 20     | 1     | src/Staking.sol:Staking |
 | _nodeAddrs                | struct EnumerableSet.AddressSet                        | 4    | 0      | 64    | src/Staking.sol:Staking |
 | _nodes                    | mapping(address => struct DataTypes.Node)              | 6    | 0      | 32    | src/Staking.sol:Staking |
 | _pendingWithdrawalCounter | uint256                                                | 7    | 0      | 32    | src/Staking.sol:Staking |
