@@ -56,7 +56,8 @@ contract SettlementTest is CommonTest, IErrors {
             1,
             array(alice, bob), // node addresses
             array(requestFee, requestFee), // request fees
-            array(operationReward, operationReward) // operation rewards
+            array(operationReward, operationReward), // operation rewards
+            false
         );
 
         uint256[] memory taxAmounts = new uint256[](2);
@@ -113,13 +114,15 @@ contract SettlementTest is CommonTest, IErrors {
             1,
             array(alice, bob), // node addresses
             array(requestFee, requestFee), // request fees
-            array(operationReward, operationReward) // operation rewards
+            array(operationReward, operationReward), // operation rewards
+            false
         );
         _settlement.distributeRewards{value: requestFee * 2}(
             1,
             array(carol, dave), // node addresses
             array(requestFee, requestFee), // request fees
-            array(operationReward, operationReward) // operation rewards
+            array(operationReward, operationReward), // operation rewards
+            false
         );
         vm.stopPrank();
 
@@ -159,7 +162,8 @@ contract SettlementTest is CommonTest, IErrors {
             1,
             array(alice), // node addresses
             array(requestFee), // request fees
-            array(100) // operation rewards
+            array(100), // operation rewards
+            false
         );
     }
 
@@ -174,7 +178,8 @@ contract SettlementTest is CommonTest, IErrors {
             1,
             array(alice), // node addresses
             array(requestFee), // request fees
-            array(100) // operation rewards
+            array(100), // operation rewards
+            false
         );
 
         skip(18 hours);
@@ -184,7 +189,8 @@ contract SettlementTest is CommonTest, IErrors {
             0,
             array(alice), // node addresses
             array(1 ether), // request fees
-            array(100) // operation rewards
+            array(100), // operation rewards
+            false
         );
         vm.stopPrank();
     }
@@ -225,7 +231,8 @@ contract SettlementTest is CommonTest, IErrors {
             1,
             array(alice, bob), // node addresses
             array(requestFee, requestFee), // request fees
-            array(operationReward, operationReward) // operation rewards
+            array(operationReward, operationReward), // operation rewards
+            false
         );
 
         skip(18 hours);
@@ -235,7 +242,8 @@ contract SettlementTest is CommonTest, IErrors {
             1,
             array(carol), // node addresses
             array(requestFee), // request fees
-            array(operationReward * 2) // operation rewards
+            array(operationReward * 2), // operation rewards
+            false
         );
         vm.stopPrank();
     }
@@ -270,7 +278,8 @@ contract SettlementTest is CommonTest, IErrors {
             1,
             array(alice, bob), // node addresses
             array(requestFee, requestFee), // request fees
-            array(operationReward, operationReward) // operation rewards
+            array(operationReward, operationReward), // operation rewards
+            false
         );
 
         vm.expectRevert(abi.encodeWithSelector(RewardsAlreadyDistributed.selector, alice));
@@ -279,7 +288,8 @@ contract SettlementTest is CommonTest, IErrors {
             1,
             array(alice), // node addresses
             array(requestFee), // request fees
-            array(operationReward) // operation rewards
+            array(operationReward), // operation rewards
+            false
         );
         vm.stopPrank();
     }
