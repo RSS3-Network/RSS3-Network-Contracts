@@ -152,7 +152,7 @@ interface IStaking {
      * @notice Sets the settlement phase.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param enabled Enalbe/disable the settlement phase.
+     * @param enabled Enable/disable the settlement phase.
      */
     function setSettlementPhase(bool enabled) external;
 
