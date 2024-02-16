@@ -10,9 +10,7 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -21,7 +19,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     using Math for uint256;
     using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
-    using SafeERC20 for IERC20;
     using Checkpoints for Checkpoints.Trace160;
 
     uint256 public constant SHARES_PER_CHIP = 5000 * 10 ** 18;

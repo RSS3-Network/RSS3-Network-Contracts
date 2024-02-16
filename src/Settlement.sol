@@ -7,7 +7,6 @@ import {IErrors} from "./interfaces/IErrors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -15,7 +14,6 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using SafeCast for uint256;
-    using SafeERC20 for IERC20;
 
     /// @dev Duration of an epoch.
     uint256 public constant EPOCH_DURATION = 18 hours;
