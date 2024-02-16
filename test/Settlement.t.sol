@@ -9,6 +9,8 @@ import {IErrors} from "../src/interfaces/IErrors.sol";
 contract SettlementTest is CommonTest, IErrors {
     event Transfer(address indexed from, address indexed to, uint256 value);
 
+    receive() external payable {}
+
     function setUp() public {
         _setUp();
 
@@ -16,7 +18,7 @@ contract SettlementTest is CommonTest, IErrors {
         vm.deal(bob, 1000000 ether);
         vm.deal(carol, 1000000 ether);
         vm.deal(dave, 1000000 ether);
-        vm.deal(address(_settlement), 30000000 ether);
+        vm.deal(address(_settlement), 390000000 ether);
         vm.deal(oracleAccount, 30000000 ether);
     }
 
@@ -153,6 +155,79 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward),
             array(stakingReward, stakingReward)
         );
+    }
+
+    function testStakingBalanceWithDistributeRewards() public {
+        uint256 depositAmount = 10000 ether;
+        uint256 stakeAmount = 10000 ether;
+
+        // create node
+        _createNode(alice);
+        _createNode(bob);
+        _createNode(carol);
+        _createNode(dave);
+
+        // deposit
+        vm.prank(alice);
+        _staking.deposit{value: depositAmount + 1}();
+
+        vm.prank(bob);
+        _staking.deposit{value: depositAmount + 2}();
+
+        vm.prank(carol);
+        _staking.deposit{value: depositAmount + 3}();
+
+        vm.prank(dave);
+        _staking.deposit{value: depositAmount + 4}();
+
+        // stake
+        _staking.stake{value: stakeAmount}(alice);
+        _staking.stake{value: stakeAmount * 2}(bob);
+        _staking.stake{value: stakeAmount * 3}(carol);
+        _staking.stake{value: stakeAmount * 4}(dave);
+
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        uint256 requestFee = 100 ether;
+        uint256 operationReward = operationRewardsPerEpoch / 4;
+
+        // distributeRewards
+        for (uint256 i = 1; i <= 10; i++) {
+            // stake
+            _staking.stake{value: stakeAmount * 2}(alice);
+            _staking.stake{value: stakeAmount * 2}(bob);
+            _staking.stake{value: stakeAmount * 2}(carol);
+            _staking.stake{value: stakeAmount * 2}(dave);
+
+            skip(18 hours);
+
+            uint256 balanceBefore = address(_staking).balance;
+
+            vm.startPrank(oracleAccount);
+            _settlement.distributeRewards{value: requestFee * 4}(
+                i,
+                array(alice, bob), // node addresses
+                array(requestFee, requestFee), // request fees
+                array(operationReward, operationReward), // operation rewards
+                false
+            );
+            _settlement.distributeRewards{value: requestFee * 4}(
+                i,
+                array(carol, dave), // node addresses
+                array(requestFee, requestFee), // request fees
+                array(operationReward, operationReward), // operation rewards
+                true
+            );
+            vm.stopPrank();
+
+            // check balance
+            uint256 balanceAfter = address(_staking).balance;
+            uint256 delta = balanceAfter - balanceBefore;
+            assertEq(
+                delta,
+                (operationRewardsPerEpoch + totalStakingRewardsPerEpoch) + requestFee * 4,
+                "check balance failed"
+            );
+        }
     }
 
     function testDistributeRewardsFailSubmissionIntervalNotElapsed() public {
