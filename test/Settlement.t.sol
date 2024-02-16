@@ -22,6 +22,11 @@ contract SettlementTest is CommonTest, IErrors {
         vm.deal(oracleAccount, 30000000 ether);
     }
 
+    function invariantTreasuryBalance() public {
+        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
+        assertTrue(address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens >= 0);
+    }
+
     function testCheckSetupStatus() public {
         assertEq(_settlement.stakingContract(), address(_staking));
         assertEq(_settlement.currentEpoch(), 0);
