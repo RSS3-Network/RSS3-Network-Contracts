@@ -154,7 +154,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function deleteNode() external override {
+    function deleteNode() external override whenNotPaused {
         address addr = msg.sender;
         DataTypes.Node storage node = _nodes[addr];
         if (address(0) == node.account) revert NodeNotExists();
@@ -196,7 +196,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override {
+    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override whenNotPaused {
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
         DataTypes.Node storage node = _nodes[msg.sender];
@@ -266,7 +266,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
         uint256 publicPoolReward
-    ) external payable override onlyRole(ORACLE_ROLE) {
+    ) external payable override whenNotPaused onlyRole(ORACLE_ROLE) {
         if (
             nodeAddrs.length != requestFees.length ||
             nodeAddrs.length != operationRewards.length ||
@@ -320,7 +320,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function slashNodes(address[] calldata nodeAddrs) external override whenNotSettlementPhase onlyRole(ORACLE_ROLE) {
+    function slashNodes(
+        address[] calldata nodeAddrs
+    ) external override whenNotPaused whenNotSettlementPhase onlyRole(ORACLE_ROLE) {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) revert NodeNotExists();
@@ -340,7 +342,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function setSettlementPhase(bool enabled) external override onlyRole(ORACLE_ROLE) {
+    function setSettlementPhase(bool enabled) external override whenNotPaused onlyRole(ORACLE_ROLE) {
         _isSettlementPhase = enabled;
     }
 
