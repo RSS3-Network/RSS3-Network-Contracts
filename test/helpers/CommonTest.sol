@@ -5,7 +5,6 @@ pragma solidity 0.8.20;
 import {Utils} from "./Utils.sol";
 import {DataTypes} from "../../src/libraries/DataTypes.sol";
 import {Staking} from "../../src/Staking.sol";
-// import {SVGGenerator} from "../../src/SVGGenerator.sol";
 import {Chips} from "../../src/Chips.sol";
 import {Settlement} from "../../src/Settlement.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";

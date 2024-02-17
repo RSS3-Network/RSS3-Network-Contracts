@@ -70,7 +70,8 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         uint256 epoch,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
-        uint256[] calldata operationRewards
+        uint256[] calldata operationRewards,
+        bool isFinal
     ) external payable override onlyRole(ORACLE_ROLE) {
         if (nodeAddrs.length != requestFees.length || nodeAddrs.length != operationRewards.length) {
             revert InvalidArrayLength();
@@ -103,13 +104,20 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
             // save totalStaking for current epoch
             (, _totalStakings[_currentEpoch]) = IStaking(_staking).getPoolInfo();
+
+            // start of the settlement, set settlement phase to true
+            IStaking(_staking).setSettlementPhase(true);
         }
 
-        uint256[] memory stakingRewards = _getStakingRewards(nodeAddrs);
-        _checkRewards(epoch, nodeAddrs, operationRewards, stakingRewards);
+        // settlement phase
+        IStaking(_staking).setSettlementPhase(!isFinal);
 
+        _checkRewards(epoch, nodeAddrs, operationRewards);
+
+        uint256[3] memory epochInfo = [epoch, _startTimestamp, _endTimestamp];
+        uint256[] memory stakingRewards = _getStakingRewards(nodeAddrs);
         IStaking(_staking).distributeRewards{value: amountToSend}(
-            [epoch, _startTimestamp, _endTimestamp],
+            epochInfo,
             nodeAddrs,
             requestFees,
             operationRewards,
@@ -133,27 +141,18 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch
-    function _checkRewards(
-        uint256 epoch,
-        address[] memory nodeAddrs,
-        uint256[] memory operationRewards,
-        uint256[] memory stakingRewards
-    ) internal {
-        uint256 distributedOperationRewards = _distributedOperationRewards[_currentEpoch];
-        uint256 distributedStakingRewards = _distributedStakingRewards[_currentEpoch];
+    function _checkRewards(uint256 epoch, address[] memory nodeAddrs, uint256[] memory operationRewards) internal {
+        uint256 distributedOperationRewards = _distributedOperationRewards[epoch];
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             if (_isRewarded(epoch, nodeAddrs[i])) revert RewardsAlreadyDistributed(nodeAddrs[i]);
             _rewardedAddresses[epoch][nodeAddrs[i]] = true;
 
             distributedOperationRewards += operationRewards[i];
-            distributedStakingRewards += stakingRewards[i];
         }
 
         if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardsExceed();
-        if (distributedStakingRewards > _totalStakingRewardsPerEpoch) revert StakingRewardsExceed();
 
-        _distributedOperationRewards[_currentEpoch] = distributedOperationRewards;
-        _distributedStakingRewards[_currentEpoch] = distributedStakingRewards;
+        _distributedOperationRewards[epoch] = distributedOperationRewards;
     }
 
     /// @dev Returns staking rewards per epoch for public pool

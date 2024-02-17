@@ -149,9 +149,23 @@ interface IStaking {
     function slashNodes(address[] calldata nodeAddrs) external;
 
     /**
+     * @notice Sets the settlement phase.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param enabled Enable/disable the settlement phase.
+     */
+    function setSettlementPhase(bool enabled) external;
+
+    /**
      * @notice Withdraws tokens from staking contract to treasury.
      */
     function withdraw2Treasury() external;
+
+    /**
+     * @notice Returns whether the current time is in settlement phase.
+     * @return bool Whether the current time is in settlement phase.
+     */
+    function isSettlementPhase() external view returns (bool);
 
     /**
      * @notice Returns the pending withdrawal request by `requestId`.
