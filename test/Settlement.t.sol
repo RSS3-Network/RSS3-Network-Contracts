@@ -9,6 +9,8 @@ import {IErrors} from "../src/interfaces/IErrors.sol";
 contract SettlementTest is CommonTest, IErrors {
     event Transfer(address indexed from, address indexed to, uint256 value);
 
+    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
+
     receive() external payable {}
 
     function setUp() public {
@@ -32,6 +34,36 @@ contract SettlementTest is CommonTest, IErrors {
         assertEq(_settlement.currentEpoch(), 0);
         assertEq(_settlement.EPOCH_DURATION(), 18 hours);
         assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
+    }
+
+    function testUpdateRewardsRatio(uint256 operationRewardsPercent) public {
+        vm.assume(operationRewardsPercent >= 0 && operationRewardsPercent <= 100);
+
+        vm.prank(oracleAccount);
+        _settlement.updateRewardsRatio(operationRewardsPercent);
+
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+
+        uint256 expectedOperationRewardsPerEpoch = (_settlement.TOTAL_REWARDS_PER_YEAR() *
+            _settlement.EPOCH_DURATION() *
+            operationRewardsPercent) / (100 * 365 days);
+        uint256 expectedStakingRewardsPerEpoch = (_settlement.TOTAL_REWARDS_PER_YEAR() *
+            _settlement.EPOCH_DURATION() *
+            (100 - operationRewardsPercent)) / (100 * 365 days);
+
+        assertEq(operationRewardsPerEpoch, expectedOperationRewardsPerEpoch);
+        assertEq(totalStakingRewardsPerEpoch, expectedStakingRewardsPerEpoch);
+    }
+
+    function testUpdateRewardsRatioFail() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                address(this),
+                0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1
+            )
+        );
+        _settlement.updateRewardsRatio(1);
     }
 
     function testDistributeRewards() public {

@@ -15,6 +15,7 @@ contract DeployConfig is Script {
 
     uint256 public chainID;
     address public proxyAdminOwner;
+    address public admin;
     address public pauseAccount;
     address public oracleAccount;
     uint256 public depositUnbondingPeriod;
@@ -42,6 +43,7 @@ contract DeployConfig is Script {
 
         chainID = stdJson.readUint(_json, "$.chainID");
         proxyAdminOwner = stdJson.readAddress(_json, "$.proxyAdminOwner");
+        admin = stdJson.readAddress(_json, "$.admin");
         pauseAccount = stdJson.readAddress(_json, "$.pauseAccount");
         oracleAccount = stdJson.readAddress(_json, "$.oracleAccount");
         depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
