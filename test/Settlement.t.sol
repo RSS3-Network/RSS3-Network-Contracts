@@ -66,6 +66,42 @@ contract SettlementTest is CommonTest, IErrors {
         _settlement.updateRewardsRatio(1);
     }
 
+    function testSetTaxRateBasisPoints4PublicPool() public {
+        vm.prank(alice);
+        _staking.createNode("alice", "alice", _defaultTaxRateBasisPoints, false);
+
+        vm.prank(bob);
+        _staking.createNode("bob", "bob", _defaultTaxRateBasisPoints * 2, false);
+
+        vm.prank(carol);
+        _staking.createNode("carol", "carol", _defaultTaxRateBasisPoints * 3, false);
+
+        vm.prank(dave);
+        _staking.createNode("dave", "dave", _defaultTaxRateBasisPoints * 4, false);
+
+        vm.prank(oracleAccount);
+        _settlement.setTaxRateBasisPoints4PublicPool(array(alice, bob, carol, dave));
+
+        assertEq(_staking.getPublicPool().taxRateBasisPoints, (_defaultTaxRateBasisPoints * 10) / 4);
+    }
+
+    function testSetTaxRateBasisPoints4PublicPoolFail() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                address(this),
+                0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1
+            )
+        );
+        _settlement.setTaxRateBasisPoints4PublicPool(array(alice, bob, carol, dave));
+
+        address[] memory emptyArray;
+
+        vm.expectRevert(abi.encodeWithSelector(EmptyNodeList.selector));
+        vm.prank(oracleAccount);
+        _settlement.setTaxRateBasisPoints4PublicPool(emptyArray);
+    }
+
     function testDistributeRewards() public {
         uint256 depositAmount = 10000 ether;
         uint256 stakeAmount = 10000 ether;
@@ -265,6 +301,28 @@ contract SettlementTest is CommonTest, IErrors {
                 "check balance failed"
             );
         }
+    }
+
+    function testDistributeRewardsFailInvalidArrayLength() public {
+        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
+        vm.prank(oracleAccount);
+        _settlement.distributeRewards(
+            1,
+            array(alice), // node addresses
+            array(1, 1), // request fees
+            array(100), // operation rewards
+            false
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
+        vm.prank(oracleAccount);
+        _settlement.distributeRewards(
+            1,
+            array(alice), // node addresses
+            array(1), // request fees
+            array(100, 100), // operation rewards
+            false
+        );
     }
 
     function testDistributeRewardsFailSubmissionIntervalNotElapsed() public {
