@@ -360,9 +360,20 @@ contract SettlementTest is CommonTest, IErrors {
 
         skip(18 hours);
 
-        vm.expectRevert(abi.encodeWithSelector(InvalidEpochNumber.selector));
+        // case 1, epoch number is less than current epoch
+        vm.expectRevert(abi.encodeWithSelector(InvalidEpochNumber.selector, 1, 0));
         _settlement.distributeRewards(
             0,
+            array(alice), // node addresses
+            array(1 ether), // request fees
+            array(100), // operation rewards
+            false
+        );
+
+        // case 2, epoch number is greater than current epoch + 1
+        vm.expectRevert(abi.encodeWithSelector(InvalidEpochNumber.selector, 1, 3));
+        _settlement.distributeRewards(
+            3,
             array(alice), // node addresses
             array(1 ether), // request fees
             array(100), // operation rewards

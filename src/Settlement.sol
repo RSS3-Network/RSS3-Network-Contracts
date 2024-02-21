@@ -82,8 +82,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         }
 
         // check epoch number
-        if (epoch < _currentEpoch) {
-            revert InvalidEpochNumber();
+        // epoch number must be the current epoch or the next epoch
+        if (epoch < _currentEpoch || epoch > _currentEpoch + 1) {
+            revert InvalidEpochNumber(_currentEpoch, epoch);
         }
 
         // check requestFees
