@@ -22,7 +22,7 @@ interface IErrors {
     error InvalidArrayLength();
 
     /// @dev Invalid epoch number.
-    error InvalidEpochNumber();
+    error InvalidEpochNumber(uint256 current, uint256 got);
 
     /// @dev Submission interval has not elapsed.
     error SubmissionIntervalNotElapsed();
