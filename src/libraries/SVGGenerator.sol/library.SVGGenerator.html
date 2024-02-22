@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="svggenerator"><a class="header" href="#svggenerator">SVGGenerator</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/e3e5f2692914398c8384d52d3166e9727e615e9c/src/libraries/SVGGenerator.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/126d34254e9d1e66498cfc0505b243594984fb82/src/libraries/SVGGenerator.sol">Git Source</a></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
 <h3 id="basesvghead"><a class="header" href="#basesvghead">baseSVGHead</a></h3>
 <pre><code class="language-solidity">string public constant baseSVGHead =
@@ -202,27 +202,39 @@
 <h3 id="color5"><a class="header" href="#color5">color5</a></h3>
 <pre><code class="language-solidity">string public constant color5 = "#31C040";
 </code></pre>
-<h3 id="baseheadssvgs1"><a class="header" href="#baseheadssvgs1">baseHeadsSVGs1</a></h3>
-<pre><code class="language-solidity">string public constant baseHeadsSVGs1 =
+<h3 id="headshapesvgs1"><a class="header" href="#headshapesvgs1">headShapeSVGs1</a></h3>
+<pre><code class="language-solidity">string public constant headShapeSVGs1 =
     '&lt;polygon class="st-base-head" points="72,48 72,64 70,64 70,66 68,66 68,68 64,68 64,70 60,70 60,72 40,72 40,70 36,70 36,68 32,68 32,66   30,66 30,64 28,64 28,48 30,48 30,46 32,46 32,44 68,44 68,46 70,46 70,48 "/&gt;';
 </code></pre>
-<h3 id="baseheadssvgs2"><a class="header" href="#baseheadssvgs2">baseHeadsSVGs2</a></h3>
-<pre><code class="language-solidity">string public constant baseHeadsSVGs2 =
+<h3 id="headshapesvgs2"><a class="header" href="#headshapesvgs2">headShapeSVGs2</a></h3>
+<pre><code class="language-solidity">string public constant headShapeSVGs2 =
     '&lt;polygon class="st-base-head" points="72,44 72,68 70,68 70,70 68,70 68,72 32,72 32,70 30,70 30,68 28,68 28,44 "/&gt;';
 </code></pre>
-<h3 id="baseheadssvgs3"><a class="header" href="#baseheadssvgs3">baseHeadsSVGs3</a></h3>
-<pre><code class="language-solidity">string public constant baseHeadsSVGs3 =
+<h3 id="headshapesvgs3"><a class="header" href="#headshapesvgs3">headShapeSVGs3</a></h3>
+<pre><code class="language-solidity">string public constant headShapeSVGs3 =
     '&lt;polygon class="st-base-head" points="72,46 72,64 70,64 70,66 68,66 68,68 66,68 66,70 64,70 64,72 36,72 36,70 34,70 34,68 32,68 32,66   30,66 30,64 28,64 28,46 30,46 30,44 70,44 70,46 "/&gt;';
 </code></pre>
+<h3 id="headshapetrait1"><a class="header" href="#headshapetrait1">headShapeTrait1</a></h3>
+<pre><code class="language-solidity">string public constant headShapeTrait1 = "round";
+</code></pre>
+<h3 id="headshapetrait2"><a class="header" href="#headshapetrait2">headShapeTrait2</a></h3>
+<pre><code class="language-solidity">string public constant headShapeTrait2 = "square";
+</code></pre>
+<h3 id="headshapetrait3"><a class="header" href="#headshapetrait3">headShapeTrait3</a></h3>
+<pre><code class="language-solidity">string public constant headShapeTrait3 = "default";
+</code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
-<h3 id="generatesvg"><a class="header" href="#generatesvg">generateSVG</a></h3>
-<pre><code class="language-solidity">function generateSVG(DataTypes.NodeTraits memory nodeTraits, DataTypes.ChipTraits memory chipTraits)
+<h3 id="generatesvgandattributes"><a class="header" href="#generatesvgandattributes">generateSVGAndAttributes</a></h3>
+<pre><code class="language-solidity">function generateSVGAndAttributes(DataTypes.NodeTraits memory nodeTraits, DataTypes.ChipTraits memory chipTraits)
     external
     pure
-    returns (string memory);
+    returns (string memory, string memory);
 </code></pre>
-<h3 id="getchiptraitsinnersvg"><a class="header" href="#getchiptraitsinnersvg">getChipTraitsInnerSVG</a></h3>
-<pre><code class="language-solidity">function getChipTraitsInnerSVG(DataTypes.ChipTraits memory chipTraits) internal pure returns (string memory);
+<h3 id="getchiptraitsinnersvgandattributes"><a class="header" href="#getchiptraitsinnersvgandattributes">getChipTraitsInnerSVGAndAttributes</a></h3>
+<pre><code class="language-solidity">function getChipTraitsInnerSVGAndAttributes(DataTypes.ChipTraits memory chipTraits)
+    internal
+    pure
+    returns (string memory, string memory);
 </code></pre>
 <h3 id="getsvgstyle"><a class="header" href="#getsvgstyle">getSVGStyle</a></h3>
 <pre><code class="language-solidity">function getSVGStyle(uint8 frameColor, uint8 chipDetailColor, uint8 headShapeColor, uint8 headDetailColor)
