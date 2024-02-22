@@ -192,9 +192,9 @@ library ChipDetail7 {
         '<rect class="cd" height="2" transform="matrix(1 -8.74228e-08 -8.74228e-08 -1 84 52)" width="2"/>'
         '<rect class="cd" height="2" transform="matrix(1 -8.74228e-08 -8.74228e-08 -1 84 50)" width="2"/>';
 
-    function getChipDetail(uint256 id) external pure returns (string memory) {
+    function getChipDetail(uint256 id) external pure returns (string memory, string memory) {
         if (id == 6) {
-            return chipDetailSVGs7;
+            return (chipDetailSVGs7, "Detail 7");
         } else {
             revert IErrors.InvalidTraitId(id);
         }

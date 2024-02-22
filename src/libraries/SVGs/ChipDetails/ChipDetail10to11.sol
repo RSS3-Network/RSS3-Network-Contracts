@@ -262,11 +262,11 @@ library ChipDetail10to11 {
         '<rect class="cd" height="2" transform="matrix(-1 -8.74228e-08 -8.74228e-08 1 26 82)" width="6"/>'
         '<rect class="cd" height="2" transform="matrix(-4.37114e-08 1 1 4.37114e-08 16 74)" width="6"/>';
 
-    function getChipDetail(uint256 id) external pure returns (string memory) {
+    function getChipDetail(uint256 id) external pure returns (string memory, string memory) {
         if (id == 9) {
-            return chipDetailSVGs10;
+            return (chipDetailSVGs10, "Detail 10");
         } else if (id == 10) {
-            return chipDetailSVGs11;
+            return (chipDetailSVGs11, "Detail 11");
         } else {
             revert IErrors.InvalidTraitId(id);
         }

@@ -252,7 +252,27 @@ library Mouths {
         '<rect fill="black" height="2" transform="rotate(90 51 60)" width="7" x="51" y="60"/>'
         '<rect fill="black" height="2" width="12" x="44" y="65"/>';
 
-    function getMouth(uint256 id) external pure returns (string memory) {
+    string public constant mouthTraits1 = "Grimace";
+    string public constant mouthTraits2 = "Scared";
+    string public constant mouthTraits3 = "Smirk";
+    string public constant mouthTraits4 = "Toothless";
+    string public constant mouthTraits5 = "Small Smile";
+    string public constant mouthTraits6 = "Cheeky";
+    string public constant mouthTraits7 = "Surprised";
+    string public constant mouthTraits8 = "Skull";
+    string public constant mouthTraits9 = "Tongue Out";
+    string public constant mouthTraits10 = "Big Smile";
+    string public constant mouthTraits11 = "Crumpled";
+    string public constant mouthTraits12 = "Fangs";
+    string public constant mouthTraits13 = "Beard";
+    string public constant mouthTraits14 = "Suave";
+    string public constant mouthTraits15 = "Big Tongue Out";
+    string public constant mouthTraits16 = "Pig Nose";
+    string public constant mouthTraits17 = "Grinding";
+    string public constant mouthTraits18 = "Moustache";
+    string public constant mouthTraits19 = "Buck Teeth";
+
+    function getMouth(uint256 id) external pure returns (string memory, string memory) {
         string[19] memory res = [
             mouthsSVGs1,
             mouthsSVGs2,
@@ -275,6 +295,28 @@ library Mouths {
             mouthsSVGs19
         ];
 
-        return res[id % 9];
+        string[19] memory mouthTraits = [
+            mouthTraits1,
+            mouthTraits2,
+            mouthTraits3,
+            mouthTraits4,
+            mouthTraits5,
+            mouthTraits6,
+            mouthTraits7,
+            mouthTraits8,
+            mouthTraits9,
+            mouthTraits10,
+            mouthTraits11,
+            mouthTraits12,
+            mouthTraits13,
+            mouthTraits14,
+            mouthTraits15,
+            mouthTraits16,
+            mouthTraits17,
+            mouthTraits18,
+            mouthTraits19
+        ];
+
+        return (res[id % 9], mouthTraits[id % 9]);
     }
 }

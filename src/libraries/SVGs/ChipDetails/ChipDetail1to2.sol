@@ -267,11 +267,11 @@ library ChipDetail1to2 {
         '<rect class="cd" height="2" transform="rotate(90 20 14)" width="6" x="20" y="14"/>'
         '<rect class="cd" height="2" transform="rotate(90 16 14)" width="6" x="16" y="14"/>';
 
-    function getChipDetail(uint256 id) external pure returns (string memory) {
+    function getChipDetail(uint256 id) external pure returns (string memory, string memory) {
         if (id == 0) {
-            return chipDetailSVGs1;
+            return (chipDetailSVGs1, "Detail 1");
         } else if (id == 1) {
-            return chipDetailSVGs2;
+            return (chipDetailSVGs2, "Detail 2");
         } else {
             revert IErrors.InvalidTraitId(id);
         }

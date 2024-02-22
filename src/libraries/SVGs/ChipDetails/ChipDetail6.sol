@@ -275,9 +275,9 @@ library ChipDetail6 {
         '<rect class="cd" height="2" transform="rotate(-180 86 20)" width="2" x="86" y="20"/>'
         '<rect class="cd" height="2" transform="rotate(-180 84 22)" width="2" x="84" y="22"/>';
 
-    function getChipDetail(uint256 id) external pure returns (string memory) {
+    function getChipDetail(uint256 id) external pure returns (string memory, string memory) {
         if (id == 5) {
-            return chipDetailSVGs6;
+            return (chipDetailSVGs6, "Detail 6");
         } else {
             revert IErrors.InvalidTraitId(id);
         }

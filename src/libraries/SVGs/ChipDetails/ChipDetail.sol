@@ -11,7 +11,7 @@ import {ChipDetail8to9} from "./ChipDetail8to9.sol";
 import {ChipDetail10to11} from "./ChipDetail10to11.sol";
 
 library ChipDetail {
-    function getChipDetail(uint256 id) external pure returns (string memory) {
+    function getChipDetail(uint256 id) external pure returns (string memory, string memory) {
         uint256 idx = id % 11;
         if (idx < 2) {
             return ChipDetail1to2.getChipDetail(idx);

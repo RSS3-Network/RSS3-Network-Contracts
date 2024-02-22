@@ -84,14 +84,22 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         DataTypes.NodeTraits memory nodeTraits;
         DataTypes.ChipTraits memory chipTraits;
         (nodeTraits, chipTraits) = _generateChipImage(id);
+
+        (string memory imageSVG, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
+            nodeTraits,
+            chipTraits
+        );
+
         string memory json = string.concat(
             '{"name": "Chip #',
             id.toString(),
             '", "description": "Chip is a unique NFT that represents a node in the network. '
             "It is generated based on the node's address and token ID.",
             '","image":"data:image/svg+xml;base64,',
-            Base64.encode(bytes(_generateSVGImage(nodeTraits, chipTraits))),
-            '"}'
+            Base64.encode(bytes(imageSVG)),
+            '", "attributes": [',
+            attributes,
+            "]}"
         );
 
         return string.concat("data:application/json;base64,", Base64.encode(bytes(string.concat(json))));
@@ -188,14 +196,6 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         });
 
         return chipTraits;
-    }
-
-    function _generateSVGImage(
-        DataTypes.NodeTraits memory nodeTraits,
-        DataTypes.ChipTraits memory chipTraits
-    ) internal pure returns (string memory) {
-        // ISVGGenerator svgGenerator = ISVGGenerator(_svgGenerator);
-        return SVGGenerator.generateSVG(nodeTraits, chipTraits);
     }
 
     function _calTraitId(uint256 traitId, uint8 traitCount, uint256 divisionFactor) internal pure returns (uint8) {

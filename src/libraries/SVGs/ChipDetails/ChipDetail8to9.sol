@@ -300,11 +300,11 @@ library ChipDetail8to9 {
         '<rect class="cd" height="4" transform="matrix(-1 -8.74228e-08 -8.74228e-08 1 84 38)" width="2"/>'
         '<rect class="cd" height="4" transform="matrix(1.31134e-07 -1 -1 -1.31134e-07 62 18)" width="2"/>';
 
-    function getChipDetail(uint256 id) external pure returns (string memory) {
+    function getChipDetail(uint256 id) external pure returns (string memory, string memory) {
         if (id == 7) {
-            return chipDetailSVGs8;
+            return (chipDetailSVGs8, "Detail 8");
         } else if (id == 8) {
-            return chipDetailSVGs9;
+            return (chipDetailSVGs9, "Detail 9");
         } else {
             revert IErrors.InvalidTraitId(id);
         }

@@ -119,9 +119,9 @@ library ChipDetail5 {
         '<rect class="cd" height="2" transform="rotate(180 58 18)" width="7" x="58" y="18"/>'
         '<rect class="cd" height="2" transform="rotate(180 78 28)" width="2" x="78" y="28"/>';
 
-    function getChipDetail(uint256 id) external pure returns (string memory) {
+    function getChipDetail(uint256 id) external pure returns (string memory, string memory) {
         if (id == 4) {
-            return chipDetailSVGs5;
+            return (chipDetailSVGs5, "Detail 5");
         } else {
             revert IErrors.InvalidTraitId(id);
         }

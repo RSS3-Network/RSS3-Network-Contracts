@@ -50,7 +50,17 @@ library Frame {
         '<path class="st-frames" d="M12,16v68h-2V16H12z M6,84v-4h2v4H6z M6,78v-2h2v2H6z M6,74v-6h2v6H6z M6,62v-6h2v6H6z M6,54v-3h2v3H6z M6,49  v-3h2v3H6z M6,66v-2h2v2H6z M6,44v-6h2v6H6z M6,36v-2h2v2H6z M6,32v-6h2v6H6z M6,20v-4h2v4H6z M6,24v-2h2v2H6z"/>'
         '<path class="st-frames" d="M90,16v68h-2V16H90z M92,84v-4h2v4H92z M92,78v-2h2v2H92z M92,74v-6h2v6H92z M92,62v-6h2v6H92z M92,54v-3h2v3  H92z M92,49v-3h2v3H92z M92,66v-2h2v2H92z M92,44v-6h2v6H92z M92,36v-2h2v2H92z M92,32v-6h2v6H92z M92,20v-4h2v4H92z M92,24v-2h2v2  H92z"/>';
 
-    function getFrame(uint256 id) external pure returns (string memory) {
+    string public constant frameTraits1 = "Frame 1";
+    string public constant frameTraits2 = "Frame 2";
+    string public constant frameTraits3 = "Frame 3";
+    string public constant frameTraits4 = "Frame 4";
+    string public constant frameTraits5 = "Frame 5";
+    string public constant frameTraits6 = "Frame 6";
+    string public constant frameTraits7 = "Frame 7";
+    string public constant frameTraits8 = "Frame 8";
+    string public constant frameTraits9 = "Frame 9";
+
+    function getFrame(uint256 id) external pure returns (string memory, string memory) {
         string[9] memory frameSVGs = [
             frameSVGs1,
             frameSVGs2,
@@ -63,7 +73,19 @@ library Frame {
             frameSVGs9
         ];
 
+        string[9] memory frameTraits = [
+            frameTraits1,
+            frameTraits2,
+            frameTraits3,
+            frameTraits4,
+            frameTraits5,
+            frameTraits6,
+            frameTraits7,
+            frameTraits8,
+            frameTraits9
+        ];
+
         uint256 idx = id % 9;
-        return frameSVGs[idx];
+        return (frameSVGs[idx], frameTraits[idx]);
     }
 }

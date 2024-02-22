@@ -69,7 +69,24 @@ library Head {
         '<rect class="st-head" height="2" width="2" x="22" y="38"/>'
         '<rect class="st-head" height="2" width="2" x="76" y="38"/>';
 
-    function getHead(uint256 id) external pure returns (string memory) {
+    string public constant headTraits1 = "Magic Hat";
+    string public constant headTraits2 = "Round Ears";
+    string public constant headTraits3 = "Beanie";
+    string public constant headTraits4 = "Brains";
+    string public constant headTraits5 = "Rabbit Ears";
+    string public constant headTraits6 = "Antenna";
+    string public constant headTraits7 = "Bowler Hat";
+    string public constant headTraits8 = "Tall Ears";
+    string public constant headTraits9 = "Hat";
+    string public constant headTraits10 = "Mushroom";
+    string public constant headTraits11 = "Crown";
+    string public constant headTraits12 = "Viking";
+    string public constant headTraits13 = "Beret";
+    string public constant headTraits14 = "Cowboy Hat";
+    string public constant headTraits15 = "Cyclops";
+    string public constant headTraits16 = "Top Hat";
+
+    function getHead(uint256 id) external pure returns (string memory, string memory) {
         string[16] memory res = [
             headSVGs1,
             headSVGs2,
@@ -88,6 +105,25 @@ library Head {
             headSVGs15,
             headSVGs16
         ];
-        return res[id % 16];
+
+        string[16] memory headTraits = [
+            headTraits1,
+            headTraits2,
+            headTraits3,
+            headTraits4,
+            headTraits5,
+            headTraits6,
+            headTraits7,
+            headTraits8,
+            headTraits9,
+            headTraits10,
+            headTraits11,
+            headTraits12,
+            headTraits13,
+            headTraits14,
+            headTraits15,
+            headTraits16
+        ];
+        return (res[id % 16], headTraits[id % 16]);
     }
 }

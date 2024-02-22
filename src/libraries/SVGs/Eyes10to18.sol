@@ -194,8 +194,17 @@ library Eyes10to18 {
         '<rect fill="black" height="0.5" transform="matrix(-2.40413e-07 1 1 5.68248e-07 62 49)" width="2"/>'
         '<rect fill="black" height="0.5" transform="matrix(-2.40413e-07 1 1 5.68248e-07 62.5 49)" width="2"/>'
         '<rect fill="black" height="1" transform="matrix(-2.40413e-07 1 1 5.68248e-07 63 49)" width="2"/>';
+    string public constant eyesTraits10 = "Googly";
+    string public constant eyesTraits11 = "Suspicious";
+    string public constant eyesTraits12 = "Thief Mask";
+    string public constant eyesTraits13 = "XX";
+    string public constant eyesTraits14 = "Sunglasses";
+    string public constant eyesTraits15 = "Third Eye";
+    string public constant eyesTraits16 = "Lizard";
+    string public constant eyesTraits17 = "Dead";
+    string public constant eyesTraits18 = "Wink";
 
-    function getEyes(uint256 id) public pure returns (string memory) {
+    function getEyes(uint256 id) public pure returns (string memory, string memory) {
         string[9] memory eyesSVGs = [
             eyesSVGs10,
             eyesSVGs11,
@@ -208,8 +217,20 @@ library Eyes10to18 {
             eyesSVGs18
         ];
 
+        string[9] memory eyesTraits = [
+            eyesTraits10,
+            eyesTraits11,
+            eyesTraits12,
+            eyesTraits13,
+            eyesTraits14,
+            eyesTraits15,
+            eyesTraits16,
+            eyesTraits17,
+            eyesTraits18
+        ];
+
         if (id < 18 && id >= 9) {
-            return eyesSVGs[id - 9];
+            return (eyesSVGs[id - 9], eyesTraits[id - 9]);
         } else {
             revert IErrors.InvalidTraitId(id);
         }

@@ -205,11 +205,11 @@ library ChipDetail3to4 {
         '<rect class="cd" height="2" transform="rotate(-180 18 30)" width="2" x="18" y="30"/>'
         '<rect class="cd" height="2" transform="rotate(-180 22 30)" width="2" x="22" y="30"/>';
 
-    function getChipDetail(uint256 id) external pure returns (string memory) {
+    function getChipDetail(uint256 id) external pure returns (string memory, string memory) {
         if (id == 2) {
-            return chipDetailSVGs3;
+            return (chipDetailSVGs3, "Detail 3");
         } else if (id == 3) {
-            return chipDetailSVGs4;
+            return (chipDetailSVGs4, "Detail 4");
         } else {
             revert IErrors.InvalidTraitId(id);
         }

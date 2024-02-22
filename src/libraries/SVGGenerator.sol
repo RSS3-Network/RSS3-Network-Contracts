@@ -22,17 +22,21 @@ library SVGGenerator {
     string public constant color4 = "#FFD600";
     string public constant color5 = "#31C040";
 
-    string public constant baseHeadsSVGs1 =
+    string public constant headShapeSVGs1 =
         '<polygon class="st-base-head" points="72,48 72,64 70,64 70,66 68,66 68,68 64,68 64,70 60,70 60,72 40,72 40,70 36,70 36,68 32,68 32,66   30,66 30,64 28,64 28,48 30,48 30,46 32,46 32,44 68,44 68,46 70,46 70,48 "/>';
-    string public constant baseHeadsSVGs2 =
+    string public constant headShapeSVGs2 =
         '<polygon class="st-base-head" points="72,44 72,68 70,68 70,70 68,70 68,72 32,72 32,70 30,70 30,68 28,68 28,44 "/>';
-    string public constant baseHeadsSVGs3 =
+    string public constant headShapeSVGs3 =
         '<polygon class="st-base-head" points="72,46 72,64 70,64 70,66 68,66 68,68 66,68 66,70 64,70 64,72 36,72 36,70 34,70 34,68 32,68 32,66   30,66 30,64 28,64 28,46 30,46 30,44 70,44 70,46 "/>';
 
-    function generateSVG(
+    string public constant headShapeTrait1 = "round";
+    string public constant headShapeTrait2 = "square";
+    string public constant headShapeTrait3 = "default";
+
+    function generateSVGAndAttributes(
         DataTypes.NodeTraits memory nodeTraits,
         DataTypes.ChipTraits memory chipTraits
-    ) external pure returns (string memory) {
+    ) external pure returns (string memory, string memory) {
         string memory styleSVG = getSVGStyle(
             nodeTraits.frameColor,
             nodeTraits.chipDetailColor,
@@ -41,36 +45,64 @@ library SVGGenerator {
         );
 
         string memory corner = nodeTraits.pgCorner ? Corners.pgSVG : Corners.alphaSVG;
+        string memory cornerTrait = nodeTraits.pgCorner ? "Public Good Node" : "Alpha Node";
+        (string memory frameSVGs, string memory frameTrait) = Frame.getFrame(nodeTraits.frameId);
+        (string memory chipSVGs, string memory chipTrait) = ChipDetail.getChipDetail(nodeTraits.chipDetailId);
 
         string memory innerSVG1 = string(
             abi.encodePacked(
                 baseSVGHead,
                 styleSVG,
-                Frame.getFrame(nodeTraits.frameId),
-                ChipDetail.getChipDetail(nodeTraits.chipDetailId),
+                frameSVGs,
+                chipSVGs,
                 // chipDetailSVGs[nodeTraits.chipDetailId % chipDetailSVGs.length], chipCorner
                 corner
             )
         );
 
-        string memory innerSVG2 = getChipTraitsInnerSVG(chipTraits);
-
-        return string(abi.encodePacked(innerSVG1, innerSVG2));
-    }
-
-    function getChipTraitsInnerSVG(DataTypes.ChipTraits memory chipTraits) internal pure returns (string memory) {
-        string[3] memory baseHeadsSVGs = [baseHeadsSVGs1, baseHeadsSVGs2, baseHeadsSVGs3];
-
-        string memory innerSVG2 = string(
+        string memory attributes1 = string(
             abi.encodePacked(
-                baseHeadsSVGs[chipTraits.headShapeId % 3],
-                Eyes.getEyes(chipTraits.eyesId),
-                Mouths.getMouth(chipTraits.mouthId),
-                Head.getHead(chipTraits.headDetailId),
-                baseSVGTail
+                '{"trait_type": "Frame", "value": "',
+                frameTrait,
+                '"}, {"trait_type": "Chip Detail", "value": "',
+                chipTrait,
+                '"}, {"trait_type": "Corner", "value": "',
+                cornerTrait,
+                '"},'
             )
         );
-        return innerSVG2;
+
+        (string memory innerSVG2, string memory attributes2) = getChipTraitsInnerSVGAndAttributes(chipTraits);
+
+        return (string(abi.encodePacked(innerSVG1, innerSVG2)), string(abi.encodePacked(attributes1, attributes2)));
+    }
+
+    function getChipTraitsInnerSVGAndAttributes(
+        DataTypes.ChipTraits memory chipTraits
+    ) internal pure returns (string memory, string memory) {
+        string[3] memory headShapeSVGs = [headShapeSVGs1, headShapeSVGs2, headShapeSVGs3];
+        string[3] memory headShapeTraits = [headShapeTrait1, headShapeTrait2, headShapeTrait3];
+        string memory headShapeSVG = headShapeSVGs[chipTraits.headShapeId % 3];
+        string memory headShapeTrait = headShapeTraits[chipTraits.headShapeId % 3];
+        (string memory eyesSVG, string memory eyesTrait) = Eyes.getEyes(chipTraits.eyesId);
+        (string memory mouthSVG, string memory mouthTrait) = Mouths.getMouth(chipTraits.mouthId);
+        (string memory headSVG, string memory headTraits) = Head.getHead(chipTraits.headDetailId);
+
+        string memory innerSVG2 = string(abi.encodePacked(headShapeSVG, eyesSVG, mouthSVG, headSVG, baseSVGTail));
+        string memory attributes = string(
+            abi.encodePacked(
+                '{"trait_type": "Head Shape", "value": "',
+                headShapeTrait,
+                '"}, {"trait_type": "Eyes", "value": "',
+                eyesTrait,
+                '"}, {"trait_type": "Mouth", "value": "',
+                mouthTrait,
+                '"}, {"trait_type": "Head Detail", "value": "',
+                headTraits,
+                '"}'
+            )
+        );
+        return (innerSVG2, attributes);
     }
 
     function getSVGStyle(
