@@ -12,10 +12,18 @@ interface ISettlement {
      */
     function initialize(
         address staking,
+        address admin,
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
     ) external;
+
+    /**
+     * @notice Sets request bonus percentage.
+     * @param percent The percentage of the total rewards to be allocated to the request bonus.
+     * Others will be allocated to the staking rewards.
+     */
+    function updateRewardsRatio(uint256 percent) external;
 
     /**
      * @notice Updates accounting stats and distribute rewards.
@@ -24,12 +32,14 @@ interface ISettlement {
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param requestFees Amounts of request fees.
      * @param operationRewards Amounts of operation rewards.
+     @ @param isFinal Whether the call is the final one in the epoch.
      */
     function distributeRewards(
         uint256 epoch,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
-        uint256[] calldata operationRewards
+        uint256[] calldata operationRewards,
+        bool isFinal
     ) external payable;
 
     /**
@@ -40,13 +50,6 @@ interface ISettlement {
      * @param nodeAddrs The addresses of active nodes.
      */
     function setTaxRateBasisPoints4PublicPool(address[] calldata nodeAddrs) external;
-
-    /**
-     * @notice Sets request bonus percentage.
-     * @param percent The percentage of the total rewards to be allocated to the request bonus.
-     * Others will be allocated to the staking rewards.
-     */
-    function updateRewardsRatio(uint256 percent) external;
 
     /**
      * @notice Slashes nodes.

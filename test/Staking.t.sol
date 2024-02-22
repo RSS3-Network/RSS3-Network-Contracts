@@ -14,6 +14,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
+    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
+
     function setUp() public {
         _setUp();
 
@@ -37,7 +39,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(_staking.USER_SLASH_RATE_BASIS_POINTS(), userSlashRateBasisPoints);
         assertEq(_staking.STAKE_RATIO(), stakeRatio);
         assertEq(_staking.TREASURY(), treasury);
-        assertEq(_staking.SHARES_PER_CHIP(), 500 ether);
+        assertEq(_staking.SHARES_PER_CHIP(), 5000 ether);
 
         vm.mockCall(
             address(_staking),
@@ -179,7 +181,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _createNode(nodeAddr);
 
         vm.prank(alice);
-        _staking.stake{value: 1000 ether}(nodeAddr);
+        _staking.stake{value: 10000 ether}(nodeAddr);
 
         vm.expectRevert(abi.encodeWithSelector(NodeStakedOrDeposited.selector));
         vm.prank(nodeAddr);
@@ -305,6 +307,27 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.claimWithdrawal(requestIds);
 
         vm.stopPrank();
+    }
+
+    function testSetSettlementPhase() public {
+        vm.startPrank(oracleAccount);
+        _staking.setSettlementPhase(true);
+        assertEq(_staking.isSettlementPhase(), true);
+
+        _staking.setSettlementPhase(false);
+        assertEq(_staking.isSettlementPhase(), false);
+        vm.stopPrank();
+    }
+
+    function testSetSettlementPhaseFail() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                address(this),
+                0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1
+            )
+        );
+        _staking.setSettlementPhase(true);
     }
 
     function testSetTaxRate4Node(uint64 taxRateBasisPoints) public {
@@ -449,6 +472,26 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.stake{value: 400 ether}(alice);
     }
 
+    function testStakeFailInSettlementPhase() public {
+        _createNode(alice);
+
+        vm.prank(oracleAccount);
+        _staking.setSettlementPhase(true);
+
+        vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
+        _staking.stake{value: 10000 ether}(alice);
+    }
+
+    function testStakeToPublicPoolFailInSettlementPhase() public {
+        _createPublicGoodNode(alice);
+
+        vm.prank(oracleAccount);
+        _staking.setSettlementPhase(true);
+
+        vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
+        _staking.stakeToPublicPool{value: 10000 ether}(alice);
+    }
+
     function testRequestUnstakeFromPublic() public {
         _createPublicGoodNode(alice);
         _testRequestUnstakeFromNode(alice, true);
@@ -457,6 +500,18 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     function testRequestUnstake() public {
         _createNode(alice);
         _testRequestUnstakeFromNode(alice, false);
+    }
+
+    function testRequestUnstakeFailInSettlementPhase() public {
+        _createNode(alice);
+
+        _staking.stake{value: 5000 ether}(alice);
+
+        vm.prank(oracleAccount);
+        _staking.setSettlementPhase(true);
+
+        vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
+        _staking.requestUnstake(alice, array(1));
     }
 
     function testRequestUnstakeFailWithBurnedChip() public {
@@ -524,7 +579,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
     function testDistributeRewards() public {
         uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 1000 ether;
+        uint256 stakeAmount = 10000 ether;
 
         // create node
         _createNode(alice);

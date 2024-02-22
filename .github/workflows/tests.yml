@@ -35,6 +35,7 @@ jobs:
       - name: Remove unwanted files
         run: |
           lcov --remove lcov.info 'test/*' -o lcov.info
+          lcov --remove lcov.info 'src/libraries/SVGs/*' -o lcov.info
           lcov --remove lcov.info 'src/base/*' 'src/mocks/*' -o lcov.info
           lcov --remove lcov.info 'src/upgradeability/*' -o lcov.info
           lcov --remove lcov.info 'script/*' -o lcov.info

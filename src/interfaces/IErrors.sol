@@ -3,43 +3,43 @@
 pragma solidity 0.8.20;
 
 interface IErrors {
-    /// @dev Caller is not staking contract
+    /// @dev Caller is not staking contract.
     error CallerNotStaking();
 
-    /// @dev Create node to zero address
+    /// @dev Create node to zero address.
     error CreateNodeToZeroAddress();
 
-    /// @dev Node already exists
+    /// @dev Node already exists.
     error NodeExists();
 
-    /// @dev Node staked or deposited
+    /// @dev Node staked or deposited.
     error NodeStakedOrDeposited();
 
-    /// @dev Node not exists
+    /// @dev Node not exists.
     error NodeNotExists();
 
-    /// @dev Invalid array length
+    /// @dev Invalid array length.
     error InvalidArrayLength();
 
     /// @dev Invalid epoch number.
     error InvalidEpochNumber();
 
-    /// @dev Submission interval has not elapsed
+    /// @dev Submission interval has not elapsed.
     error SubmissionIntervalNotElapsed();
 
-    /// @dev Request already claimed
+    /// @dev Request already claimed.
     error AlreadyClaimed();
 
-    /// @dev Claim time not ready
+    /// @dev Claim time not ready.
     error ClaimTimeNotReady();
 
-    /// @dev Claim time not ready
+    /// @dev Claim time not ready.
     error ClaimIdNotExists(uint256 claimId);
 
-    /// @dev Staking amount too small
+    /// @dev Staking amount too small.
     error AmountTooSmall(uint256 amount);
 
-    /// @dev Not chips owner or approver
+    /// @dev Not chips owner or approver.
     error ChipNotAuthorized(uint256 tokenId);
 
     /// @dev Token is not valid for the node
@@ -57,42 +57,48 @@ interface IErrors {
     /// @dev Deposit is not allowed for public good node.
     error PublicGoodNodeNotDeposited();
 
-    /// @dev Public good node cannot be staked
+    /// @dev Public good node cannot be staked.
     error StakeToPublicGoodNode(address nodeAddr);
 
-    /// @dev Basis points of tax rate too large
+    /// @dev Basis points of tax rate too large.
     error TaxRateBasisPointsTooLarge();
 
-    /// @dev Batch size is zero
+    /// @dev Batch size is zero.
     error BatchSizeZero();
 
-    /// @dev Invalid epoch
+    /// @dev Invalid epoch.
     error InvalidEpoch(uint256 expected, uint256 actual);
 
-    ///@dev Node list is empty
+    ///@dev Node list is empty.
     error EmptyNodeList();
 
-    /// @dev Chips id overflow
+    /// @dev Chips id overflow.
     error ChipsIdOverflow();
 
-    /// @dev Reward distribution failed
+    /// @dev Reward distribution failed.
     error RewardDistributionFailed();
 
-    /// @dev Inffucient value to stake
+    /// @dev Inffucient value to stake.
     error InsufficientValue();
 
-    /// @dev Transfer failed
+    /// @dev Transfer failed.
     error TransferFailed();
 
-    /// @dev Distributed staking rewards exceed limit
+    /// @dev Distributed staking rewards exceed limit.
     error StakingRewardsExceed();
 
-    /// @dev Distributed operation rewards exceed limit
+    /// @dev Distributed operation rewards exceed limit.
     error OperationRewardsExceed();
 
-    /// @dev Insufficient requestFees
+    /// @dev Insufficient requestFees.
     error InsufficientRequestFees();
 
-    /// @dev Invalid trait id
+    /// @dev Invalid trait id.
     error InvalidTraitId(uint256 traitId);
+
+    /// @dev Rewards already distributed.
+    error RewardsAlreadyDistributed(address nodeAddr);
+
+    /// @dev Settlement phase, stake/requestUnstakce is not allowed.
+    error SettlementPhase();
 }

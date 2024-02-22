@@ -5,7 +5,6 @@ pragma solidity 0.8.20;
 import {Utils} from "./Utils.sol";
 import {DataTypes} from "../../src/libraries/DataTypes.sol";
 import {Staking} from "../../src/Staking.sol";
-// import {SVGGenerator} from "../../src/SVGGenerator.sol";
 import {Chips} from "../../src/Chips.sol";
 import {Settlement} from "../../src/Settlement.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
@@ -24,6 +23,7 @@ contract CommonTest is Utils {
     address public constant proxyAdmin = address(0x777);
     address public constant pauseAccount = address(0x888);
     address public constant oracleAccount = address(0x999);
+    address public constant adminAccount = address(0xaaa);
 
     uint256 public constant stakeUnbondingPeriod = 22.5 days;
     uint256 public constant depositUnbondingPeriod = 22.5 days;
@@ -102,7 +102,7 @@ contract CommonTest is Utils {
         uint256 totalRewards = (3 * _rss3.totalSupply()) / 100;
         _rss3.approve(address(_settlement), totalRewards);
 
-        _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
+        _settlement.initialize(address(_staking), adminAccount, oracleAccount, block.timestamp, 20);
 
         vm.startPrank(oracleAccount);
         _staking.grantRole(_staking.ORACLE_ROLE(), address(_settlement));
@@ -110,7 +110,7 @@ contract CommonTest is Utils {
 
         _internalSettlementTest = new InternalSettlement();
 
-        _internalSettlementTest.initialize(address(_staking), oracleAccount, 0, 0);
+        _internalSettlementTest.initialize(address(_staking), adminAccount, oracleAccount, 0, 0);
 
         // label test accounts
         vm.label(alice, "alice");

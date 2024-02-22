@@ -1,0 +1,80 @@
+@startuml
+'https://plantuml.com/use-case-diagram
+
+left to right direction
+actor User as user
+actor "Node Operator" as operator
+actor "Pause Account" as pauser
+actor "Oracle Account" as oracle
+
+package "Staking Contract" {
+    rectangle  {
+        usecase "createNode/deleteNode" as S1
+        usecase "deposit/requestWithdrawal" as S2
+        usecase "setTaxRateBasisPoints4Node" as S3
+        usecase "claimWithdrawal" as S4
+    }
+
+    rectangle {
+        usecase "pause" as S7
+        usecase "unpause" as S8
+    }
+
+    rectangle {
+        usecase "stake" as S9
+        usecase "requestUnstake" as S10
+        usecase "claimUnstake" as S11
+        usecase "stakeToPublicPool" as S12
+    }
+
+    rectangle {
+        usecase "withdraw2Treasury" as S13
+        usecase "distributeRewards" as S14
+        usecase "slashNodes" as S15
+        usecase "setTaxRateBasisPoints4PublicPool" as S16
+
+    }
+
+}
+
+package "Settlement Contract" {
+    usecase "distributeRewards" as ST1
+    usecase "setTaxRateBasisPoints4PublicPool" as ST2
+    usecase "updateRewardsRatio" as ST3
+    usecase "slashNodes" as ST4
+}
+
+package "Chips Contract" {
+    usecase "mintBatch" as C1
+    usecase "tokenURI" as C2
+    usecase "burn" as C3
+}
+
+
+user --> S9
+user --> S10
+user --> S11
+user --> S12
+
+operator --> S1
+operator --> S2
+operator --> S3
+operator --> S4
+
+pauser --> S7
+pauser --> S8
+
+oracle --> ST1
+oracle --> ST2
+oracle --> ST3
+
+
+S9 --> C1 #blue;line.dotted;text:blue   :  mint chips
+S12 --> C1 #blue;line.dotted;text:blue   :  mint chips
+S10 --> C3 #blue;line.dotted;text:blue   :  burn chips
+
+ST1 ..> S14 #blue;line.dotted;text:blue   :  call
+ST2 ..> S16 #blue;line.dotted;text:blue   :  call
+ST4 ..> S15 #blue;line.dotted;text:blue   :  call
+
+@enduml

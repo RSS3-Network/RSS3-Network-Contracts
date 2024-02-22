@@ -54,7 +54,7 @@ contract ChipsTest is CommonTest {
         vm.deal(alice, 100000 ether);
 
         vm.prank(alice);
-        _staking.stake{value: 500 ether}(alice);
+        _staking.stake{value: 5000 ether}(alice);
 
         string memory tokenURI = _chips.tokenURI(1);
         string memory base64prefix = "data:application/json;base64,";

@@ -7,15 +7,12 @@ import {IErrors} from "./interfaces/IErrors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using SafeCast for uint256;
-    using SafeERC20 for IERC20;
 
     /// @dev Duration of an epoch.
     uint256 public constant EPOCH_DURATION = 18 hours;
@@ -34,6 +31,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     uint256 internal _startTimestamp;
     uint256 internal _endTimestamp;
@@ -44,10 +42,13 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     mapping(uint256 epoch => uint256 stakingRewards) internal _distributedStakingRewards;
     // distributed operation rewards for each epoch
     mapping(uint256 epoch => uint256 operationRewards) internal _distributedOperationRewards;
+    // rewarded node addresses
+    mapping(uint256 epoch => mapping(address nodeAddr => bool rewarded)) internal _rewardedAddresses;
 
     /// @inheritdoc ISettlement
     function initialize(
         address staking,
+        address admin,
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
@@ -57,6 +58,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         _updateRewardsRatio(operationRewardsPercent);
 
+        // grants `ADMIN_ROLE`
+        _grantRole(ADMIN_ROLE, admin);
+        // grants `ORACLE_ROLE`
         _grantRole(ORACLE_ROLE, oracleAccount);
     }
 
@@ -70,7 +74,8 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         uint256 epoch,
         address[] calldata nodeAddrs,
         uint256[] calldata requestFees,
-        uint256[] calldata operationRewards
+        uint256[] calldata operationRewards,
+        bool isFinal
     ) external payable override onlyRole(ORACLE_ROLE) {
         if (nodeAddrs.length != requestFees.length || nodeAddrs.length != operationRewards.length) {
             revert InvalidArrayLength();
@@ -103,62 +108,26 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
             // save totalStaking for current epoch
             (, _totalStakings[_currentEpoch]) = IStaking(_staking).getPoolInfo();
+
+            // start of the settlement, set settlement phase to true
+            IStaking(_staking).setSettlementPhase(true);
         }
 
-        uint256[] memory stakingRewards = _getStakingRewards(nodeAddrs);
-        _checkRewards(nodeAddrs, operationRewards, stakingRewards);
+        // settlement phase
+        IStaking(_staking).setSettlementPhase(!isFinal);
 
+        _checkRewards(epoch, nodeAddrs, operationRewards);
+
+        uint256[3] memory epochInfo = [epoch, _startTimestamp, _endTimestamp];
+        uint256[] memory stakingRewards = _getStakingRewards(nodeAddrs);
         IStaking(_staking).distributeRewards{value: amountToSend}(
-            [epoch, _startTimestamp, _endTimestamp],
+            epochInfo,
             nodeAddrs,
             requestFees,
             operationRewards,
             stakingRewards,
             publicPoolRewards
         );
-    }
-
-    /// @dev check submission interval
-    function _checkSubmissionInterval() internal view {
-        uint256 submissionInterval = EPOCH_DURATION - 1 hours;
-        if (block.timestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
-    }
-
-    function _updateEpochInfo(uint256 epoch) internal {
-        // update current epoch
-        _currentEpoch = epoch;
-        // update epoch timestamp
-        _startTimestamp = _endTimestamp;
-        _endTimestamp = block.timestamp;
-    }
-
-    /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch
-    function _checkRewards(
-        address[] memory nodeAddrs,
-        uint256[] memory operationRewards,
-        uint256[] memory stakingRewards
-    ) internal {
-        uint256 distributedOperationRewards = _distributedOperationRewards[_currentEpoch];
-        uint256 distributedStakingRewards = _distributedStakingRewards[_currentEpoch];
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            distributedOperationRewards += operationRewards[i];
-            distributedStakingRewards += stakingRewards[i];
-        }
-
-        if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardsExceed();
-        if (distributedStakingRewards > _totalStakingRewardsPerEpoch) revert StakingRewardsExceed();
-
-        _distributedOperationRewards[_currentEpoch] = distributedOperationRewards;
-        _distributedStakingRewards[_currentEpoch] = distributedStakingRewards;
-    }
-
-    /// @dev Returns staking rewards per epoch for public pool
-    function _getPublicPoolStakingRewards() internal view returns (uint256) {
-        (, uint256 totalStaking) = IStaking(_staking).getPoolInfo();
-        if (totalStaking == 0) return 0;
-
-        uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
-        return (publicPoolTokens * _totalStakingRewardsPerEpoch) / totalStaking;
     }
 
     /// @inheritdoc ISettlement
@@ -208,6 +177,44 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             (100 * 365 days);
     }
 
+    /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch
+    function _checkRewards(uint256 epoch, address[] memory nodeAddrs, uint256[] memory operationRewards) internal {
+        uint256 distributedOperationRewards = _distributedOperationRewards[epoch];
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            if (_isRewarded(epoch, nodeAddrs[i])) revert RewardsAlreadyDistributed(nodeAddrs[i]);
+            _rewardedAddresses[epoch][nodeAddrs[i]] = true;
+
+            distributedOperationRewards += operationRewards[i];
+        }
+
+        if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardsExceed();
+
+        _distributedOperationRewards[epoch] = distributedOperationRewards;
+    }
+
+    function _updateEpochInfo(uint256 epoch) internal {
+        // update current epoch
+        _currentEpoch = epoch;
+        // update epoch timestamp
+        _startTimestamp = _endTimestamp;
+        _endTimestamp = block.timestamp;
+    }
+
+    /// @dev check submission interval
+    function _checkSubmissionInterval() internal view {
+        uint256 submissionInterval = EPOCH_DURATION - 1 hours;
+        if (block.timestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+    }
+
+    /// @dev Returns staking rewards per epoch for public pool
+    function _getPublicPoolStakingRewards() internal view returns (uint256) {
+        (, uint256 totalStaking) = IStaking(_staking).getPoolInfo();
+        if (totalStaking == 0) return 0;
+
+        uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
+        return (publicPoolTokens * _totalStakingRewardsPerEpoch) / totalStaking;
+    }
+
     /// @dev returns staking rewards
     function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256[] memory nodeRewards) {
         uint256 len = nodeAddrs.length;
@@ -229,5 +236,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         if (totalStaking == 0) {
             (, totalStaking) = IStaking(_staking).getPoolInfo();
         }
+    }
+
+    function _isRewarded(uint256 epoch, address nodeAddr) internal view returns (bool) {
+        return _rewardedAddresses[epoch][nodeAddr];
     }
 }

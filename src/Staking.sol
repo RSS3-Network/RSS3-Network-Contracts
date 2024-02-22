@@ -10,9 +10,7 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -21,10 +19,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     using Math for uint256;
     using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
-    using SafeERC20 for IERC20;
     using Checkpoints for Checkpoints.Trace160;
 
-    uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
+    uint256 public constant SHARES_PER_CHIP = 5000 * 10 ** 18;
 
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
     /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
@@ -48,6 +45,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev the chips contract
     address internal _chips;
+
+    /// @dev the flag of settlement phase.
+    /// Stake/requestUnstake is not allowed in settlement phase.
+    bool internal _isSettlementPhase;
 
     /// @dev all node addresses
     EnumerableSet.AddressSet internal _nodeAddrs;
@@ -79,6 +80,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+
+    modifier whenNotSettlementPhase() {
+        if (_isSettlementPhase) revert SettlementPhase();
+        _;
+    }
 
     /**
      * @notice constructor.
@@ -148,7 +154,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function deleteNode() external override {
+    function deleteNode() external override whenNotPaused {
         address addr = msg.sender;
         DataTypes.Node storage node = _nodes[addr];
         if (address(0) == node.account) revert NodeNotExists();
@@ -190,7 +196,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override {
+    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override whenNotPaused {
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
         DataTypes.Node storage node = _nodes[msg.sender];
@@ -220,7 +226,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function stake(
         address nodeAddr
-    ) external payable override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
+    )
+        external
+        payable
+        override
+        whenNotPaused
+        whenNotSettlementPhase
+        returns (uint256 startTokenId, uint256 endTokenId)
+    {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // validate node
         if (node.account == address(0)) revert NodeNotExists();
@@ -234,7 +247,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function requestUnstake(
         address nodeAddr,
         uint256[] calldata chipsIds
-    ) external override whenNotPaused returns (uint256 requestId) {
+    ) external override whenNotPaused whenNotSettlementPhase returns (uint256 requestId) {
         return _unstakeFromNode(nodeAddr, chipsIds);
     }
 
@@ -253,7 +266,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
         uint256 publicPoolReward
-    ) external payable override onlyRole(ORACLE_ROLE) {
+    ) external payable override whenNotPaused onlyRole(ORACLE_ROLE) {
         if (
             nodeAddrs.length != requestFees.length ||
             nodeAddrs.length != operationRewards.length ||
@@ -290,7 +303,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function stakeToPublicPool(
         address nodeAddr
-    ) external payable override whenNotPaused returns (uint256 startTokenId, uint256 endTokenId) {
+    )
+        external
+        payable
+        override
+        whenNotPaused
+        whenNotSettlementPhase
+        returns (uint256 startTokenId, uint256 endTokenId)
+    {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
@@ -300,7 +320,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
+    function slashNodes(
+        address[] calldata nodeAddrs
+    ) external override whenNotPaused whenNotSettlementPhase onlyRole(ORACLE_ROLE) {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) revert NodeNotExists();
@@ -320,11 +342,21 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
+    function setSettlementPhase(bool enabled) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        _isSettlementPhase = enabled;
+    }
+
+    /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 balance = address(this).balance;
         // TODO: check arithmetic underflow or overflow error
         uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
         _transfer(TREASURY, amount);
+    }
+
+    /// @inheritdoc IStaking
+    function isSettlementPhase() external view override returns (bool) {
+        return _isSettlementPhase;
     }
 
     /// @inheritdoc IStaking
