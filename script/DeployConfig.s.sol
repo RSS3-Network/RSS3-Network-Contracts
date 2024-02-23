@@ -41,7 +41,6 @@ contract DeployConfig is Script {
 
         // TODO: any conscise way to do this?
 
-        chainID = stdJson.readUint(_json, "$.chainID");
         proxyAdminOwner = stdJson.readAddress(_json, "$.proxyAdminOwner");
         admin = stdJson.readAddress(_json, "$.admin");
         pauseAccount = stdJson.readAddress(_json, "$.pauseAccount");
