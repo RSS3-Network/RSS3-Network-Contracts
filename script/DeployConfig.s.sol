@@ -13,9 +13,7 @@ import {stdJson} from "forge-std/StdJson.sol";
 contract DeployConfig is Script {
     string internal _json;
 
-    uint256 public chainID;
     address public proxyAdminOwner;
-    address public admin;
     address public pauseAccount;
     address public oracleAccount;
     uint256 public depositUnbondingPeriod;
@@ -39,10 +37,7 @@ contract DeployConfig is Script {
             return;
         }
 
-        // TODO: any conscise way to do this?
-
         proxyAdminOwner = stdJson.readAddress(_json, "$.proxyAdminOwner");
-        admin = stdJson.readAddress(_json, "$.admin");
         pauseAccount = stdJson.readAddress(_json, "$.pauseAccount");
         oracleAccount = stdJson.readAddress(_json, "$.oracleAccount");
         depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");

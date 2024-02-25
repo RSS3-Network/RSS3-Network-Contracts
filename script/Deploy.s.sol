@@ -17,7 +17,6 @@ contract Deploy is Deployer {
     bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     // solhint-disable private-vars-leading-underscore
     DeployConfig internal cfg;
@@ -163,7 +162,6 @@ contract Deploy is Deployer {
 
         settlementProxy.initialize(
             stakingProxy,
-            cfg.admin(),
             cfg.oracleAccount(),
             cfg.settlementStartTime(),
             cfg.operationRewardsPercent()
@@ -171,7 +169,6 @@ contract Deploy is Deployer {
 
         // check states
         require(settlementProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");
-        require(settlementProxy.hasRole(ADMIN_ROLE, cfg.admin()), "check admin role error");
         require(settlementProxy.stakingContract() == stakingProxy, "check settlement contract error");
         require(settlementProxy.currentEpoch() == 0, "check start epoch error");
         require(settlementProxy.EPOCH_DURATION() == 18 hours, "check start epoch error");

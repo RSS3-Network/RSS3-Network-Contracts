@@ -123,10 +123,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _chips = chips;
 
         _grantRole(PAUSE_ROLE, pauseAccount);
-        _setRoleAdmin(PAUSE_ROLE, PAUSE_ROLE);
-
         _grantRole(ORACLE_ROLE, oracleAccount);
-        _setRoleAdmin(ORACLE_ROLE, ORACLE_ROLE);
     }
 
     /// @inheritdoc IStaking
