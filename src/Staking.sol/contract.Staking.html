@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/0e0fb4e5d2e06da08f4003f78b5835375250ddaf/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/495f280417af1430321ce75ee09ae02ccff16c38/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -213,6 +213,10 @@ node operator can receive tax if it stakes at least 10,000 tokens, otherwise not
 <h3 id="stake_unbonding_period"><a class="header" href="#stake_unbonding_period">STAKE_UNBONDING_PERIOD</a></h3>
 <p><em>the period of time that user can't withdraw staked tokens</em></p>
 <pre><code class="language-solidity">uint256 public immutable STAKE_UNBONDING_PERIOD;
+</code></pre>
+<h3 id="min_tax_rate_basis_points"><a class="header" href="#min_tax_rate_basis_points">MIN_TAX_RATE_BASIS_POINTS</a></h3>
+<p><em>the minimum value of tax rate basis points</em></p>
+<pre><code class="language-solidity">uint256 public immutable MIN_TAX_RATE_BASIS_POINTS;
 </code></pre>
 <h3 id="_chips"><a class="header" href="#_chips">_chips</a></h3>
 <p><em>the chips contract</em></p>
@@ -289,7 +293,8 @@ requestUnstake/requestWithdrawl is not allowed in alpha phase.</em></p>
     uint256 depositUnbondingPeriod,
     uint256 nodeSlashRateBasisPoints,
     uint256 userSlashRateBasisPoints,
-    uint256 minDeposit
+    uint256 minDeposit,
+    uint256 minTaxRateBasisPoints
 );
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -301,6 +306,7 @@ requestUnstake/requestWithdrawl is not allowed in alpha phase.</em></p>
 <tr><td><code>nodeSlashRateBasisPoints</code></td><td><code>uint256</code></td><td>Slash rate in basis points for node operator.</td></tr>
 <tr><td><code>userSlashRateBasisPoints</code></td><td><code>uint256</code></td><td>Slash rate measured in basis points for user.</td></tr>
 <tr><td><code>minDeposit</code></td><td><code>uint256</code></td><td>The deposit base line of the node operator.</td></tr>
+<tr><td><code>minTaxRateBasisPoints</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
