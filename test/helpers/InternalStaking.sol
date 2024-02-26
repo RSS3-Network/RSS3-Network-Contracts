@@ -12,7 +12,8 @@ contract InternalStaking is Staking {
         uint256 depositUnbondingPeriod,
         uint256 nodeSlashRateBasisPoints,
         uint256 userSlashRateBasisPoints,
-        uint256 minDeposit
+        uint256 minDeposit,
+        uint256 minTaxRateBasisPoints
     )
         Staking(
             treasury,
@@ -21,7 +22,8 @@ contract InternalStaking is Staking {
             depositUnbondingPeriod,
             nodeSlashRateBasisPoints,
             userSlashRateBasisPoints,
-            minDeposit
+            minDeposit,
+            minTaxRateBasisPoints
         )
     {}
 

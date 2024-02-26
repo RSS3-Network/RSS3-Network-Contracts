@@ -101,7 +101,8 @@ contract Deploy is Deployer {
             cfg.depositUnbondingPeriod(),
             cfg.nodeSlashRateBasisPoints(),
             cfg.userSlashRateBasisPoints(),
-            cfg.depositBaseline()
+            cfg.depositBaseline(),
+            cfg.taxRateBasisPointsBaseline()
         );
 
         // check states

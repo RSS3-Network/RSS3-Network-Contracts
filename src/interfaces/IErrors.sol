@@ -63,6 +63,9 @@ interface IErrors {
     /// @dev Basis points of tax rate too large.
     error TaxRateBasisPointsTooLarge();
 
+    /// @dev Basis points of tax rate too small.
+    error TaxRateBasisPointsTooSmall();
+
     /// @dev Batch size is zero.
     error BatchSizeZero();
 

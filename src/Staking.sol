@@ -43,6 +43,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev the period of time that user can't withdraw staked tokens
     uint256 public immutable STAKE_UNBONDING_PERIOD;
 
+    /// @dev the minimum value of tax rate basis points
+    uint256 public immutable MIN_TAX_RATE_BASIS_POINTS;
+
     /// @dev the chips contract
     address internal _chips;
 
@@ -113,7 +116,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 depositUnbondingPeriod,
         uint256 nodeSlashRateBasisPoints,
         uint256 userSlashRateBasisPoints,
-        uint256 minDeposit
+        uint256 minDeposit,
+        uint256 minTaxRateBasisPoints
     ) {
         TREASURY = treasury;
         STAKE_RATIO = stakeRatio;
@@ -125,6 +129,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         USER_SLASH_RATE_BASIS_POINTS = userSlashRateBasisPoints;
 
         MIN_DEPOSIT = minDeposit;
+        MIN_TAX_RATE_BASIS_POINTS = minTaxRateBasisPoints;
     }
 
     /// @inheritdoc IStaking
@@ -211,6 +216,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override whenNotPaused {
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
+
+        if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
 
         DataTypes.Node storage node = _nodes[msg.sender];
         if (address(0) == node.account) revert NodeNotExists();

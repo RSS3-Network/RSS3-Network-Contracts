@@ -40,6 +40,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(_staking.STAKE_RATIO(), stakeRatio);
         assertEq(_staking.TREASURY(), treasury);
         assertEq(_staking.SHARES_PER_CHIP(), 5000 ether);
+        assertEq(_staking.MIN_DEPOSIT(), minDeposit);
+        assertEq(_staking.MIN_TAX_RATE_BASIS_POINTS(), minTaxRateBasisPoints);
 
         vm.mockCall(
             address(_staking),
@@ -349,7 +351,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testSetTaxRate4Node(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints <= _denominator());
+        vm.assume(taxRateBasisPoints <= _denominator() && taxRateBasisPoints >= minTaxRateBasisPoints);
 
         _createNode(alice);
 
@@ -377,7 +379,14 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(realTaxRateBasisPoints, expectedTaxRateBasisPoints);
     }
 
-    function testSetTaxRateError(uint64 taxRateBasisPoints) public {
+    function testSetTaxRateTooSmallError(uint64 taxRateBasisPoints) public {
+        vm.assume(taxRateBasisPoints < minTaxRateBasisPoints);
+        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooSmall.selector));
+        vm.prank(oracleAccount);
+        _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
+    }
+
+    function testSetTaxRateTooLargeError(uint64 taxRateBasisPoints) public {
         vm.assume(taxRateBasisPoints > _denominator());
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
         vm.prank(alice);
@@ -391,7 +400,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     function testSetTaxRateFailWithNonExistentNode() public {
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
         vm.prank(dave);
-        _staking.setTaxRateBasisPoints4Node(100);
+        _staking.setTaxRateBasisPoints4Node(1000);
     }
 
     function testStake(uint256 amount) public {
