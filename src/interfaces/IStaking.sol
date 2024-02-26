@@ -157,6 +157,13 @@ interface IStaking {
     function setSettlementPhase(bool enabled) external;
 
     /**
+     * @notice Disable the alpha phase.
+     * Requirements:
+     * - The caller must have the `PAUSE_ROLE`.
+     */
+    function disableAlphaPhase() external;
+
+    /**
      * @notice Withdraws tokens from staking contract to treasury.
      */
     function withdraw2Treasury() external;
@@ -166,6 +173,12 @@ interface IStaking {
      * @return bool Whether the current time is in settlement phase.
      */
     function isSettlementPhase() external view returns (bool);
+
+    /**
+     * @notice Returns whether the current time is in alpha phase.
+     * @return bool Whether the current time is in alpha phase.
+     */
+    function isAlphaPhase() external view returns (bool);
 
     /**
      * @notice Returns the pending withdrawal request by `requestId`.

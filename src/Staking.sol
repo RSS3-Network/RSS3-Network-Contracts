@@ -50,6 +50,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// Stake/requestUnstake is not allowed in settlement phase.
     bool internal _isSettlementPhase;
 
+    /// @dev the flag of alpha phase.
+    /// requestUnstake/requestWithdrawl is not allowed in alpha phase.
+    bool internal _isAlphaPhase;
+
     /// @dev all node addresses
     EnumerableSet.AddressSet internal _nodeAddrs;
     /// @dev all node info
@@ -80,6 +84,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+
+    modifier whenNotAlphaPhase() {
+        if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
+        _;
+    }
 
     modifier whenNotSettlementPhase() {
         if (_isSettlementPhase) revert SettlementPhase();
@@ -127,6 +136,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         _grantRole(ORACLE_ROLE, oracleAccount);
         _setRoleAdmin(ORACLE_ROLE, ORACLE_ROLE);
+
+        _isAlphaPhase = true;
     }
 
     /// @inheritdoc IStaking
@@ -176,7 +187,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId) {
+    function requestWithdrawal(
+        uint256 amount
+    ) external override whenNotPaused whenNotAlphaPhase returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert NodeNotExists();
 
@@ -247,7 +260,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function requestUnstake(
         address nodeAddr,
         uint256[] calldata chipsIds
-    ) external override whenNotPaused whenNotSettlementPhase returns (uint256 requestId) {
+    ) external override whenNotPaused whenNotSettlementPhase whenNotAlphaPhase returns (uint256 requestId) {
         return _unstakeFromNode(nodeAddr, chipsIds);
     }
 
@@ -347,6 +360,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
+    function disableAlphaPhase() external override whenNotPaused onlyRole(PAUSE_ROLE) {
+        _isAlphaPhase = false;
+    }
+
+    /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 balance = address(this).balance;
         // TODO: check arithmetic underflow or overflow error
@@ -357,6 +375,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function isSettlementPhase() external view override returns (bool) {
         return _isSettlementPhase;
+    }
+
+    function isAlphaPhase() external view override returns (bool) {
+        return _isAlphaPhase;
     }
 
     /// @inheritdoc IStaking

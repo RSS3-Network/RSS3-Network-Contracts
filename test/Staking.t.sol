@@ -195,6 +195,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testRequestWithdrawal() public {
+        _disableAlphaPhase();
+
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
@@ -219,6 +221,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testMultipleDepositAndRequestWithdrawal() public {
+        _disableAlphaPhase();
+
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
@@ -237,6 +241,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testRequestWithdrawalFailWithInsufficientTokens() public {
+        _disableAlphaPhase();
         uint256 amount = 10000 ether;
 
         _createNode(alice);
@@ -250,11 +255,14 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testRequestWithdrawalFailWithNonExistentNode() public {
+        _disableAlphaPhase();
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
         _staking.requestWithdrawal(1 ether);
     }
 
     function testClaimWithdrawal() public {
+        _disableAlphaPhase();
+
         uint256 amount = 10000 ether;
 
         _createNode(alice);
@@ -284,6 +292,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testMultipleRequestAndClaimWithdrawal() public {
+        _disableAlphaPhase();
         _createNode(alice);
 
         uint256 amount = 10000 ether;
@@ -317,6 +326,15 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.setSettlementPhase(false);
         assertEq(_staking.isSettlementPhase(), false);
         vm.stopPrank();
+    }
+
+    function testAlphaPhase() public {
+        vm.prank(alice);
+        assertEq(_staking.isAlphaPhase(), true);
+
+        _disableAlphaPhase();
+
+        assertEq(_staking.isAlphaPhase(), false);
     }
 
     function testSetSettlementPhaseFail() public {
@@ -493,16 +511,22 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testRequestUnstakeFromPublic() public {
+        _disableAlphaPhase();
+
         _createPublicGoodNode(alice);
         _testRequestUnstakeFromNode(alice, true);
     }
 
     function testRequestUnstake() public {
+        _disableAlphaPhase();
+
         _createNode(alice);
         _testRequestUnstakeFromNode(alice, false);
     }
 
     function testRequestUnstakeFailInSettlementPhase() public {
+        _disableAlphaPhase();
+
         _createNode(alice);
 
         _staking.stake{value: 5000 ether}(alice);
@@ -515,6 +539,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testRequestUnstakeFailWithBurnedChip() public {
+        _disableAlphaPhase();
+
         uint256 amount = 10000 ether;
 
         _createNode(alice);
@@ -539,6 +565,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testClaimUnstake() public {
+        _disableAlphaPhase();
+
         uint256 amount = 10000 ether;
 
         _createNode(alice);

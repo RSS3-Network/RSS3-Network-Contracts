@@ -129,6 +129,11 @@ contract CommonTest is Utils {
         _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, false);
     }
 
+    function _disableAlphaPhase() internal {
+        vm.prank(pauseAccount);
+        _staking.disableAlphaPhase();
+    }
+
     function _createPublicGoodNode(address to) internal {
         vm.prank(to);
         _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, true);

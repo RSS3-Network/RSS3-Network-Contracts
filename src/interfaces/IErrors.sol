@@ -101,4 +101,7 @@ interface IErrors {
 
     /// @dev Settlement phase, stake/requestUnstakce is not allowed.
     error SettlementPhase();
+
+    /// @dev Node is not staked.
+    error AlphaWithdrawNotAllowed();
 }
