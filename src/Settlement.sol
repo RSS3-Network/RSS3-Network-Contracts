@@ -193,7 +193,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         // update current epoch
         _currentEpoch = epoch;
         // update epoch timestamp
-        _startTimestamp = _endTimestamp;
+        if (_endTimestamp > 0) {
+            _startTimestamp = _endTimestamp;
+        }
         _endTimestamp = block.timestamp;
     }
 
