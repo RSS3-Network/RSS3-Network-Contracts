@@ -63,6 +63,9 @@ interface IErrors {
     /// @dev Basis points of tax rate too large.
     error TaxRateBasisPointsTooLarge();
 
+    /// @dev Basis points of tax rate too small.
+    error TaxRateBasisPointsTooSmall();
+
     /// @dev Batch size is zero.
     error BatchSizeZero();
 
@@ -101,4 +104,7 @@ interface IErrors {
 
     /// @dev Settlement phase, stake/requestUnstakce is not allowed.
     error SettlementPhase();
+
+    /// @dev Node is not staked.
+    error AlphaWithdrawNotAllowed();
 }

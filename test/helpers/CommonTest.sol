@@ -33,6 +33,7 @@ contract CommonTest is Utils {
     uint256 public constant userSlashRateBasisPoints = 100;
     uint256 public constant stakeRatio = 25;
     uint256 public constant minDeposit = 10000 ether;
+    uint256 public constant minTaxRateBasisPoints = 500;
     address public constant treasury = address(0xaaa);
 
     string public constant chipsName = "RSS3 Chips";
@@ -66,7 +67,8 @@ contract CommonTest is Utils {
             depositUnbondingPeriod,
             nodeSlashRateBasisPoints,
             userSlashRateBasisPoints,
-            minDeposit
+            minDeposit,
+            minTaxRateBasisPoints
         );
         _internalStakingTest.initialize(address(_chips), address(_settlement), oracleAccount);
 
@@ -78,7 +80,8 @@ contract CommonTest is Utils {
             depositUnbondingPeriod,
             nodeSlashRateBasisPoints,
             userSlashRateBasisPoints,
-            minDeposit
+            minDeposit,
+            minTaxRateBasisPoints
         );
 
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
@@ -122,6 +125,11 @@ contract CommonTest is Utils {
     function _createNode(address to) internal {
         vm.prank(to);
         _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, false);
+    }
+
+    function _disableAlphaPhase() internal {
+        vm.prank(pauseAccount);
+        _staking.disableAlphaPhase();
     }
 
     function _createPublicGoodNode(address to) internal {

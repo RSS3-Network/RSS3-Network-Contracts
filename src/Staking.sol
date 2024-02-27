@@ -43,12 +43,19 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev the period of time that user can't withdraw staked tokens
     uint256 public immutable STAKE_UNBONDING_PERIOD;
 
+    /// @dev the minimum value of tax rate basis points
+    uint256 public immutable MIN_TAX_RATE_BASIS_POINTS;
+
     /// @dev the chips contract
     address internal _chips;
 
     /// @dev the flag of settlement phase.
     /// Stake/requestUnstake is not allowed in settlement phase.
     bool internal _isSettlementPhase;
+
+    /// @dev the flag of alpha phase.
+    /// requestUnstake/requestWithdrawl is not allowed in alpha phase.
+    bool internal _isAlphaPhase;
 
     /// @dev all node addresses
     EnumerableSet.AddressSet internal _nodeAddrs;
@@ -81,6 +88,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
+    modifier whenNotAlphaPhase() {
+        if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
+        _;
+    }
+
     modifier whenNotSettlementPhase() {
         if (_isSettlementPhase) revert SettlementPhase();
         _;
@@ -104,7 +116,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 depositUnbondingPeriod,
         uint256 nodeSlashRateBasisPoints,
         uint256 userSlashRateBasisPoints,
-        uint256 minDeposit
+        uint256 minDeposit,
+        uint256 minTaxRateBasisPoints
     ) {
         TREASURY = treasury;
         STAKE_RATIO = stakeRatio;
@@ -116,6 +129,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         USER_SLASH_RATE_BASIS_POINTS = userSlashRateBasisPoints;
 
         MIN_DEPOSIT = minDeposit;
+        MIN_TAX_RATE_BASIS_POINTS = minTaxRateBasisPoints;
     }
 
     /// @inheritdoc IStaking
@@ -124,6 +138,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         _grantRole(PAUSE_ROLE, pauseAccount);
         _grantRole(ORACLE_ROLE, oracleAccount);
+
+        _isAlphaPhase = true;
     }
 
     /// @inheritdoc IStaking
@@ -173,7 +189,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId) {
+    function requestWithdrawal(
+        uint256 amount
+    ) external override whenNotPaused whenNotAlphaPhase returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert NodeNotExists();
 
@@ -195,6 +213,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override whenNotPaused {
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
+
+        if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
 
         DataTypes.Node storage node = _nodes[msg.sender];
         if (address(0) == node.account) revert NodeNotExists();
@@ -244,7 +264,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function requestUnstake(
         address nodeAddr,
         uint256[] calldata chipsIds
-    ) external override whenNotPaused whenNotSettlementPhase returns (uint256 requestId) {
+    ) external override whenNotPaused whenNotSettlementPhase whenNotAlphaPhase returns (uint256 requestId) {
         return _unstakeFromNode(nodeAddr, chipsIds);
     }
 
@@ -344,6 +364,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
+    function disableAlphaPhase() external override whenNotPaused onlyRole(PAUSE_ROLE) {
+        _isAlphaPhase = false;
+    }
+
+    /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 balance = address(this).balance;
         // TODO: check arithmetic underflow or overflow error
@@ -354,6 +379,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function isSettlementPhase() external view override returns (bool) {
         return _isSettlementPhase;
+    }
+
+    function isAlphaPhase() external view override returns (bool) {
+        return _isAlphaPhase;
     }
 
     /// @inheritdoc IStaking
