@@ -349,7 +349,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testSetSettlementPhase() public {
-        vm.startPrank(oracleAccount);
+        vm.startPrank(address(_settlement));
         _staking.setSettlementPhase(true);
         assertEq(_staking.isSettlementPhase(), true);
 
@@ -396,7 +396,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     function testSetTaxRate4PublicPool(uint64 expectedTaxRateBasisPoints) public {
         vm.assume(expectedTaxRateBasisPoints <= _denominator());
 
-        vm.startPrank(oracleAccount);
+        vm.startPrank(address(_settlement));
         expectEmit();
         emit Events.PublicPoolTaxRateBasisPointsSet(expectedTaxRateBasisPoints);
         _staking.setTaxRateBasisPoints4PublicPool(expectedTaxRateBasisPoints);
@@ -421,7 +421,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
 
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
-        vm.prank(oracleAccount);
+        vm.prank(address(_settlement));
         _staking.setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
     }
 
@@ -530,7 +530,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     function testStakeFailInSettlementPhase() public {
         _createNode(alice);
 
-        vm.prank(oracleAccount);
+        vm.prank(address(_settlement));
         _staking.setSettlementPhase(true);
 
         vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
@@ -540,7 +540,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     function testStakeToPublicPoolFailInSettlementPhase() public {
         _createPublicGoodNode(alice);
 
-        vm.prank(oracleAccount);
+        vm.prank(address(_settlement));
         _staking.setSettlementPhase(true);
 
         vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
@@ -568,7 +568,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
         _staking.stake{value: 5000 ether}(alice);
 
-        vm.prank(oracleAccount);
+        vm.prank(address(_settlement));
         _staking.setSettlementPhase(true);
 
         vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
@@ -686,7 +686,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             array(stakingReward, stakingReward),
             taxAmounts
         );
-        vm.prank(oracleAccount);
+        vm.prank(address(_settlement));
         _staking.distributeRewards(
             [1, startTime, endTime],
             array(alice, bob),
@@ -747,7 +747,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
         uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
 
-        vm.startPrank(oracleAccount);
+        vm.startPrank(address(_settlement));
 
         address[] memory nodeAddrs = new address[](2);
         nodeAddrs[0] = alice;

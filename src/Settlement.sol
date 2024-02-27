@@ -31,7 +31,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     uint256 internal _startTimestamp;
     uint256 internal _endTimestamp;
@@ -48,7 +47,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     /// @inheritdoc ISettlement
     function initialize(
         address staking,
-        address admin,
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
@@ -58,8 +56,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         _updateRewardsRatio(operationRewardsPercent);
 
-        // grants `ADMIN_ROLE`
-        _grantRole(ADMIN_ROLE, admin);
         // grants `ORACLE_ROLE`
         _grantRole(ORACLE_ROLE, oracleAccount);
     }
