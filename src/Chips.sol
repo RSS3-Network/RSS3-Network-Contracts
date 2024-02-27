@@ -115,7 +115,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         return _totalSupply;
     }
 
-    function nodeImageAndAttributes(address nodeAddr) external view override returns (string memory, string memory) {
+    function nodeImageAndAttributesURI(address nodeAddr) external view override returns (string memory) {
         DataTypes.NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr);
         uint256 seed = uint256(keccak256(abi.encodePacked(nodeAddr)));
         DataTypes.ChipTraits memory chipTraits = _getChipTraitsBySeed(seed);
@@ -126,7 +126,15 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             chipTraits
         );
 
-        return (imageSVG, attributes);
+        string memory json = string.concat(
+            '{"name": "Node Avatar", "image":"data:image/svg+xml;base64,',
+            Base64.encode(bytes(imageSVG)),
+            '", "attributes": [',
+            attributes,
+            "]}"
+        );
+
+        return string.concat("data:application/json;base64,", Base64.encode(bytes(string.concat(json))));
     }
 
     function _generateChipImage(

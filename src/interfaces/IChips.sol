@@ -49,5 +49,5 @@ interface IChips {
      * @param nodeAddr address of the given node.
      * @return SVG and attributes of the node image.
      */
-    function nodeImageAndAttributes(address nodeAddr) external view returns (string memory, string memory);
+    function nodeImageAndAttributesURI(address nodeAddr) external view returns (string memory);
 }
