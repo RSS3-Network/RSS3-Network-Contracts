@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/495f280417af1430321ce75ee09ae02ccff16c38/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/8157ca9599eb5945aaf9dfbb2cd70b78f5f7f2f3/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -207,9 +207,6 @@
 <h3 id="oracle_role"><a class="header" href="#oracle_role">ORACLE_ROLE</a></h3>
 <pre><code class="language-solidity">bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 </code></pre>
-<h3 id="admin_role"><a class="header" href="#admin_role">ADMIN_ROLE</a></h3>
-<pre><code class="language-solidity">bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-</code></pre>
 <h3 id="_starttimestamp"><a class="header" href="#_starttimestamp">_startTimestamp</a></h3>
 <pre><code class="language-solidity">uint256 internal _startTimestamp;
 </code></pre>
@@ -231,18 +228,14 @@
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the Settlement contract.</p>
-<pre><code class="language-solidity">function initialize(
-    address staking,
-    address admin,
-    address oracleAccount,
-    uint256 startTime,
-    uint256 operationRewardsPercent
-) external override initializer;
+<pre><code class="language-solidity">function initialize(address staking, address oracleAccount, uint256 startTime, uint256 operationRewardsPercent)
+    external
+    override
+    initializer;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>staking</code></td><td><code>address</code></td><td>Address of the Staking contract.</td></tr>
-<tr><td><code>admin</code></td><td><code>address</code></td><td></td></tr>
 <tr><td><code>oracleAccount</code></td><td><code>address</code></td><td>Address who makes settlement with the Staking contract.</td></tr>
 <tr><td><code>startTime</code></td><td><code>uint256</code></td><td>The start time of the first epoch.</td></tr>
 <tr><td><code>operationRewardsPercent</code></td><td><code>uint256</code></td><td>The percentage of the total rewards to be allocated to the request bonus. Others will be allocated to the staking rewards.</td></tr>
