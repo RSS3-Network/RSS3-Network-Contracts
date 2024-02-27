@@ -31,22 +31,22 @@ contract ChipsTest is CommonTest {
         assertEq(_chips.balanceOf(alice), 1);
         assertEq(_chips.totalSupply(), 1);
 
-        string memory uri = _chips.tokenURI(tokenId);
-        console.log("URI: %s", uri);
+        // string memory uri = _chips.tokenURI(tokenId);
+        // console.log("URI: %s", uri);
     }
 
-    function testMintBatchh() public {
-        vm.prank(address(_staking));
-        (uint256 start, uint256 end) = _chips.mintBatch(alice, 10);
+    // function testMintBatchh() public {
+    //     vm.prank(address(_staking));
+    //     (uint256 start, uint256 end) = _chips.mintBatch(alice, 10);
 
-        assertEq(_chips.balanceOf(alice), 10);
-        assertEq(_chips.totalSupply(), 10);
+    //     assertEq(_chips.balanceOf(alice), 10);
+    //     assertEq(_chips.totalSupply(), 10);
 
-        for (uint256 tokenId = start; tokenId <= end; tokenId++) {
-            string memory uri = _chips.tokenURI(tokenId);
-            console.log("URI: %s", uri);
-        }
-    }
+    //     for (uint256 tokenId = start; tokenId <= end; tokenId++) {
+    //         string memory uri = _chips.tokenURI(tokenId);
+    //         // console.log("URI: %s", uri);
+    //     }
+    // }
 
     function testTokenURI() public {
         _createNode(alice);

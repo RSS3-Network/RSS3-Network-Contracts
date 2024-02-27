@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable quotes
 pragma solidity 0.8.20;
 
 import {IStaking} from "./interfaces/IStaking.sol";
@@ -14,6 +15,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
 contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable {
     using Math for uint256;
@@ -425,6 +427,19 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
         return _nodes[nodeAddr];
+    }
+
+    function getNodeAvatar(address nodeAddr) external view override returns (string memory) {
+        (string memory image, string memory attributes) = IChips(_chips).nodeImageAndAttributes(nodeAddr);
+        string memory json = string.concat(
+            '{"name": "Node Avatar", "image":"data:image/svg+xml;base64,',
+            Base64.encode(bytes(image)),
+            '", "attributes": [',
+            attributes,
+            "]}"
+        );
+
+        return string.concat("data:application/json;base64,", Base64.encode(bytes(string.concat(json))));
     }
 
     /// @inheritdoc IStaking

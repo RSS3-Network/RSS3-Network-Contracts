@@ -229,6 +229,13 @@ interface IStaking {
     function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
 
     /**
+     * @notice Gets node avatar data by node address.
+     * @param nodeAddr Node address to query.
+     * @return string Node avatar info in json.
+     */
+    function getNodeAvatar(address nodeAddr) external view returns (string memory);
+
+    /**
      * @notice Gets nodes info by node addresses.
      * @param nodeAddrs Node addresses to query.
      * @return DataTypes.Node[] Nodes info.

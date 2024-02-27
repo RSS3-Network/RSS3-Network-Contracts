@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable comprehensive-interface
+// solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
@@ -9,8 +9,14 @@ import {Staking} from "../src/Staking.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {IErrors} from "../src/interfaces/IErrors.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
+import {LibString} from "solady/utils/LibString.sol";
+import {Base64} from "solady/utils/Base64.sol";
+import {stdJson} from "forge-std/StdJson.sol";
+import {console2 as console} from "forge-std/console2.sol";
 
 contract StakingTest is CommonTest, IErrors, IERC721Errors {
+    using stdJson for string;
+
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
 
@@ -76,6 +82,28 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         // check node info
         _checkNode(alice, name, description, taxRateBasisPoints, 0, publicGood);
         assertEq(_staking.getNodeCount(), 1);
+    }
+
+    function testNodeAvatar() public {
+        string memory nodeAvatarURI = _staking.getNodeAvatar(bob);
+        string memory base64prefix = "data:application/json;base64,";
+
+        string memory decodedTokenURI = string(
+            Base64.decode(LibString.slice(nodeAvatarURI, bytes(base64prefix).length))
+        );
+        assertEq(decodedTokenURI.readString(".name"), "Node Avatar");
+        string memory base64Image = decodedTokenURI.readString(".image");
+
+        string memory base64Imageprefix = "data:image/svg+xml;base64,";
+
+        string memory decodedImageURI = string(
+            Base64.decode(LibString.slice(base64Image, bytes(base64Imageprefix).length))
+        );
+        uint256 found1 = LibString.indexOf(decodedImageURI, "st-base-head{fill:#DEE5D9;}"); // head color white
+        assertEq(found1 != LibString.NOT_FOUND, true);
+
+        uint256 found2 = LibString.indexOf(decodedImageURI, "st-head{fill:#DEE5D9;}"); // head detail color white
+        assertEq(found2 != LibString.NOT_FOUND, true);
     }
 
     function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
