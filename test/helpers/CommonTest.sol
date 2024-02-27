@@ -23,7 +23,6 @@ contract CommonTest is Utils {
     address public constant proxyAdmin = address(0x777);
     address public constant pauseAccount = address(0x888);
     address public constant oracleAccount = address(0x999);
-    address public constant adminAccount = address(0xaaa);
 
     uint256 public constant stakeUnbondingPeriod = 22.5 days;
     uint256 public constant depositUnbondingPeriod = 22.5 days;
@@ -71,7 +70,7 @@ contract CommonTest is Utils {
             minDeposit,
             minTaxRateBasisPoints
         );
-        _internalStakingTest.initialize(address(_chips), pauseAccount, oracleAccount);
+        _internalStakingTest.initialize(address(_chips), address(_settlement), oracleAccount);
 
         // deploy and init Staking contract
         Staking stakingImpl = new Staking(
@@ -93,7 +92,7 @@ contract CommonTest is Utils {
                 "initialize(address,address,address)",
                 address(_chips),
                 pauseAccount,
-                oracleAccount
+                address(_settlement)
             )
         );
         _staking = Staking(payable(proxy));
@@ -105,15 +104,11 @@ contract CommonTest is Utils {
         uint256 totalRewards = (3 * _rss3.totalSupply()) / 100;
         _rss3.approve(address(_settlement), totalRewards);
 
-        _settlement.initialize(address(_staking), adminAccount, oracleAccount, block.timestamp, 20);
-
-        vm.startPrank(oracleAccount);
-        _staking.grantRole(_staking.ORACLE_ROLE(), address(_settlement));
-        vm.stopPrank();
+        _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
 
         _internalSettlementTest = new InternalSettlement();
 
-        _internalSettlementTest.initialize(address(_staking), adminAccount, oracleAccount, 0, 0);
+        _internalSettlementTest.initialize(address(_staking), oracleAccount, 0, 0);
 
         // label test accounts
         vm.label(alice, "alice");

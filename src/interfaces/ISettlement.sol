@@ -12,7 +12,6 @@ interface ISettlement {
      */
     function initialize(
         address staking,
-        address admin,
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
