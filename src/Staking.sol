@@ -425,6 +425,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return _nodes[nodeAddr];
     }
 
+    /// @inheritdoc IStaking
     function getNodeAvatar(address nodeAddr) external view override returns (string memory) {
         return IChips(_chips).nodeImageAndAttributesURI(nodeAddr);
     }
