@@ -629,20 +629,4 @@ contract SettlementTest is CommonTest, IErrors {
 
         assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
     }
-
-    function _getTreasuryAmount() internal returns (uint256) {
-        address treasury = _staking.TREASURY();
-
-        uint256 balanceBefore = address(treasury).balance;
-        _staking.withdraw2Treasury();
-        uint256 balanceAfter = address(treasury).balance;
-
-        return balanceAfter - balanceBefore;
-    }
-
-    function _deposit(address account, uint256 depositAmount) internal {
-        vm.deal(account, depositAmount);
-        vm.prank(account);
-        _staking.deposit{value: depositAmount}();
-    }
 }

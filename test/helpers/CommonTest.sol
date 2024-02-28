@@ -160,6 +160,22 @@ contract CommonTest is Utils {
         }
     }
 
+    function _deposit(address account, uint256 depositAmount) internal {
+        vm.deal(account, depositAmount);
+        vm.prank(account);
+        _staking.deposit{value: depositAmount}();
+    }
+
+    function _getTreasuryAmount() internal returns (uint256) {
+        address treasury_ = _staking.TREASURY();
+
+        uint256 balanceBefore = address(treasury_).balance;
+        _staking.withdraw2Treasury();
+        uint256 balanceAfter = address(treasury_).balance;
+
+        return balanceAfter - balanceBefore;
+    }
+
     function _denominator() internal pure virtual returns (uint96) {
         return 10000;
     }

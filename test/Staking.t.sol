@@ -838,47 +838,46 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assert(minTokens > _staking.SHARES_PER_CHIP());
     }
 
+    function testDistributeRewardsFailInvalidArrayLength() public {
+        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
+        vm.prank(address(_settlement));
+        _staking.distributeRewards(
+            [uint256(1), uint256(1), uint256(2)],
+            array(alice, bob),
+            array(1),
+            array(1, 1),
+            array(1, 1),
+            1 ether // public pool reward
+        );
+    }
+
     function testWithdraw2Treasury(uint256 amount) public {
         vm.assume(amount > 0);
 
         vm.deal(address(_staking), amount);
-
-        // (, , uint256 treasuryAmount) = _staking.getPoolInfo();
-        // assertEq(treasuryAmount, amount);
 
         _staking.withdraw2Treasury();
         assertEq(treasury.balance, amount);
     }
 
     function testSlashNodes() public {
-        _createNode(alice);
-        _createNode(bob);
-
         uint256 depositedTokens = 10000 ether;
         uint256 stakedTokens = 40000 ether;
 
-        vm.startPrank(alice);
-        _staking.deposit{value: depositedTokens}();
-        vm.stopPrank();
+        _createNode(alice);
+        _createNode(bob);
 
-        vm.startPrank(bob);
-        _staking.deposit{value: depositedTokens}();
-        vm.stopPrank();
+        _deposit(alice, depositedTokens);
+        _deposit(bob, depositedTokens);
 
-        vm.startPrank(carol);
         _staking.stake{value: stakedTokens}(alice);
         _staking.stake{value: stakedTokens}(bob);
-        vm.stopPrank();
 
         uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
         uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
 
-        vm.startPrank(address(_settlement));
-
-        address[] memory nodeAddrs = new address[](2);
-        nodeAddrs[0] = alice;
-        nodeAddrs[1] = bob;
-
+        // slash
+        address[] memory nodeAddrs = array(alice, bob);
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             expectEmit();
             emit Events.NodeSlashed(
@@ -887,8 +886,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
                 expectedSlashedTokensOnStakingPool
             );
         }
+        vm.prank(address(_settlement));
         _staking.slashNodes(nodeAddrs);
-        vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
         assertEq(node.slashedTokens, expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool);
@@ -899,7 +898,10 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         (uint256 totalOperationTokens, uint256 totalStakingTokens) = _staking.getPoolInfo();
         assertEq(totalOperationTokens, 2 * depositedTokens - 2 * expectedSlashedTokensOnOperationPool);
         assertEq(totalStakingTokens, 2 * stakedTokens - 2 * expectedSlashedTokensOnStakingPool);
-        // assertEq(treasuryAmount, (expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) * 2);
+
+        // check treasury
+        uint256 treasuryAmount = _getTreasuryAmount();
+        assertEq(treasuryAmount, (expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) * 2);
     }
 
     function testCalcTax1(uint256 operationPool) public {
