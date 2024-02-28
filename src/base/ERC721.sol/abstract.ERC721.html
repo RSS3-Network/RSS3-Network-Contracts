@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="erc721"><a class="header" href="#erc721">ERC721</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/f4055a1a5284f34238bce3939cd2456f8db92202/src/base/ERC721.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/5e8ada8b73ab353fc2d38831dc4db698140b07ba/src/base/ERC721.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Context, ERC165, IERC721, IERC721Metadata, <a href="/src/interfaces/IERC721Errors.sol/interface.IERC721Errors.html">IERC721Errors</a></p>
 <p><em>Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
@@ -230,13 +230,7 @@ the Metadata extension, but not including the Enumerable extension, which is ava
 </code></pre>
 <h3 id="tokenuri"><a class="header" href="#tokenuri">tokenURI</a></h3>
 <p><em>See <a href="/lib/solady/src/tokens/ERC721.sol/abstract.ERC721.html#tokenuri">IERC721Metadata-tokenURI</a>.</em></p>
-<pre><code class="language-solidity">function tokenURI(uint256 tokenId) public view virtual returns (string memory);
-</code></pre>
-<h3 id="_baseuri"><a class="header" href="#_baseuri">_baseURI</a></h3>
-<p><em>Base URI for computing <a href="/src/base/ERC721.sol/abstract.ERC721.html#tokenuri">tokenURI</a>. If set, the resulting URI for each
-token will be the concatenation of the <code>baseURI</code> and the <code>tokenId</code>. Empty
-by default, can be overridden in child contracts.</em></p>
-<pre><code class="language-solidity">function _baseURI() internal view virtual returns (string memory);
+<pre><code class="language-solidity">function tokenURI(uint256) public view virtual returns (string memory);
 </code></pre>
 <h3 id="approve"><a class="header" href="#approve">approve</a></h3>
 <p><em>See <a href="/lib/solady/src/tokens/ERC721.sol/abstract.ERC721.html#approve">IERC721-approve</a>.</em></p>
@@ -269,7 +263,7 @@ by default, can be overridden in child contracts.</em></p>
 <h3 id="_ownerof"><a class="header" href="#_ownerof">_ownerOf</a></h3>
 <p><em>Returns the owner of the <code>tokenId</code>. Does NOT revert if token doesn't exist
 IMPORTANT: Any overrides to this function that add ownership of tokens not tracked by the
-core ERC721 logic MUST be matched with the use of <a href="/src/base/ERC721.sol/abstract.ERC721.html#_increasebalance">_increaseBalance</a> to keep balances
+core ERC721 logic MUST be matched with the use of {_increaseBalance} to keep balances
 consistent with ownership. The invariant to preserve is that for any address <code>a</code> the value returned by
 <code>balanceOf(a)</code> must be equal to the number of tokens such that <code>_ownerOf(tokenId)</code> is <code>a</code>.</em></p>
 <pre><code class="language-solidity">function _ownerOf(uint256 tokenId) internal view virtual returns (address);
@@ -293,15 +287,6 @@ WARNING: This function assumes that <code>owner</code> is the actual owner of <c
 assumption.</em></p>
 <pre><code class="language-solidity">function _checkAuthorized(address owner, address spender, uint256 tokenId) internal view virtual;
 </code></pre>
-<h3 id="_increasebalance"><a class="header" href="#_increasebalance">_increaseBalance</a></h3>
-<p><em>Unsafe write access to the balances, used by extensions that "mint" tokens using an <a href="/src/base/ERC721.sol/abstract.ERC721.html#ownerof">ownerOf</a> override.
-NOTE: the value is limited to type(uint128).max. This protect against _balance overflow. It is unrealistic that
-a uint256 would ever overflow from increments when these increments are bounded to uint128 values.
-WARNING: Increasing an account's balance using this function tends to be paired with an override of the
-{_ownerOf} function to resolve the ownership of the corresponding tokens so that balances and ownership
-remain consistent with one another.</em></p>
-<pre><code class="language-solidity">function _increaseBalance(address account, uint128 value) internal virtual;
-</code></pre>
 <h3 id="_update"><a class="header" href="#_update">_update</a></h3>
 <p><em>Transfers <code>tokenId</code> from its current owner to <code>to</code>, or alternatively mints (or burns) if the current owner
 (or <code>to</code>) is the zero address. Returns the owner of the <code>tokenId</code> before the update.
@@ -313,7 +298,7 @@ NOTE: If overriding this function in a way that tracks balances, see also {_incr
 </code></pre>
 <h3 id="_mint"><a class="header" href="#_mint">_mint</a></h3>
 <p>*Mints <code>tokenId</code> and transfers it to <code>to</code>.
-WARNING: Usage of this method is discouraged, use <a href="/src/base/ERC721.sol/abstract.ERC721.html#_safemint">_safeMint</a> whenever possible
+WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
 Requirements:</p>
 <ul>
 <li><code>tokenId</code> must not exist.</li>
@@ -325,22 +310,6 @@ Emits a {Transfer} event.*</li>
 <h3 id="_mintconsecutive"><a class="header" href="#_mintconsecutive">_mintConsecutive</a></h3>
 <p><em>Mints tokens with consecutive tokenIds in the range [startTokenId, endTokenId] and transfers them to <code>to</code>.</em></p>
 <pre><code class="language-solidity">function _mintConsecutive(address to, uint256 startTokenId, uint256 endTokenId) internal;
-</code></pre>
-<h3 id="_safemint"><a class="header" href="#_safemint">_safeMint</a></h3>
-<p>*Mints <code>tokenId</code>, transfers it to <code>to</code> and checks for <code>to</code> acceptance.
-Requirements:</p>
-<ul>
-<li><code>tokenId</code> must not exist.</li>
-<li>If <code>to</code> refers to a smart contract, it must implement <a href="/lib/solady/test/ERC721.t.sol/abstract.ERC721TokenReceiver.html#onerc721received">IERC721Receiver-onERC721Received</a>,
-which is called upon a safe transfer.
-Emits a {Transfer} event.*</li>
-</ul>
-<pre><code class="language-solidity">function _safeMint(address to, uint256 tokenId) internal;
-</code></pre>
-<h3 id="_safemint-1"><a class="header" href="#_safemint-1">_safeMint</a></h3>
-<p><em>Same as <a href="/lib/solady/src/tokens/ERC721.sol/abstract.ERC721.html#_safemint"><code>_safeMint</code></a>, with an additional <code>data</code> parameter which is
-forwarded in {IERC721Receiver-onERC721Received} to contract recipients.</em></p>
-<pre><code class="language-solidity">function _safeMint(address to, uint256 tokenId, bytes memory data) internal virtual;
 </code></pre>
 <h3 id="_burn"><a class="header" href="#_burn">_burn</a></h3>
 <p>*Destroys <code>tokenId</code>.
@@ -363,30 +332,6 @@ Requirements:</p>
 Emits a {Transfer} event.*</li>
 </ul>
 <pre><code class="language-solidity">function _transfer(address from, address to, uint256 tokenId) internal;
-</code></pre>
-<h3 id="_safetransfer"><a class="header" href="#_safetransfer">_safeTransfer</a></h3>
-<p>*Safely transfers <code>tokenId</code> token from <code>from</code> to <code>to</code>, checking that contract recipients
-are aware of the ERC721 standard to prevent tokens from being forever locked.
-<code>data</code> is additional data, it has no specified format and it is sent in call to <code>to</code>.
-This internal function is like <a href="/src/base/ERC721.sol/abstract.ERC721.html#safetransferfrom">safeTransferFrom</a> in the sense that it invokes
-{IERC721Receiver-onERC721Received} on the receiver, and can be used to e.g.
-implement alternative mechanisms to perform token transfer, such as signature-based.
-Requirements:</p>
-<ul>
-<li><code>tokenId</code> token must exist and be owned by <code>from</code>.</li>
-<li><code>to</code> cannot be the zero address.</li>
-<li><code>from</code> cannot be the zero address.</li>
-<li>If <code>to</code> refers to a smart contract, it must implement {IERC721Receiver-onERC721Received},
-which is called upon a safe transfer.
-Emits a {Transfer} event.*</li>
-</ul>
-<pre><code class="language-solidity">function _safeTransfer(address from, address to, uint256 tokenId) internal;
-</code></pre>
-<h3 id="_safetransfer-1"><a class="header" href="#_safetransfer-1">_safeTransfer</a></h3>
-<p><em>Same as <a href="/lib/solady/src/tokens/ERC721.sol/abstract.ERC721.html#_safetransfer"><code>_safeTransfer</code></a>,
-with an additional <code>data</code> parameter which is forwarded in {IERC721Receiver-onERC721Received}
-to contract recipients.</em></p>
-<pre><code class="language-solidity">function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal virtual;
 </code></pre>
 <h3 id="_approve"><a class="header" href="#_approve">_approve</a></h3>
 <p><em>Approve <code>to</code> to operate on <code>tokenId</code>
