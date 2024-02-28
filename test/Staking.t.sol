@@ -252,6 +252,49 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(_staking.getNodeCount(), 1);
     }
 
+    function testUpdateNode() public {
+        _createNode(alice);
+        uint256 dpAmount = 5000 ether;
+        uint256 stAmount = 60000 ether;
+
+        vm.prank(alice);
+        _staking.deposit{value: dpAmount}();
+
+        vm.prank(bob);
+        _staking.stake{value: stAmount}(alice);
+
+        DataTypes.Node memory node = _staking.getNode(alice);
+        assertEq(node.publicGood, false);
+        assertEq(node.operationPoolTokens, dpAmount);
+        assertEq(node.stakingPoolTokens, stAmount);
+
+        expectEmit();
+        emit Events.WithdrawRequested(alice, dpAmount, 1);
+        emit Events.NodeUpdated2PublicGood(alice);
+        vm.prank(alice);
+        _staking.updateToPublicGood();
+
+        vm.stopPrank();
+
+        DataTypes.Node memory updatedNode = _staking.getNode(alice);
+        DataTypes.Node memory publicPool = _staking.getPublicPool();
+        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
+
+        assertEq(updatedNode.publicGood, true);
+        assertEq(updatedNode.operationPoolTokens, 0);
+
+        assertEq(updatedNode.stakingPoolTokens, 0);
+        assertEq(publicPool.stakingPoolTokens, stAmount);
+
+        assertEq(totalOperationPoolTokens, 0);
+        assertEq(totalStakingPoolTokens, stAmount);
+
+        DataTypes.WithdrawalRequest memory pendingWithdrawl = _staking.getPendingWithdrawal(1);
+        assertEq(pendingWithdrawl.owner, alice);
+        assertEq(pendingWithdrawl.amount, dpAmount);
+        assertEq(pendingWithdrawl.timestamp, block.timestamp);
+    }
+
     function testCreateNodeFailWithMultipleNodes() public {
         _createNode(alice);
 
@@ -876,7 +919,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
         uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
 
-        // slash
         address[] memory nodeAddrs = array(alice, bob);
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             expectEmit();

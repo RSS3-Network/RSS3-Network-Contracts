@@ -51,6 +51,9 @@ interface IErrors {
     /// @dev Node is not public good node.
     error NodeNotPublicGood(address nodeAddr);
 
+    /// @dev Node is already public good node.
+    error NodeAlreadyPublicGood(address nodeAddr);
+
     /// @dev Excess withdrawal amount.
     error ExcessWithdrawalAmount();
 
