@@ -175,12 +175,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         node.publicGood = true;
 
-        _decreaseStakingPool(node, node.operationPoolTokens);
-        _increaseStakingPool(_publicPool, node.operationPoolTokens);
+        uint256 stakingTokens = node.stakingPoolTokens;
+        _decreaseStakingPool(node, stakingTokens);
+        _increaseStakingPool(_publicPool, stakingTokens);
 
         if (node.operationPoolTokens > 0) {
-            _decreaseOperationPool(node, node.operationPoolTokens);
-            _transfer(addr, node.operationPoolTokens);
+            _requestWithdrawl(node, node.operationPoolTokens);
         }
 
         emit Events.NodeUpdated2PublicGood(addr);
@@ -218,16 +218,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         //  withdrawal amount should not exceed the operation pool tokens
         if (amount > node.operationPoolTokens) revert ExcessWithdrawalAmount();
 
-        _decreaseOperationPool(node, amount);
-
-        requestId = ++_pendingWithdrawalCounter;
-
-        DataTypes.WithdrawalRequest storage req = _pendingWithdrawals[requestId];
-        req.timestamp = uint40(block.timestamp);
-        req.owner = msg.sender;
-        req.amount = amount;
-
-        emit Events.WithdrawRequested(msg.sender, amount, requestId);
+        return _requestWithdrawl(node, amount);
     }
 
     /// @inheritdoc IStaking
@@ -494,6 +485,21 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
         return _chips;
+    }
+
+    function _requestWithdrawl(DataTypes.Node storage node, uint256 amount) internal returns (uint256 requestId) {
+        _decreaseOperationPool(node, amount);
+
+        requestId = ++_pendingWithdrawalCounter;
+
+        DataTypes.WithdrawalRequest storage req = _pendingWithdrawals[requestId];
+        req.timestamp = uint40(block.timestamp);
+        req.owner = node.account;
+        req.amount = amount;
+
+        emit Events.WithdrawRequested(node.account, amount, requestId);
+
+        return requestId;
     }
 
     /// @dev increase operation pool tokens of a node, and total operation pool tokens
