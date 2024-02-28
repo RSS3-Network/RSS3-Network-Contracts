@@ -50,7 +50,7 @@ interface IStaking {
     /**
      * @notice Updates node of msg.sender to the public good node.
      */
-    function update2PublicGood() external;
+    function updateToPublicGood() external;
 
     /**
      * @notice Deposits tokens for node operator.

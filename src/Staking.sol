@@ -167,7 +167,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (msg.value > 0) _deposit(msg.sender, msg.value);
     }
 
-    function update2PublicGood() external override whenNotPaused {
+    function updateToPublicGood() external override whenNotPaused {
         address addr = msg.sender;
 
         DataTypes.Node storage node = _nodes[addr];
@@ -181,7 +181,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (node.operationPoolTokens > 0) {
             _decreaseOperationPool(node, node.operationPoolTokens);
             _transfer(addr, node.operationPoolTokens);
-
         }
 
         emit Events.NodeUpdated2PublicGood(addr);
