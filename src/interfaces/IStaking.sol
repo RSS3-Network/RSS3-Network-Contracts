@@ -48,6 +48,11 @@ interface IStaking {
     ) external payable;
 
     /**
+     * @notice Updates node of msg.sender to the public good node.
+     */
+    function update2PublicGood() external;
+
+    /**
      * @notice Deposits tokens for node operator.
      * msg.value carries the amount of tokens to deposit.
      *

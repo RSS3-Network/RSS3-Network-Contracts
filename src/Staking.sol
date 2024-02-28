@@ -167,11 +167,31 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (msg.value > 0) _deposit(msg.sender, msg.value);
     }
 
+    function update2PublicGood() external override whenNotPaused {
+        address addr = msg.sender;
+
+        DataTypes.Node storage node = _nodes[addr];
+        if (node.account == address(0)) revert NodeNotExists();
+
+        node.publicGood = true;
+
+        _decreaseStakingPool(node, node.operationPoolTokens);
+        _increaseStakingPool(_publicPool, node.operationPoolTokens);
+
+        if (node.operationPoolTokens > 0) {
+            _decreaseOperationPool(node, node.operationPoolTokens);
+            _transfer(addr, node.operationPoolTokens);
+
+        }
+
+        emit Events.NodeUpdated2PublicGood(addr);
+    }
+
     /// @inheritdoc IStaking
     function deleteNode() external override whenNotPaused {
         address addr = msg.sender;
         DataTypes.Node storage node = _nodes[addr];
-        if (address(0) == node.account) revert NodeNotExists();
+        if (node.account == address(0)) revert NodeNotExists();
 
         // can't delete a node with staked or deposited tokens
         if (node.operationPoolTokens > 0 || node.stakingPoolTokens > 0) revert NodeStakedOrDeposited();

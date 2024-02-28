@@ -252,6 +252,42 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         assertEq(_staking.getNodeCount(), 1);
     }
 
+    function testUpdateNode() public {
+        _createNode(alice);
+        uint256 amount = 5000 ether;
+
+        vm.prank(alice);
+        _staking.deposit{value: amount}();
+
+        vm.prank(bob);
+        _staking.stake{value: amount}(alice);
+
+        DataTypes.Node memory node = _staking.getNode(alice);
+        assertEq(node.publicGood, false);
+        assertEq(node.operationPoolTokens, amount);
+        assertEq(node.stakingPoolTokens, amount);
+
+        expectEmit();
+        emit Events.NodeUpdated2PublicGood(alice);
+        vm.prank(alice);
+        _staking.update2PublicGood();
+
+        vm.stopPrank();
+
+        DataTypes.Node memory updatedNode = _staking.getNode(alice);
+        DataTypes.Node memory publicPool = _staking.getPublicPool();
+        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
+
+        assertEq(updatedNode.publicGood, true);
+        assertEq(updatedNode.operationPoolTokens, 0);
+
+        assertEq(updatedNode.stakingPoolTokens, 0);
+        assertEq(publicPool.stakingPoolTokens, amount);
+
+        assertEq(totalOperationPoolTokens, 0);
+        assertEq(totalStakingPoolTokens, amount);
+    }
+
     function testCreateNodeFailWithMultipleNodes() public {
         _createNode(alice);
 
@@ -876,7 +912,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
         uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
 
-        // slash
         address[] memory nodeAddrs = array(alice, bob);
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             expectEmit();

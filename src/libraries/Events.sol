@@ -19,6 +19,12 @@ library Events {
     );
 
     /**
+     * @dev Emitted on update2PublicGood()
+     * @param nodeAddr Address of node operator.
+     */
+    event NodeUpdated2PublicGood(address indexed nodeAddr);
+
+    /**
      * @dev Emitted on deleteNode()
      * @param nodeAddr Address of node operator deleted.
      */
