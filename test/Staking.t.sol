@@ -19,8 +19,12 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
+    event Paused(address account);
+    event Unpaused(address account);
 
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
+    error EnforcedPause();
+    error ExpectedPause();
 
     function setUp() public {
         _setUp();
@@ -65,6 +69,128 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
                     slashedTokens: 0
                 })
             )
+        );
+    }
+
+    function testPause() public {
+        // expect events
+        expectEmit(CheckAll);
+        emit Paused(pauseAccount);
+        vm.prank(pauseAccount);
+        _staking.pause();
+
+        // check paused
+        assertEq(_staking.paused(), true);
+    }
+
+    function testPauseFail() public {
+        // case 1: caller is not PAUSE_ROLE
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), PAUSE_ROLE));
+        _staking.pause();
+        // check paused
+        assertEq(_staking.paused(), false);
+
+        // pause staking contract
+        vm.startPrank(pauseAccount);
+        _staking.pause();
+        // case 2: staking contract has been paused
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.pause();
+        vm.stopPrank();
+    }
+
+    function testUnpause() public {
+        vm.prank(pauseAccount);
+        _staking.pause();
+        // check paused
+        assertEq(_staking.paused(), true);
+
+        // expect events
+        expectEmit(CheckAll);
+        emit Unpaused(pauseAccount);
+        vm.prank(pauseAccount);
+        _staking.unpause();
+
+        // check paused
+        assertEq(_staking.paused(), false);
+    }
+
+    function testUnpauseFail() public {
+        // case 1: _staking not paused
+        vm.expectRevert(abi.encodeWithSelector(ExpectedPause.selector));
+        _staking.unpause();
+        // check paused
+        assertEq(_staking.paused(), false);
+
+        // case 2: caller has no `PAUSE_ROLE` permission
+        vm.prank(pauseAccount);
+        _staking.pause();
+        // check paused
+        assertEq(_staking.paused(), true);
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), PAUSE_ROLE));
+        _staking.unpause();
+        // check paused
+        assertEq(_staking.paused(), true);
+    }
+
+    function testDoFailWhenPaused() public {
+        // users can't do specific operations when the contract is paused
+        vm.prank(pauseAccount);
+        _staking.pause();
+
+        // case 1: create node
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.createNode("Alice", "Alice's node", 100, false);
+
+        // case 2: deposit
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.deposit{value: 100}();
+
+        // case 3: delete node
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.deleteNode();
+
+        // case 4: request withdrawal
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.requestWithdrawal(100);
+
+        // case 5: claim withdrawal
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.claimWithdrawal(new uint256[](0));
+
+        // case 6: set tax rate
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.setTaxRateBasisPoints4Node(100);
+
+        // case 7: stake
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.stake{value: 100}(alice);
+
+        // case 8: stake to public pool
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.stakeToPublicPool{value: 100}(alice);
+
+        // case 9: set settlement phase
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.setSettlementPhase(true);
+
+        // case 10: unstake
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.requestUnstake(alice, new uint256[](1));
+
+        // case 11: claim unstake
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.claimUnstake(new uint256[](1));
+
+        // case 12: distribute rewards
+        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
+        _staking.distributeRewards(
+            [uint256(1), uint256(1), uint256(2)],
+            array(alice, bob),
+            array(1, 1),
+            array(1, 1),
+            array(1, 1),
+            1 ether // public pool reward
         );
     }
 

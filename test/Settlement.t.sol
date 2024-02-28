@@ -57,13 +57,8 @@ contract SettlementTest is CommonTest, IErrors {
     }
 
     function testUpdateRewardsRatioFail() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                address(this),
-                0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1
-            )
-        );
+        // caller has no `ORACLE_ROLE` permission
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
         _settlement.updateRewardsRatio(1);
     }
 
@@ -87,13 +82,7 @@ contract SettlementTest is CommonTest, IErrors {
     }
 
     function testSetTaxRateBasisPoints4PublicPoolFail() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                address(this),
-                0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
         _settlement.setTaxRateBasisPoints4PublicPool(array(alice, bob, carol, dave));
 
         address[] memory emptyArray;
@@ -352,6 +341,18 @@ contract SettlementTest is CommonTest, IErrors {
                 "check balance failed"
             );
         }
+    }
+
+    function testDistributeRewardsFailNoPermission() public {
+        // caller has no `ORACLE_ROLE` permission
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _settlement.distributeRewards(
+            1,
+            array(alice), // node addresses
+            array(1, 1), // request fees
+            array(100), // operation rewards
+            false
+        );
     }
 
     function testDistributeRewardsFailInvalidArrayLength() public {

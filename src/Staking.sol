@@ -477,21 +477,25 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return _chips;
     }
 
+    /// @dev increase operation pool tokens of a node, and total operation pool tokens
     function _increaseOperationPool(DataTypes.Node storage node, uint256 amount) internal {
         node.operationPoolTokens += amount;
         _totalOperationPoolTokens += amount;
     }
 
+    /// @dev decrease operation pool tokens of a node, and total operation pool tokens
     function _decreaseOperationPool(DataTypes.Node storage node, uint256 amount) internal {
         node.operationPoolTokens -= amount;
         _totalOperationPoolTokens -= amount;
     }
 
+    /// @dev increase staking pool tokens of a node, and total staking pool tokens
     function _increaseStakingPool(DataTypes.Node storage node, uint256 amount) internal {
         node.stakingPoolTokens += amount;
         _totalStakingPoolTokens += amount;
     }
 
+    /// @dev decrease staking pool tokens of a node, and total staking pool tokens
     function _decreaseStakingPool(DataTypes.Node storage node, uint256 amount) internal {
         node.stakingPoolTokens -= amount;
         _totalStakingPoolTokens -= amount;
@@ -547,6 +551,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return taxAmounts;
     }
 
+    /// @dev unstake from a node by burning chips
     function _unstakeFromNode(address nodeAddr, uint256[] calldata chipsIds) internal returns (uint256 requestId) {
         _checkUnstakeConditions(nodeAddr, chipsIds);
 
@@ -599,6 +604,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         emit Events.NodeCreated(nodeAddr, name, description, taxRateBasisPoints, publicGood);
     }
 
+    /// @dev deposit tokens to a node
     function _deposit(address nodeAddr, uint256 amount) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
@@ -677,10 +683,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
+    /// @dev checks whether user is token owner or approved
     function _checkAuthorized(uint256 tokenId, address user) internal view returns (bool) {
         return (IERC721(_chips).ownerOf(tokenId) == user || IERC721(_chips).getApproved(tokenId) == user);
     }
 
+    /// @dev checks that:
+    /// 1. caller has the authorization to unstake the chips
+    /// 2. chips are issued by the node
     function _checkUnstakeConditions(address nodeAddr, uint256[] calldata chipsIds) internal view {
         // check conditions
         for (uint256 i = 0; i < chipsIds.length; i++) {
@@ -691,6 +701,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
+    /// @dev returns the node address which issued the chips
     function _issuerOf(uint256 tokenId) internal view returns (address) {
         // check the token was not burned, and fetch ownership from the anchors
         // Note: no need for safe cast, we know that tokenId <= type(uint96).max
@@ -743,6 +754,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
+    /// @dev returns the full tax amount
     function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
         return (rewards * taxRateBasisPoints) / _denominator();
     }
@@ -766,7 +778,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /**
-     * @dev doniminator
+     * @dev denominator
      */
     function _denominator() internal pure virtual returns (uint64) {
         return 10000;
