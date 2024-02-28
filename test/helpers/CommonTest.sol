@@ -53,12 +53,47 @@ contract CommonTest is Utils {
     function _setUp() internal {
         // deploy rss3 token
         _rss3 = new RSS3Token(address(this));
-        // deploy chips token
-        _chips = new Chips();
-        // deploy account oracle
-        _settlement = new Settlement();
 
-        // _svgGenerator = new SVGGenerator();
+        // deploy Staking contract
+        Staking stakingImpl = new Staking(
+            treasury,
+            stakeRatio,
+            stakeUnbondingPeriod,
+            depositUnbondingPeriod,
+            nodeSlashRateBasisPoints,
+            userSlashRateBasisPoints,
+            minDeposit,
+            minTaxRateBasisPoints
+        );
+        // deploy chips token
+        Chips chipsImpl = new Chips();
+        // deploy settlement contract
+        Settlement settlementImpl = new Settlement();
+
+        // deploy staking proxy
+        TransparentUpgradeableProxy stakingProxy = new TransparentUpgradeableProxy(
+            address(stakingImpl),
+            proxyAdmin,
+            ""
+        );
+        _staking = Staking(payable(stakingProxy));
+
+        // deploy chips proxy
+        TransparentUpgradeableProxy chipsProxy = new TransparentUpgradeableProxy(address(chipsImpl), proxyAdmin, "");
+        _chips = Chips(payable(chipsProxy));
+
+        // deploy settlement proxy
+        TransparentUpgradeableProxy settlementProxy = new TransparentUpgradeableProxy(
+            address(settlementImpl),
+            proxyAdmin,
+            ""
+        );
+        _settlement = Settlement(payable(settlementProxy));
+
+        // init
+        _staking.initialize(address(_chips), pauseAccount, address(_settlement));
+        _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
+        _chips.initialize(chipsName, chipsSymbol, address(_staking));
 
         _internalStakingTest = new InternalStaking(
             treasury,
@@ -72,42 +107,7 @@ contract CommonTest is Utils {
         );
         _internalStakingTest.initialize(address(_chips), address(_settlement), oracleAccount);
 
-        // deploy and init Staking contract
-        Staking stakingImpl = new Staking(
-            treasury,
-            stakeRatio,
-            stakeUnbondingPeriod,
-            depositUnbondingPeriod,
-            nodeSlashRateBasisPoints,
-            userSlashRateBasisPoints,
-            minDeposit,
-            minTaxRateBasisPoints
-        );
-
-        TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(
-            address(stakingImpl),
-            proxyAdmin,
-            abi.encodeWithSignature(
-                // solhint-disable-next-line max-line-length
-                "initialize(address,address,address)",
-                address(_chips),
-                pauseAccount,
-                address(_settlement)
-            )
-        );
-        _staking = Staking(payable(proxy));
-
-        // init chips token
-        _chips.initialize(chipsName, chipsSymbol, address(_staking));
-
-        // init account oracle
-        uint256 totalRewards = (3 * _rss3.totalSupply()) / 100;
-        _rss3.approve(address(_settlement), totalRewards);
-
-        _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
-
         _internalSettlementTest = new InternalSettlement();
-
         _internalSettlementTest.initialize(address(_staking), oracleAccount, 0, 0);
 
         // label test accounts

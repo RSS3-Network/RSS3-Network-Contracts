@@ -5,6 +5,7 @@ pragma solidity 0.8.20;
 import {console} from "forge-std/console.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {IErrors} from "../src/interfaces/IErrors.sol";
+import {Events} from "../src/libraries/Events.sol";
 
 contract SettlementTest is CommonTest, IErrors {
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -109,11 +110,8 @@ contract SettlementTest is CommonTest, IErrors {
         _createNode(alice);
         _createNode(bob);
 
-        vm.prank(alice);
-        _staking.deposit{value: depositAmount}();
-
-        vm.prank(bob);
-        _staking.deposit{value: depositAmount}();
+        _deposit(alice, depositAmount);
+        _deposit(bob, depositAmount);
 
         _staking.stake{value: stakeAmount}(alice);
         _staking.stake{value: stakeAmount}(bob);
@@ -149,29 +147,29 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward),
             array(stakingReward, stakingReward)
         );
+
+        // check treasury amount
+        uint256 treasuryAmount = _getTreasuryAmount();
+        assertEq(treasuryAmount, 0);
     }
 
     function testDistributeRewardsMultiple() public {
         uint256 depositAmount = 10000 ether;
         uint256 stakeAmount = 10000 ether;
 
+        // create node
         _createNode(alice);
         _createNode(bob);
         _createNode(carol);
         _createNode(dave);
 
-        vm.prank(alice);
-        _staking.deposit{value: depositAmount}();
+        // deposit
+        _deposit(alice, depositAmount);
+        _deposit(bob, depositAmount);
+        _deposit(carol, depositAmount);
+        _deposit(dave, depositAmount);
 
-        vm.prank(bob);
-        _staking.deposit{value: depositAmount}();
-
-        vm.prank(carol);
-        _staking.deposit{value: depositAmount}();
-
-        vm.prank(dave);
-        _staking.deposit{value: depositAmount}();
-
+        // stake
         _staking.stake{value: stakeAmount}(alice);
         _staking.stake{value: stakeAmount}(bob);
         _staking.stake{value: stakeAmount}(carol);
@@ -192,7 +190,6 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward), // operation rewards
             false
         );
-
         assertEq(_staking.isSettlementPhase(), true);
 
         _settlement.distributeRewards{value: requestFee * 2}(
@@ -202,10 +199,65 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward), // operation rewards
             true
         );
-
         assertEq(_staking.isSettlementPhase(), false);
-
         vm.stopPrank();
+
+        uint256 taxAmount = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
+
+        // check status
+        _checkDistribution(
+            array(depositAmount, depositAmount, depositAmount, depositAmount),
+            array(stakeAmount, stakeAmount, stakeAmount, stakeAmount),
+            array(alice, bob, carol, dave),
+            array(taxAmount, taxAmount, taxAmount, taxAmount),
+            array(requestFee, requestFee, requestFee, requestFee),
+            array(operationReward, operationReward, operationReward, operationReward),
+            array(stakingReward, stakingReward, stakingReward, stakingReward)
+        );
+
+        // check treasury amount
+        // treasury amount should be 0
+        uint256 treasuryAmount = _getTreasuryAmount();
+        assertApproxEqAbs(treasuryAmount, 0, 2); // 2 is the max diff
+    }
+
+    function testDistributeRewardsWithPartialNodeOffline() public {
+        uint256 depositAmount = 10000 ether;
+        uint256 stakeAmount = 10000 ether;
+
+        // create node
+        _createNode(alice);
+        _createNode(bob);
+        _createNode(carol);
+        _createNode(dave);
+
+        // deposit
+        _deposit(alice, depositAmount);
+        _deposit(bob, depositAmount);
+        _deposit(carol, depositAmount);
+        _deposit(dave, depositAmount);
+
+        // stake
+        _staking.stake{value: stakeAmount}(alice);
+        _staking.stake{value: stakeAmount}(bob);
+        _staking.stake{value: stakeAmount}(carol);
+        _staking.stake{value: stakeAmount}(dave);
+
+        skip(18 hours);
+
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        uint256 requestFee = 100 ether;
+        uint256 operationReward = operationRewardsPerEpoch / 4;
+        uint256 stakingReward = totalStakingRewardsPerEpoch / 4;
+
+        vm.prank(oracleAccount);
+        _settlement.distributeRewards{value: requestFee * 2}(
+            1,
+            array(alice, bob), // node addresses
+            array(requestFee, requestFee), // request fees
+            array(operationReward, operationReward), // operation rewards
+            true
+        );
 
         uint256 taxAmount = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
 
@@ -219,15 +271,21 @@ contract SettlementTest is CommonTest, IErrors {
             array(operationReward, operationReward),
             array(stakingReward, stakingReward)
         );
+        // carol and dave are offline, so their rewards should be 0
         _checkDistribution(
             array(depositAmount, depositAmount),
             array(stakeAmount, stakeAmount),
             array(carol, dave),
-            array(taxAmount, taxAmount),
-            array(requestFee, requestFee),
-            array(operationReward, operationReward),
-            array(stakingReward, stakingReward)
+            array(uint256(0), uint256(0)),
+            array(uint256(0), uint256(0)),
+            array(uint256(0), uint256(0)),
+            array(uint256(0), uint256(0))
         );
+
+        // check treasury amount
+        // stakingRewards and operationRewards of offline nodes will be added to treasury
+        uint256 treasuryAmount = _getTreasuryAmount();
+        assertApproxEqAbs(treasuryAmount, (stakingReward + operationReward) * 2, 2);
     }
 
     function testStakingBalanceWithDistributeRewards() public {
@@ -241,17 +299,10 @@ contract SettlementTest is CommonTest, IErrors {
         _createNode(dave);
 
         // deposit
-        vm.prank(alice);
-        _staking.deposit{value: depositAmount + 1}();
-
-        vm.prank(bob);
-        _staking.deposit{value: depositAmount + 2}();
-
-        vm.prank(carol);
-        _staking.deposit{value: depositAmount + 3}();
-
-        vm.prank(dave);
-        _staking.deposit{value: depositAmount + 4}();
+        _deposit(alice, depositAmount + 1);
+        _deposit(bob, depositAmount + 2);
+        _deposit(carol, depositAmount + 3);
+        _deposit(dave, depositAmount + 4);
 
         // stake
         _staking.stake{value: stakeAmount}(alice);
@@ -394,14 +445,9 @@ contract SettlementTest is CommonTest, IErrors {
         _createNode(carol);
 
         // deposit
-        vm.prank(alice);
-        _staking.deposit{value: depositAmount}();
-
-        vm.prank(bob);
-        _staking.deposit{value: depositAmount}();
-
-        vm.prank(carol);
-        _staking.deposit{value: depositAmount}();
+        _deposit(alice, depositAmount);
+        _deposit(bob, depositAmount);
+        _deposit(carol, depositAmount);
 
         // stake
         _staking.stake{value: stakeAmount}(alice);
@@ -446,11 +492,8 @@ contract SettlementTest is CommonTest, IErrors {
         _createNode(bob);
 
         // deposit
-        vm.prank(alice);
-        _staking.deposit{value: depositAmount}();
-
-        vm.prank(bob);
-        _staking.deposit{value: depositAmount}();
+        _deposit(alice, depositAmount);
+        _deposit(bob, depositAmount);
 
         // stake
         _staking.stake{value: stakeAmount}(alice);
@@ -479,6 +522,76 @@ contract SettlementTest is CommonTest, IErrors {
             false
         );
         vm.stopPrank();
+    }
+
+    function testDistributeRewardsWithEmptyEpoch() public {
+        uint256 depositAmount = 10000 ether;
+
+        // create node
+        _createNode(alice);
+        _createNode(bob);
+        _createPublicGoodNode(carol);
+
+        // deposit
+        _deposit(alice, depositAmount);
+        _deposit(bob, depositAmount);
+
+        // stake
+        _staking.stake{value: 10000 ether}(alice);
+        _staking.stake{value: 10000 ether}(bob);
+        _staking.stakeToPublicPool{value: 10000 ether}(carol);
+
+        // distribute rewards
+        uint256 startTime = block.timestamp;
+        skip(18 hours);
+        uint256 endTime = block.timestamp;
+
+        uint256 pgStakingPoolTokens = _staking.getPublicPool().stakingPoolTokens;
+        (, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
+        (uint256 totalOperationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        uint256 publicPoolReward = (pgStakingPoolTokens * totalStakingRewardsPerEpoch) / totalStakingPoolTokens;
+
+        uint256 balanceBeforeStaking = address(_staking).balance;
+        uint256 balanceBeforePublicPool = _staking.getPublicPool().stakingPoolTokens;
+
+        expectEmit();
+        emit Events.PublicGoodRewardDistributed(1, startTime, endTime, publicPoolReward, 0);
+        expectEmit();
+        emit Events.RewardDistributed(
+            1,
+            startTime,
+            endTime,
+            new address[](0),
+            new uint256[](0),
+            new uint256[](0),
+            new uint256[](0),
+            new uint256[](0)
+        );
+        vm.prank(oracleAccount);
+        _settlement.distributeRewards(1, new address[](0), new uint256[](0), new uint256[](0), false);
+
+        // check balance diff
+        uint256 balanceAfterStaking = address(_staking).balance;
+        assertEq(
+            balanceAfterStaking - balanceBeforeStaking,
+            totalOperationRewardsPerEpoch + totalStakingRewardsPerEpoch,
+            "check staking balance diff error"
+        );
+
+        uint256 balanceAfterPublicPool = _staking.getPublicPool().stakingPoolTokens;
+        assertEq(
+            balanceAfterPublicPool - balanceBeforePublicPool,
+            publicPoolReward,
+            "check public pool balance diff error"
+        );
+
+        // check treasury amount
+        uint256 treasuryAmount = _getTreasuryAmount();
+        assertEq(
+            treasuryAmount,
+            totalOperationRewardsPerEpoch + totalStakingRewardsPerEpoch - publicPoolReward,
+            "check treasury amount error"
+        );
     }
 
     function testStakingRewards(uint256 stakingAmount) public {
@@ -514,5 +627,21 @@ contract SettlementTest is CommonTest, IErrors {
         }
 
         assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
+    }
+
+    function _getTreasuryAmount() internal returns (uint256) {
+        address treasury = _staking.TREASURY();
+
+        uint256 balanceBefore = address(treasury).balance;
+        _staking.withdraw2Treasury();
+        uint256 balanceAfter = address(treasury).balance;
+
+        return balanceAfter - balanceBefore;
+    }
+
+    function _deposit(address account, uint256 depositAmount) internal {
+        vm.deal(account, depositAmount);
+        vm.prank(account);
+        _staking.deposit{value: depositAmount}();
     }
 }
