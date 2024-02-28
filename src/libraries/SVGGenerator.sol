@@ -48,8 +48,8 @@ library SVGGenerator {
         (string memory innerSVG2, string memory attributes2) = getChipTraitsInnerSVGAndAttributes(chipTraits);
 
         return (
-            string(abi.encodePacked(baseSVGHead, styleSVG, innerSVG1, innerSVG2, baseSVGTail)),
-            string(abi.encodePacked(attributes1, attributes2))
+            string.concat(baseSVGHead, styleSVG, innerSVG1, innerSVG2, baseSVGTail),
+            string.concat(attributes1, attributes2)
         );
     }
 
@@ -61,29 +61,25 @@ library SVGGenerator {
         (string memory frameSVGs, string memory frameTrait) = Frame.getFrame(nodeTraits.frameId);
         (string memory chipSVGs, string memory chipTrait) = ChipDetail.getChipDetail(nodeTraits.chipDetailId);
 
-        string memory innerSVG1 = string(
-            abi.encodePacked(
-                frameSVGs,
-                chipSVGs,
-                // chipDetailSVGs[nodeTraits.chipDetailId % chipDetailSVGs.length], chipCorner
-                corner
-            )
+        string memory innerSVG1 = string.concat(
+            frameSVGs,
+            chipSVGs,
+            // chipDetailSVGs[nodeTraits.chipDetailId % chipDetailSVGs.length], chipCorner
+            corner
         );
 
-        string memory attributes1 = string(
-            abi.encodePacked(
-                '{"trait_type": "Frame", "value": "',
-                frameTrait,
-                '"}, {"trait_type": "Chip Detail", "value": "',
-                getColor(nodeTraits.frameColor),
-                '"}, {"trait_type": "Chip Detail", "value": "',
-                chipTrait,
-                '"}, {"trait_type": "Chip Detail Color", "value": "',
-                getColor(nodeTraits.chipDetailColor),
-                '"}, {"trait_type": "Corner", "value": "',
-                cornerTrait,
-                '"},'
-            )
+        string memory attributes1 = string.concat(
+            '{"trait_type": "Frame", "value": "',
+            frameTrait,
+            '"}, {"trait_type": "Chip Detail", "value": "',
+            getColor(nodeTraits.frameColor),
+            '"}, {"trait_type": "Chip Detail", "value": "',
+            chipTrait,
+            '"}, {"trait_type": "Chip Detail Color", "value": "',
+            getColor(nodeTraits.chipDetailColor),
+            '"}, {"trait_type": "Corner", "value": "',
+            cornerTrait,
+            '"},'
         );
 
         return (innerSVG1, attributes1);
@@ -92,18 +88,14 @@ library SVGGenerator {
     function getChipTraitsInnerSVGAndAttributes(
         DataTypes.ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
-        (string memory headShapeSVG, string memory headShapeTrait) = getHeadShape(chipTraits.headShapeId % 3);
+        (string memory svgParts, string memory headShapeTrait) = getHeadShape(chipTraits.headShapeId % 3);
 
-        string memory svgParts = string(abi.encodePacked(headShapeSVG));
-
-        string memory attributes = string(
-            abi.encodePacked(
-                '{"trait_type": "Head Shape", "value": "',
-                headShapeTrait,
-                '"}, {"trait_type": "Head Shape Color", "value": "',
-                getColor(chipTraits.headShapeColor),
-                '"}'
-            )
+        string memory attributes = string.concat(
+            '{"trait_type": "Head Shape", "value": "',
+            headShapeTrait,
+            '"}, {"trait_type": "Head Shape Color", "value": "',
+            getColor(chipTraits.headShapeColor),
+            '"}'
         );
 
         (svgParts, attributes) = addEyes(svgParts, attributes, chipTraits);
@@ -121,8 +113,8 @@ library SVGGenerator {
         (string memory eyesSVG, string memory eyesTrait) = Eyes.getEyes(chipTraits.eyesId);
 
         return (
-            string(abi.encodePacked(svgs, eyesSVG)),
-            string(abi.encodePacked(attrs, ',{"trait_type": "Eyes", "value": "', eyesTrait, '"}'))
+            string.concat(svgs, eyesSVG),
+            string.concat(attrs, ',{"trait_type": "Eyes", "value": "', eyesTrait, '"}')
         );
     }
 
@@ -134,8 +126,8 @@ library SVGGenerator {
         (string memory mouthSVG, string memory mouthTrait) = Mouths.getMouth(chipTraits.mouthId);
 
         return (
-            string(abi.encodePacked(svgs, mouthSVG)),
-            string(abi.encodePacked(attrs, ',{"trait_type": "Mouth", "value": "', mouthTrait, '"}'))
+            string.concat(svgs, mouthSVG),
+            string.concat(attrs, ',{"trait_type": "Mouth", "value": "', mouthTrait, '"}')
         );
     }
 
@@ -147,16 +139,14 @@ library SVGGenerator {
         (string memory headSVG, string memory headTraits) = Head.getHead(chipTraits.headDetailId);
 
         return (
-            string(abi.encodePacked(svgs, headSVG)),
-            string(
-                abi.encodePacked(
-                    attrs,
-                    ',{"trait_type": "Head Detail", "value": "',
-                    headTraits,
-                    '"}, {"trait_type": "Head Detail Color", "value": "',
-                    getColor(chipTraits.headDetailColor),
-                    '"}'
-                )
+            string.concat(svgs, headSVG),
+            string.concat(
+                attrs,
+                ',{"trait_type": "Head Detail", "value": "',
+                headTraits,
+                '"}, {"trait_type": "Head Detail Color", "value": "',
+                getColor(chipTraits.headDetailColor),
+                '"}'
             )
         );
     }
@@ -168,18 +158,16 @@ library SVGGenerator {
         uint8 headDetailColor
     ) internal pure returns (string memory) {
         return
-            string(
-                abi.encodePacked(
-                    '<style type="text/css">.st-frames{fill:',
-                    getColor(frameColor),
-                    ";}.cd{fill:",
-                    getColor(chipDetailColor),
-                    ";}.st-base-head{fill:",
-                    getColor(headShapeColor),
-                    ";}.st-head{fill:",
-                    getColor(headDetailColor),
-                    ";}.st-alpha{fill:#1477FB;}.st-pg{fill:#FB1467;}.st-head-evenodd{fill-rule:evenodd;clip-rule:evenodd;}</style>"
-                )
+            string.concat(
+                '<style type="text/css">.st-frames{fill:',
+                getColor(frameColor),
+                ";}.cd{fill:",
+                getColor(chipDetailColor),
+                ";}.st-base-head{fill:",
+                getColor(headShapeColor),
+                ";}.st-head{fill:",
+                getColor(headDetailColor),
+                ";}.st-alpha{fill:#1477FB;}.st-pg{fill:#FB1467;}.st-head-evenodd{fill-rule:evenodd;clip-rule:evenodd;}</style>"
             );
     }
 

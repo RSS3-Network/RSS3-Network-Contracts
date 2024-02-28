@@ -87,19 +87,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId) public view virtual returns (string memory) {
-        _requireOwned(tokenId);
-
-        string memory baseURI = _baseURI();
-        return bytes(baseURI).length > 0 ? string.concat(baseURI, tokenId.toString()) : "";
-    }
-
-    /**
-     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
-     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
-     * by default, can be overridden in child contracts.
-     */
-    function _baseURI() internal view virtual returns (string memory) {
+    function tokenURI(uint256) public view virtual returns (string memory) {
         return "";
     }
 
@@ -214,22 +202,6 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     }
 
     /**
-     * @dev Unsafe write access to the balances, used by extensions that "mint" tokens using an {ownerOf} override.
-     *
-     * NOTE: the value is limited to type(uint128).max. This protect against _balance overflow. It is unrealistic that
-     * a uint256 would ever overflow from increments when these increments are bounded to uint128 values.
-     *
-     * WARNING: Increasing an account's balance using this function tends to be paired with an override of the
-     * {_ownerOf} function to resolve the ownership of the corresponding tokens so that balances and ownership
-     * remain consistent with one another.
-     */
-    function _increaseBalance(address account, uint128 value) internal virtual {
-        unchecked {
-            _balances[account] += value;
-        }
-    }
-
-    /**
      * @dev Transfers `tokenId` from its current owner to `to`, or alternatively mints (or burns) if the current owner
      * (or `to`) is the zero address. Returns the owner of the `tokenId` before the update.
      *
@@ -308,30 +280,6 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     }
 
     /**
-     * @dev Mints `tokenId`, transfers it to `to` and checks for `to` acceptance.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must not exist.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received},
-     * which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _safeMint(address to, uint256 tokenId) internal {
-        _safeMint(to, tokenId, "");
-    }
-
-    /**
-     * @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
-     * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
-     */
-    function _safeMint(address to, uint256 tokenId, bytes memory data) internal virtual {
-        _mint(to, tokenId);
-        _checkOnERC721Received(address(0), to, tokenId, data);
-    }
-
-    /**
      * @dev Destroys `tokenId`.
      * The approval is cleared when the token is burned.
      * This is an internal function that does not check if the sender is authorized to operate on the token.
@@ -370,40 +318,6 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         } else if (previousOwner != from) {
             revert ERC721IncorrectOwner(from, tokenId, previousOwner);
         }
-    }
-
-    /**
-     * @dev Safely transfers `tokenId` token from `from` to `to`, checking that contract recipients
-     * are aware of the ERC721 standard to prevent tokens from being forever locked.
-     *
-     * `data` is additional data, it has no specified format and it is sent in call to `to`.
-     *
-     * This internal function is like {safeTransferFrom} in the sense that it invokes
-     * {IERC721Receiver-onERC721Received} on the receiver, and can be used to e.g.
-     * implement alternative mechanisms to perform token transfer, such as signature-based.
-     *
-     * Requirements:
-     *
-     * - `tokenId` token must exist and be owned by `from`.
-     * - `to` cannot be the zero address.
-     * - `from` cannot be the zero address.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received},
-     * which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _safeTransfer(address from, address to, uint256 tokenId) internal {
-        _safeTransfer(from, to, tokenId, "");
-    }
-
-    /**
-     * @dev Same as {xref-ERC721-_safeTransfer-address-address-uint256-}[`_safeTransfer`],
-     * with an additional `data` parameter which is forwarded in {IERC721Receiver-onERC721Received}
-     * to contract recipients.
-     */
-    function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal virtual {
-        _transfer(from, to, tokenId);
-        _checkOnERC721Received(from, to, tokenId, data);
     }
 
     /**

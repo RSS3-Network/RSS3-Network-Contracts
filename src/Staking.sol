@@ -181,7 +181,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _increaseStakingPool(_publicPool, stakingTokens);
 
         if (node.operationPoolTokens > 0) {
-            _requestWithdrawl(node, node.operationPoolTokens);
+            _requestWithdrawal(node, node.operationPoolTokens);
         }
 
         emit Events.NodeUpdated2PublicGood(addr);
@@ -219,7 +219,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         //  withdrawal amount should not exceed the operation pool tokens
         if (amount > node.operationPoolTokens) revert ExcessWithdrawalAmount();
 
-        return _requestWithdrawl(node, amount);
+        return _requestWithdrawal(node, amount);
     }
 
     /// @inheritdoc IStaking
@@ -488,7 +488,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return _chips;
     }
 
-    function _requestWithdrawl(DataTypes.Node storage node, uint256 amount) internal returns (uint256 requestId) {
+    function _requestWithdrawal(DataTypes.Node storage node, uint256 amount) internal returns (uint256 requestId) {
         _decreaseOperationPool(node, amount);
 
         requestId = ++_pendingWithdrawalCounter;

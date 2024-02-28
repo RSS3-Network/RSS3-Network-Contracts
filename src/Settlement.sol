@@ -37,8 +37,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     // total staking for each epoch
     mapping(uint256 epoch => uint256 totalStaking) internal _totalStakings;
-    // distributed staking rewards for each epoch
-    mapping(uint256 epoch => uint256 stakingRewards) internal _distributedStakingRewards;
+    uint256 internal _unused; // TODO: delete this line before mainnet
     // distributed operation rewards for each epoch
     mapping(uint256 epoch => uint256 operationRewards) internal _distributedOperationRewards;
     // rewarded node addresses
@@ -105,9 +104,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
             // save totalStaking for current epoch
             (, _totalStakings[_currentEpoch]) = IStaking(_staking).getPoolInfo();
-
-            // start of the settlement, set settlement phase to true
-            IStaking(_staking).setSettlementPhase(true);
         }
 
         // settlement phase
