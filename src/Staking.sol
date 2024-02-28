@@ -55,7 +55,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     bool internal _isSettlementPhase;
 
     /// @dev the flag of alpha phase.
-    /// requestUnstake/requestWithdrawl is not allowed in alpha phase.
+    /// requestUnstake/requestWithdrawal is not allowed in alpha phase.
     bool internal _isAlphaPhase;
 
     /// @dev all node addresses
@@ -76,18 +76,17 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev public pool
     DataTypes.Node internal _publicPool;
 
+    /// @dev total operation pool tokens
     uint256 internal _totalOperationPoolTokens;
-
+    /// @dev total staking pool tokens
     uint256 internal _totalStakingPoolTokens;
 
     /// @dev the issuers of chips
     Checkpoints.Trace160 internal _families;
 
     /// ACL
-    // keccak256("PAUSE_ROLE");
-    bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
-    // keccak256("ORACLE_ROLE");
-    bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+    bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
+    bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 
     modifier whenNotAlphaPhase() {
         if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();

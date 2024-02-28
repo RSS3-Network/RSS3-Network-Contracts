@@ -20,6 +20,8 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     /// @dev Total rewards of the first year.
     uint256 public constant TOTAL_REWARDS_PER_YEAR = 30000000 * 10 ** 18;
 
+    bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
+
     /// @dev Staking contract address.
     address internal _staking;
 
@@ -29,15 +31,11 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     /// @dev The current epoch.
     uint256 internal _currentEpoch;
 
-    // keccak256("ORACLE_ROLE");
-    bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
-
     uint256 internal _startTimestamp;
     uint256 internal _endTimestamp;
 
     // total staking for each epoch
     mapping(uint256 epoch => uint256 totalStaking) internal _totalStakings;
-    uint256 internal _unused; // TODO: delete this line before mainnet
     // distributed operation rewards for each epoch
     mapping(uint256 epoch => uint256 operationRewards) internal _distributedOperationRewards;
     // rewarded node addresses
