@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/5e8ada8b73ab353fc2d38831dc4db698140b07ba/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1c172821f1d4eab9ae700e87572a56c5a0d2bc3f/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -189,6 +189,9 @@
 <h3 id="total_rewards_per_year"><a class="header" href="#total_rewards_per_year">TOTAL_REWARDS_PER_YEAR</a></h3>
 <p><em>Total rewards of the first year.</em></p>
 <pre><code class="language-solidity">uint256 public constant TOTAL_REWARDS_PER_YEAR = 30000000 * 10 ** 18;
+</code></pre>
+<h3 id="oracle_role"><a class="header" href="#oracle_role">ORACLE_ROLE</a></h3>
+<pre><code class="language-solidity">bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 </code></pre>
 <h3 id="_staking"><a class="header" href="#_staking">_staking</a></h3>
 <p><em>Staking contract address.</em></p>
@@ -204,9 +207,6 @@
 <p><em>The current epoch.</em></p>
 <pre><code class="language-solidity">uint256 internal _currentEpoch;
 </code></pre>
-<h3 id="oracle_role"><a class="header" href="#oracle_role">ORACLE_ROLE</a></h3>
-<pre><code class="language-solidity">bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
-</code></pre>
 <h3 id="_starttimestamp"><a class="header" href="#_starttimestamp">_startTimestamp</a></h3>
 <pre><code class="language-solidity">uint256 internal _startTimestamp;
 </code></pre>
@@ -215,9 +215,6 @@
 </code></pre>
 <h3 id="_totalstakings"><a class="header" href="#_totalstakings">_totalStakings</a></h3>
 <pre><code class="language-solidity">mapping(uint256 epoch =&gt; uint256 totalStaking) internal _totalStakings;
-</code></pre>
-<h3 id="_unused"><a class="header" href="#_unused">_unused</a></h3>
-<pre><code class="language-solidity">uint256 internal _unused;
 </code></pre>
 <h3 id="_distributedoperationrewards"><a class="header" href="#_distributedoperationrewards">_distributedOperationRewards</a></h3>
 <pre><code class="language-solidity">mapping(uint256 epoch =&gt; uint256 operationRewards) internal _distributedOperationRewards;
