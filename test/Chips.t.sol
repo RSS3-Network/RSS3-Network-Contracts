@@ -42,6 +42,21 @@ contract ChipsTest is CommonTest {
         }
     }
 
+    function testBurn() public {
+        vm.startPrank(address(_staking));
+        (uint256 start, uint256 end) = _chips.mintBatch(alice, 10);
+
+        uint256 totalSupply = _chips.totalSupply();
+        assertEq(_chips.totalSupply(), 10);
+
+        for (uint256 tokenId = start; tokenId <= end; tokenId++) {
+            _chips.burn(tokenId);
+
+            assertEq(_chips.totalSupply(), --totalSupply);
+        }
+        vm.stopPrank();
+    }
+
     function testTokenURI() public {
         _createNode(alice);
 

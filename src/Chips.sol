@@ -78,6 +78,8 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     /// @inheritdoc IChips
     function burn(uint256 tokenId) external override onlyStaking {
         _burn(tokenId);
+
+        _totalSupply--;
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
