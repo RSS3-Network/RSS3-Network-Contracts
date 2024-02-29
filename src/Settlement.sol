@@ -149,10 +149,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     function _updateRewardsRatio(uint256 operationRewardsPercent) internal {
-        // rewardsPerEpoch = TOTAL_REWARDS_PER_YEAR / (365 days / EPOCH_DURATION)
-        // operationRewardsPerEpoch = rewardsPerEpoch * (operationRewardsPercent / 100)%
-        // stakingBonusPerEpoch = rewardsPerEpoch *  (1 - (operationRewardsPercent / 100))%
-
         _totalOperationRewardsPerEpoch =
             (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) /
             (100 * 365 days);
@@ -173,7 +169,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardsExceed();
 
-        _distributedOperationRewards[epoch] += distributedOperationRewards;
+        _distributedOperationRewards[epoch] = distributedOperationRewards;
     }
 
     function _updateEpochInfo(uint256 epoch) internal {
