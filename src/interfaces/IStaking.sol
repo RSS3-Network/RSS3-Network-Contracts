@@ -253,7 +253,7 @@ interface IStaking {
     function getNodesWithPagination(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
 
     /**
-     *
+     * @notice Gets the pool info.
      * @return totalOperationPoolTokens Total tokens in operation pool
      * @return totalStakingPoolTokens Total tokens in staking pool
      */

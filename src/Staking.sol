@@ -387,6 +387,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return _isSettlementPhase;
     }
 
+    /// @inheritdoc IStaking
     function isAlphaPhase() external view override returns (bool) {
         return _isAlphaPhase;
     }
