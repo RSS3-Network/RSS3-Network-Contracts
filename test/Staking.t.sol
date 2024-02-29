@@ -189,7 +189,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             array(alice, bob),
             array(1, 1),
             array(1, 1),
-            array(1, 1),
             1 ether // public pool reward
         );
     }
@@ -838,7 +837,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.stake{value: stakeAmount}(alice);
         _staking.stake{value: stakeAmount}(bob);
 
-        uint256 requestFee = 11 ether;
         uint256 operationReward = 200 ether;
         uint256 stakingReward = 800 ether;
 
@@ -858,7 +856,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             startTime,
             endTime,
             array(alice, bob),
-            array(requestFee, requestFee),
             array(operationReward, operationReward),
             array(stakingReward, stakingReward),
             taxAmounts
@@ -867,7 +864,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _staking.distributeRewards(
             [1, startTime, endTime],
             array(alice, bob),
-            array(requestFee, requestFee),
             array(operationReward, operationReward),
             array(stakingReward, stakingReward),
             1 ether // public pool reward
@@ -879,7 +875,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             array(stakeAmount, stakeAmount),
             array(alice, bob),
             taxAmounts,
-            array(requestFee, requestFee),
             array(operationReward, operationReward),
             array(stakingReward, stakingReward)
         );
@@ -896,7 +891,6 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             [uint256(1), uint256(1), uint256(2)],
             array(alice, bob),
             array(1),
-            array(1, 1),
             array(1, 1),
             1 ether // public pool reward
         );

@@ -66,11 +66,10 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     function distributeRewards(
         uint256 epoch,
         address[] calldata nodeAddrs,
-        uint256[] calldata requestFees,
         uint256[] calldata operationRewards,
         bool isFinal
-    ) external payable override onlyRole(ORACLE_ROLE) {
-        if (nodeAddrs.length != requestFees.length || nodeAddrs.length != operationRewards.length) {
+    ) external override onlyRole(ORACLE_ROLE) {
+        if (nodeAddrs.length != operationRewards.length) {
             revert InvalidArrayLength();
         }
 
@@ -80,16 +79,11 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
             revert InvalidEpochNumber(_currentEpoch, epoch);
         }
 
-        // check requestFees
-        uint256 amountToSend;
-        for (uint256 i = 0; i < requestFees.length; i++) {
-            amountToSend += requestFees[i];
-        }
-        if (amountToSend > msg.value) revert InsufficientRequestFees();
-
-        // start of a new epoch
         uint256 publicPoolRewards;
+        uint256 amountToSend;
         if (epoch == _currentEpoch + 1) {
+            // start of a new epoch
+
             _checkSubmissionInterval();
 
             _updateEpochInfo(epoch);
@@ -114,7 +108,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         IStaking(_staking).distributeRewards{value: amountToSend}(
             epochInfo,
             nodeAddrs,
-            requestFees,
             operationRewards,
             stakingRewards,
             publicPoolRewards
@@ -147,10 +140,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     function _updateRewardsRatio(uint256 operationRewardsPercent) internal {
-        // rewardsPerEpoch = TOTAL_REWARDS_PER_YEAR / (365 days / EPOCH_DURATION)
-        // operationRewardsPerEpoch = rewardsPerEpoch * (operationRewardsPercent / 100)%
-        // stakingBonusPerEpoch = rewardsPerEpoch *  (1 - (operationRewardsPercent / 100))%
-
         _totalOperationRewardsPerEpoch =
             (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) /
             (100 * 365 days);

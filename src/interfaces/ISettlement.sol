@@ -29,17 +29,15 @@ interface ISettlement {
      * @dev periodically called.
      * @param epoch The current epoch number.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
-     * @param requestFees Amounts of request fees.
      * @param operationRewards Amounts of operation rewards.
      @ @param isFinal Whether the call is the final one in the epoch.
      */
     function distributeRewards(
         uint256 epoch,
         address[] calldata nodeAddrs,
-        uint256[] calldata requestFees,
         uint256[] calldata operationRewards,
         bool isFinal
-    ) external payable;
+    ) external;
 
     /**
      * @notice Sets tax fraction for public pool.

@@ -96,9 +96,6 @@ interface IErrors {
     /// @dev Distributed operation rewards exceed limit.
     error OperationRewardsExceed();
 
-    /// @dev Insufficient requestFees.
-    error InsufficientRequestFees();
-
     /// @dev Invalid trait id.
     error InvalidTraitId(uint256 traitId);
 
