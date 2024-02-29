@@ -43,12 +43,11 @@ interface ISettlement {
 
     /**
      * @notice Sets tax fraction for public pool.
-     * @dev The tax fraction of public pool will be set as the average of tax fractions of active nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param nodeAddrs The addresses of active nodes.
+     * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool.
      */
-    function setTaxRateBasisPoints4PublicPool(address[] calldata nodeAddrs) external;
+    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 
     /**
      * @notice Slashes nodes.

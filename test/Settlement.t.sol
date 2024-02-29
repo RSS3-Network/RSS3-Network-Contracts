@@ -62,34 +62,24 @@ contract SettlementTest is CommonTest, IErrors {
         _settlement.updateRewardsRatio(1);
     }
 
-    function testSetTaxRateBasisPoints4PublicPool() public {
-        vm.prank(alice);
-        _staking.createNode("alice", "alice", _defaultTaxRateBasisPoints, false);
-
-        vm.prank(bob);
-        _staking.createNode("bob", "bob", _defaultTaxRateBasisPoints * 2, false);
-
-        vm.prank(carol);
-        _staking.createNode("carol", "carol", _defaultTaxRateBasisPoints * 3, false);
-
-        vm.prank(dave);
-        _staking.createNode("dave", "dave", _defaultTaxRateBasisPoints * 4, false);
+    function testSetTaxRateBasisPoints4PublicPool(uint64 taxRate) public {
+        vm.assume(taxRate >= 0 && taxRate <= 10000);
 
         vm.prank(oracleAccount);
-        _settlement.setTaxRateBasisPoints4PublicPool(array(alice, bob, carol, dave));
+        _settlement.setTaxRateBasisPoints4PublicPool(taxRate);
 
-        assertEq(_staking.getPublicPool().taxRateBasisPoints, (_defaultTaxRateBasisPoints * 10) / 4);
+        assertEq(_staking.getPublicPool().taxRateBasisPoints, taxRate);
     }
 
     function testSetTaxRateBasisPoints4PublicPoolFail() public {
+        // case 1: caller has no `ORACLE_ROLE` permission
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
-        _settlement.setTaxRateBasisPoints4PublicPool(array(alice, bob, carol, dave));
+        _settlement.setTaxRateBasisPoints4PublicPool(10001);
 
-        address[] memory emptyArray;
-
-        vm.expectRevert(abi.encodeWithSelector(EmptyNodeList.selector));
+        // case 2: tax rate is greater than 10000
+        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
         vm.prank(oracleAccount);
-        _settlement.setTaxRateBasisPoints4PublicPool(emptyArray);
+        _settlement.setTaxRateBasisPoints4PublicPool(10001);
     }
 
     function testDistributeRewards() public {

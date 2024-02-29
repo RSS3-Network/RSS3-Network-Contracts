@@ -122,17 +122,8 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @inheritdoc ISettlement
-    function setTaxRateBasisPoints4PublicPool(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
-        uint256 length = nodeAddrs.length;
-
-        if (length == 0) revert EmptyNodeList();
-
-        uint256 totalTaxRateBasisPoints;
-        for (uint256 i = 0; i < length; i++) {
-            DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddrs[i]);
-            totalTaxRateBasisPoints += node.taxRateBasisPoints;
-        }
-        IStaking(_staking).setTaxRateBasisPoints4PublicPool((totalTaxRateBasisPoints / length).toUint64());
+    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
     }
 
     /// @inheritdoc ISettlement

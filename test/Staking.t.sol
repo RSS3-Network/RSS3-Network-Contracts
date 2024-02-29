@@ -195,7 +195,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testCreateNode(uint64 taxRateBasisPoints, bool publicGood) public {
-        vm.assume(taxRateBasisPoints <= 10000);
+        vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
 
         string memory name = "Alice";
         string memory description = "Alice's node";
@@ -233,7 +233,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     }
 
     function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
-        vm.assume(taxRateBasisPoints <= 10000);
+        vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
         vm.assume(amount > 1 && amount < _initialAmount);
 
         string memory name = "Alice";
@@ -274,8 +274,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.prank(alice);
         _staking.updateToPublicGood();
 
-        vm.stopPrank();
-
+        // check status
         DataTypes.Node memory updatedNode = _staking.getNode(alice);
         DataTypes.Node memory publicPool = _staking.getPublicPool();
         (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
@@ -312,6 +311,13 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         vm.assume(taxRateBasisPoints > 10000);
 
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
+        _staking.createNode("Alice", "Alice's node", taxRateBasisPoints, false);
+    }
+
+    function testCreateNodeFailWithSmallTaxRate(uint64 taxRateBasisPoints) public {
+        vm.assume(taxRateBasisPoints < 500);
+
+        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooSmall.selector));
         _staking.createNode("Alice", "Alice's node", taxRateBasisPoints, false);
     }
 
@@ -399,7 +405,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
-        _staking.createNode{value: amount}("Alice", "Alice's node", uint64(100), false);
+        _staking.createNode{value: amount}("Alice", "Alice's node", uint64(1000), false);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
@@ -425,7 +431,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
-        _staking.createNode{value: amount}("Alice", "Alice's node", uint64(100), false);
+        _staking.createNode{value: amount}("Alice", "Alice's node", uint64(1000), false);
 
         _staking.deposit{value: amount}();
 
@@ -578,6 +584,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
     function testSetTaxRateTooSmallError(uint64 taxRateBasisPoints) public {
         vm.assume(taxRateBasisPoints < minTaxRateBasisPoints);
+
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooSmall.selector));
         vm.prank(oracleAccount);
         _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
@@ -585,6 +592,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
     function testSetTaxRateTooLargeError(uint64 taxRateBasisPoints) public {
         vm.assume(taxRateBasisPoints > _denominator());
+
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
         vm.prank(alice);
         _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
