@@ -290,16 +290,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function distributeRewards(
         uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
-        uint256[] calldata requestFees,
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
         uint256 publicPoolReward
     ) external payable override whenNotPaused onlyRole(ORACLE_ROLE) {
-        if (
-            nodeAddrs.length != requestFees.length ||
-            nodeAddrs.length != operationRewards.length ||
-            nodeAddrs.length != stakingRewards.length
-        ) revert InvalidArrayLength();
+        if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != stakingRewards.length)
+            revert InvalidArrayLength();
 
         // distribute rewards for public pool
         if (publicPoolReward > 0) {
@@ -314,14 +310,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
 
         // distribute rewards for other nodes
-        uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, requestFees, operationRewards, stakingRewards);
+        uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, operationRewards, stakingRewards);
 
         emit Events.RewardDistributed(
             epochInfo[0],
             epochInfo[1],
             epochInfo[2],
             nodeAddrs,
-            requestFees,
             operationRewards,
             stakingRewards,
             taxAmounts
@@ -537,11 +532,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     function _distributeNodesRewards(
         address[] memory nodeAddrs,
-        uint256[] memory requestFees,
         uint256[] memory operationRewards,
         uint256[] memory stakingRewards
     ) internal returns (uint256[] memory) {
-        uint256 remainedTax;
         uint256[] memory taxAmounts = new uint256[](nodeAddrs.length);
         // update node rewards
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
@@ -550,28 +543,22 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
                 continue;
             }
 
-            // request bonus and staking rewards are sent to staking pool
+            // operation rewards and staking rewards are sent to staking pool
             uint256 rewards = operationRewards[i] + stakingRewards[i];
-
-            uint256 fullTax;
-            uint256 receivedTax;
-            (fullTax, receivedTax) = _getTax(
+            (uint256 fullTax, uint256 receivedTax) = _getTax(
                 rewards,
                 node.taxRateBasisPoints,
                 node.operationPoolTokens,
                 node.stakingPoolTokens
             );
-            rewards -= fullTax;
 
-            // request fee and tax are sent to operation pool
-            uint256 operationPool = requestFees[i] + receivedTax;
             taxAmounts[i] = receivedTax;
-            remainedTax += fullTax - receivedTax;
 
-            // update node
-            _increaseOperationPool(node, operationPool);
-            // all after-tax rewards and request bonus are sent to the staking pool
-            _increaseStakingPool(node, rewards);
+            // update node pool
+            // tax is sent to operation pool
+            _increaseOperationPool(node, receivedTax);
+            // all after-tax rewards are sent to the staking pool
+            _increaseStakingPool(node, rewards - fullTax);
         }
         return taxAmounts;
     }

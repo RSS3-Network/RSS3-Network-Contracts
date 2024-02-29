@@ -145,14 +145,13 @@ contract CommonTest is Utils {
         uint256[] memory stakeAmounts,
         address[] memory nodeAddrs,
         uint256[] memory taxAmounts,
-        uint256[] memory requestFees,
         uint256[] memory operationRewards,
         uint256[] memory stakingRewards
     ) internal {
         // status check
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node memory node = _staking.getNode(nodeAddrs[i]);
-            uint256 newOperationPool = depositAmounts[i] + requestFees[i] + taxAmounts[i];
+            uint256 newOperationPool = depositAmounts[i] + taxAmounts[i];
             assertEq(node.operationPoolTokens, newOperationPool, "check operation pool failed");
 
             uint256 newStakingPool = stakeAmounts[i] + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
