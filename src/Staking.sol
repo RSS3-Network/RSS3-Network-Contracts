@@ -532,7 +532,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256[] memory taxAmounts = new uint256[](nodeAddrs.length);
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
-            if (node.account == address(0)) {
+            if (node.account == address(0) || node.publicGood || node.operationPoolTokens < MIN_DEPOSIT) {
                 continue;
             }
 
