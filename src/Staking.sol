@@ -407,14 +407,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function minTokensToStake(address nodeAddr) external view override returns (uint256) {
-        // Tokens per share
-        return _minTokensToStake(nodeAddr);
+        // the equivalent tokens for a chip
+        return _tokensPerChip(nodeAddr);
     }
 
     /// @inheritdoc IStaking
     function getChipsInfo(uint256 tokenId) external view override returns (address nodeAddr, uint256 tokens) {
         nodeAddr = _issuerOf(tokenId);
-        tokens = _minTokensToStake(nodeAddr);
+        tokens = _tokensPerChip(nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -573,7 +573,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         requestId = ++_pendingUnstakeCounter;
 
-        // update rewards
+        // update pool tokens and shares
         uint256 shares = SHARES_PER_CHIP * chipsIds.length;
         uint256 unstakeAmount = _sharesToTokens(shares, node.totalShares, node.stakingPoolTokens);
         _decreaseStakingPool(node, unstakeAmount);
@@ -634,24 +634,23 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 amount,
         address nodeAddr
     ) internal returns (uint256 startTokenId, uint256 endTokenId) {
-        uint256 shares = _tokensToShares(amount, node.stakingPoolTokens, node.totalShares);
-        uint256 chipsCount = shares / SHARES_PER_CHIP;
+        uint256 chipPrice = _tokensPerChip(nodeAddr);
+        uint256 chipsCount = amount / chipPrice;
         if (chipsCount == 0) revert AmountTooSmall(amount);
 
-        // update stakedAmount
-        uint256 stakedAmount = _sharesToTokens(chipsCount * SHARES_PER_CHIP, node.totalShares, node.stakingPoolTokens);
-
+        uint256 remaining = amount % chipPrice;
+        uint256 stakedAmount = amount - remaining;
         _increaseStakingPool(node, stakedAmount);
 
         // update total shares
-        node.totalShares += (chipsCount * SHARES_PER_CHIP);
+        uint256 sharesToMint = chipsCount * SHARES_PER_CHIP;
+        node.totalShares += sharesToMint;
 
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
-
         _families.push(endTokenId.toUint96(), uint160(nodeAddr));
 
         // refund the exceeding part
-        _transfer(msg.sender, amount - stakedAmount);
+        _transfer(msg.sender, remaining);
 
         emit Events.Staked(msg.sender, node.account, stakedAmount, startTokenId, endTokenId);
     }
@@ -722,13 +721,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return address(_families.lowerLookup(tokenId.toUint96()));
     }
 
-    // function _getTreasuryAmount() internal view returns (uint256) {
-    //     uint256 balance = address(this).balance;
-    //     return balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
-    // }
-
-    /// @dev get minimal tokens to stake for a node
-    function _minTokensToStake(address nodeAddr) internal view returns (uint256) {
+    /// @dev returns the equivalent tokens for each chip, which is also the minimal tokens to stake for a node
+    function _tokensPerChip(address nodeAddr) internal view returns (uint256) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.publicGood) {
             node = _publicPool;
@@ -774,21 +768,21 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @dev convert shares to equivalent tokens
-    function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalAmount) internal pure returns (uint256) {
+    function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalTokens) internal pure returns (uint256) {
         if (totalShares == 0) {
             return shares;
         }
 
-        return (shares * totalAmount) / totalShares;
+        return (shares * totalTokens) / totalShares;
     }
 
     /// @dev convert tokens to equivalent shares
-    function _tokensToShares(uint256 amount, uint256 totalAmount, uint256 totalShares) internal pure returns (uint256) {
-        if (totalAmount == 0) {
+    function _tokensToShares(uint256 amount, uint256 totalTokens, uint256 totalShares) internal pure returns (uint256) {
+        if (totalTokens == 0) {
             return amount;
         }
 
-        return (amount * totalShares) / totalAmount;
+        return (amount * totalShares) / totalTokens;
     }
 
     /**
