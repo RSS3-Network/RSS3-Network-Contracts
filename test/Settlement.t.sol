@@ -2,7 +2,6 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {console} from "forge-std/console.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {IErrors} from "../src/interfaces/IErrors.sol";
 import {Events} from "../src/libraries/Events.sol";
@@ -131,7 +130,7 @@ contract SettlementTest is CommonTest, IErrors {
 
     function testDistributeRewardsMultiple() public {
         uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 10000 ether;
+        uint256 stakeAmount = 30000 ether;
 
         // create node
         _createNode(alice);
@@ -151,13 +150,12 @@ contract SettlementTest is CommonTest, IErrors {
         _staking.stake{value: stakeAmount}(carol);
         _staking.stake{value: stakeAmount}(dave);
 
-        skip(18 hours);
-
         (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
         uint256 operationReward = operationRewardsPerEpoch / 4;
         uint256 stakingReward = totalStakingRewardsPerEpoch / 4;
 
         vm.startPrank(oracleAccount);
+        skip(18 hours);
         _settlement.distributeRewards(
             1,
             array(alice, bob), // node addresses
@@ -488,15 +486,7 @@ contract SettlementTest is CommonTest, IErrors {
         uint256 balanceBeforeStaking = address(_staking).balance;
 
         expectEmit();
-        emit Events.RewardDistributed(
-            1,
-            startTime,
-            endTime,
-            new address[](0),
-            new uint256[](0),
-            new uint256[](0),
-            new uint256[](0)
-        );
+        emit Events.RewardDistributed(1, startTime, endTime, zeroAddrArr, zeroUintArr, zeroUintArr, zeroUintArr);
         vm.prank(oracleAccount);
         _settlement.distributeRewards(1, new address[](0), new uint256[](0), false);
 
@@ -543,49 +533,29 @@ contract SettlementTest is CommonTest, IErrors {
 
         uint256 pgStakingPoolTokens = _staking.getPublicPool().stakingPoolTokens;
         (, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
-        (uint256 totalOperationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
-        uint256 publicPoolReward = (pgStakingPoolTokens * totalStakingRewardsPerEpoch) / totalStakingPoolTokens;
+        (uint256 totalOpRewards, uint256 totalStRewards) = _settlement.getBonusInfo();
+        uint256 pgRewards = (pgStakingPoolTokens * totalStRewards) / totalStakingPoolTokens;
 
         uint256 balanceBeforeStaking = address(_staking).balance;
         uint256 balanceBeforePublicPool = _staking.getPublicPool().stakingPoolTokens;
 
         expectEmit();
-        emit Events.PublicGoodRewardDistributed(1, startTime, endTime, publicPoolReward, 0);
+        emit Events.PublicGoodRewardDistributed(1, startTime, endTime, pgRewards, 0);
         expectEmit();
-        emit Events.RewardDistributed(
-            1,
-            startTime,
-            endTime,
-            new address[](0),
-            new uint256[](0),
-            new uint256[](0),
-            new uint256[](0)
-        );
+        emit Events.RewardDistributed(1, startTime, endTime, zeroAddrArr, zeroUintArr, zeroUintArr, zeroUintArr);
         vm.prank(oracleAccount);
-        _settlement.distributeRewards(1, new address[](0), new uint256[](0), false);
+        _settlement.distributeRewards(1, zeroAddrArr, zeroUintArr, false);
 
         // check balance diff
         uint256 balanceAfterStaking = address(_staking).balance;
-        assertEq(
-            balanceAfterStaking - balanceBeforeStaking,
-            totalOperationRewardsPerEpoch + totalStakingRewardsPerEpoch,
-            "check staking balance diff error"
-        );
+        assertEq(balanceAfterStaking - balanceBeforeStaking, totalOpRewards + totalStRewards);
 
         uint256 balanceAfterPublicPool = _staking.getPublicPool().stakingPoolTokens;
-        assertEq(
-            balanceAfterPublicPool - balanceBeforePublicPool,
-            publicPoolReward,
-            "check public pool balance diff error"
-        );
+        assertEq(balanceAfterPublicPool - balanceBeforePublicPool, pgRewards);
 
         // check treasury amount
         uint256 treasuryAmount = _getTreasuryAmount();
-        assertEq(
-            treasuryAmount,
-            totalOperationRewardsPerEpoch + totalStakingRewardsPerEpoch - publicPoolReward,
-            "check treasury amount error"
-        );
+        assertEq(treasuryAmount, totalOpRewards + totalStRewards - pgRewards);
     }
 
     function testStakingRewards(uint256 stakingAmount) public {

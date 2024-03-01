@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable private-vars-leading-underscore
 pragma solidity 0.8.20;
 
 import {IStaking} from "./interfaces/IStaking.sol";
@@ -14,7 +15,6 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
 contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable {
     using Math for uint256;
@@ -26,10 +26,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
     /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
-    uint256 public immutable STAKE_RATIO; // solhint-disable-line private-vars-leading-underscore
+    uint256 public immutable STAKE_RATIO;
 
     /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
-    address public immutable TREASURY; // solhint-disable-line private-vars-leading-underscore
+    address public immutable TREASURY;
 
     /// @dev slash rate
     uint256 public immutable NODE_SLASH_RATE_BASIS_POINTS;
@@ -51,7 +51,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     address internal _chips;
 
     /// @dev the flag of settlement phase.
-    /// Stake/requestUnstake is not allowed in settlement phase.
+    /// stake/requestUnstake is not allowed in settlement phase.
     bool internal _isSettlementPhase;
 
     /// @dev the flag of alpha phase.
@@ -293,21 +293,15 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         address[] calldata nodeAddrs,
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
-        uint256 publicPoolReward
+        uint256 publicPoolRewards
     ) external payable override whenNotPaused onlyRole(ORACLE_ROLE) {
         if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != stakingRewards.length)
             revert InvalidArrayLength();
 
         // distribute rewards for public pool
-        if (publicPoolReward > 0) {
-            uint256 publicPoolTax = _distributePublicPoolRewards(publicPoolReward);
-            emit Events.PublicGoodRewardDistributed(
-                epochInfo[0],
-                epochInfo[1],
-                epochInfo[2],
-                publicPoolReward,
-                publicPoolTax
-            );
+        if (publicPoolRewards > 0) {
+            uint256 tax = _distributePublicPoolRewards(publicPoolRewards);
+            emit Events.PublicGoodRewardDistributed(epochInfo[0], epochInfo[1], epochInfo[2], publicPoolRewards, tax);
         }
 
         // distribute rewards for other nodes
@@ -378,7 +372,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 balance = address(this).balance;
-        // TODO: check arithmetic underflow or overflow error
         uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
         _transfer(TREASURY, amount);
     }
@@ -471,7 +464,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     {
         totalOperationPoolTokens = _totalOperationPoolTokens;
         totalStakingPoolTokens = _totalStakingPoolTokens;
-        // treasuryAmount = _getTreasuryAmount();
     }
 
     /// @inheritdoc IStaking
@@ -538,7 +530,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256[] memory stakingRewards
     ) internal returns (uint256[] memory) {
         uint256[] memory taxAmounts = new uint256[](nodeAddrs.length);
-        // update node rewards
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0)) {
@@ -557,10 +548,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             taxAmounts[i] = receivedTax;
 
             // update node pool
-            // tax is sent to operation pool
+            // receivedTax is sent to operation pool
             _increaseOperationPool(node, receivedTax);
             // all after-tax rewards are sent to the staking pool
             _increaseStakingPool(node, rewards - fullTax);
+            // the remaining tax is sent to the treasury
         }
         return taxAmounts;
     }

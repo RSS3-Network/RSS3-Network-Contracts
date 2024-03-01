@@ -2,7 +2,6 @@
 // solhint-disable comprehensive-interface,no-console,max-line-length
 pragma solidity 0.8.20;
 
-import {console2 as console} from "forge-std/console2.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";

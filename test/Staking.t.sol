@@ -12,7 +12,6 @@ import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Base64} from "solady/utils/Base64.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {console2 as console} from "forge-std/console2.sol";
 
 contract StakingTest is CommonTest, IErrors, IERC721Errors {
     using stdJson for string;
@@ -820,25 +819,21 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
 
     function testDistributeRewards() public {
         uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 10000 ether;
+        uint256 stakeAmount = 20000 ether;
+        uint256 operationRewards = 200 ether;
+        uint256 stakingRewards = 800 ether;
 
         // create node
         _createNode(alice);
         _createNode(bob);
 
         // deposit
-        vm.prank(alice);
-        _staking.deposit{value: depositAmount}();
-
-        vm.prank(bob);
-        _staking.deposit{value: depositAmount}();
+        _deposit(alice, depositAmount);
+        _deposit(bob, depositAmount);
 
         // stake
         _staking.stake{value: stakeAmount}(alice);
         _staking.stake{value: stakeAmount}(bob);
-
-        uint256 operationReward = 200 ether;
-        uint256 stakingReward = 800 ether;
 
         // distribute rewards
         uint256 startTime = block.timestamp;
@@ -846,27 +841,26 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         uint256 endTime = block.timestamp;
 
         uint256[] memory taxAmounts = new uint256[](2);
-        taxAmounts[0] = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
+        taxAmounts[0] = _getFullTax(operationRewards + stakingRewards, _defaultTaxRateBasisPoints);
         taxAmounts[1] = taxAmounts[0];
 
         expectEmit();
-
         emit Events.RewardDistributed(
             1,
             startTime,
             endTime,
             array(alice, bob),
-            array(operationReward, operationReward),
-            array(stakingReward, stakingReward),
+            array(operationRewards, operationRewards),
+            array(stakingRewards, stakingRewards),
             taxAmounts
         );
         vm.prank(address(_settlement));
         _staking.distributeRewards(
             [1, startTime, endTime],
             array(alice, bob),
-            array(operationReward, operationReward),
-            array(stakingReward, stakingReward),
-            1 ether // public pool reward
+            array(operationRewards, operationRewards),
+            array(stakingRewards, stakingRewards),
+            0
         );
 
         // check status
@@ -875,8 +869,8 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
             array(stakeAmount, stakeAmount),
             array(alice, bob),
             taxAmounts,
-            array(operationReward, operationReward),
-            array(stakingReward, stakingReward)
+            array(operationRewards, operationRewards),
+            array(stakingRewards, stakingRewards)
         );
 
         // new stake and price will goes up
