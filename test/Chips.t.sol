@@ -56,6 +56,23 @@ contract ChipsTest is CommonTest {
         vm.stopPrank();
     }
 
+    function testApprove() public {
+        vm.prank(address(_staking));
+        uint256 tokenId = _chips.mint(alice);
+
+        vm.prank(alice);
+        _chips.approve(bob, tokenId);
+
+        assertEq(_chips.getApproved(tokenId), bob);
+    }
+
+    function testSetApprovalForAll() public {
+        vm.prank(alice);
+        _chips.setApprovalForAll(bob, true);
+
+        assertEq(_chips.isApprovedForAll(alice, bob), true);
+    }
+
     function testTokenURI() public {
         _createNode(alice);
 
