@@ -3,10 +3,9 @@
 pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
-import {IErrors} from "../src/interfaces/IErrors.sol";
 import {Events} from "../src/libraries/Events.sol";
 
-contract SettlementTest is CommonTest, IErrors {
+contract SettlementTest is CommonTest {
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);

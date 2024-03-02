@@ -33,6 +33,24 @@ library SVGGenerator {
     string public constant headShapeTrait2 = "square";
     string public constant headShapeTrait3 = "default";
 
+    function getNodeTraitsCount() external pure returns (uint8, uint8, uint8, uint8) {
+        return (
+            5, // uint8(_colors.length),
+            9, //            uint8(_frameSVGs.length),
+            7, // uint8(_cornerSVGs.length),
+            11 // uint8(_chipDetailSVGs.length)
+        );
+    }
+
+    function getChipTraitsCount() external pure returns (uint8, uint8, uint8, uint8) {
+        return (
+            18, // uint8(_eyesSVGs.length),
+            19, //uint8(_mouthsSVGs.length),
+            3, //uint8(_baseHeadsSVGs.length),
+            16 //uint8(_headSVGs.length)
+        );
+    }
+
     function generateSVGAndAttributes(
         DataTypes.NodeTraits memory nodeTraits,
         DataTypes.ChipTraits memory chipTraits
@@ -194,23 +212,5 @@ library SVGGenerator {
         assert(id < 3);
         string[3] memory headShapeTraits = [headShapeTrait1, headShapeTrait2, headShapeTrait3];
         return headShapeTraits[id];
-    }
-
-    function getNodeTraitsCount() external pure returns (uint8, uint8, uint8, uint8) {
-        return (
-            5, // uint8(_colors.length),
-            9, //            uint8(_frameSVGs.length),
-            7, // uint8(_cornerSVGs.length),
-            11 // uint8(_chipDetailSVGs.length)
-        );
-    }
-
-    function getChipTraitsCount() external pure returns (uint8, uint8, uint8, uint8) {
-        return (
-            18, // uint8(_eyesSVGs.length),
-            19, //uint8(_mouthsSVGs.length),
-            3, //uint8(_baseHeadsSVGs.length),
-            16 //uint8(_headSVGs.length)
-        );
     }
 }

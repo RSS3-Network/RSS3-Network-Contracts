@@ -3,22 +3,21 @@
 pragma solidity 0.8.20;
 
 import {Utils} from "./Utils.sol";
-import {DataTypes} from "../../src/libraries/DataTypes.sol";
+import {IErrors} from "../../src/interfaces/IErrors.sol";
 import {Staking} from "../../src/Staking.sol";
 import {Chips} from "../../src/Chips.sol";
 import {Settlement} from "../../src/Settlement.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
-import {TransparentUpgradeableProxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
+import {TransparentUpgradeableProxy as Proxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {InternalStaking} from "./InternalStaking.sol";
 import {InternalSettlement} from "./InternalSettlement.sol";
 
-contract CommonTest is Utils {
+contract CommonTest is Utils, IErrors {
     address public constant alice = address(0x111);
     address public constant bob = address(0x222);
     address public constant carol = address(0x333);
     address public constant dave = address(0x444);
     address public constant eve = address(0x555);
-    address public constant frank = address(0x666);
 
     address public constant proxyAdmin = address(0x777);
     address public constant pauseAccount = address(0x888);
@@ -77,23 +76,15 @@ contract CommonTest is Utils {
         Settlement settlementImpl = new Settlement();
 
         // deploy staking proxy
-        TransparentUpgradeableProxy stakingProxy = new TransparentUpgradeableProxy(
-            address(stakingImpl),
-            proxyAdmin,
-            ""
-        );
+        Proxy stakingProxy = new Proxy(address(stakingImpl), proxyAdmin, "");
         _staking = Staking(payable(stakingProxy));
 
         // deploy chips proxy
-        TransparentUpgradeableProxy chipsProxy = new TransparentUpgradeableProxy(address(chipsImpl), proxyAdmin, "");
+        Proxy chipsProxy = new Proxy(address(chipsImpl), proxyAdmin, "");
         _chips = Chips(payable(chipsProxy));
 
         // deploy settlement proxy
-        TransparentUpgradeableProxy settlementProxy = new TransparentUpgradeableProxy(
-            address(settlementImpl),
-            proxyAdmin,
-            ""
-        );
+        Proxy settlementProxy = new Proxy(address(settlementImpl), proxyAdmin, "");
         _settlement = Settlement(payable(settlementProxy));
 
         // init
@@ -122,7 +113,6 @@ contract CommonTest is Utils {
         vm.label(carol, "carol");
         vm.label(dave, "dave");
         vm.label(eve, "eve");
-        vm.label(frank, "frank");
         vm.label(address(_staking), "staking");
         vm.label(address(_settlement), "settlement");
         vm.label(address(_chips), "chips");

@@ -225,7 +225,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override whenNotPaused {
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
-
         if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
 
         DataTypes.Node storage node = _nodes[msg.sender];
@@ -267,7 +266,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // validate node
         if (node.account == address(0)) revert NodeNotExists();
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
-        if (msg.value == 0) revert InsufficientValue();
 
         (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr);
     }
@@ -332,7 +330,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
-        if (msg.value == 0) revert InsufficientValue();
 
         (startTokenId, endTokenId) = _stakeToNode(_publicPool, msg.value, nodeAddr);
     }

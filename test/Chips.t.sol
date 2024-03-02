@@ -41,6 +41,12 @@ contract ChipsTest is CommonTest {
         }
     }
 
+    function testMintBatchFail() public {
+        vm.expectRevert(abi.encodeWithSelector(BatchSizeZero.selector));
+        vm.prank(address(_staking));
+        _chips.mintBatch(alice, 0);
+    }
+
     function testBurn() public {
         vm.startPrank(address(_staking));
         (uint256 start, uint256 end) = _chips.mintBatch(alice, 10);

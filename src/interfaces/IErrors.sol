@@ -81,10 +81,7 @@ interface IErrors {
     /// @dev Chips id overflow.
     error ChipsIdOverflow();
 
-    /// @dev Reward distribution failed.
-    error RewardDistributionFailed();
-
-    /// @dev Inffucient value to stake.
+    /// @dev Insufficient value to stake.
     error InsufficientValue();
 
     /// @dev Transfer failed.

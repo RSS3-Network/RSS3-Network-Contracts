@@ -8,7 +8,6 @@ import {DataTypes} from "./libraries/DataTypes.sol";
 import {SVGGenerator} from "./libraries/SVGGenerator.sol";
 import {IErrors} from "./interfaces/IErrors.sol";
 import {ERC721} from "./base/ERC721.sol";
-import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
@@ -30,21 +29,10 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     }
 
     /// @inheritdoc IChips
-    function initialize(
-        string memory name_,
-        string memory symbol_,
-        address staking_
-    )
-        external
-        override
-        // address svgGenerator_
-        initializer
-    {
+    function initialize(string memory name_, string memory symbol_, address staking_) external override initializer {
         _staking = staking_;
 
         __ERC721_init(name_, symbol_);
-
-        // _svgGenerator = svgGenerator_;
     }
 
     /// @inheritdoc IChips
@@ -82,31 +70,6 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         _totalSupply--;
     }
 
-    function tokenURI(uint256 id) public view override returns (string memory) {
-        DataTypes.NodeTraits memory nodeTraits;
-        DataTypes.ChipTraits memory chipTraits;
-        (nodeTraits, chipTraits) = _generateChipImage(id);
-
-        (string memory imageSVG, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
-            nodeTraits,
-            chipTraits
-        );
-
-        string memory json = string.concat(
-            '{"name": "Chip #',
-            id.toString(),
-            '", "description": "Chip is a unique NFT that represents a node in the network. '
-            "It is generated based on the node's address and token ID.",
-            '","image":"data:image/svg+xml;base64,',
-            Base64.encode(bytes(imageSVG)),
-            '", "attributes": [',
-            attributes,
-            "]}"
-        );
-
-        return string.concat("data:application/json;base64,", Base64.encode(bytes(string.concat(json))));
-    }
-
     /// @inheritdoc IChips
     function stakingContract() external view override returns (address) {
         return _staking;
@@ -130,6 +93,31 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
 
         string memory json = string.concat(
             '{"name": "Node Avatar", "image":"data:image/svg+xml;base64,',
+            Base64.encode(bytes(imageSVG)),
+            '", "attributes": [',
+            attributes,
+            "]}"
+        );
+
+        return string.concat("data:application/json;base64,", Base64.encode(bytes(string.concat(json))));
+    }
+
+    function tokenURI(uint256 id) public view override returns (string memory) {
+        DataTypes.NodeTraits memory nodeTraits;
+        DataTypes.ChipTraits memory chipTraits;
+        (nodeTraits, chipTraits) = _generateChipImage(id);
+
+        (string memory imageSVG, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
+            nodeTraits,
+            chipTraits
+        );
+
+        string memory json = string.concat(
+            '{"name": "Chip #',
+            id.toString(),
+            '", "description": "Chip is a unique NFT that represents a node in the network. '
+            "It is generated based on the node's address and token ID.",
+            '","image":"data:image/svg+xml;base64,',
             Base64.encode(bytes(imageSVG)),
             '", "attributes": [',
             attributes,

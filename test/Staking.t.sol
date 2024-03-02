@@ -7,13 +7,12 @@ import {TestEvents} from "test/helpers/TestEvents.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
 import {Events} from "../src/libraries/Events.sol";
-import {IErrors} from "../src/interfaces/IErrors.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Base64} from "solady/utils/Base64.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 
-contract StakingTest is CommonTest, IErrors, IERC721Errors {
+contract StakingTest is CommonTest, IERC721Errors {
     using stdJson for string;
 
     event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -672,7 +671,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
         _createPublicGoodNode(alice);
 
         // stake to public pool with zero amount will fail
-        vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
+        vm.expectRevert(abi.encodeWithSelector(AmountTooSmall.selector, 0));
         _staking.stakeToPublicPool{value: 0}(alice);
 
         // stake to public pool with insufficient value will fail
@@ -695,7 +694,7 @@ contract StakingTest is CommonTest, IErrors, IERC721Errors {
     function testStakeFailWithInsufficientValue() public {
         _createNode(alice);
 
-        vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
+        vm.expectRevert(abi.encodeWithSelector(AmountTooSmall.selector, 0));
         _staking.stake{value: 0}(alice);
 
         vm.expectRevert(abi.encodeWithSelector(AmountTooSmall.selector, 400 ether));
