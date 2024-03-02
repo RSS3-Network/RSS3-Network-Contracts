@@ -664,7 +664,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.WithdrawalRequest memory req = _pendingWithdrawals[requestId];
 
         if (req.owner == address(0)) revert ClaimIdNotExists(requestId);
-
         if (block.timestamp < req.timestamp + DEPOSIT_UNBONDING_PERIOD) revert ClaimTimeNotReady();
 
         delete _pendingWithdrawals[requestId];
@@ -763,15 +762,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
 
         return (shares * totalTokens) / totalShares;
-    }
-
-    /// @dev convert tokens to equivalent shares
-    function _tokensToShares(uint256 amount, uint256 totalTokens, uint256 totalShares) internal pure returns (uint256) {
-        if (totalTokens == 0) {
-            return amount;
-        }
-
-        return (amount * totalShares) / totalTokens;
     }
 
     /**

@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 
 import {Utils} from "./Utils.sol";
 import {IErrors} from "../../src/interfaces/IErrors.sol";
+import {DataTypes} from "../../src/libraries/DataTypes.sol";
 import {Staking} from "../../src/Staking.sol";
 import {Chips} from "../../src/Chips.sol";
 import {Settlement} from "../../src/Settlement.sol";
