@@ -42,6 +42,12 @@ interface IErrors {
     /// @dev Not chips owner or approver.
     error ChipNotAuthorized(uint256 tokenId);
 
+    /// @dev ChipsIds are empty.
+    error EmptyChipsIds();
+
+    /// @dev Chips are not same owner.
+    error ChipsNotSameOwner();
+
     /// @dev Token is not valid for the node
     error ChipNotValid(uint256 tokenId, address nodeAddr);
 
