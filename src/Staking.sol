@@ -563,10 +563,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         requestId = ++_pendingUnstakeCounter;
 
         // update pool tokens and shares
-        uint256 shares = SHARES_PER_CHIP * chipsIds.length;
-        uint256 unstakeAmount = _sharesToTokens(shares, node.totalShares, node.stakingPoolTokens);
+        uint256 sharesToBurn = SHARES_PER_CHIP * chipsIds.length;
+        uint256 unstakeAmount = _sharesToTokens(sharesToBurn, node.totalShares, node.stakingPoolTokens);
         _decreaseStakingPool(node, unstakeAmount);
-        node.totalShares -= shares;
+        node.totalShares -= sharesToBurn;
 
         // add to request queue
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
@@ -757,10 +757,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev convert shares to equivalent tokens
     function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalTokens) internal pure returns (uint256) {
-        if (totalShares == 0) {
-            return shares;
-        }
-
         return (shares * totalTokens) / totalShares;
     }
 
