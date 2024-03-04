@@ -757,7 +757,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev convert shares to equivalent tokens
     function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalTokens) internal pure returns (uint256) {
-        return (shares * totalTokens) / totalShares;
+        return totalShares == 0 ? 0 : (shares * totalTokens) / totalShares;
     }
 
     /**
