@@ -15,8 +15,9 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable {
+contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard {
     using Math for uint256;
     using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -247,7 +248,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused {
+    function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused nonReentrant {
         for (uint256 i = 0; i < requestIds.length; i++) {
             _claimWithdrawal(requestIds[i]);
         }
@@ -281,7 +282,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused {
+    function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused nonReentrant {
         for (uint256 i = 0; i < requestIds.length; i++) {
             _claimUnstake(requestIds[i]);
         }
