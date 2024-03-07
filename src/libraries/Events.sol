@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 library Events {
     /**
      * @dev Emitted on createNode()
+     * @param nodeId The unique identifier of the node.
      * @param nodeAddr Address of node operator.
      * @param name Human-readable name.
      * @param description Description of node.
@@ -11,6 +12,7 @@ library Events {
      * @param publicGood Flag indicating if the node is a public good.
      */
     event NodeCreated(
+        uint256 indexed nodeId,
         address indexed nodeAddr,
         string name,
         string description,

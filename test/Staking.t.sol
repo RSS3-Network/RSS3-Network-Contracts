@@ -56,6 +56,7 @@ contract StakingTest is CommonTest, IERC721Errors {
             abi.encodeWithSelector(Staking.getPublicPool.selector),
             abi.encode(
                 DataTypes.Node({
+                    nodeId: 0,
                     account: address(0),
                     taxRateBasisPoints: 0,
                     publicGood: false,
@@ -198,12 +199,12 @@ contract StakingTest is CommonTest, IERC721Errors {
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(alice, name, description, taxRateBasisPoints, publicGood);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, publicGood);
         vm.prank(alice);
         _staking.createNode(name, description, taxRateBasisPoints, publicGood);
 
         // check node info
-        _checkNode(alice, name, description, taxRateBasisPoints, 0, publicGood);
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, publicGood);
         assertEq(_staking.getNodeCount(), 1);
     }
 
@@ -237,7 +238,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(alice, name, description, taxRateBasisPoints, false);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false);
         expectEmit();
         emit Events.Deposited(alice, amount);
 
@@ -245,8 +246,59 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.createNode{value: amount}(name, description, taxRateBasisPoints, false);
 
         // check node info
-        _checkNode(alice, name, description, taxRateBasisPoints, amount, false);
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, amount, false);
         assertEq(_staking.getNodeCount(), 1);
+    }
+
+    function testGetNodeCount() public {
+        _createNode(alice);
+        _createNode(bob);
+        _createPublicGoodNode(carol);
+
+        assertEq(_staking.getNodeCount(), 3);
+
+        // delete a node
+        vm.prank(alice);
+        _staking.deleteNode();
+
+        assertEq(_staking.getNodeCount(), 2);
+
+        // delete a public good node
+        vm.prank(carol);
+        _staking.deleteNode();
+
+        assertEq(_staking.getNodeCount(), 1);
+    }
+
+    function testGetNodes() public {
+        _createNode(alice);
+        _createNode(bob);
+        _createPublicGoodNode(carol);
+        _createNode(dave);
+
+        // get nodes with pagination
+        DataTypes.Node[] memory nodes = _staking.getNodesWithPagination(0, 4);
+        assertEq(nodes.length, 4);
+        assertEq(nodes[0].account, alice);
+        assertEq(nodes[1].account, bob);
+        assertEq(nodes[2].account, carol);
+        assertEq(nodes[3].account, dave);
+        assertEq(nodes[0].nodeId, 1);
+        assertEq(nodes[1].nodeId, 2);
+        assertEq(nodes[2].nodeId, 3);
+        assertEq(nodes[3].nodeId, 4);
+
+        // get nodes by addresses
+        DataTypes.Node[] memory nodes2 = _staking.getNodes(array(alice, bob, carol, dave));
+        assertEq(nodes2.length, 4);
+        assertEq(nodes2[0].account, alice);
+        assertEq(nodes2[1].account, bob);
+        assertEq(nodes2[2].account, carol);
+        assertEq(nodes2[3].account, dave);
+        assertEq(nodes2[0].nodeId, 1);
+        assertEq(nodes2[1].nodeId, 2);
+        assertEq(nodes2[2].nodeId, 3);
+        assertEq(nodes2[3].nodeId, 4);
     }
 
     function testUpdateNode() public {
@@ -1209,6 +1261,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function _checkNode(
         address nodeAddr,
+        uint256 nodeId,
         string memory name,
         string memory description,
         uint64 taxRateBasisPoints,
@@ -1216,6 +1269,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         bool publicGood
     ) internal {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
+        assertEq(node.nodeId, nodeId);
         assertEq(node.name, name);
         assertEq(node.description, description);
         assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
