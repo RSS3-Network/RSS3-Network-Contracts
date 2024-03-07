@@ -188,21 +188,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function deleteNode() external override whenNotPaused {
-        address addr = msg.sender;
-        DataTypes.Node storage node = _nodes[addr];
-        if (node.account == address(0)) revert NodeNotExists();
-
-        // can't delete a node with staked or deposited tokens
-        if (node.operationPoolTokens > 0 || node.stakingPoolTokens > 0) revert NodeStakedOrDeposited();
-
-        delete _nodes[addr];
-        _nodeAddrs.remove(addr);
-
-        emit Events.NodeDeleted(addr);
-    }
-
-    /// @inheritdoc IStaking
     function deposit() external payable override whenNotPaused {
         if (msg.value == 0) revert InsufficientValue();
 
@@ -461,11 +446,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     {
         totalOperationPoolTokens = _totalOperationPoolTokens;
         totalStakingPoolTokens = _totalStakingPoolTokens;
-    }
-
-    /// @inheritdoc IStaking
-    function getMinDeposit() external view override returns (uint256) {
-        return MIN_DEPOSIT;
     }
 
     /// @inheritdoc IStaking
