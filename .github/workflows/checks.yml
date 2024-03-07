@@ -10,7 +10,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -24,9 +24,9 @@ jobs:
   codespell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run CodeSpell
-        uses: codespell-project/actions-codespell@v1.0
+        uses: codespell-project/actions-codespell@v2
         with:
           check_filenames: true
           skip: ./.git,./docs,package-lock.json,yarn.lock
@@ -34,7 +34,7 @@ jobs:
   solhint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -46,7 +46,7 @@ jobs:
   upgradeable:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - uses: actions/setup-node@v3
@@ -64,7 +64,7 @@ jobs:
   contract-storage-layout:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - uses: actions/setup-node@v3
@@ -84,7 +84,7 @@ jobs:
   mythril:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -99,11 +99,11 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - uses: crytic/slither-action@v0.3.0
+      - uses: crytic/slither-action@v0.3.1
         id: slither
         with:
           node-version: 16

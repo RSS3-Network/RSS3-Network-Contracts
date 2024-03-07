@@ -56,6 +56,7 @@ contract StakingTest is CommonTest, IERC721Errors {
             abi.encodeWithSelector(Staking.getPublicPool.selector),
             abi.encode(
                 DataTypes.Node({
+                    nodeId: 0,
                     account: address(0),
                     taxRateBasisPoints: 0,
                     publicGood: false,
@@ -198,12 +199,12 @@ contract StakingTest is CommonTest, IERC721Errors {
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(alice, name, description, taxRateBasisPoints, publicGood);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, publicGood);
         vm.prank(alice);
         _staking.createNode(name, description, taxRateBasisPoints, publicGood);
 
         // check node info
-        _checkNode(alice, name, description, taxRateBasisPoints, 0, publicGood);
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, publicGood);
         assertEq(_staking.getNodeCount(), 1);
     }
 
@@ -237,7 +238,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(alice, name, description, taxRateBasisPoints, false);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false);
         expectEmit();
         emit Events.Deposited(alice, amount);
 
@@ -245,8 +246,59 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.createNode{value: amount}(name, description, taxRateBasisPoints, false);
 
         // check node info
-        _checkNode(alice, name, description, taxRateBasisPoints, amount, false);
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, amount, false);
         assertEq(_staking.getNodeCount(), 1);
+    }
+
+    function testGetNodeCount() public {
+        _createNode(alice);
+        _createNode(bob);
+        _createPublicGoodNode(carol);
+
+        assertEq(_staking.getNodeCount(), 3);
+
+        // delete a node
+        vm.prank(alice);
+        _staking.deleteNode();
+
+        assertEq(_staking.getNodeCount(), 2);
+
+        // delete a public good node
+        vm.prank(carol);
+        _staking.deleteNode();
+
+        assertEq(_staking.getNodeCount(), 1);
+    }
+
+    function testGetNodes() public {
+        _createNode(alice);
+        _createNode(bob);
+        _createPublicGoodNode(carol);
+        _createNode(dave);
+
+        // get nodes with pagination
+        DataTypes.Node[] memory nodes = _staking.getNodesWithPagination(0, 4);
+        assertEq(nodes.length, 4);
+        assertEq(nodes[0].account, alice);
+        assertEq(nodes[1].account, bob);
+        assertEq(nodes[2].account, carol);
+        assertEq(nodes[3].account, dave);
+        assertEq(nodes[0].nodeId, 1);
+        assertEq(nodes[1].nodeId, 2);
+        assertEq(nodes[2].nodeId, 3);
+        assertEq(nodes[3].nodeId, 4);
+
+        // get nodes by addresses
+        DataTypes.Node[] memory nodes2 = _staking.getNodes(array(alice, bob, carol, dave));
+        assertEq(nodes2.length, 4);
+        assertEq(nodes2[0].account, alice);
+        assertEq(nodes2[1].account, bob);
+        assertEq(nodes2[2].account, carol);
+        assertEq(nodes2[3].account, dave);
+        assertEq(nodes2[0].nodeId, 1);
+        assertEq(nodes2[1].nodeId, 2);
+        assertEq(nodes2[2].nodeId, 3);
+        assertEq(nodes2[3].nodeId, 4);
     }
 
     function testUpdateNode() public {
@@ -474,8 +526,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
-        uint256[] memory requestIds = new uint256[](1);
-        requestIds[0] = requestId;
+        uint256[] memory requestIds = array(requestId);
 
         vm.expectRevert(abi.encodeWithSelector(ClaimTimeNotReady.selector));
         _staking.claimWithdrawal(requestIds);
@@ -735,6 +786,60 @@ contract StakingTest is CommonTest, IERC721Errors {
         _testRequestUnstakeFromNode(alice, false);
     }
 
+    function testRequestUnstakeApprovedChips() public {
+        _disableAlphaPhase();
+
+        _createNode(alice);
+        _testRequestUnstakeApprovedChipsFromNode(alice, false);
+    }
+
+    function testRequestUnstakeApprovedChip() public {
+        _disableAlphaPhase();
+
+        _createNode(alice);
+        _testRequestUnstakeApprovedChipFromNode(alice, false);
+    }
+
+    function testRequestUnstakeApprovedChipsFromPublicGoodNode() public {
+        _disableAlphaPhase();
+
+        _createPublicGoodNode(alice);
+        _testRequestUnstakeApprovedChipsFromNode(alice, true);
+    }
+
+    function testRequestUnstakeApprovedChipFromPublicGoodNode() public {
+        _disableAlphaPhase();
+
+        _createPublicGoodNode(alice);
+        _testRequestUnstakeApprovedChipFromNode(alice, true);
+    }
+
+    function testRequestUnstakeFailInEmptyChipsIds() public {
+        _disableAlphaPhase();
+
+        _createNode(alice);
+
+        vm.expectRevert(abi.encodeWithSelector(EmptyChipsIds.selector));
+        _staking.requestUnstake(alice, new uint256[](0));
+    }
+
+    function testRequestUnstakeFailInChipsNotSameOwner() public {
+        _disableAlphaPhase();
+
+        _createNode(alice);
+
+        vm.startPrank(bob);
+        (uint256 t1, ) = _staking.stake{value: 10000 ether}(alice);
+        _chips.approve(carol, t1);
+
+        vm.startPrank(carol);
+        (uint256 t2, ) = _staking.stake{value: 10000 ether}(alice);
+
+        vm.expectRevert(abi.encodeWithSelector(ChipsNotSameOwner.selector));
+        _staking.requestUnstake(alice, array(t1, t2));
+        vm.stopPrank();
+    }
+
     function testRequestUnstakeFailInSettlementPhase() public {
         _disableAlphaPhase();
 
@@ -795,8 +900,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         uint256 requestId = _staking.requestUnstake(alice, tokenIds);
 
-        uint256[] memory requestIds = new uint256[](1);
-        requestIds[0] = requestId;
+        uint256[] memory requestIds = array(requestId);
 
         vm.expectRevert(abi.encodeWithSelector(ClaimTimeNotReady.selector));
         _staking.claimUnstake(requestIds);
@@ -1042,6 +1146,91 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(node.totalShares, 0);
     }
 
+    function _testRequestUnstakeApprovedChipsFromNode(address nodeAddr, bool isPublicGood) internal {
+        uint256 amount = 10000 ether;
+
+        // stake
+        vm.startPrank(bob);
+        (uint256 startTokenId, uint256 endTokenId) = isPublicGood
+            ? _staking.stakeToPublicPool{value: amount}(nodeAddr)
+            : _staking.stake{value: amount}(nodeAddr);
+
+        uint256 tokensCount = endTokenId - startTokenId + 1;
+        uint256[] memory tokenIds = new uint256[](tokensCount);
+        for (uint256 i = startTokenId; i <= endTokenId; i++) {
+            tokenIds[i - startTokenId] = i;
+        }
+
+        // approve chips
+        _chips.setApprovalForAll(carol, true);
+        vm.stopPrank();
+
+        vm.prank(carol);
+        expectEmit();
+        emit TestEvents.Transfer(bob, address(0), startTokenId);
+
+        expectEmit();
+        emit Events.UnstakeRequested(bob, nodeAddr, 1, amount, tokenIds);
+        uint256 requestId = _staking.requestUnstake(nodeAddr, tokenIds);
+
+        // check status
+        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        assertEq(req.owner, bob);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.unstakeAmount, amount);
+
+        // check node info
+        DataTypes.Node memory node = isPublicGood ? _staking.getPublicPool() : _staking.getNode(nodeAddr);
+        assertEq(node.stakingPoolTokens, 0);
+        assertEq(node.totalShares, 0);
+    }
+
+    function _testRequestUnstakeApprovedChipFromNode(address nodeAddr, bool isPublicGood) internal {
+        uint256 amount = 10000 ether;
+
+        // stake
+        vm.prank(bob);
+        (uint256 startTokenId, uint256 endTokenId) = isPublicGood
+            ? _staking.stakeToPublicPool{value: amount}(nodeAddr)
+            : _staking.stake{value: amount}(nodeAddr);
+        uint256 tokensCount = endTokenId - startTokenId + 1;
+
+        // approve only one chip
+        vm.prank(bob);
+        _chips.approve(carol, startTokenId);
+
+        uint256[] memory singleTokenId = array(startTokenId);
+
+        vm.prank(carol);
+        expectEmit();
+        emit TestEvents.Transfer(bob, address(0), startTokenId);
+        expectEmit();
+        uint256 unstakedAmount = amount / tokensCount;
+        emit Events.UnstakeRequested(bob, nodeAddr, 1, unstakedAmount, singleTokenId);
+        uint256 requestId = _staking.requestUnstake(nodeAddr, singleTokenId);
+        // check status
+        _checkUnstakeOneChip(nodeAddr, requestId, amount, unstakedAmount, isPublicGood);
+    }
+
+    function _checkUnstakeOneChip(
+        address nodeAddr,
+        uint256 requestId,
+        uint256 stakedAmount,
+        uint256 unstakedAmount,
+        bool isPublicGood
+    ) internal {
+        // check status
+        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        assertEq(req.owner, bob);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.unstakeAmount, unstakedAmount);
+
+        // check node info
+        DataTypes.Node memory node = isPublicGood ? _staking.getPublicPool() : _staking.getNode(nodeAddr);
+
+        assertEq(node.stakingPoolTokens, stakedAmount - unstakedAmount);
+    }
+
     function _unstakeAndCheckAmount(
         address sender,
         uint256 amount,
@@ -1055,8 +1244,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 requestId = _staking.requestUnstake(alice, tokenIds);
         skip(22.5 days);
 
-        uint256[] memory requestIds = new uint256[](1);
-        requestIds[0] = requestId;
+        uint256[] memory requestIds = array(requestId);
 
         uint256 allRewards = amount + operationRewards[0] + stakingRewards[0] - taxAmounts[0];
 
@@ -1073,6 +1261,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function _checkNode(
         address nodeAddr,
+        uint256 nodeId,
         string memory name,
         string memory description,
         uint64 taxRateBasisPoints,
@@ -1080,6 +1269,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         bool publicGood
     ) internal {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
+        assertEq(node.nodeId, nodeId);
         assertEq(node.name, name);
         assertEq(node.description, description);
         assertEq(node.taxRateBasisPoints, taxRateBasisPoints);

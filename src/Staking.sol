@@ -63,6 +63,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     EnumerableSet.AddressSet internal _nodeAddrs;
     /// @dev all node info
     mapping(address nodeAddr => DataTypes.Node) internal _nodes;
+    /// @dev counter of node id
+    uint256 internal _nodeIdCounter;
 
     /// @dev pending withdrawal request counter
     uint256 internal _pendingWithdrawalCounter;
@@ -557,7 +559,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev unstake from a node by burning chips
     function _unstakeFromNode(address nodeAddr, uint256[] calldata chipsIds) internal returns (uint256 requestId) {
-        _checkUnstakeConditions(nodeAddr, chipsIds);
+        address owner = _checkUnstakeConditions(nodeAddr, chipsIds);
 
         DataTypes.Node storage node = _nodes[nodeAddr].publicGood ? _publicPool : _nodes[nodeAddr];
 
@@ -572,7 +574,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // add to request queue
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
         req.timestamp = block.timestamp;
-        req.owner = msg.sender;
+        req.owner = owner;
+
         req.nodeAddr = nodeAddr;
         req.unstakeAmount = unstakeAmount;
 
@@ -580,7 +583,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             IChips(_chips).burn(chipsIds[i]);
         }
 
-        emit Events.UnstakeRequested(msg.sender, nodeAddr, requestId, unstakeAmount, chipsIds);
+        emit Events.UnstakeRequested(owner, nodeAddr, requestId, unstakeAmount, chipsIds);
     }
 
     /// @dev create a node
@@ -594,8 +597,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (nodeAddr == address(0)) revert CreateNodeToZeroAddress();
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
+        uint256 nodeId = ++_nodeIdCounter;
+
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (address(0) != node.account) revert NodeExists();
+        if (node.nodeId > 0) revert NodeExists();
+        node.nodeId = nodeId;
         node.account = nodeAddr;
         node.name = name;
         node.description = description;
@@ -605,7 +611,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // add to node list
         _nodeAddrs.add(nodeAddr);
 
-        emit Events.NodeCreated(nodeAddr, name, description, taxRateBasisPoints, publicGood);
+        emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood);
     }
 
     /// @dev deposit tokens to a node
@@ -686,21 +692,34 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @dev checks whether user is token owner or approved
-    function _checkAuthorized(uint256 tokenId, address user) internal view returns (bool) {
-        return (IERC721(_chips).ownerOf(tokenId) == user || IERC721(_chips).getApproved(tokenId) == user);
+    function _checkAuthorized(address owner, uint256 tokenId, address user) internal view returns (bool) {
+        return
+            owner == user ||
+            IERC721(_chips).getApproved(tokenId) == user ||
+            IERC721(_chips).isApprovedForAll(owner, user);
     }
 
     /// @dev checks that:
-    /// 1. caller has the authorization to unstake the chips
-    /// 2. chips are issued by the node
-    function _checkUnstakeConditions(address nodeAddr, uint256[] calldata chipsIds) internal view {
-        // check conditions
+    /// 1. length of chipsIds is not zero
+    /// 2. caller has the authorization to unstake the chips
+    /// 3. chips are issued by the node
+    /// 4. chips have the same owner
+    function _checkUnstakeConditions(address nodeAddr, uint256[] calldata chipsIds) internal view returns (address) {
+        if (chipsIds.length == 0) revert EmptyChipsIds();
+
+        address lastOwner;
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (!_checkAuthorized(tokenId, msg.sender)) revert ChipNotAuthorized(tokenId);
+            address owner = IERC721(_chips).ownerOf(tokenId);
+            if (lastOwner != address(0) && owner != lastOwner) revert ChipsNotSameOwner();
+            lastOwner = owner;
+
+            if (!_checkAuthorized(owner, tokenId, msg.sender)) revert ChipNotAuthorized(tokenId);
 
             if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
         }
+
+        return lastOwner;
     }
 
     /// @dev returns the node address which issued the chips

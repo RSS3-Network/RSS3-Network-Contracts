@@ -9,11 +9,12 @@
 | _isAlphaPhase             | bool                                                   | 4    | 21     | 1     | src/Staking.sol:Staking |
 | _nodeAddrs                | struct EnumerableSet.AddressSet                        | 5    | 0      | 64    | src/Staking.sol:Staking |
 | _nodes                    | mapping(address => struct DataTypes.Node)              | 7    | 0      | 32    | src/Staking.sol:Staking |
-| _pendingWithdrawalCounter | uint256                                                | 8    | 0      | 32    | src/Staking.sol:Staking |
-| _pendingWithdrawals       | mapping(uint256 => struct DataTypes.WithdrawalRequest) | 9    | 0      | 32    | src/Staking.sol:Staking |
-| _pendingUnstakeCounter    | uint256                                                | 10   | 0      | 32    | src/Staking.sol:Staking |
-| _pendingUnstake           | mapping(uint256 => struct DataTypes.UnstakeRequest)    | 11   | 0      | 32    | src/Staking.sol:Staking |
-| _publicPool               | struct DataTypes.Node                                  | 12   | 0      | 224   | src/Staking.sol:Staking |
-| _totalOperationPoolTokens | uint256                                                | 19   | 0      | 32    | src/Staking.sol:Staking |
-| _totalStakingPoolTokens   | uint256                                                | 20   | 0      | 32    | src/Staking.sol:Staking |
-| _families                 | struct Checkpoints.Trace160                            | 21   | 0      | 32    | src/Staking.sol:Staking |
+| _nodeIdCounter            | uint256                                                | 8    | 0      | 32    | src/Staking.sol:Staking |
+| _pendingWithdrawalCounter | uint256                                                | 9    | 0      | 32    | src/Staking.sol:Staking |
+| _pendingWithdrawals       | mapping(uint256 => struct DataTypes.WithdrawalRequest) | 10   | 0      | 32    | src/Staking.sol:Staking |
+| _pendingUnstakeCounter    | uint256                                                | 11   | 0      | 32    | src/Staking.sol:Staking |
+| _pendingUnstake           | mapping(uint256 => struct DataTypes.UnstakeRequest)    | 12   | 0      | 32    | src/Staking.sol:Staking |
+| _publicPool               | struct DataTypes.Node                                  | 13   | 0      | 256   | src/Staking.sol:Staking |
+| _totalOperationPoolTokens | uint256                                                | 21   | 0      | 32    | src/Staking.sol:Staking |
+| _totalStakingPoolTokens   | uint256                                                | 22   | 0      | 32    | src/Staking.sol:Staking |
+| _families                 | struct Checkpoints.Trace160                            | 23   | 0      | 32    | src/Staking.sol:Staking |

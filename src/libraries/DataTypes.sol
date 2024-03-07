@@ -7,6 +7,8 @@ pragma solidity 0.8.20;
  */
 library DataTypes {
     struct Node {
+        /// @notice unique identifier of the node
+        uint256 nodeId;
         /// @notice address of the node operator
         address account;
         /// @notice tax rate measured in basis points.
