@@ -15,8 +15,9 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable {
+contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard {
     using Math for uint256;
     using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -62,6 +63,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     EnumerableSet.AddressSet internal _nodeAddrs;
     /// @dev all node info
     mapping(address nodeAddr => DataTypes.Node) internal _nodes;
+    /// @dev counter of node id
+    uint256 internal _nodeIdCounter;
 
     /// @dev pending withdrawal request counter
     uint256 internal _pendingWithdrawalCounter;
@@ -230,7 +233,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused {
+    function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused nonReentrant {
         for (uint256 i = 0; i < requestIds.length; i++) {
             _claimWithdrawal(requestIds[i]);
         }
@@ -264,7 +267,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused {
+    function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused nonReentrant {
         for (uint256 i = 0; i < requestIds.length; i++) {
             _claimUnstake(requestIds[i]);
         }
@@ -574,8 +577,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (nodeAddr == address(0)) revert CreateNodeToZeroAddress();
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
+        uint256 nodeId = ++_nodeIdCounter;
+
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (address(0) != node.account) revert NodeExists();
+        if (node.nodeId > 0) revert NodeExists();
+        node.nodeId = nodeId;
         node.account = nodeAddr;
         node.name = name;
         node.description = description;
@@ -585,7 +591,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // add to node list
         _nodeAddrs.add(nodeAddr);
 
-        emit Events.NodeCreated(nodeAddr, name, description, taxRateBasisPoints, publicGood);
+        emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood);
     }
 
     /// @dev deposit tokens to a node
