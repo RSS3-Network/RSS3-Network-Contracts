@@ -62,6 +62,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     EnumerableSet.AddressSet internal _nodeAddrs;
     /// @dev all node info
     mapping(address nodeAddr => DataTypes.Node) internal _nodes;
+    /// @dev counter of node id
+    uint256 internal _nodeIdCounter;
 
     /// @dev pending withdrawal request counter
     uint256 internal _pendingWithdrawalCounter;
@@ -594,8 +596,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (nodeAddr == address(0)) revert CreateNodeToZeroAddress();
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
+        uint256 nodeId = ++_nodeIdCounter;
+
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (address(0) != node.account) revert NodeExists();
+        if (node.nodeId > 0) revert NodeExists();
+        node.nodeId = nodeId;
         node.account = nodeAddr;
         node.name = name;
         node.description = description;
@@ -605,7 +610,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // add to node list
         _nodeAddrs.add(nodeAddr);
 
-        emit Events.NodeCreated(nodeAddr, name, description, taxRateBasisPoints, publicGood);
+        emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood);
     }
 
     /// @dev deposit tokens to a node
