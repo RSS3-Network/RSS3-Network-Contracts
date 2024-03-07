@@ -1,0 +1,883 @@
+{
+  "abi": [
+    {
+      "type": "function",
+      "name": "approve",
+      "inputs": [
+        {
+          "name": "to",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "balanceOf",
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "burn",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "getApproved",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "initialize",
+      "inputs": [
+        {
+          "name": "name_",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "symbol_",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "staking_",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "isApprovedForAll",
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "operator",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "mint",
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "mintBatch",
+      "inputs": [
+        {
+          "name": "to",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "batchSize",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "startTokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "endTokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "name",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "nodeImageAndAttributesURI",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "ownerOf",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "safeTransferFrom",
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "to",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "safeTransferFrom",
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "to",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "data",
+          "type": "bytes",
+          "internalType": "bytes"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "setApprovalForAll",
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "approved",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "stakingContract",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "supportsInterface",
+      "inputs": [
+        {
+          "name": "interfaceId",
+          "type": "bytes4",
+          "internalType": "bytes4"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "symbol",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "tokenURI",
+      "inputs": [
+        {
+          "name": "id",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "totalSupply",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "transferFrom",
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "to",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "event",
+      "name": "Approval",
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "approved",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "ApprovalForAll",
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "operator",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "approved",
+          "type": "bool",
+          "indexed": false,
+          "internalType": "bool"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "Initialized",
+      "inputs": [
+        {
+          "name": "version",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "Transfer",
+      "inputs": [
+        {
+          "name": "from",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "to",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "error",
+      "name": "AlphaWithdrawNotAllowed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "AlreadyClaimed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "AmountTooSmall",
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "BatchSizeZero",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "CallerNotStaking",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ChipNotAuthorized",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ChipNotPublicGood",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ChipNotValid",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ChipsIdOverflow",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ChipsNotSameOwner",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ClaimIdNotExists",
+      "inputs": [
+        {
+          "name": "claimId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ClaimTimeNotReady",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "CreateNodeToZeroAddress",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ERC721IncorrectOwner",
+      "inputs": [
+        {
+          "name": "sender",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "owner",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC721InsufficientApproval",
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC721InvalidApprover",
+      "inputs": [
+        {
+          "name": "approver",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC721InvalidOperator",
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC721InvalidOwner",
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC721InvalidReceiver",
+      "inputs": [
+        {
+          "name": "receiver",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC721InvalidSender",
+      "inputs": [
+        {
+          "name": "sender",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC721NonexistentToken",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "EmptyChipsIds",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "EmptyNodeList",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ExcessWithdrawalAmount",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InsufficientValue",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidArrayLength",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidEpoch",
+      "inputs": [
+        {
+          "name": "expected",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "actual",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "InvalidEpochNumber",
+      "inputs": [
+        {
+          "name": "current",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "got",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "InvalidInitialization",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidTraitId",
+      "inputs": [
+        {
+          "name": "traitId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NodeAlreadyPublicGood",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NodeExists",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NodeNotExists",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NodeNotPublicGood",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NodeStakedOrDeposited",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotInitializing",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "OperationRewardsExceed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "PublicGoodNodeNotDeposited",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "RewardsAlreadyDistributed",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "SettlementPhase",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "StakeToPublicGoodNode",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "StakingRewardsExceed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "SubmissionIntervalNotElapsed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "TaxRateBasisPointsTooLarge",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "TaxRateBasisPointsTooSmall",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "TransferFailed",
+      "inputs": []
+    }
+  ],
+  "address": "0xFd7940B12B974dAe77e662D56bEA4642A923757a",
+  "args": [],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "devdoc": null,
+  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"type\":\"error\",\"name\":\"AlphaWithdrawNotAllowed\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"AlreadyClaimed\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"AmountTooSmall\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"BatchSizeZero\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"CallerNotStaking\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"ChipNotAuthorized\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"ChipNotPublicGood\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"ChipNotValid\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ChipsIdOverflow\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ChipsNotSameOwner\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"claimId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"ClaimIdNotExists\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ClaimTimeNotReady\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"CreateNodeToZeroAddress\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"ERC721IncorrectOwner\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"ERC721InsufficientApproval\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"approver\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"ERC721InvalidApprover\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"ERC721InvalidOperator\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"ERC721InvalidOwner\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"ERC721InvalidReceiver\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"ERC721InvalidSender\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"ERC721NonexistentToken\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"EmptyChipsIds\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"EmptyNodeList\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ExcessWithdrawalAmount\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"InsufficientValue\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"InvalidArrayLength\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"expected\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"actual\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"InvalidEpoch\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"current\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"got\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"InvalidEpochNumber\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"InvalidInitialization\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"traitId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"InvalidTraitId\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"NodeAlreadyPublicGood\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"NodeExists\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"NodeNotExists\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"NodeNotPublicGood\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"NodeStakedOrDeposited\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"NotInitializing\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"OperationRewardsExceed\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"PublicGoodNodeNotDeposited\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"RewardsAlreadyDistributed\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"SettlementPhase\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"StakeToPublicGoodNode\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"StakingRewardsExceed\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"SubmissionIntervalNotElapsed\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"TaxRateBasisPointsTooLarge\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"TaxRateBasisPointsTooSmall\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"TransferFailed\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"approved\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\",\"indexed\":true}],\"type\":\"event\",\"name\":\"Approval\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\",\"indexed\":false}],\"type\":\"event\",\"name\":\"ApprovalForAll\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\",\"indexed\":false}],\"type\":\"event\",\"name\":\"Initialized\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\",\"indexed\":true}],\"type\":\"event\",\"name\":\"Transfer\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"approve\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"burn\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getApproved\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}]},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name_\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"symbol_\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"staking_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"initialize\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"isApprovedForAll\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"mint\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"batchSize\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"mintBatch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"startTokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTokenId\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"nodeImageAndAttributesURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}]},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"safeTransferFrom\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"safeTransferFrom\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"setApprovalForAll\"},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"stakingContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}]},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}]},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"transferFrom\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"approve(address,uint256)\":{\"details\":\"See {IERC721-approve}.\"},\"balanceOf(address)\":{\"details\":\"See {IERC721-balanceOf}.\"},\"burn(uint256)\":{\"params\":{\"tokenId\":\"ID of token to burn.\"}},\"getApproved(uint256)\":{\"details\":\"See {IERC721-getApproved}.\"},\"initialize(string,string,address)\":{\"params\":{\"name_\":\"Name of the token.\",\"staking_\":\"Address of the Staking contract.\",\"symbol_\":\"Symbol of the token.\"}},\"isApprovedForAll(address,address)\":{\"details\":\"See {IERC721-isApprovedForAll}.\"},\"mint(address)\":{\"params\":{\"account\":\"Address to receive the minted token.\"},\"returns\":{\"tokenId\":\"The new minted token id.\"}},\"mintBatch(address,uint256)\":{\"params\":{\"batchSize\":\"Number of tokens to mint.\",\"to\":\"Address to receive the minted tokens.\"},\"returns\":{\"endTokenId\":\"The end of new minted chips token ids.\",\"startTokenId\":\"The start of new minted chips token ids.\"}},\"name()\":{\"details\":\"See {IERC721Metadata-name}.\"},\"nodeImageAndAttributesURI(address)\":{\"params\":{\"nodeAddr\":\"address of the given node.\"},\"returns\":{\"_0\":\"SVG and attributes of the node image.\"}},\"ownerOf(uint256)\":{\"details\":\"See {IERC721-ownerOf}.\"},\"safeTransferFrom(address,address,uint256)\":{\"details\":\"See {IERC721-safeTransferFrom}.\"},\"safeTransferFrom(address,address,uint256,bytes)\":{\"details\":\"See {IERC721-safeTransferFrom}.\"},\"setApprovalForAll(address,bool)\":{\"details\":\"See {IERC721-setApprovalForAll}.\"},\"stakingContract()\":{\"returns\":{\"_0\":\"Address of the Staking contract.\"}},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"},\"symbol()\":{\"details\":\"See {IERC721Metadata-symbol}.\"},\"totalSupply()\":{\"returns\":{\"_0\":\"Total supply of tokens.\"}},\"transferFrom(address,address,uint256)\":{\"details\":\"See {IERC721-transferFrom}.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"burn(uint256)\":{\"notice\":\"Destroys `tokenId`.\"},\"initialize(string,string,address)\":{\"notice\":\"Initializes the Chips contract.\"},\"mint(address)\":{\"notice\":\"Mints a token to `account`.\"},\"mintBatch(address,uint256)\":{\"notice\":\"Mints a batch tokens to `account`.\"},\"nodeImageAndAttributesURI(address)\":{\"notice\":\"Returns the svg and attributes of the image for a given node addr.\"},\"stakingContract()\":{\"notice\":\"Returns the address of the Staking contract.\"},\"totalSupply()\":{\"notice\":\"Returns total supply of tokens.\"}},\"version\":1}},\"settings\":{\"remappings\":[\"@openzeppelin/=node_modules/@openzeppelin/\",\"ds-test/=lib/forge-std/lib/ds-test/src/\",\"forge-std/=lib/forge-std/src/\",\"solady/=lib/solady/src/\"],\"optimizer\":{\"enabled\":true,\"runs\":999999},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"compilationTarget\":{\"src/Chips.sol\":\"Chips\"},\"evmVersion\":\"paris\",\"libraries\":{}},\"sources\":{\"node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol\":{\"keccak256\":\"0x631188737069917d2f909d29ce62c4d48611d326686ba6683e26b72a23bfac0b\",\"urls\":[\"bzz-raw://7a61054ae84cd6c4d04c0c4450ba1d6de41e27e0a2c4f1bcdf58f796b401c609\",\"dweb:/ipfs/QmUvtdp7X1mRVyC3CsHrtPbgoqWaXHp3S1ZR24tpAQYJWM\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"keccak256\":\"0x5ef46daa3b58ef2702279d514780316efaa952915ee1aa3396f041ee2982b0b4\",\"urls\":[\"bzz-raw://2f8f2a76e23b02fc69e8cd24c3cb47da6c7af3a2d6c3a382f8ac25c6e094ade7\",\"dweb:/ipfs/QmPV4ZS4tPVv4mTCf9ejyZ1ai57EEibDRj7mN2ARDCLV5n\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol\":{\"keccak256\":\"0x7f7a26306c79a65fb8b3b6c757cd74660c532cd8a02e165488e30027dd34ca49\",\"urls\":[\"bzz-raw://d01e0b2b837ee2f628545e54d8715b49c7ef2befd08356c2e7f6c50dde8a1c22\",\"dweb:/ipfs/QmWBAn6y2D1xgftci97Z3qR9tQnkvwQpYwFwkTvDMvqU4i\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol\":{\"keccak256\":\"0x37d1aaaa5a2908a09e9dcf56a26ddf762ecf295afb5964695937344fc6802ce1\",\"urls\":[\"bzz-raw://ed0bfc1b92153c5000e50f4021367b931bbe96372ac6facec3c4961b72053d02\",\"dweb:/ipfs/Qmbwp8VDerjS5SV1quwHH1oMXxPQ93fzfLVqJ2RCqbowGE\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/Base64.sol\":{\"keccak256\":\"0x09000342b85b1a06fa1f5b71bdeef7c449cd25799aac14fa9053d8abd18219aa\",\"urls\":[\"bzz-raw://a7cdab282a9165b685fa86da3bd331c8e319e5a5c64e16599134e738934a77d4\",\"dweb:/ipfs/QmSLcE5FmDqVQbFDB6MzUzuFi4UhJVUQ1A2rT4aJGhpERT\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2\",\"urls\":[\"bzz-raw://6a708e8a5bdb1011c2c381c9a5cfd8a9a956d7d0a9dc1bd8bcdaf52f76ef2f12\",\"dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/Strings.sol\":{\"keccak256\":\"0x55f102ea785d8399c0e58d1108e2d289506dde18abc6db1b7f68c1f9f9bc5792\",\"urls\":[\"bzz-raw://6e52e0a7765c943ef14e5bcf11e46e6139fa044be564881378349236bf2e3453\",\"dweb:/ipfs/QmZEeeXoFPW47amyP35gfzomF9DixqqTEPwzBakv6cZw6i\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"keccak256\":\"0x9e8778b14317ba9e256c30a76fd6c32b960af621987f56069e1e819c77c6a133\",\"urls\":[\"bzz-raw://1777404f1dcd0fac188e55a288724ec3c67b45288e49cc64723e95e702b49ab8\",\"dweb:/ipfs/QmZFdC626GButBApwDUvvTnUzdinevC3B24d7yyh57XkiA\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x4296879f55019b23e135000eb36896057e7101fb7fb859c5ef690cf14643757b\",\"urls\":[\"bzz-raw://87b3541437c8c443ccd36795e56a338ed12855eec17f8da624511b8d1a7e14df\",\"dweb:/ipfs/QmeJQCtZrQjtJLr6u7ZHWeH3pBnjtLWzvRrKViAi7UZqxL\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/math/Math.sol\":{\"keccak256\":\"0x005ec64c6313f0555d59e278f9a7a5ab2db5bdc72a027f255a37c327af1ec02d\",\"urls\":[\"bzz-raw://4ece9f0b9c8daca08c76b6b5405a6446b6f73b3a15fab7ff56e296cbd4a2c875\",\"dweb:/ipfs/QmQyRpyPRL5SQuAgj6SHmbir3foX65FJjbVTTQrA2EFg6L\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/math/SignedMath.sol\":{\"keccak256\":\"0x5f7e4076e175393767754387c962926577f1660dd9b810187b9002407656be72\",\"urls\":[\"bzz-raw://7d533a1c97cd43a57cd9c465f7ee8dd0e39ae93a8fb8ff8e5303a356b081cdcc\",\"dweb:/ipfs/QmVBEei6aTnvYNZp2CHYVNKyZS4q1KkjANfY39WVXZXVoT\"],\"license\":\"MIT\"},\"src/Chips.sol\":{\"keccak256\":\"0xda3889a6c03411957aad0983bf3e1b63f5e843400cadb81b6c9774178b92fce0\",\"urls\":[\"bzz-raw://eebe901443ff283323ff98e974d95c469ad6ec0871dbd155d4338f4b89903ef9\",\"dweb:/ipfs/QmVWUHJUYkmLm7xDx49wJKSR2pEV6RpvsgXxq9WnqK2Vjd\"],\"license\":\"MIT\"},\"src/base/ERC721.sol\":{\"keccak256\":\"0xb54736a4028e04903a670c5b971efcfa973ac9e7bd24d8eed7939b9d8f5dcfde\",\"urls\":[\"bzz-raw://bca1ccd2837ab60eb149af6dfac4c5b919c342fd4e5980af33cf31850d7f1e8b\",\"dweb:/ipfs/QmNqN132xkxBXYHHaWPFYsWptQCHUj14kT6fsVR95nPepD\"],\"license\":\"MIT\"},\"src/interfaces/IChips.sol\":{\"keccak256\":\"0x2cd1cb9c10fcaf5f682a9a8a8f306c39ecf4366acb268cfbc882c8f84cb9b56f\",\"urls\":[\"bzz-raw://044dc920cda34c8b15522b75ffb7459b62b7e2c9f11b7d428eed4956bf5e8366\",\"dweb:/ipfs/QmPzwqwy7xCwoyt25rpa9xYkHtZF3d43hProU4bHSyQZdj\"],\"license\":\"MIT\"},\"src/interfaces/IERC721Errors.sol\":{\"keccak256\":\"0x47fe298cfe556dc5b7957c6a3ae8b695d12cf27c538d13f31f0fbe12a7af8177\",\"urls\":[\"bzz-raw://7c41fc893c37e9648832b0efdc3f519eca8f00322bf8e686315362003e2facfd\",\"dweb:/ipfs/QmS7qNQYQy433LWGXEsumPcVk74QArVspAdMiKR6xag85d\"],\"license\":\"MIT\"},\"src/interfaces/IErrors.sol\":{\"keccak256\":\"0x1533fed390ebc9aec345c895e30ee848285cdbfd2229542db8fc46ca15390424\",\"urls\":[\"bzz-raw://7e8b3d6d446672a55226768c4af22af3f35c6b63c3ebe903236547ff1a60a286\",\"dweb:/ipfs/QmYSc9CAtwsz2eAwuNbgkhXGSmnr4znpvaQJ5eKte8FP82\"],\"license\":\"MIT\"},\"src/interfaces/IStaking.sol\":{\"keccak256\":\"0xaf529761085159c0a4fede7e762da982224f98477ac1152a87dcbb51edcb0b40\",\"urls\":[\"bzz-raw://679911f48b014b802746ebc0be6fdc8466acb01b815b7fee6233fb7478526aee\",\"dweb:/ipfs/QmeSeYHFZ8piSLDGFUwF1yuh7RJVvzQdJ8Y4onjek7KoVE\"],\"license\":\"MIT\"},\"src/libraries/DataTypes.sol\":{\"keccak256\":\"0xb9decf98cf0025851b41c3b9c779527cfb398c32c4419923dd46756d893788b0\",\"urls\":[\"bzz-raw://f796fb7396149c832041dfe2909c3c35d5b0360d6fbf4b71bb7dc2277b1401ed\",\"dweb:/ipfs/QmSkcD4se72w4hMJqeLYAYAtke8tRsCK6kmDo1yyqraRZ2\"],\"license\":\"MIT\"},\"src/libraries/SVGGenerator.sol\":{\"keccak256\":\"0xd7729c7ff9dc9e76b64d8cd1a6001f27238192c4f33b2e26cda3231229ac43b3\",\"urls\":[\"bzz-raw://25398568e5b2700d34a36b745bc45b81b1a3af9e20511112d0be7fccf68fd064\",\"dweb:/ipfs/QmWLU6fmwbxVtWR5haoWamxT8LihnNdqnH9wFs8LJuR25k\"],\"license\":\"MIT\"},\"src/libraries/SVGs/ChipDetails/ChipDetail.sol\":{\"keccak256\":\"0x035ec6e8d5b7c6fb276ca4a68a8754aec88203aac69108b0b5037aa40f06f30d\",\"urls\":[\"bzz-raw://83e01e7ae10cd4667dee984913ed8ae64984ebbae82f4f1e3dbe2b22766e9b55\",\"dweb:/ipfs/QmRpdiyhgHRzptvDN3r1hpUrCZSAMABC4yE7gEyuygtX3y\"],\"license\":\"MIT\"},\"src/libraries/SVGs/ChipDetails/ChipDetail10to11.sol\":{\"keccak256\":\"0x7e55d65a089a2cc4d66f1ddce2510f19737bed2b3858611441cd22e825eed506\",\"urls\":[\"bzz-raw://14136cf8f68a706245f1ba16c74e78bbb12b61f301ec5de89e960783dc881742\",\"dweb:/ipfs/QmQxAaNCxh5iBmotBGEHTLQjDPEDEPGWgiaVBTbnvnbc3a\"],\"license\":\"MIT\"},\"src/libraries/SVGs/ChipDetails/ChipDetail1to2.sol\":{\"keccak256\":\"0x4a4acd53d3d44be860196b99255baa473be0c5922eb9590675c15543d72fdfb8\",\"urls\":[\"bzz-raw://0cf7b9f1fe7bc26f51b4ad69687508ad990c6902ee025a56fd17a5b766d64072\",\"dweb:/ipfs/QmdbQGPQaMShULHYEJvtG3kFYpNCZxRSxhpXiiZscqeVqT\"],\"license\":\"MIT\"},\"src/libraries/SVGs/ChipDetails/ChipDetail3to4.sol\":{\"keccak256\":\"0x625e1bbfc169c2d88ee36f7acad47681616617874b873e7ccf8650fd0ff7b33a\",\"urls\":[\"bzz-raw://260609d1834fc2b153afedd9d11ebd9337708e2b908043061dc7c5925a42bbf2\",\"dweb:/ipfs/Qmajr3Y8Q4aiNKDZvYakLxZ8Sh1L9ZsYmcsdrYTWuFV7Co\"],\"license\":\"MIT\"},\"src/libraries/SVGs/ChipDetails/ChipDetail5.sol\":{\"keccak256\":\"0x39618b41795336885277954845b8cad9374694688a9966d0de3535634fa587a1\",\"urls\":[\"bzz-raw://b21e92565f307f77b4e0ba41513654c77faf17dec371900f1cfad4d865b28a73\",\"dweb:/ipfs/QmTLfmGbossf6zVU6vtj4PEWELv3R3UKcQWJSSqyjCX9ts\"],\"license\":\"MIT\"},\"src/libraries/SVGs/ChipDetails/ChipDetail6.sol\":{\"keccak256\":\"0x15fa81038bcc3eb94d9296976f92af3b6665991a80e243c88f4634f305694920\",\"urls\":[\"bzz-raw://3525e3959fcf2187d8dfc1a6b180883b4211ed1996936b9d1606156506ae332c\",\"dweb:/ipfs/QmXGVixmXfJ1TRcVH14b2zyG7a5CwyGSbMf5VN5bhPW5Gi\"],\"license\":\"MIT\"},\"src/libraries/SVGs/ChipDetails/ChipDetail7.sol\":{\"keccak256\":\"0x008e3764f5bfd7e6be2df4f744c1b56686f632734691d8d4488eb95f8e671d4c\",\"urls\":[\"bzz-raw://85c0cddef37de6cce5d56133472b33d60715dec96006640f032997ad8ed73f6b\",\"dweb:/ipfs/QmWdLPhQ7FCYK2w3hKGn2DuKb4WVLD5Zkf5yjS3TMhLZ2A\"],\"license\":\"MIT\"},\"src/libraries/SVGs/ChipDetails/ChipDetail8to9.sol\":{\"keccak256\":\"0x4a8e6974732b4761ea098696ec2001b6995144fc9aac3e2b3b14be9d4e7c6ec2\",\"urls\":[\"bzz-raw://8c11ab11a59d389d7e63c68bc105b559ea02358a9db48ee466ff2818822acfdd\",\"dweb:/ipfs/QmTZH2Erq2GVDVZJG3wdD8hxUPfbfB1KGZbxWS7i11zc1w\"],\"license\":\"MIT\"},\"src/libraries/SVGs/Corners.sol\":{\"keccak256\":\"0xc6357cc83a3af0cefb805c1af3ba37a41542e29679ea809a2a5f4d37b2dba405\",\"urls\":[\"bzz-raw://eea28fb9502505c5fa1fd3342edf3b583aff1b080970d5eb048dcba93daf80de\",\"dweb:/ipfs/QmY4BvZYaikYQ7qKM9GVtiU4nK2m32zh7kTkhXgZXKnQpH\"],\"license\":\"MIT\"},\"src/libraries/SVGs/Eyes.sol\":{\"keccak256\":\"0x12e553c08aacd3c55d00d79226b9ffe134a47d6d738695ca26f2cff8fa682272\",\"urls\":[\"bzz-raw://a116b1dad7480d30581eb1fe74dd3578fb02dd14453a697460ad4047010a9c52\",\"dweb:/ipfs/QmZKDqtykWjN1k22qqkLNy1Jw49Y1sqzaQccfsj5xw97VK\"],\"license\":\"MIT\"},\"src/libraries/SVGs/Eyes10to18.sol\":{\"keccak256\":\"0x4a0daebfcfa6454ec2adea7d8988df5077f0bf1d4344f11155709f0c6ba2e0ef\",\"urls\":[\"bzz-raw://0ffb54271df40cad7aed2ac748f7350dc552db111c86c769551e2ef614ced304\",\"dweb:/ipfs/Qmc87ANc7AjEVs5YcA4RhgPHo1CJDA4uA9cfTdeyRGd2bc\"],\"license\":\"MIT\"},\"src/libraries/SVGs/Eyes1to9.sol\":{\"keccak256\":\"0xd7df20bdafebccd36825fba9c8f646eaaaf95f7a1905191881d7966032ca2001\",\"urls\":[\"bzz-raw://d81f22402fd2d3e97af721194d89dc88fb56b1010186d1c0de4744c6cb85c7c7\",\"dweb:/ipfs/QmUptyMZe4SUwozgZ3ASPEcuCLHUewjG4wh11vJ3XAUMXV\"],\"license\":\"MIT\"},\"src/libraries/SVGs/Frame.sol\":{\"keccak256\":\"0xae3b0bcc03ec2535044c7d7b5d29c8348d7b8b4797fbe9b348f05b3a1984456b\",\"urls\":[\"bzz-raw://af42c291970ae4afb5a9ddb7f6d14af67a37c546adc0a94279131d67607f14dd\",\"dweb:/ipfs/Qmc4jgWPfCSVqHNTswoQSoKMDoizUiGLXG7gLxj9yQEB85\"],\"license\":\"MIT\"},\"src/libraries/SVGs/Head.sol\":{\"keccak256\":\"0xd5c8546fde27a9baf9e51ad0b3adba6094ec0cc37dfbf661a2d819b16f9175cc\",\"urls\":[\"bzz-raw://06ca4da1c7712f8292b57b41755178aaa281e601ce31118a5bd96c86105cc54d\",\"dweb:/ipfs/QmYz9G8YDuaukhbwFj1AE8EesXvMtMdCAvGNNddKGMB4K1\"],\"license\":\"MIT\"},\"src/libraries/SVGs/Mouths.sol\":{\"keccak256\":\"0x6f1f58dfe11af3d53d64ca9b7c30fd6fdf4645673900a0e16412bc299d7b4910\",\"urls\":[\"bzz-raw://1429185945f6441c402a67d2932d0ae17dac1f7b5152900ac4fc1385be38d29e\",\"dweb:/ipfs/QmWiMK4FmULPd5reSu7WJjgxoiursnvfHukH7tcVXerKkB\"],\"license\":\"MIT\"}},\"version\":1}",
+  "numDeployments": 1,
+  "receipt": {
+    "transactionHash": "0x03ec4fa77410bfad3c408fe8b244496e4d3e6c5693979764fa1c601bd7ca0607",
+    "transactionIndex": "0x1",
+    "blockHash": "0x6081ad79f2a7c0e1cfc7f12dd070a9743034218a363f7f1d99027926994e6bfd",
+    "blockNumber": "0x8b3a2",
+    "from": "0x3c4294E715f94dB20B9B77Eea7b4Fe5E750dB02b",
+    "to": null,
+    "cumulativeGasUsed": "0x2aa477",
+    "gasUsed": "0x29ed36",
+    "contractAddress": "0xFd7940B12B974dAe77e662D56bEA4642A923757a",
+    "logs": [],
+    "status": "0x1",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "type": "0x2",
+    "effectiveGasPrice": "0xb2d05e39"
+  },
+  "solcInputHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "storageLayout": null,
+  "transactionHash": "0x03ec4fa77410bfad3c408fe8b244496e4d3e6c5693979764fa1c601bd7ca0607",
+  "userdoc": null
+}
