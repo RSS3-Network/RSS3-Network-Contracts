@@ -27,12 +27,6 @@ library Events {
     event NodeUpdated2PublicGood(address indexed nodeAddr);
 
     /**
-     * @dev Emitted on deleteNode()
-     * @param nodeAddr Address of node operator deleted.
-     */
-    event NodeDeleted(address indexed nodeAddr);
-
-    /**
      * @dev Emitted on deposit()
      * @param nodeAddr Address of node operator.
      * @param amount Amount of tokens deposited by node operator.

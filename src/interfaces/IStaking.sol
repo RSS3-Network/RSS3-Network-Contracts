@@ -27,12 +27,6 @@ interface IStaking {
     function unpause() external;
 
     /**
-     * @notice Deletes a node.
-     * @dev Only node operator can call to delete a node for itself.
-     */
-    function deleteNode() external;
-
-    /**
      * @notice Creates a node and deposits tokens.
      * @param name Human-readable name.
      * @param description Description of node.
@@ -258,11 +252,6 @@ interface IStaking {
      * @return totalStakingPoolTokens Total tokens in staking pool
      */
     function getPoolInfo() external view returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens);
-
-    /**
-     * @notice The minimum amount of tokens to deposit for a node.
-     */
-    function getMinDeposit() external view returns (uint256);
 
     /**
      * @notice Returns the address of the chips contract.

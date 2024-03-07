@@ -38,7 +38,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.paused(), false);
 
         assertEq(_staking.getNodeCount(), 0);
-        assertEq(_staking.getMinDeposit(), minDeposit);
+        assertEq(_staking.MIN_DEPOSIT(), minDeposit);
         assertEq(_staking.chipsContract(), address(_chips));
 
         assertEq(_staking.STAKE_UNBONDING_PERIOD(), stakeUnbondingPeriod);
@@ -145,43 +145,39 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.deposit{value: 100}();
 
-        // case 3: delete node
-        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
-        _staking.deleteNode();
-
-        // case 4: request withdrawal
+        // case 3: request withdrawal
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.requestWithdrawal(100);
 
-        // case 5: claim withdrawal
+        // case 4: claim withdrawal
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.claimWithdrawal(new uint256[](0));
 
-        // case 6: set tax rate
+        // case 5: set tax rate
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.setTaxRateBasisPoints4Node(100);
 
-        // case 7: stake
+        // case 6: stake
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.stake{value: 100}(alice);
 
-        // case 8: stake to public pool
+        // case 7: stake to public pool
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.stakeToPublicPool{value: 100}(alice);
 
-        // case 9: set settlement phase
+        // case 8: set settlement phase
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.setSettlementPhase(true);
 
-        // case 10: unstake
+        // case 9: unstake
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.requestUnstake(alice, new uint256[](1));
 
-        // case 11: claim unstake
+        // case 10: claim unstake
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.claimUnstake(new uint256[](1));
 
-        // case 12: distribute rewards
+        // case 11: distribute rewards
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.distributeRewards(
             [uint256(1), uint256(1), uint256(2)],
@@ -256,18 +252,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createPublicGoodNode(carol);
 
         assertEq(_staking.getNodeCount(), 3);
-
-        // delete a node
-        vm.prank(alice);
-        _staking.deleteNode();
-
-        assertEq(_staking.getNodeCount(), 2);
-
-        // delete a public good node
-        vm.prank(carol);
-        _staking.deleteNode();
-
-        assertEq(_staking.getNodeCount(), 1);
     }
 
     function testGetNodes() public {
@@ -397,55 +381,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testDepositFailWithZeroAmount() public {
         vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
         _staking.deposit{value: 0}();
-    }
-
-    function testDeleteNode(address nodeAddr) public {
-        vm.assume(nodeAddr != proxyAdmin && nodeAddr != address(0));
-
-        _createNode(nodeAddr);
-
-        expectEmit();
-        emit Events.NodeDeleted(nodeAddr);
-        vm.prank(nodeAddr);
-        _staking.deleteNode();
-
-        DataTypes.Node memory node = _staking.getNode(nodeAddr);
-        assertEq(node.account, address(0));
-        assertEq(_staking.getNodeCount(), 0);
-    }
-
-    function testDeleteNodeFailWithNodeDeposited(address nodeAddr) public {
-        vm.assume(nodeAddr != proxyAdmin && nodeAddr != address(0));
-
-        _createNode(nodeAddr);
-
-        vm.deal(nodeAddr, 100 ether);
-
-        vm.startPrank(nodeAddr);
-        _staking.deposit{value: 100 ether}();
-
-        vm.expectRevert(abi.encodeWithSelector(NodeStakedOrDeposited.selector));
-        _staking.deleteNode();
-        vm.stopPrank();
-    }
-
-    function testDeleteNodeFailWithNodeStaked(address nodeAddr) public {
-        vm.assume(nodeAddr != proxyAdmin && nodeAddr != address(0));
-
-        _createNode(nodeAddr);
-
-        vm.prank(alice);
-        _staking.stake{value: 10000 ether}(nodeAddr);
-
-        vm.expectRevert(abi.encodeWithSelector(NodeStakedOrDeposited.selector));
-        vm.prank(nodeAddr);
-        _staking.deleteNode();
-    }
-
-    function testDeleteNodeFailWithNonExistentNode() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        vm.prank(dave);
-        _staking.deleteNode();
     }
 
     function testRequestWithdrawal() public {
