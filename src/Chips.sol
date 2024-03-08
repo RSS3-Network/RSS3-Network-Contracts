@@ -115,8 +115,11 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         string memory json = string.concat(
             '{"name": "Chip #',
             id.toString(),
-            '", "description": "Chip is a unique NFT that represents a node in the network. '
-            "It is generated based on the node's address and token ID.",
+            '", "description": "Chip Monsters are unique creatures living in the RSS3 Network, '
+            "each one special because of where it was born. They represent the idea of FREE and "
+            "OPEN INFORMATION, thriving in a world that values sharing and being different. "
+            "These Chip Monsters are more than just digital; they symbolize the excitement and "
+            "importance of being unique in a connected digital world.",
             '","image":"data:image/svg+xml;base64,',
             Base64.encode(bytes(imageSVG)),
             '", "attributes": [',
