@@ -47,7 +47,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.USER_SLASH_RATE_BASIS_POINTS(), userSlashRateBasisPoints);
         assertEq(_staking.STAKE_RATIO(), stakeRatio);
         assertEq(_staking.TREASURY(), treasury);
-        assertEq(_staking.SHARES_PER_CHIP(), 5000 ether);
+        assertEq(_staking.SHARES_PER_CHIP(), 500 ether);
         assertEq(_staking.MIN_DEPOSIT(), minDeposit);
         assertEq(_staking.MIN_TAX_RATE_BASIS_POINTS(), minTaxRateBasisPoints);
 
