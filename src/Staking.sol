@@ -23,7 +23,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     using EnumerableSet for EnumerableSet.AddressSet;
     using Checkpoints for Checkpoints.Trace160;
 
-    uint256 public constant SHARES_PER_CHIP = 5000 * 10 ** 18;
+    uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
     /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
