@@ -27,12 +27,6 @@ interface IStaking {
     function unpause() external;
 
     /**
-     * @notice Deletes a node.
-     * @dev Only node operator can call to delete a node for itself.
-     */
-    function deleteNode() external;
-
-    /**
      * @notice Creates a node and deposits tokens.
      * @param name Human-readable name.
      * @param description Description of node.
@@ -46,6 +40,11 @@ interface IStaking {
         uint64 taxRateBasisPoints,
         bool publicGood
     ) external payable;
+
+    /**
+     * @notice Updates node of msg.sender to the public good node.
+     */
+    function updateToPublicGood() external;
 
     /**
      * @notice Deposits tokens for node operator.
@@ -126,7 +125,6 @@ interface IStaking {
      * - epochInfo[1]: The start timestamp of the current epoch.
      * - epochInfo[2]: The end timestamp of the current epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
-     * @param requestFees Amounts of request fees.
      * @param operationRewards Amounts of request bonuses.
      * @param stakingRewards Amounts of staking rewards to staking pool.
      * @param publicPoolReward Amount of rewards to public pool.
@@ -134,7 +132,6 @@ interface IStaking {
     function distributeRewards(
         uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
-        uint256[] calldata requestFees,
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
         uint256 publicPoolReward
@@ -157,6 +154,13 @@ interface IStaking {
     function setSettlementPhase(bool enabled) external;
 
     /**
+     * @notice Disable the alpha phase.
+     * Requirements:
+     * - The caller must have the `PAUSE_ROLE`.
+     */
+    function disableAlphaPhase() external;
+
+    /**
      * @notice Withdraws tokens from staking contract to treasury.
      */
     function withdraw2Treasury() external;
@@ -166,6 +170,12 @@ interface IStaking {
      * @return bool Whether the current time is in settlement phase.
      */
     function isSettlementPhase() external view returns (bool);
+
+    /**
+     * @notice Returns whether the current time is in alpha phase.
+     * @return bool Whether the current time is in alpha phase.
+     */
+    function isAlphaPhase() external view returns (bool);
 
     /**
      * @notice Returns the pending withdrawal request by `requestId`.
@@ -216,6 +226,13 @@ interface IStaking {
     function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
 
     /**
+     * @notice Gets node avatar data by node address.
+     * @param nodeAddr Node address to query.
+     * @return string Node avatar info in json.
+     */
+    function getNodeAvatar(address nodeAddr) external view returns (string memory);
+
+    /**
      * @notice Gets nodes info by node addresses.
      * @param nodeAddrs Node addresses to query.
      * @return DataTypes.Node[] Nodes info.
@@ -230,16 +247,11 @@ interface IStaking {
     function getNodesWithPagination(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
 
     /**
-     *
+     * @notice Gets the pool info.
      * @return totalOperationPoolTokens Total tokens in operation pool
      * @return totalStakingPoolTokens Total tokens in staking pool
      */
     function getPoolInfo() external view returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens);
-
-    /**
-     * @notice The minimum amount of tokens to deposit for a node.
-     */
-    function getMinDeposit() external view returns (uint256);
 
     /**
      * @notice Returns the address of the chips contract.

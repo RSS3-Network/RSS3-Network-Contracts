@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable private-vars-leading-underscore
 pragma solidity 0.8.20;
 
 import {IStaking} from "./interfaces/IStaking.sol";
@@ -14,21 +15,22 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable {
+contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard {
     using Math for uint256;
     using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
     using Checkpoints for Checkpoints.Trace160;
 
-    uint256 public constant SHARES_PER_CHIP = 5000 * 10 ** 18;
+    uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
     /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
-    uint256 public immutable STAKE_RATIO; // solhint-disable-line private-vars-leading-underscore
+    uint256 public immutable STAKE_RATIO;
 
     /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
-    address public immutable TREASURY; // solhint-disable-line private-vars-leading-underscore
+    address public immutable TREASURY;
 
     /// @dev slash rate
     uint256 public immutable NODE_SLASH_RATE_BASIS_POINTS;
@@ -43,17 +45,26 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev the period of time that user can't withdraw staked tokens
     uint256 public immutable STAKE_UNBONDING_PERIOD;
 
+    /// @dev the minimum value of tax rate basis points
+    uint256 public immutable MIN_TAX_RATE_BASIS_POINTS;
+
     /// @dev the chips contract
     address internal _chips;
 
     /// @dev the flag of settlement phase.
-    /// Stake/requestUnstake is not allowed in settlement phase.
+    /// stake/requestUnstake is not allowed in settlement phase.
     bool internal _isSettlementPhase;
+
+    /// @dev the flag of alpha phase.
+    /// requestUnstake/requestWithdrawal is not allowed in alpha phase.
+    bool internal _isAlphaPhase;
 
     /// @dev all node addresses
     EnumerableSet.AddressSet internal _nodeAddrs;
     /// @dev all node info
     mapping(address nodeAddr => DataTypes.Node) internal _nodes;
+    /// @dev counter of node id
+    uint256 internal _nodeIdCounter;
 
     /// @dev pending withdrawal request counter
     uint256 internal _pendingWithdrawalCounter;
@@ -68,18 +79,22 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev public pool
     DataTypes.Node internal _publicPool;
 
+    /// @dev total operation pool tokens
     uint256 internal _totalOperationPoolTokens;
-
+    /// @dev total staking pool tokens
     uint256 internal _totalStakingPoolTokens;
 
     /// @dev the issuers of chips
     Checkpoints.Trace160 internal _families;
 
     /// ACL
-    // keccak256("PAUSE_ROLE");
-    bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
-    // keccak256("ORACLE_ROLE");
-    bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+    bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
+    bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
+
+    modifier whenNotAlphaPhase() {
+        if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
+        _;
+    }
 
     modifier whenNotSettlementPhase() {
         if (_isSettlementPhase) revert SettlementPhase();
@@ -104,7 +119,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 depositUnbondingPeriod,
         uint256 nodeSlashRateBasisPoints,
         uint256 userSlashRateBasisPoints,
-        uint256 minDeposit
+        uint256 minDeposit,
+        uint256 minTaxRateBasisPoints
     ) {
         TREASURY = treasury;
         STAKE_RATIO = stakeRatio;
@@ -116,6 +132,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         USER_SLASH_RATE_BASIS_POINTS = userSlashRateBasisPoints;
 
         MIN_DEPOSIT = minDeposit;
+        MIN_TAX_RATE_BASIS_POINTS = minTaxRateBasisPoints;
     }
 
     /// @inheritdoc IStaking
@@ -123,10 +140,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _chips = chips;
 
         _grantRole(PAUSE_ROLE, pauseAccount);
-        _setRoleAdmin(PAUSE_ROLE, PAUSE_ROLE);
-
         _grantRole(ORACLE_ROLE, oracleAccount);
-        _setRoleAdmin(ORACLE_ROLE, ORACLE_ROLE);
+
+        _isAlphaPhase = true;
     }
 
     /// @inheritdoc IStaking
@@ -147,25 +163,31 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         bool publicGood
     ) external payable override whenNotPaused {
         if (publicGood && msg.value > 0) revert PublicGoodNodeNotDeposited();
+        if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
 
         _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
 
         if (msg.value > 0) _deposit(msg.sender, msg.value);
     }
 
-    /// @inheritdoc IStaking
-    function deleteNode() external override whenNotPaused {
+    function updateToPublicGood() external override whenNotPaused {
         address addr = msg.sender;
+
         DataTypes.Node storage node = _nodes[addr];
-        if (address(0) == node.account) revert NodeNotExists();
+        if (node.account == address(0)) revert NodeNotExists();
+        if (node.publicGood) revert NodeAlreadyPublicGood(addr);
 
-        // can't delete a node with staked or deposited tokens
-        if (node.operationPoolTokens > 0 || node.stakingPoolTokens > 0) revert NodeStakedOrDeposited();
+        node.publicGood = true;
 
-        delete _nodes[addr];
-        _nodeAddrs.remove(addr);
+        uint256 stakingTokens = node.stakingPoolTokens;
+        _decreaseStakingPool(node, stakingTokens);
+        _increaseStakingPool(_publicPool, stakingTokens);
 
-        emit Events.NodeDeleted(addr);
+        if (node.operationPoolTokens > 0) {
+            _requestWithdrawal(node, node.operationPoolTokens);
+        }
+
+        emit Events.NodeUpdated2PublicGood(addr);
     }
 
     /// @inheritdoc IStaking
@@ -176,28 +198,22 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId) {
+    function requestWithdrawal(
+        uint256 amount
+    ) external override whenNotPaused whenNotAlphaPhase returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert NodeNotExists();
 
         //  withdrawal amount should not exceed the operation pool tokens
         if (amount > node.operationPoolTokens) revert ExcessWithdrawalAmount();
 
-        _decreaseOperationPool(node, amount);
-
-        requestId = ++_pendingWithdrawalCounter;
-
-        DataTypes.WithdrawalRequest storage req = _pendingWithdrawals[requestId];
-        req.timestamp = uint40(block.timestamp);
-        req.owner = msg.sender;
-        req.amount = amount;
-
-        emit Events.WithdrawRequested(msg.sender, amount, requestId);
+        return _requestWithdrawal(node, amount);
     }
 
     /// @inheritdoc IStaking
     function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override whenNotPaused {
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
+        if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
 
         DataTypes.Node storage node = _nodes[msg.sender];
         if (address(0) == node.account) revert NodeNotExists();
@@ -217,7 +233,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused {
+    function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused nonReentrant {
         for (uint256 i = 0; i < requestIds.length; i++) {
             _claimWithdrawal(requestIds[i]);
         }
@@ -238,7 +254,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // validate node
         if (node.account == address(0)) revert NodeNotExists();
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
-        if (msg.value == 0) revert InsufficientValue();
 
         (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr);
     }
@@ -247,12 +262,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function requestUnstake(
         address nodeAddr,
         uint256[] calldata chipsIds
-    ) external override whenNotPaused whenNotSettlementPhase returns (uint256 requestId) {
+    ) external override whenNotPaused whenNotSettlementPhase whenNotAlphaPhase returns (uint256 requestId) {
         return _unstakeFromNode(nodeAddr, chipsIds);
     }
 
     /// @inheritdoc IStaking
-    function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused {
+    function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused nonReentrant {
         for (uint256 i = 0; i < requestIds.length; i++) {
             _claimUnstake(requestIds[i]);
         }
@@ -262,38 +277,27 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function distributeRewards(
         uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
-        uint256[] calldata requestFees,
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
-        uint256 publicPoolReward
+        uint256 publicPoolRewards
     ) external payable override whenNotPaused onlyRole(ORACLE_ROLE) {
-        if (
-            nodeAddrs.length != requestFees.length ||
-            nodeAddrs.length != operationRewards.length ||
-            nodeAddrs.length != stakingRewards.length
-        ) revert InvalidArrayLength();
+        if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != stakingRewards.length)
+            revert InvalidArrayLength();
 
         // distribute rewards for public pool
-        if (publicPoolReward > 0) {
-            uint256 publicPoolTax = _distributePublicPoolRewards(publicPoolReward);
-            emit Events.PublicGoodRewardDistributed(
-                epochInfo[0],
-                epochInfo[1],
-                epochInfo[2],
-                publicPoolReward,
-                publicPoolTax
-            );
+        if (publicPoolRewards > 0) {
+            uint256 tax = _distributePublicPoolRewards(publicPoolRewards);
+            emit Events.PublicGoodRewardDistributed(epochInfo[0], epochInfo[1], epochInfo[2], publicPoolRewards, tax);
         }
 
         // distribute rewards for other nodes
-        uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, requestFees, operationRewards, stakingRewards);
+        uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, operationRewards, stakingRewards);
 
         emit Events.RewardDistributed(
             epochInfo[0],
             epochInfo[1],
             epochInfo[2],
             nodeAddrs,
-            requestFees,
             operationRewards,
             stakingRewards,
             taxAmounts
@@ -314,7 +318,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
-        if (msg.value == 0) revert InsufficientValue();
 
         (startTokenId, endTokenId) = _stakeToNode(_publicPool, msg.value, nodeAddr);
     }
@@ -347,9 +350,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
+    function disableAlphaPhase() external override whenNotPaused onlyRole(PAUSE_ROLE) {
+        _isAlphaPhase = false;
+    }
+
+    /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 balance = address(this).balance;
-        // TODO: check arithmetic underflow or overflow error
         uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
         _transfer(TREASURY, amount);
     }
@@ -357,6 +364,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function isSettlementPhase() external view override returns (bool) {
         return _isSettlementPhase;
+    }
+
+    /// @inheritdoc IStaking
+    function isAlphaPhase() external view override returns (bool) {
+        return _isAlphaPhase;
     }
 
     /// @inheritdoc IStaking
@@ -373,14 +385,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function minTokensToStake(address nodeAddr) external view override returns (uint256) {
-        // Tokens per share
-        return _minTokensToStake(nodeAddr);
+        // the equivalent tokens for a chip
+        return _tokensPerChip(nodeAddr);
     }
 
     /// @inheritdoc IStaking
     function getChipsInfo(uint256 tokenId) external view override returns (address nodeAddr, uint256 tokens) {
         nodeAddr = _issuerOf(tokenId);
-        tokens = _minTokensToStake(nodeAddr);
+        tokens = _tokensPerChip(nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -396,6 +408,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
         return _nodes[nodeAddr];
+    }
+
+    /// @inheritdoc IStaking
+    function getNodeAvatar(address nodeAddr) external view override returns (string memory) {
+        return IChips(_chips).nodeImageAndAttributesURI(nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -432,12 +449,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     {
         totalOperationPoolTokens = _totalOperationPoolTokens;
         totalStakingPoolTokens = _totalStakingPoolTokens;
-        // treasuryAmount = _getTreasuryAmount();
-    }
-
-    /// @inheritdoc IStaking
-    function getMinDeposit() external view override returns (uint256) {
-        return MIN_DEPOSIT;
     }
 
     /// @inheritdoc IStaking
@@ -445,21 +456,40 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return _chips;
     }
 
+    function _requestWithdrawal(DataTypes.Node storage node, uint256 amount) internal returns (uint256 requestId) {
+        _decreaseOperationPool(node, amount);
+
+        requestId = ++_pendingWithdrawalCounter;
+
+        DataTypes.WithdrawalRequest storage req = _pendingWithdrawals[requestId];
+        req.timestamp = uint40(block.timestamp);
+        req.owner = node.account;
+        req.amount = amount;
+
+        emit Events.WithdrawRequested(node.account, amount, requestId);
+
+        return requestId;
+    }
+
+    /// @dev increase operation pool tokens of a node, and total operation pool tokens
     function _increaseOperationPool(DataTypes.Node storage node, uint256 amount) internal {
         node.operationPoolTokens += amount;
         _totalOperationPoolTokens += amount;
     }
 
+    /// @dev decrease operation pool tokens of a node, and total operation pool tokens
     function _decreaseOperationPool(DataTypes.Node storage node, uint256 amount) internal {
         node.operationPoolTokens -= amount;
         _totalOperationPoolTokens -= amount;
     }
 
+    /// @dev increase staking pool tokens of a node, and total staking pool tokens
     function _increaseStakingPool(DataTypes.Node storage node, uint256 amount) internal {
         node.stakingPoolTokens += amount;
         _totalStakingPoolTokens += amount;
     }
 
+    /// @dev decrease staking pool tokens of a node, and total staking pool tokens
     function _decreaseStakingPool(DataTypes.Node storage node, uint256 amount) internal {
         node.stakingPoolTokens -= amount;
         _totalStakingPoolTokens -= amount;
@@ -476,62 +506,56 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     function _distributeNodesRewards(
         address[] memory nodeAddrs,
-        uint256[] memory requestFees,
         uint256[] memory operationRewards,
         uint256[] memory stakingRewards
     ) internal returns (uint256[] memory) {
-        uint256 remainedTax;
         uint256[] memory taxAmounts = new uint256[](nodeAddrs.length);
-        // update node rewards
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
-            if (node.account == address(0)) {
+            if (node.account == address(0) || node.publicGood || node.operationPoolTokens < MIN_DEPOSIT) {
                 continue;
             }
 
-            // request bonus and staking rewards are sent to staking pool
+            // operation rewards and staking rewards are sent to staking pool
             uint256 rewards = operationRewards[i] + stakingRewards[i];
-
-            uint256 fullTax;
-            uint256 receivedTax;
-            (fullTax, receivedTax) = _getTax(
+            (uint256 fullTax, uint256 receivedTax) = _getTax(
                 rewards,
                 node.taxRateBasisPoints,
                 node.operationPoolTokens,
                 node.stakingPoolTokens
             );
-            rewards -= fullTax;
 
-            // request fee and tax are sent to operation pool
-            uint256 operationPool = requestFees[i] + receivedTax;
             taxAmounts[i] = receivedTax;
-            remainedTax += fullTax - receivedTax;
 
-            // update node
-            _increaseOperationPool(node, operationPool);
-            // all after-tax rewards and request bonus are sent to the staking pool
-            _increaseStakingPool(node, rewards);
+            // update node pool
+            // receivedTax is sent to operation pool
+            _increaseOperationPool(node, receivedTax);
+            // all after-tax rewards are sent to the staking pool
+            _increaseStakingPool(node, rewards - fullTax);
+            // the remaining tax is sent to the treasury
         }
         return taxAmounts;
     }
 
+    /// @dev unstake from a node by burning chips
     function _unstakeFromNode(address nodeAddr, uint256[] calldata chipsIds) internal returns (uint256 requestId) {
-        _checkUnstakeConditions(nodeAddr, chipsIds);
+        address owner = _checkUnstakeConditions(nodeAddr, chipsIds);
 
         DataTypes.Node storage node = _nodes[nodeAddr].publicGood ? _publicPool : _nodes[nodeAddr];
 
         requestId = ++_pendingUnstakeCounter;
 
-        // update rewards
-        uint256 shares = SHARES_PER_CHIP * chipsIds.length;
-        uint256 unstakeAmount = _sharesToTokens(shares, node.totalShares, node.stakingPoolTokens);
+        // update pool tokens and shares
+        uint256 sharesToBurn = SHARES_PER_CHIP * chipsIds.length;
+        uint256 unstakeAmount = _sharesToTokens(sharesToBurn, node.totalShares, node.stakingPoolTokens);
         _decreaseStakingPool(node, unstakeAmount);
-        node.totalShares -= shares;
+        node.totalShares -= sharesToBurn;
 
         // add to request queue
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
         req.timestamp = block.timestamp;
-        req.owner = msg.sender;
+        req.owner = owner;
+
         req.nodeAddr = nodeAddr;
         req.unstakeAmount = unstakeAmount;
 
@@ -539,7 +563,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             IChips(_chips).burn(chipsIds[i]);
         }
 
-        emit Events.UnstakeRequested(msg.sender, nodeAddr, requestId, unstakeAmount, chipsIds);
+        emit Events.UnstakeRequested(owner, nodeAddr, requestId, unstakeAmount, chipsIds);
     }
 
     /// @dev create a node
@@ -553,8 +577,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (nodeAddr == address(0)) revert CreateNodeToZeroAddress();
         if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
 
+        uint256 nodeId = ++_nodeIdCounter;
+
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (address(0) != node.account) revert NodeExists();
+        if (node.nodeId > 0) revert NodeExists();
+        node.nodeId = nodeId;
         node.account = nodeAddr;
         node.name = name;
         node.description = description;
@@ -564,9 +591,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // add to node list
         _nodeAddrs.add(nodeAddr);
 
-        emit Events.NodeCreated(nodeAddr, name, description, taxRateBasisPoints, publicGood);
+        emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood);
     }
 
+    /// @dev deposit tokens to a node
     function _deposit(address nodeAddr, uint256 amount) internal {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
@@ -582,24 +610,23 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 amount,
         address nodeAddr
     ) internal returns (uint256 startTokenId, uint256 endTokenId) {
-        uint256 shares = _tokensToShares(amount, node.stakingPoolTokens, node.totalShares);
-        uint256 chipsCount = shares / SHARES_PER_CHIP;
+        uint256 chipPrice = _tokensPerChip(nodeAddr);
+        uint256 chipsCount = amount / chipPrice;
         if (chipsCount == 0) revert AmountTooSmall(amount);
 
-        // update stakedAmount
-        uint256 stakedAmount = _sharesToTokens(chipsCount * SHARES_PER_CHIP, node.totalShares, node.stakingPoolTokens);
-
+        uint256 remaining = amount % chipPrice;
+        uint256 stakedAmount = amount - remaining;
         _increaseStakingPool(node, stakedAmount);
 
         // update total shares
-        node.totalShares += (chipsCount * SHARES_PER_CHIP);
+        uint256 sharesToMint = chipsCount * SHARES_PER_CHIP;
+        node.totalShares += sharesToMint;
 
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
-
         _families.push(endTokenId.toUint96(), uint160(nodeAddr));
 
         // refund the exceeding part
-        _transfer(msg.sender, amount - stakedAmount);
+        _transfer(msg.sender, remaining);
 
         emit Events.Staked(msg.sender, node.account, stakedAmount, startTokenId, endTokenId);
     }
@@ -624,7 +651,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.WithdrawalRequest memory req = _pendingWithdrawals[requestId];
 
         if (req.owner == address(0)) revert ClaimIdNotExists(requestId);
-
         if (block.timestamp < req.timestamp + DEPOSIT_UNBONDING_PERIOD) revert ClaimTimeNotReady();
 
         delete _pendingWithdrawals[requestId];
@@ -645,33 +671,46 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
-    function _checkAuthorized(uint256 tokenId, address user) internal view returns (bool) {
-        return (IERC721(_chips).ownerOf(tokenId) == user || IERC721(_chips).getApproved(tokenId) == user);
+    /// @dev checks whether user is token owner or approved
+    function _checkAuthorized(address owner, uint256 tokenId, address user) internal view returns (bool) {
+        return
+            owner == user ||
+            IERC721(_chips).getApproved(tokenId) == user ||
+            IERC721(_chips).isApprovedForAll(owner, user);
     }
 
-    function _checkUnstakeConditions(address nodeAddr, uint256[] calldata chipsIds) internal view {
-        // check conditions
+    /// @dev checks that:
+    /// 1. length of chipsIds is not zero
+    /// 2. caller has the authorization to unstake the chips
+    /// 3. chips are issued by the node
+    /// 4. chips have the same owner
+    function _checkUnstakeConditions(address nodeAddr, uint256[] calldata chipsIds) internal view returns (address) {
+        if (chipsIds.length == 0) revert EmptyChipsIds();
+
+        address lastOwner;
         for (uint256 i = 0; i < chipsIds.length; i++) {
             uint256 tokenId = chipsIds[i];
-            if (!_checkAuthorized(tokenId, msg.sender)) revert ChipNotAuthorized(tokenId);
+            address owner = IERC721(_chips).ownerOf(tokenId);
+            if (lastOwner != address(0) && owner != lastOwner) revert ChipsNotSameOwner();
+            lastOwner = owner;
+
+            if (!_checkAuthorized(owner, tokenId, msg.sender)) revert ChipNotAuthorized(tokenId);
 
             if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
         }
+
+        return lastOwner;
     }
 
+    /// @dev returns the node address which issued the chips
     function _issuerOf(uint256 tokenId) internal view returns (address) {
         // check the token was not burned, and fetch ownership from the anchors
         // Note: no need for safe cast, we know that tokenId <= type(uint96).max
         return address(_families.lowerLookup(tokenId.toUint96()));
     }
 
-    // function _getTreasuryAmount() internal view returns (uint256) {
-    //     uint256 balance = address(this).balance;
-    //     return balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
-    // }
-
-    /// @dev get minimal tokens to stake for a node
-    function _minTokensToStake(address nodeAddr) internal view returns (uint256) {
+    /// @dev returns the equivalent tokens for each chip, which is also the minimal tokens to stake for a node
+    function _tokensPerChip(address nodeAddr) internal view returns (uint256) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.publicGood) {
             node = _publicPool;
@@ -711,30 +750,18 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
+    /// @dev returns the full tax amount
     function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
         return (rewards * taxRateBasisPoints) / _denominator();
     }
 
     /// @dev convert shares to equivalent tokens
-    function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalAmount) internal pure returns (uint256) {
-        if (totalShares == 0) {
-            return shares;
-        }
-
-        return (shares * totalAmount) / totalShares;
-    }
-
-    /// @dev convert tokens to equivalent shares
-    function _tokensToShares(uint256 amount, uint256 totalAmount, uint256 totalShares) internal pure returns (uint256) {
-        if (totalAmount == 0) {
-            return amount;
-        }
-
-        return (amount * totalShares) / totalAmount;
+    function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalTokens) internal pure returns (uint256) {
+        return totalShares == 0 ? 0 : (shares * totalTokens) / totalShares;
     }
 
     /**
-     * @dev doniminator
+     * @dev denominator
      */
     function _denominator() internal pure virtual returns (uint64) {
         return 10000;

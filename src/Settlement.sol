@@ -4,7 +4,6 @@ pragma solidity 0.8.20;
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {IErrors} from "./interfaces/IErrors.sol";
-import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
@@ -20,6 +19,8 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     /// @dev Total rewards of the first year.
     uint256 public constant TOTAL_REWARDS_PER_YEAR = 30000000 * 10 ** 18;
 
+    bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
+
     /// @dev Staking contract address.
     address internal _staking;
 
@@ -29,17 +30,11 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     /// @dev The current epoch.
     uint256 internal _currentEpoch;
 
-    // keccak256("ORACLE_ROLE");
-    bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-
     uint256 internal _startTimestamp;
     uint256 internal _endTimestamp;
 
     // total staking for each epoch
     mapping(uint256 epoch => uint256 totalStaking) internal _totalStakings;
-    // distributed staking rewards for each epoch
-    mapping(uint256 epoch => uint256 stakingRewards) internal _distributedStakingRewards;
     // distributed operation rewards for each epoch
     mapping(uint256 epoch => uint256 operationRewards) internal _distributedOperationRewards;
     // rewarded node addresses
@@ -48,7 +43,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     /// @inheritdoc ISettlement
     function initialize(
         address staking,
-        address admin,
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
@@ -58,8 +52,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
         _updateRewardsRatio(operationRewardsPercent);
 
-        // grants `ADMIN_ROLE`
-        _grantRole(ADMIN_ROLE, admin);
         // grants `ORACLE_ROLE`
         _grantRole(ORACLE_ROLE, oracleAccount);
     }
@@ -73,29 +65,24 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     function distributeRewards(
         uint256 epoch,
         address[] calldata nodeAddrs,
-        uint256[] calldata requestFees,
         uint256[] calldata operationRewards,
         bool isFinal
-    ) external payable override onlyRole(ORACLE_ROLE) {
-        if (nodeAddrs.length != requestFees.length || nodeAddrs.length != operationRewards.length) {
+    ) external override onlyRole(ORACLE_ROLE) {
+        if (nodeAddrs.length != operationRewards.length) {
             revert InvalidArrayLength();
         }
 
         // check epoch number
-        if (epoch < _currentEpoch) {
-            revert InvalidEpochNumber();
+        // epoch number must be the current epoch or the next epoch
+        if (epoch < _currentEpoch || epoch > _currentEpoch + 1) {
+            revert InvalidEpochNumber(_currentEpoch, epoch);
         }
 
-        // check requestFees
-        uint256 amountToSend;
-        for (uint256 i = 0; i < requestFees.length; i++) {
-            amountToSend += requestFees[i];
-        }
-        if (amountToSend > msg.value) revert InsufficientRequestFees();
-
-        // start of a new epoch
         uint256 publicPoolRewards;
+        uint256 amountToSend;
         if (epoch == _currentEpoch + 1) {
+            // start of a new epoch
+
             _checkSubmissionInterval();
 
             _updateEpochInfo(epoch);
@@ -108,9 +95,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
             // save totalStaking for current epoch
             (, _totalStakings[_currentEpoch]) = IStaking(_staking).getPoolInfo();
-
-            // start of the settlement, set settlement phase to true
-            IStaking(_staking).setSettlementPhase(true);
         }
 
         // settlement phase
@@ -123,7 +107,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         IStaking(_staking).distributeRewards{value: amountToSend}(
             epochInfo,
             nodeAddrs,
-            requestFees,
             operationRewards,
             stakingRewards,
             publicPoolRewards
@@ -131,17 +114,8 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @inheritdoc ISettlement
-    function setTaxRateBasisPoints4PublicPool(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
-        uint256 length = nodeAddrs.length;
-
-        if (length == 0) revert EmptyNodeList();
-
-        uint256 totalTaxRateBasisPoints;
-        for (uint256 i = 0; i < length; i++) {
-            DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddrs[i]);
-            totalTaxRateBasisPoints += node.taxRateBasisPoints;
-        }
-        IStaking(_staking).setTaxRateBasisPoints4PublicPool((totalTaxRateBasisPoints / length).toUint64());
+    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
     }
 
     /// @inheritdoc ISettlement
@@ -165,10 +139,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     function _updateRewardsRatio(uint256 operationRewardsPercent) internal {
-        // rewardsPerEpoch = TOTAL_REWARDS_PER_YEAR / (365 days / EPOCH_DURATION)
-        // operationRewardsPerEpoch = rewardsPerEpoch * (operationRewardsPercent / 100)%
-        // stakingBonusPerEpoch = rewardsPerEpoch *  (1 - (operationRewardsPercent / 100))%
-
         _totalOperationRewardsPerEpoch =
             (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) /
             (100 * 365 days);
@@ -196,7 +166,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         // update current epoch
         _currentEpoch = epoch;
         // update epoch timestamp
-        _startTimestamp = _endTimestamp;
+        if (_endTimestamp > 0) {
+            _startTimestamp = _endTimestamp;
+        }
         _endTimestamp = block.timestamp;
     }
 

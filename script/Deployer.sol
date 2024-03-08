@@ -121,8 +121,8 @@ abstract contract Deployer is Script {
             console.log("Syncing deployment %s: contract %s", deploymentName, contractName);
 
             string[] memory args = getDeployTransactionConstructorArguments(deployTx);
-            bytes memory code = _getCode(contractName);
-            bytes memory deployedCode = _getDeployedCode(contractName);
+            bytes memory code = "";
+            bytes memory deployedCode = "";
             string memory receipt = _getDeployReceiptByContractAddress(addr);
 
             string memory artifactPath = string.concat(deploymentsDir, "/", deploymentName, ".json");

@@ -43,4 +43,11 @@ interface IChips {
      * @return Address of the Staking contract.
      */
     function stakingContract() external view returns (address);
+
+    /**
+     * @notice Returns the svg and attributes of the image for a given node addr.
+     * @param nodeAddr address of the given node.
+     * @return SVG and attributes of the node image.
+     */
+    function nodeImageAndAttributesURI(address nodeAddr) external view returns (string memory);
 }

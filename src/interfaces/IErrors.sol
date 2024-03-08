@@ -22,7 +22,7 @@ interface IErrors {
     error InvalidArrayLength();
 
     /// @dev Invalid epoch number.
-    error InvalidEpochNumber();
+    error InvalidEpochNumber(uint256 current, uint256 got);
 
     /// @dev Submission interval has not elapsed.
     error SubmissionIntervalNotElapsed();
@@ -42,6 +42,12 @@ interface IErrors {
     /// @dev Not chips owner or approver.
     error ChipNotAuthorized(uint256 tokenId);
 
+    /// @dev ChipsIds are empty.
+    error EmptyChipsIds();
+
+    /// @dev Chips are not same owner.
+    error ChipsNotSameOwner();
+
     /// @dev Token is not valid for the node
     error ChipNotValid(uint256 tokenId, address nodeAddr);
 
@@ -50,6 +56,9 @@ interface IErrors {
 
     /// @dev Node is not public good node.
     error NodeNotPublicGood(address nodeAddr);
+
+    /// @dev Node is already public good node.
+    error NodeAlreadyPublicGood(address nodeAddr);
 
     /// @dev Excess withdrawal amount.
     error ExcessWithdrawalAmount();
@@ -63,6 +72,9 @@ interface IErrors {
     /// @dev Basis points of tax rate too large.
     error TaxRateBasisPointsTooLarge();
 
+    /// @dev Basis points of tax rate too small.
+    error TaxRateBasisPointsTooSmall();
+
     /// @dev Batch size is zero.
     error BatchSizeZero();
 
@@ -75,10 +87,7 @@ interface IErrors {
     /// @dev Chips id overflow.
     error ChipsIdOverflow();
 
-    /// @dev Reward distribution failed.
-    error RewardDistributionFailed();
-
-    /// @dev Inffucient value to stake.
+    /// @dev Insufficient value to stake.
     error InsufficientValue();
 
     /// @dev Transfer failed.
@@ -90,9 +99,6 @@ interface IErrors {
     /// @dev Distributed operation rewards exceed limit.
     error OperationRewardsExceed();
 
-    /// @dev Insufficient requestFees.
-    error InsufficientRequestFees();
-
     /// @dev Invalid trait id.
     error InvalidTraitId(uint256 traitId);
 
@@ -101,4 +107,7 @@ interface IErrors {
 
     /// @dev Settlement phase, stake/requestUnstakce is not allowed.
     error SettlementPhase();
+
+    /// @dev Node is not staked.
+    error AlphaWithdrawNotAllowed();
 }

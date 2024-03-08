@@ -8,7 +8,6 @@ import {DataTypes} from "./libraries/DataTypes.sol";
 import {SVGGenerator} from "./libraries/SVGGenerator.sol";
 import {IErrors} from "./interfaces/IErrors.sol";
 import {ERC721} from "./base/ERC721.sol";
-import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
@@ -30,21 +29,10 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     }
 
     /// @inheritdoc IChips
-    function initialize(
-        string memory name_,
-        string memory symbol_,
-        address staking_
-    )
-        external
-        override
-        // address svgGenerator_
-        initializer
-    {
+    function initialize(string memory name_, string memory symbol_, address staking_) external override initializer {
         _staking = staking_;
 
         __ERC721_init(name_, symbol_);
-
-        // _svgGenerator = svgGenerator_;
     }
 
     /// @inheritdoc IChips
@@ -78,6 +66,40 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     /// @inheritdoc IChips
     function burn(uint256 tokenId) external override onlyStaking {
         _burn(tokenId);
+
+        _totalSupply--;
+    }
+
+    /// @inheritdoc IChips
+    function stakingContract() external view override returns (address) {
+        return _staking;
+    }
+
+    /// @inheritdoc IChips
+    function totalSupply() external view override returns (uint256) {
+        return _totalSupply;
+    }
+
+    function nodeImageAndAttributesURI(address nodeAddr) external view override returns (string memory) {
+        DataTypes.NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr);
+        uint256 seed = uint256(keccak256(abi.encodePacked(nodeAddr)));
+        DataTypes.ChipTraits memory chipTraits = _getChipTraitsBySeed(seed);
+        chipTraits.headShapeColor = 0;
+        chipTraits.headDetailColor = 0;
+        (string memory imageSVG, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
+            nodeTraits,
+            chipTraits
+        );
+
+        string memory json = string.concat(
+            '{"name": "Node Avatar", "image":"data:image/svg+xml;base64,',
+            Base64.encode(bytes(imageSVG)),
+            '", "attributes": [',
+            attributes,
+            "]}"
+        );
+
+        return string.concat("data:application/json;base64,", Base64.encode(bytes(string.concat(json))));
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
@@ -108,25 +130,23 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         return string.concat("data:application/json;base64,", Base64.encode(bytes(string.concat(json))));
     }
 
-    /// @inheritdoc IChips
-    function stakingContract() external view override returns (address) {
-        return _staking;
-    }
-
-    /// @inheritdoc IChips
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupply;
-    }
-
     function _generateChipImage(
         uint256 tokenId
     ) internal view returns (DataTypes.NodeTraits memory, DataTypes.ChipTraits memory) {
         (address nodeAddr, ) = IStaking(_staking).getChipsInfo(tokenId);
+
+        DataTypes.NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr);
+
+        DataTypes.ChipTraits memory chipTraits = _getChipTraits(nodeAddr, tokenId);
+
+        return (nodeTraits, chipTraits);
+    }
+
+    function _getNodeTraits(address nodeAddr) internal view returns (DataTypes.NodeTraits memory) {
         DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddr);
 
         (uint8 colorCount, uint8 frameCount, uint8 chipCornerCount, uint8 chipDetailCount) = SVGGenerator
             .getNodeTraitsCount();
-
         uint256 nodeTraitCount = uint256(frameCount) *
             uint256(colorCount) *
             uint256(chipDetailCount) *
@@ -135,7 +155,6 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
 
         // Chips from the same node will have the same traits
         uint256 nodeTraitId = uint256(keccak256(abi.encodePacked(nodeAddr))) % nodeTraitCount;
-
         DataTypes.NodeTraits memory nodeTraits = DataTypes.NodeTraits({
             frameId: _calTraitId(
                 nodeTraitId,
@@ -153,12 +172,15 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             pgCorner: node.publicGood
         });
 
-        DataTypes.ChipTraits memory chipTraits = _getChipTraits(nodeAddr, tokenId);
-
-        return (nodeTraits, chipTraits);
+        return nodeTraits;
     }
 
     function _getChipTraits(address nodeAddr, uint256 tokenId) internal pure returns (DataTypes.ChipTraits memory) {
+        uint256 seed = uint256(keccak256(abi.encodePacked(nodeAddr, tokenId)));
+        return _getChipTraitsBySeed(seed);
+    }
+
+    function _getChipTraitsBySeed(uint256 seed) internal pure returns (DataTypes.ChipTraits memory) {
         (uint8 eyeCount, uint8 mouthCount, uint8 headShapeCount, uint8 headDetailCount) = SVGGenerator
             .getChipTraitsCount();
 
@@ -171,7 +193,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             uint256(headDetailCount) *
             uint256(colorCount);
 
-        uint256 chipTraitId = uint256(keccak256(abi.encodePacked(nodeAddr, tokenId))) % chipTraitCount;
+        uint256 chipTraitId = seed % chipTraitCount;
 
         DataTypes.ChipTraits memory chipTraits = DataTypes.ChipTraits({
             eyesId: _calTraitId(

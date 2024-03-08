@@ -30,8 +30,8 @@ forge script script/Deploy.s.sol:Deploy \
 --verifier-url $VERIFIER_URL \
 --verifier $VERIFIER \
 --verify \
---broadcast --ffi -vvvv #--resume
+--broadcast --ffi -vvvv 
 
 # generate easily readable abi to /deployments
-forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy --ffi
+forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --broadcast --ffi
 ```

@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 library Events {
     /**
      * @dev Emitted on createNode()
+     * @param nodeId The unique identifier of the node.
      * @param nodeAddr Address of node operator.
      * @param name Human-readable name.
      * @param description Description of node.
@@ -11,6 +12,7 @@ library Events {
      * @param publicGood Flag indicating if the node is a public good.
      */
     event NodeCreated(
+        uint256 indexed nodeId,
         address indexed nodeAddr,
         string name,
         string description,
@@ -19,10 +21,10 @@ library Events {
     );
 
     /**
-     * @dev Emitted on deleteNode()
-     * @param nodeAddr Address of node operator deleted.
+     * @dev Emitted on update2PublicGood()
+     * @param nodeAddr Address of node operator.
      */
-    event NodeDeleted(address indexed nodeAddr);
+    event NodeUpdated2PublicGood(address indexed nodeAddr);
 
     /**
      * @dev Emitted on deposit()
@@ -57,7 +59,6 @@ library Events {
      * @param startTimestamp The start timestamp of the epoch.
      * @param endTimestamp The end timestamp of the epoch.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
-     * @param requestFees Amount of request fees to operation pool.
      * @param operationRewards Amount of bonuses to staking pool.
      * @param stakingRewards Amount of rewards to staking pool.
      * @param taxAmounts Amount of tax to node operator.
@@ -67,7 +68,6 @@ library Events {
         uint256 startTimestamp,
         uint256 endTimestamp,
         address[] nodeAddrs,
-        uint256[] requestFees,
         uint256[] operationRewards,
         uint256[] stakingRewards,
         uint256[] taxAmounts

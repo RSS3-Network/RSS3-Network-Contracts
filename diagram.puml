@@ -67,6 +67,7 @@ pauser --> S8
 oracle --> ST1
 oracle --> ST2
 oracle --> ST3
+oracle --> ST4
 
 
 S9 --> C1 #blue;line.dotted;text:blue   :  mint chips

@@ -2,7 +2,6 @@
 // solhint-disable comprehensive-interface,no-console,max-line-length
 pragma solidity 0.8.20;
 
-import {console2 as console} from "forge-std/console2.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
@@ -14,8 +13,6 @@ contract ChipsTest is CommonTest {
     function setUp() public {
         _setUp();
     }
-
-    mapping(uint256 => bool) internal _testMintMap;
 
     function testCheckSetupStatus() public {
         assertEq(_chips.name(), chipsName);
@@ -30,12 +27,9 @@ contract ChipsTest is CommonTest {
         assertEq(_chips.ownerOf(tokenId), alice);
         assertEq(_chips.balanceOf(alice), 1);
         assertEq(_chips.totalSupply(), 1);
-
-        string memory uri = _chips.tokenURI(tokenId);
-        console.log("URI: %s", uri);
     }
 
-    function testMintBatchh() public {
+    function testMintBatch() public {
         vm.prank(address(_staking));
         (uint256 start, uint256 end) = _chips.mintBatch(alice, 10);
 
@@ -43,9 +37,46 @@ contract ChipsTest is CommonTest {
         assertEq(_chips.totalSupply(), 10);
 
         for (uint256 tokenId = start; tokenId <= end; tokenId++) {
-            string memory uri = _chips.tokenURI(tokenId);
-            console.log("URI: %s", uri);
+            assertEq(_chips.ownerOf(tokenId), alice);
         }
+    }
+
+    function testMintBatchFail() public {
+        vm.expectRevert(abi.encodeWithSelector(BatchSizeZero.selector));
+        vm.prank(address(_staking));
+        _chips.mintBatch(alice, 0);
+    }
+
+    function testBurn() public {
+        vm.startPrank(address(_staking));
+        (uint256 start, uint256 end) = _chips.mintBatch(alice, 10);
+
+        uint256 totalSupply = _chips.totalSupply();
+        assertEq(_chips.totalSupply(), 10);
+
+        for (uint256 tokenId = start; tokenId <= end; tokenId++) {
+            _chips.burn(tokenId);
+
+            assertEq(_chips.totalSupply(), --totalSupply);
+        }
+        vm.stopPrank();
+    }
+
+    function testApprove() public {
+        vm.prank(address(_staking));
+        uint256 tokenId = _chips.mint(alice);
+
+        vm.prank(alice);
+        _chips.approve(bob, tokenId);
+
+        assertEq(_chips.getApproved(tokenId), bob);
+    }
+
+    function testSetApprovalForAll() public {
+        vm.prank(alice);
+        _chips.setApprovalForAll(bob, true);
+
+        assertEq(_chips.isApprovedForAll(alice, bob), true);
     }
 
     function testTokenURI() public {

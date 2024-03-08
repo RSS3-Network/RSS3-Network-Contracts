@@ -13,9 +13,7 @@ import {stdJson} from "forge-std/StdJson.sol";
 contract DeployConfig is Script {
     string internal _json;
 
-    uint256 public chainID;
     address public proxyAdminOwner;
-    address public admin;
     address public pauseAccount;
     address public oracleAccount;
     uint256 public depositUnbondingPeriod;
@@ -24,6 +22,7 @@ contract DeployConfig is Script {
     uint256 public userSlashRateBasisPoints;
     uint256 public stakeRatio;
     uint256 public depositBaseline;
+    uint256 public taxRateBasisPointsBaseline;
     address public treasury;
     string public chipsName;
     string public chipsSymbol;
@@ -39,11 +38,7 @@ contract DeployConfig is Script {
             return;
         }
 
-        // TODO: any conscise way to do this?
-
-        chainID = stdJson.readUint(_json, "$.chainID");
         proxyAdminOwner = stdJson.readAddress(_json, "$.proxyAdminOwner");
-        admin = stdJson.readAddress(_json, "$.admin");
         pauseAccount = stdJson.readAddress(_json, "$.pauseAccount");
         oracleAccount = stdJson.readAddress(_json, "$.oracleAccount");
         depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
@@ -52,6 +47,7 @@ contract DeployConfig is Script {
         userSlashRateBasisPoints = stdJson.readUint(_json, "$.userSlashRateBasisPoints");
         stakeRatio = stdJson.readUint(_json, "$.stakeRatio");
         depositBaseline = stdJson.readUint(_json, "$.depositBaseline");
+        taxRateBasisPointsBaseline = stdJson.readUint(_json, "$.taxRateBasisPointsBaseline");
         treasury = stdJson.readAddress(_json, "$.treasury");
         chipsName = stdJson.readString(_json, "$.chipsName");
         chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");

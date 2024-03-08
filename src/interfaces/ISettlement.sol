@@ -12,7 +12,6 @@ interface ISettlement {
      */
     function initialize(
         address staking,
-        address admin,
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
@@ -30,26 +29,23 @@ interface ISettlement {
      * @dev periodically called.
      * @param epoch The current epoch number.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
-     * @param requestFees Amounts of request fees.
      * @param operationRewards Amounts of operation rewards.
      @ @param isFinal Whether the call is the final one in the epoch.
      */
     function distributeRewards(
         uint256 epoch,
         address[] calldata nodeAddrs,
-        uint256[] calldata requestFees,
         uint256[] calldata operationRewards,
         bool isFinal
-    ) external payable;
+    ) external;
 
     /**
      * @notice Sets tax fraction for public pool.
-     * @dev The tax fraction of public pool will be set as the average of tax fractions of active nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param nodeAddrs The addresses of active nodes.
+     * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool.
      */
-    function setTaxRateBasisPoints4PublicPool(address[] calldata nodeAddrs) external;
+    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 
     /**
      * @notice Slashes nodes.
