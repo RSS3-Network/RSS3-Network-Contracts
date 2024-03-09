@@ -592,7 +592,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // add to node list
         _nodeAddrs.add(nodeAddr);
 
-        emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood, _isAlphaPhase);
+        emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood);
     }
 
     /// @dev deposit tokens to a node
