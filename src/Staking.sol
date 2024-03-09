@@ -587,6 +587,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         node.description = description;
         node.taxRateBasisPoints = taxRateBasisPoints;
         node.publicGood = publicGood;
+        node.alpha = _isAlphaPhase;
 
         // add to node list
         _nodeAddrs.add(nodeAddr);

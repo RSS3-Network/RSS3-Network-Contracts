@@ -2,321 +2,56 @@
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
 
+import {LibZip} from "@solady/utils/LibZip.sol";
+
 library Mouths {
-    string public constant mouthsSVGs1 =
-        '<rect fill="black" height="6" width="2" x="38" y="62"/>'
-        '<rect fill="black" height="6" width="2" x="60" y="62"/>'
-        '<rect fill="black" height="20" transform="rotate(-90 40 62)" width="2" x="40" y="62"/>'
-        '<rect fill="#DEE5D9" height="20" transform="rotate(-90 40 68)" width="6" x="40" y="68"/>'
-        '<rect fill="black" height="20" transform="rotate(-90 40 66)" width="2" x="40" y="66"/>'
-        '<rect fill="black" height="20" transform="rotate(-90 40 70)" width="2" x="40" y="70"/>';
-    string public constant mouthsSVGs2 =
-        '<rect fill="black" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="black" height="12" transform="rotate(-90 44 62)" width="2" x="44" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="64"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 58 64)" width="16"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 56 62)" width="12"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="66"/>'
-        '<rect fill="black" height="2" width="14" x="42" y="66"/>'
-        '<rect fill="#DEE5D9" height="2" width="16" x="42" y="64"/>';
-    string public constant mouthsSVGs3 =
-        '<rect fill="black" height="2" width="2" x="40" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="64"/>'
-        '<rect fill="black" height="4" width="16" x="44" y="64"/>';
-    string public constant mouthsSVGs4 =
-        '<rect fill="black" height="2" width="2" x="38" y="61"/>'
-        '<rect fill="black" height="4" width="4" x="42" y="63"/>'
-        '<rect fill="black" height="4" width="2" x="40" y="63"/>'
-        '<rect fill="#DEE5D9" height="2" width="4" x="54" y="63"/>'
-        '<rect fill="black" height="4" width="2" x="46" y="63"/>'
-        '<rect fill="black" height="4" width="2" x="52" y="63"/>'
-        '<rect fill="black" height="4" width="2" x="58" y="63"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="61"/>'
-        '<rect fill="black" height="4" width="4" x="54" y="63"/>'
-        '<rect fill="#DEE5D9" height="2" width="4" x="54" y="61"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="44" y="61"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="61"/>'
-        '<rect fill="black" height="4" width="4" x="48" y="63"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="67"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="34" y="61"/>'
-        '<rect fill="black" height="2" width="2" x="34" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="34" y="65"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 66 61)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 66 63)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 66 65)" width="2"/>'
-        '<rect fill="black" height="4" width="2" x="38" y="63"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="52" y="67"/>'
-        '<rect fill="black" height="4" width="2" x="60" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="63"/>';
-    string public constant mouthsSVGs5 =
-        '<rect fill="black" height="2" width="2" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="60"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="64"/>';
-    string public constant mouthsSVGs6 =
-        '<rect fill="black" height="2" width="2" x="43" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="55" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="45" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="53" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="57" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="57" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="57" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="59" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="61" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="59" y="58"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 43 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 43 62)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 43 64)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 41 66)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 39 66)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 41 58)" width="2"/>'
-        '<rect fill="black" height="2" width="6" x="47" y="64"/>'
-        '<rect fill="black" height="2" width="6" x="47" y="66"/>';
-    string public constant mouthsSVGs7 =
-        '<rect fill="black" height="2" width="4" x="48" y="62"/>'
-        '<rect fill="black" height="2" width="4" x="48" y="68"/>'
-        '<rect fill="black" height="2" transform="rotate(90 48 64)" width="4" x="48" y="64"/>'
-        '<rect fill="black" height="2" transform="rotate(90 54 64)" width="4" x="54" y="64"/>'
-        '<rect fill="black" height="4" transform="rotate(90 52 64)" width="4" x="52" y="64"/>';
-    string public constant mouthsSVGs8 =
-        '<rect fill="black" height="2" width="4" x="28" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="32" y="62"/>'
-        '<rect fill="black" height="2" width="6" x="66" y="62"/>'
-        '<rect fill="black" height="4" width="2" x="34" y="62"/>'
-        '<rect fill="black" height="4" width="2" x="64" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="38" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="66"/>'
-        '<rect fill="black" height="2" width="4" x="48" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="52" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="66"/>';
-    string public constant mouthsSVGs9 =
-        '<rect fill="black" height="2" width="24" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="64"/>'
-        '<rect fill="black" height="2" width="16" x="42" y="66"/>'
-        '<rect fill="black" height="2" width="16" x="42" y="68"/>'
-        '<rect fill="black" height="2" width="12" x="44" y="70"/>'
-        '<rect fill="#DEE5D9" height="8" width="8" x="46" y="66"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 48 76)" width="4"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="46" y="64"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="52" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="60"/>';
-    string public constant mouthsSVGs10 =
-        '<rect fill="black" height="2" width="28" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="64"/>'
-        '<rect fill="#DEE5D9" height="2" width="16" x="42" y="62"/>'
-        '<rect fill="black" height="2" width="16" x="42" y="66"/>';
-    string public constant mouthsSVGs11 =
-        '<rect fill="black" height="2" width="2" x="38" y="61"/>'
-        '<rect fill="black" height="2" width="4" x="40" y="63"/>'
-        '<rect fill="black" height="2" width="4" x="44" y="61"/>'
-        '<rect fill="black" height="2" width="4" x="48" y="63"/>'
-        '<rect fill="black" height="2" width="4" x="52" y="61"/>'
-        '<rect fill="black" height="2" width="4" x="56" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="61"/>'
-        '<rect fill="black" height="2" width="2" x="64" y="65"/>'
-        '<rect fill="black" height="2" width="2" x="34" y="65"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="63"/>';
-    string public constant mouthsSVGs12 =
-        '<rect fill="black" height="2" width="2" x="44" y="64"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="42" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="64"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="56" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="66"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="62"/>';
-    string public constant mouthsSVGs13 =
-        '<rect fill="#DEE5D9" height="10" width="20" x="40" y="62"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 40 74)" width="20"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 42 76)" width="16"/>'
-        '<rect fill="black" height="8" width="2" x="38" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="48" y="60"/>'
-        '<rect fill="black" height="8" transform="matrix(-1 0 0 1 62 64)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 62 62)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 60 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 58 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 56 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 54 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 52 60)" width="2"/>'
-        '<rect fill="black" height="2" width="8" x="46" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="66"/>';
-    string public constant mouthsSVGs14 =
-        '<rect fill="black" height="2" width="12" x="44" y="60"/>'
-        '<rect fill="black" height="2" width="8" x="46" y="66"/>'
-        '<rect fill="black" height="2" width="5" x="44" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="64"/>'
-        '<rect fill="black" height="2" width="4" x="56" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="black" height="2" width="5" x="51" y="62"/>';
-    string public constant mouthsSVGs15 =
-        '<rect fill="black" height="8" width="28" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="64"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="66"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="68"/>'
-        '<rect fill="black" height="2" width="16" x="42" y="70"/>'
-        '<rect fill="#DEE5D9" height="8" width="12" x="44" y="66"/>'
-        '<rect fill="black" height="2" transform="matrix(1 0 0 -1 48 68)" width="4"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 38 64)" width="24"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 46 76)" width="8"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="60"/>';
-    string public constant mouthsSVGs16 =
-        '<rect fill="#DEE5D9" height="8" width="8" x="46" y="58"/>'
-        '<rect fill="#DEE5D9" height="4" width="12" x="44" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="8" x="46" y="56"/>'
-        '<rect fill="#140B1C" height="2" width="8" x="46" y="66"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="54" y="58"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="54" y="64"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="52" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="52" y="62"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="56" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="44" y="58"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="44" y="64"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="42" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="46" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="46" y="62"/>';
-    string public constant mouthsSVGs17 =
-        '<rect fill="black" height="2" width="20" x="40" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="48" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="52" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="50" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="62"/>'
-        '<rect fill="black" height="4" width="2" x="38" y="62"/>'
-        '<rect fill="black" height="4" width="2" x="60" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="48" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="52" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="50" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="60"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="60"/>';
-    string public constant mouthsSVGs18 =
-        '<rect fill="black" height="2" width="4" x="48" y="60"/>'
-        '<rect fill="black" height="2" width="4" x="48" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="38" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="52" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="62"/>';
-    string public constant mouthsSVGs19 =
-        '<rect fill="black" height="2" width="28" x="36" y="60"/>'
-        '<rect fill="#DEE5D9" height="5" width="8" x="46" y="62"/>'
-        '<rect fill="black" height="2" transform="rotate(90 46 60)" width="7" x="46" y="60"/>'
-        '<rect fill="black" height="2" transform="rotate(90 56 60)" width="7" x="56" y="60"/>'
-        '<rect fill="black" height="2" transform="rotate(90 51 60)" width="7" x="51" y="60"/>'
-        '<rect fill="black" height="2" width="12" x="44" y="65"/>';
-
-    string public constant mouthTraits1 = "Grimace";
-    string public constant mouthTraits2 = "Scared";
-    string public constant mouthTraits3 = "Smirk";
-    string public constant mouthTraits4 = "Toothless";
-    string public constant mouthTraits5 = "Small Smile";
-    string public constant mouthTraits6 = "Cheeky";
-    string public constant mouthTraits7 = "Surprised";
-    string public constant mouthTraits8 = "Skull";
-    string public constant mouthTraits9 = "Tongue Out";
-    string public constant mouthTraits10 = "Big Smile";
-    string public constant mouthTraits11 = "Crumpled";
-    string public constant mouthTraits12 = "Fangs";
-    string public constant mouthTraits13 = "Beard";
-    string public constant mouthTraits14 = "Suave";
-    string public constant mouthTraits15 = "Big Tongue Out";
-    string public constant mouthTraits16 = "Pig Nose";
-    string public constant mouthTraits17 = "Grinding";
-    string public constant mouthTraits18 = "Moustache";
-    string public constant mouthTraits19 = "Buck Teeth";
-
     function getMouth(uint256 id) external pure returns (string memory, string memory) {
-        string[19] memory res = [
-            mouthsSVGs1,
-            mouthsSVGs2,
-            mouthsSVGs3,
-            mouthsSVGs4,
-            mouthsSVGs5,
-            mouthsSVGs6,
-            mouthsSVGs7,
-            mouthsSVGs8,
-            mouthsSVGs9,
-            mouthsSVGs10,
-            mouthsSVGs11,
-            mouthsSVGs12,
-            mouthsSVGs13,
-            mouthsSVGs14,
-            mouthsSVGs15,
-            mouthsSVGs16,
-            mouthsSVGs17,
-            mouthsSVGs18,
-            mouthsSVGs19
+        string[19] memory mouthSVGs = [
+            hex"193c7061746820643d224d333820363268327636682d327a4d3630e0030d0034400d01762d201e123076327a222066696c6c3d2223303030222f3ee0014240260338762d3640260036e0012605444545354439e008290036e000504038013730e0000ee0015f043030222f3e",
+            hex"193c7061746820643d224d343220363268327632682d327a4d3434200d04762d3268312011037a4d3536200ee0001c043538203634e0000d013430e0030d601b014834203502683136200e403802483434400e2047402b0036e00039402be0020d202ae0010d408e023668312038204c0f7a222066696c6c3d2223303030222f3ee005b500342069e0062608444545354439222f3e",
+            hex"1c3c7061746820643d224d343020363268327632682d327a4d3432203634e0040de0021b0034e0021b0e222066696c6c3d2223303030222f3ee0024f60250631367634483434e00226043030222f3e",
+            hex"1f3c7061746820643d224d333820363168327632682d327a4d34322036336834760334682d34200d0030400d0032400d10327a222066696c6c3d2223303030222f3ee001410135344025003440410034e0012505444545354439e004280134364028a04e014d35606ae0000d2086e0010d4078209405307632483430202aa0616095e014870031c087014d34203320424095e002bbe00a95003620e4e00028014d346087a06a60870037e001870033a0c0812b0033e00361600d40c0e0011b0035c07d014d36203700312087201ca00d0033e0040d0035e0000d418d404520e9e002b5e10871213a2096204ee00325e00edbe0004e014d362036400de0053605303030222f3e",
+            hex"193c7061746820643d224d333620363068327632682d327a4d3632e0030d16333820363268323476324833387a4d3430203634683230200e1134307a222066696c6c3d2223303030222f3e",
+            hex"193c7061746820643d224d343320363268327632682d327a4d3535e0030d0034200d0034e0011b2029e0020d0337203630e0011b200de00245200de002290339203636e00029013631e0030d201b013538e0001b408b00302087208c208b400d4095e0010d0034e0011b6045c01b00336061c00d201b2053e0000d608b00362044012d36201b200d0036c00d0e222066696c6c3d2223303030222f3e",
+            hex"163c7061746820643d224d343820363268347632682d347a600d0038e0040d06347634682d3276401c013534e0050e0032a00e0034401d0e222066696c6c3d2223303030222f3e",
+            hex"193c7061746820643d224d323820363268347632682d347a4d3332400d0032400d04327a4d3636400d0036400d0036201b0034400d02327634801be0040d003320290036201b20452037003320530038e0000d013430e0031b00342061e0021b2045e00137003420370036e0008b00342053e001290035e004370035e004370035e005296045c08b0036207de0014500362045e0001b0e222066696c6c3d2223303030222f3e",
+            hex"1f3c7061746820643d224d333820363268323476324833387a4d343020363468320030200e013430200e0632203636683136400e0032800e0038e0020e0634203730683132401d10347a222066696c6c3d2223303030222f3ee00162013436404404387638682d40610b382037366834762d32682d342052201c20700076200d20600035206fe0000de0005005444545354439e00453003320360030e0003600362036e0000de0003605303030222f3e",
+            hex"1f3c7061746820643d224d333620363068323876324833367a4d333820363268320034400e0a387a4d3430203634683230200e1134307a222066696c6c3d2223303030222f3ee00144013432403501313640260032e0012605444545354439e008290036e0092905303030222f3e",
+            hex"1e3c7061746820643d224d333820363168327632682d327a4d34302036336834400d0034200d0034401be0000d2029e0011b013532e0031b013536e0031b00362045e00153003620450035e000610033e0050d6037c07d00362053e0000d0e222066696c6c3d2223303030222f3e",
+            hex"1f3c7061746820643d224d343420363468327632682d327a222066696c6c3d222305303030222f3ee002250032e00b2505444545354439e00428013538e00228024d3430e0030d0035e01c6a013536e00233e00090e00a6a40930036c0b9014d3320360030e0000d003620afe0010d4052e0022920a208326832347632483338e0016105303030222f3e",
+            hex"1c3c7061746820643d224d34302036326832307631304834307a6d302031600e012d32600e05322032683136600d13327a222066696c6c3d2223444545354439222f3ee001470b333820363468327638682d322045002d2044017632600b0032e0030b012030e00117e01a0b033134203420442055a054200b2059027a6d2d4055e0010c204ae0270c043620386838204c012d38a04d405940bb013130204da00ce000f105303030222f3e",
+            hex"1f3c7061746820643d224d343420363068313276324834347a4d34362036366838047632682d38200d201c02326835400d0035200d0032400d202902682d32800d0034e0010d0030e0030d003520450234683440292053013338e0033700362029e001454029e0020d0031400da06f0e222066696c6c3d2223303030222f3e",
+            hex"1f3c7061746820643d224d333620363068323876384833367a222066696c6c3d220623303030222f3ee00226153820363468323476324833387a4d3430203636683230200e0234307a601d0038e0021d0632203730683136401d0032e011530134344044013132207a013434e0012605444545354439e0047d0034207d07386834762d32682de00229e010a4002da0a505362037366838200e02682d38e01460a1050076202804327a4d36326113800de10112043030222f3e",
+            hex"1f3c7061746820643d224d343620353868387638682d387a222066696c6c3d222308444545354439222f3ee002280b342036306831327634483434e0152920520036205200324052400d0036e0010d013534406e0032401b0032600d013634e0010d00324061e0001b200d0032e0010d2045e0021b200de0011b209920c2c037200de0025300342045e00137400de002372045e0021b200de0001be1000808313430423143222f3e",
+            hex"1f3c7061746820643d224d343020363668323076324834307a222066696c6c3d220623303030222f3ee0022600346026087632682d327a4d3438e0030d013532e0040d0036e0030d0034201b0034e00137201be0010d0035207ae0020d2061e0020d2061e0010d40a40032e000450033201b400d0034608b00362045e0010d40a7400de001a7e0010d40a7e0020d208be0010d40a70030e0006140a7e0010d40a7e0020d20a7e0000de1102f40a3202500342156013338e00226043030222f3e",
+            hex"163c7061746820643d224d343820363068347632682d347a600d0036e0010d05362036326832401b0032201b0334203634e0000d00336037e0001b0032e004290030e0030d0035e0041b0035e0044500362029e001450035e0046f00352061e0007d0e222066696c6c3d2223303030222f3e",
+            hex"1f3c7061746820643d224d333620363068323876324833367a222066696c6c3d220623303030222f3ee0012600342026073268387635682d38e0012505444545354439e008280b307637682d32762d377a4d352037e0030e0031e0030ee0116d06342036356831322094013434e00226043030222f3e"
         ];
 
         string[19] memory mouthTraits = [
-            mouthTraits1,
-            mouthTraits2,
-            mouthTraits3,
-            mouthTraits4,
-            mouthTraits5,
-            mouthTraits6,
-            mouthTraits7,
-            mouthTraits8,
-            mouthTraits9,
-            mouthTraits10,
-            mouthTraits11,
-            mouthTraits12,
-            mouthTraits13,
-            mouthTraits14,
-            mouthTraits15,
-            mouthTraits16,
-            mouthTraits17,
-            mouthTraits18,
-            mouthTraits19
+            "Grimace",
+            "Scared",
+            "Smirk",
+            "Toothless",
+            "Small Smile",
+            "Cheeky",
+            "Surprised",
+            "Skull",
+            "Tongue Out",
+            "Big Smile",
+            "Crumpled",
+            "Fangs",
+            "Beard",
+            "Suave",
+            "Big Tongue Out",
+            "Pig Nose",
+            "Grinding",
+            "Moustache",
+            "Buck Teeth"
         ];
 
-        return (res[id % 9], mouthTraits[id % 9]);
+        uint256 idx = id % 16;
+        bytes memory mouthSVG = LibZip.flzDecompress(bytes(mouthSVGs[idx]));
+        return (string(mouthSVG), mouthTraits[id % 9]);
     }
 }

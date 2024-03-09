@@ -6,6 +6,8 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Base64} from "solady/utils/Base64.sol";
+import {SVGGenerator} from "../src/libraries/SVGGenerator.sol";
+import {DataTypes} from "../src/libraries/DataTypes.sol";
 
 contract ChipsTest is CommonTest {
     using stdJson for string;
@@ -103,5 +105,43 @@ contract ChipsTest is CommonTest {
                 "they symbolize the excitement and importance of being unique in a connected digital world."
             )
         );
+    }
+
+    function testCorner() public {
+        (, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
+            DataTypes.NodeTraits(1, 2, 3, 4, 5, true, true),
+            DataTypes.ChipTraits(0, 0, 0, 0, 0, 0)
+        );
+
+        uint256 found1 = LibString.indexOf(attributes, "Public Good Node"); // head detail color white
+
+        assertNotEq(found1, LibString.NOT_FOUND);
+
+        (, string memory attributes2) = SVGGenerator.generateSVGAndAttributes(
+            DataTypes.NodeTraits(1, 2, 3, 4, 5, true, false),
+            DataTypes.ChipTraits(0, 0, 0, 0, 0, 0)
+        );
+
+        uint256 found2 = LibString.indexOf(attributes2, "Public Good Node"); // head detail color white
+
+        assertNotEq(found2, LibString.NOT_FOUND);
+
+        (, string memory attributes3) = SVGGenerator.generateSVGAndAttributes(
+            DataTypes.NodeTraits(1, 2, 3, 4, 5, false, false),
+            DataTypes.ChipTraits(0, 0, 0, 0, 0, 0)
+        );
+
+        uint256 found3 = LibString.indexOf(attributes3, "Corner "); // head detail color white
+
+        assertNotEq(found3, LibString.NOT_FOUND);
+
+        (, string memory attributes4) = SVGGenerator.generateSVGAndAttributes(
+            DataTypes.NodeTraits(1, 2, 3, 4, 5, false, true),
+            DataTypes.ChipTraits(0, 0, 0, 0, 0, 0)
+        );
+
+        uint256 found4 = LibString.indexOf(attributes4, "Alpha Node"); // head detail color white
+
+        assertNotEq(found4, LibString.NOT_FOUND);
     }
 }

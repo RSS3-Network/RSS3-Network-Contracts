@@ -15,6 +15,8 @@ library DataTypes {
         uint64 taxRateBasisPoints;
         /// @notice flag indicating if the node is a public good
         bool publicGood;
+        /// @notice flag indicating if the node is created in alpha phase
+        bool alpha;
         /// @notice name of the node
         string name;
         /// @notice description of the node
@@ -54,8 +56,9 @@ library DataTypes {
         uint8 frameId;
         uint8 chipDetailColor;
         uint8 chipDetailId;
-        // uint8 chipCornerId; // TODO: in the future
-        bool pgCorner; // true: public good node corner; false: alpha node corner
+        uint8 chipCornerId; // TODO: in the future
+        bool pg; // true: is public good node
+        bool alpha; // true: is alpha node
     }
 
     struct ChipTraits {
