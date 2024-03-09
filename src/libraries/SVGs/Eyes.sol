@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable quotes,max-line-length
+// solhint-disable quotes,max-line-length,function-max-lines
 pragma solidity 0.8.20;
 
 import {LibZip} from "@solady/utils/LibZip.sol";

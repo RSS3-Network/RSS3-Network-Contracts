@@ -10,6 +10,7 @@ library Events {
      * @param description Description of node.
      * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
+     * @param alpha Flag indicating if the node is an alpha node.
      */
     event NodeCreated(
         uint256 indexed nodeId,
@@ -17,7 +18,8 @@ library Events {
         string name,
         string description,
         uint64 taxRateBasisPoints,
-        bool publicGood
+        bool publicGood,
+        bool alpha
     );
 
     /**

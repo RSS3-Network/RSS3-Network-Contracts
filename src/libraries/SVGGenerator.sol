@@ -74,19 +74,15 @@ library SVGGenerator {
     function getNodeTraitsInnerSVGAndAttributes(
         DataTypes.NodeTraits memory nodeTraits
     ) internal pure returns (string memory, string memory) {
-        string memory corner = nodeTraits.pgCorner ? Corners.pgSVG : Corners.alphaSVG;
-        string memory cornerTrait = nodeTraits.pgCorner ? "Public Good Node" : "Alpha Node";
+        (string memory corner, string memory cornerTrait) = nodeTraits.pg
+            ? (Corners.pgSVG, "Public Good Node")
+            : nodeTraits.alpha
+            ? (Corners.alphaSVG, "Alpha Node")
+            : Corners.getCorner(nodeTraits.chipCornerId);
         (string memory frameSVGs, string memory frameTrait) = Frame.getFrame(nodeTraits.frameId);
         (string memory chipSVGs, string memory chipTrait) = ChipDetail.getChipDetail(nodeTraits.chipDetailId);
 
-        string memory innerSVG1 = string.concat(
-            frameSVGs,
-            '<svg class="c">',
-            chipSVGs,
-            "</svg>",
-            // chipDetailSVGs[nodeTraits.chipDetailId % chipDetailSVGs.length], chipCorner
-            corner
-        );
+        string memory innerSVG1 = string.concat(frameSVGs, '<svg class="c">', chipSVGs, "</svg>", corner);
 
         string memory attributes1 = string.concat(
             '{"trait_type": "Frame", "value": "',
