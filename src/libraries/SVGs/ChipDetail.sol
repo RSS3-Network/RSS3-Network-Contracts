@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable max-line-length,quotes
+// solhint-disable max-line-length,quotes,function-max-lines
 pragma solidity 0.8.20;
 
 library ChipDetail {
