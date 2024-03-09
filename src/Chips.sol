@@ -113,7 +113,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         );
 
         string memory json = string.concat(
-            '{"name": "Chip #',
+            '{"name": "Open Chips #',
             id.toString(),
             '", "description": "Chip Monsters are unique creatures living in the RSS3 Network, '
             "each one special because of where it was born. They represent the idea of FREE and "

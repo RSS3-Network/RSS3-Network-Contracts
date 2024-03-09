@@ -93,7 +93,7 @@ contract ChipsTest is CommonTest {
         string memory base64prefix = "data:application/json;base64,";
         string memory decodedTokenURI = string(Base64.decode(LibString.slice(tokenURI, bytes(base64prefix).length)));
 
-        assertEq(decodedTokenURI.readString(".name"), "Chip #1");
+        assertEq(decodedTokenURI.readString(".name"), "Open Chips #1");
         assertEq(
             decodedTokenURI.readString(".description"),
             string.concat(
