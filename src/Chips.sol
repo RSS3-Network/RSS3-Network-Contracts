@@ -155,6 +155,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
 
         // Chips from the same node will have the same traits
         uint256 nodeTraitId = uint256(keccak256(abi.encodePacked(nodeAddr))) % nodeTraitCount;
+
         DataTypes.NodeTraits memory nodeTraits = DataTypes.NodeTraits({
             frameId: _calTraitId(
                 nodeTraitId,
@@ -168,8 +169,9 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             ),
             chipDetailColor: _calTraitId(nodeTraitId, colorCount, uint256(chipDetailCount) * uint256(colorCount)),
             chipDetailId: _calTraitId(nodeTraitId, chipDetailCount, colorCount),
-            // chipCornerId: uint8(nodeTraitId % _chip_corner_count) // TODO: in the future
-            pgCorner: node.publicGood
+            chipCornerId: _calTraitId(nodeTraitId, chipCornerCount, 1),
+            pg: node.publicGood,
+            alpha: node.alpha
         });
 
         return nodeTraits;
@@ -217,7 +219,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
             ),
             headShapeId: _calTraitId(chipTraitId, headShapeCount, colorCount * headDetailCount),
             headDetailColor: _calTraitId(chipTraitId, colorCount, headDetailCount),
-            headDetailId: uint8(chipTraitId % headDetailCount)
+            headDetailId: _calTraitId(chipTraitId, headDetailCount, 1)
         });
 
         return chipTraits;
