@@ -1,7 +1,7 @@
 {
   "proxyAdminOwner": "0x97576e0eE9f795aE740C3F2EA9765314B5D66fd3",
   "pauseAccount": "0xD34eCb5656508137D1DfeB3A3E686Eef86086A91",
-  "oracleAccount": "0x6727A51CaeFCaF1Bc189A8316eA09f844644b195",
+  "oracleAccount": "0xEB72D842Dc186FB1d1CAb93A56E7308ABD2E9d0E",
   "depositUnbondingPeriod": "360",
   "stakeUnbondingPeriod": "180",
   "nodeSlashRateBasisPoints": "200",
@@ -10,7 +10,7 @@
   "depositBaseline": "10000000000000000000000",
   "taxRateBasisPointsBaseline": "500",
   "treasury": "0xC4878516C198a919566773797e24af20DfdE6272",
-  "chipsName": "RSS3 Chips",
+  "chipsName": "Open Chips",
   "chipsSymbol": "Chips",
   "settlementStartTime": "1708771296",
   "operationRewardsPercent": 0
