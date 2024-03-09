@@ -4,254 +4,44 @@ pragma solidity 0.8.20;
 
 library Mouths {
     string public constant mouthsSVGs1 =
-        '<rect fill="black" height="6" width="2" x="38" y="62"/>'
-        '<rect fill="black" height="6" width="2" x="60" y="62"/>'
-        '<rect fill="black" height="20" transform="rotate(-90 40 62)" width="2" x="40" y="62"/>'
-        '<rect fill="#DEE5D9" height="20" transform="rotate(-90 40 68)" width="6" x="40" y="68"/>'
-        '<rect fill="black" height="20" transform="rotate(-90 40 66)" width="2" x="40" y="66"/>'
-        '<rect fill="black" height="20" transform="rotate(-90 40 70)" width="2" x="40" y="70"/>';
+        '<path d="M38 62h2v6h-2zM60 62h2v6h-2zM40 62v-2h20v2z" fill="#000"/><path d="M40 68v-6h20v6z" fill="#DEE5D9"/><path d="M40 66v-2h20v2zM40 70v-2h20v2z" fill="#000"/>';
     string public constant mouthsSVGs2 =
-        '<rect fill="black" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="black" height="12" transform="rotate(-90 44 62)" width="2" x="44" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="64"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 58 64)" width="16"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 56 62)" width="12"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="66"/>'
-        '<rect fill="black" height="2" width="14" x="42" y="66"/>'
-        '<rect fill="#DEE5D9" height="2" width="16" x="42" y="64"/>';
+        '<path d="M42 62h2v2h-2zM44 62v-2h12v2zM56 62h2v2h-2zM58 64h2v2h-2zM40 64h2v2h-2zM58 64H42v2h16zM56 62H44v2h12zM40 66h2v2h-2zM58 66h2v2h-2zM56 66h2v2h-2zM42 66h14v2H42z" fill="#000"/><path d="M42 64h16v2H42z" fill="#DEE5D9"/>';
     string public constant mouthsSVGs3 =
-        '<rect fill="black" height="2" width="2" x="40" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="64"/>'
-        '<rect fill="black" height="4" width="16" x="44" y="64"/>';
+        '<path d="M40 62h2v2h-2zM42 64h2v2h-2zM42 62h2v2h-2zM44 64h2v2h-2z" fill="#000"/><path d="M44 64h16v4H44z" fill="#000"/>';
     string public constant mouthsSVGs4 =
-        '<rect fill="black" height="2" width="2" x="38" y="61"/>'
-        '<rect fill="black" height="4" width="4" x="42" y="63"/>'
-        '<rect fill="black" height="4" width="2" x="40" y="63"/>'
-        '<rect fill="#DEE5D9" height="2" width="4" x="54" y="63"/>'
-        '<rect fill="black" height="4" width="2" x="46" y="63"/>'
-        '<rect fill="black" height="4" width="2" x="52" y="63"/>'
-        '<rect fill="black" height="4" width="2" x="58" y="63"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="61"/>'
-        '<rect fill="black" height="4" width="4" x="54" y="63"/>'
-        '<rect fill="#DEE5D9" height="2" width="4" x="54" y="61"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="44" y="61"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="61"/>'
-        '<rect fill="black" height="4" width="4" x="48" y="63"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="67"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="34" y="61"/>'
-        '<rect fill="black" height="2" width="2" x="34" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="34" y="65"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 66 61)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 66 63)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 66 65)" width="2"/>'
-        '<rect fill="black" height="4" width="2" x="38" y="63"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="52" y="67"/>'
-        '<rect fill="black" height="4" width="2" x="60" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="63"/>';
+        '<path d="M38 61h2v2h-2zM42 63h4v4h-4zM40 63h2v4h-2z" fill="#000"/><path d="M54 63h4v2h-4z" fill="#DEE5D9"/><path d="M46 63h2v4h-2zM52 63h2v4h-2zM58 63h2v4h-2zM40 61h20v2H40zM54 63h4v4h-4z" fill="#000"/><path d="M54 61h4v2h-4zM44 61h2v2h-2z" fill="#DEE5D9"/><path d="M60 61h2v2h-2zM48 63h4v4h-4zM40 67h20v2H40zM36 63h2v2h-2zM34 61h2v2h-2zM34 63h2v2h-2zM34 65h2v2h-2zM66 61h-2v2h2zM66 63h-2v2h2zM66 65h-2v2h2zM38 63h2v4h-2z" fill="#000"/><path d="M52 67h2v2h-2z" fill="#DEE5D9"/><path d="M60 63h2v4h-2zM62 63h2v2h-2z" fill="#000"/>';
     string public constant mouthsSVGs5 =
-        '<rect fill="black" height="2" width="2" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="60"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="64"/>';
+        '<path d="M36 60h2v2h-2zM62 60h2v2h-2zM38 62h24v2H38zM40 64h20v2H40z" fill="#000"/>';
     string public constant mouthsSVGs6 =
-        '<rect fill="black" height="2" width="2" x="43" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="55" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="45" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="53" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="57" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="57" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="57" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="59" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="61" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="59" y="58"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 43 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 43 62)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 43 64)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 41 66)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 39 66)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 41 58)" width="2"/>'
-        '<rect fill="black" height="2" width="6" x="47" y="64"/>'
-        '<rect fill="black" height="2" width="6" x="47" y="66"/>';
+        '<path d="M43 62h2v2h-2zM55 62h2v2h-2zM45 64h2v2h-2zM53 64h2v2h-2zM57 60h2v2h-2zM57 62h2v2h-2zM57 64h2v2h-2zM59 66h2v2h-2zM61 66h2v2h-2zM59 58h2v2h-2zM43 60h-2v2h2zM43 62h-2v2h2zM43 64h-2v2h2zM41 66h-2v2h2zM39 66h-2v2h2zM41 58h-2v2h2zM47 64h6v2h-6zM47 66h6v2h-6z" fill="#000"/>';
     string public constant mouthsSVGs7 =
-        '<rect fill="black" height="2" width="4" x="48" y="62"/>'
-        '<rect fill="black" height="2" width="4" x="48" y="68"/>'
-        '<rect fill="black" height="2" transform="rotate(90 48 64)" width="4" x="48" y="64"/>'
-        '<rect fill="black" height="2" transform="rotate(90 54 64)" width="4" x="54" y="64"/>'
-        '<rect fill="black" height="4" transform="rotate(90 52 64)" width="4" x="52" y="64"/>';
+        '<path d="M48 62h4v2h-4zM48 68h4v2h-4zM48 64v4h-2v-4zM54 64v4h-2v-4zM52 64v4h-4v-4z" fill="#000"/>';
     string public constant mouthsSVGs8 =
-        '<rect fill="black" height="2" width="4" x="28" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="32" y="62"/>'
-        '<rect fill="black" height="2" width="6" x="66" y="62"/>'
-        '<rect fill="black" height="4" width="2" x="34" y="62"/>'
-        '<rect fill="black" height="4" width="2" x="64" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="38" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="66"/>'
-        '<rect fill="black" height="2" width="4" x="48" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="52" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="66"/>';
+        '<path d="M28 62h4v2h-4zM32 62h2v2h-2zM66 62h6v2h-6zM34 62h2v4h-2zM64 62h2v4h-2zM36 66h2v2h-2zM38 68h2v2h-2zM40 66h2v2h-2zM42 68h2v2h-2zM44 66h2v2h-2zM48 66h4v2h-4zM46 68h2v2h-2zM52 68h2v2h-2zM54 66h2v2h-2zM56 68h2v2h-2zM58 66h2v2h-2zM60 68h2v2h-2zM62 66h2v2h-2z" fill="#000"/>';
     string public constant mouthsSVGs9 =
-        '<rect fill="black" height="2" width="24" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="64"/>'
-        '<rect fill="black" height="2" width="16" x="42" y="66"/>'
-        '<rect fill="black" height="2" width="16" x="42" y="68"/>'
-        '<rect fill="black" height="2" width="12" x="44" y="70"/>'
-        '<rect fill="#DEE5D9" height="8" width="8" x="46" y="66"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 48 76)" width="4"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="46" y="64"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="52" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="60"/>';
+        '<path d="M38 62h24v2H38zM40 64h20v2H40zM42 66h16v2H42zM42 68h16v2H42zM44 70h12v2H44z" fill="#000"/><path d="M46 66h8v8h-8zM48 76h4v-2h-4zM46 64h2v2h-2zM52 64h2v2h-2z" fill="#DEE5D9"/><path d="M36 60h2v2h-2zM62 60h2v2h-2z" fill="#000"/>';
     string public constant mouthsSVGs10 =
-        '<rect fill="black" height="2" width="28" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="64"/>'
-        '<rect fill="#DEE5D9" height="2" width="16" x="42" y="62"/>'
-        '<rect fill="black" height="2" width="16" x="42" y="66"/>';
+        '<path d="M36 60h28v2H36zM38 62h24v2H38zM40 64h20v2H40z" fill="#000"/><path d="M42 62h16v2H42z" fill="#DEE5D9"/><path d="M42 66h16v2H42z" fill="#000"/>';
     string public constant mouthsSVGs11 =
-        '<rect fill="black" height="2" width="2" x="38" y="61"/>'
-        '<rect fill="black" height="2" width="4" x="40" y="63"/>'
-        '<rect fill="black" height="2" width="4" x="44" y="61"/>'
-        '<rect fill="black" height="2" width="4" x="48" y="63"/>'
-        '<rect fill="black" height="2" width="4" x="52" y="61"/>'
-        '<rect fill="black" height="2" width="4" x="56" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="61"/>'
-        '<rect fill="black" height="2" width="2" x="64" y="65"/>'
-        '<rect fill="black" height="2" width="2" x="34" y="65"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="63"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="63"/>';
+        '<path d="M38 61h2v2h-2zM40 63h4v2h-4zM44 61h4v2h-4zM48 63h4v2h-4zM52 61h4v2h-4zM56 63h4v2h-4zM60 61h2v2h-2zM64 65h2v2h-2zM34 65h2v2h-2zM36 63h2v2h-2zM62 63h2v2h-2z" fill="#000"/>';
     string public constant mouthsSVGs12 =
-        '<rect fill="black" height="2" width="2" x="44" y="64"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="42" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="64"/>'
-        '<rect fill="#DEE5D9" height="2" width="2" x="56" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="66"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="62"/>';
+        '<path d="M44 64h2v2h-2z" fill="#000"/><path d="M42 64h2v2h-2z" fill="#DEE5D9"/><path d="M58 64h2v2h-2zM40 64h2v2h-2zM54 64h2v2h-2z" fill="#000"/><path d="M56 64h2v2h-2z" fill="#DEE5D9"/><path d="M42 66h2v2h-2zM36 60h2v2h-2zM62 60h2v2h-2zM56 66h2v2h-2zM38 62h24v2H38z" fill="#000"/>';
     string public constant mouthsSVGs13 =
-        '<rect fill="#DEE5D9" height="10" width="20" x="40" y="62"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 40 74)" width="20"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 42 76)" width="16"/>'
-        '<rect fill="black" height="8" width="2" x="38" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="48" y="60"/>'
-        '<rect fill="black" height="8" transform="matrix(-1 0 0 1 62 64)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 62 62)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 60 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 58 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 56 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 54 60)" width="2"/>'
-        '<rect fill="black" height="2" transform="matrix(-1 0 0 1 52 60)" width="2"/>'
-        '<rect fill="black" height="2" width="8" x="46" y="68"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="66"/>';
+        '<path d="M40 62h20v10H40zm0 12h20v-2H40zm2 2h16v-2H42z" fill="#DEE5D9"/>'
+        '<path d="M38 64h2v8h-2zm0-2h2v2h-2zm2-2h2v2h-2zm2 0h2v2h-2zm2 0h2v2h-2zm2 0h2v2h-2zm2 0h2v2h-2zm14 4h-2v8h2zm0-2h-2v2h2zm-2-2h-2v2h2zm-2 0h-2v2h2zm-2 0h-2v2h2zm-2 0h-2v2h2zm-2 0h-2v2h2zm-6 8h8v2h-8zm-2-2h2v2h-2zm10 0h2v2h-2z" fill="#000"/>';
     string public constant mouthsSVGs14 =
-        '<rect fill="black" height="2" width="12" x="44" y="60"/>'
-        '<rect fill="black" height="2" width="8" x="46" y="66"/>'
-        '<rect fill="black" height="2" width="5" x="44" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="64"/>'
-        '<rect fill="black" height="2" width="4" x="56" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="38" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="black" height="2" width="5" x="51" y="62"/>';
+        '<path d="M44 60h12v2H44zM46 66h8v2h-8zM44 62h5v2h-5zM42 62h2v2h-2zM42 64h2v2h-2zM40 64h2v2h-2zM56 64h4v2h-4zM38 62h2v2h-2zM60 62h2v2h-2zM56 62h2v2h-2zM51 62h5v2h-5z" fill="#000"/>';
     string public constant mouthsSVGs15 =
-        '<rect fill="black" height="8" width="28" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="64"/>'
-        '<rect fill="black" height="2" width="20" x="40" y="66"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="68"/>'
-        '<rect fill="black" height="2" width="16" x="42" y="70"/>'
-        '<rect fill="#DEE5D9" height="8" width="12" x="44" y="66"/>'
-        '<rect fill="black" height="2" transform="matrix(1 0 0 -1 48 68)" width="4"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 38 64)" width="24"/>'
-        '<rect fill="#DEE5D9" height="2" transform="matrix(1 0 0 -1 46 76)" width="8"/>'
-        '<rect fill="black" height="2" width="2" x="36" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="62" y="60"/>';
+        '<path d="M36 60h28v8H36z" fill="#000"/><path d="M38 64h24v2H38zM40 66h20v2H40zM38 68h24v2H38zM42 70h16v2H42z" fill="#000"/><path d="M44 66h12v8H44z" fill="#DEE5D9"/><path d="M48 68h4v-2h-4z" fill="#000"/><path d="M38 64h24v-2H38zM46 76h8v-2h-8z" fill="#DEE5D9"/><path d="M36 60h2v2h-2zM62 60h2v2h-2z" fill="#000"/>';
     string public constant mouthsSVGs16 =
-        '<rect fill="#DEE5D9" height="8" width="8" x="46" y="58"/>'
-        '<rect fill="#DEE5D9" height="4" width="12" x="44" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="8" x="46" y="56"/>'
-        '<rect fill="#140B1C" height="2" width="8" x="46" y="66"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="54" y="58"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="54" y="64"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="52" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="52" y="62"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="56" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="44" y="58"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="44" y="64"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="42" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="46" y="60"/>'
-        '<rect fill="#140B1C" height="2" width="2" x="46" y="62"/>';
+        '<path d="M46 58h8v8h-8z" fill="#DEE5D9"/><path d="M44 60h12v4H44z" fill="#DEE5D9"/><path d="M46 56h8v2h-8zM46 66h8v2h-8zM54 58h2v2h-2zM54 64h2v2h-2zM52 60h2v2h-2zM52 62h2v2h-2zM56 60h2v2h-2zM56 62h2v2h-2zM44 58h2v2h-2zM44 64h2v2h-2zM42 60h2v2h-2zM42 62h2v2h-2zM46 60h2v2h-2zM46 62h2v2h-2z" fill="#140B1C"/>';
     string public constant mouthsSVGs17 =
-        '<rect fill="black" height="2" width="20" x="40" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="48" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="52" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="50" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="62"/>'
-        '<rect fill="black" height="4" width="2" x="38" y="62"/>'
-        '<rect fill="black" height="4" width="2" x="60" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="48" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="52" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="50" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="60"/>'
-        '<rect fill="black" height="2" width="24" x="38" y="60"/>';
+        '<path d="M40 66h20v2H40z" fill="#000"/><path d="M44 66h2v2h-2zM48 66h2v2h-2zM52 66h2v2h-2zM56 66h2v2h-2zM42 64h2v2h-2zM46 64h2v2h-2zM50 64h2v2h-2zM54 64h2v2h-2zM58 64h2v2h-2zM40 62h2v2h-2zM38 62h2v4h-2zM60 62h2v4h-2zM44 62h2v2h-2zM48 62h2v2h-2zM52 62h2v2h-2zM56 62h2v2h-2zM42 60h2v2h-2zM46 60h2v2h-2zM50 60h2v2h-2zM54 60h2v2h-2z" fill="#000"/><path d="M38 60h24v2H38z" fill="#000"/>';
     string public constant mouthsSVGs18 =
-        '<rect fill="black" height="2" width="4" x="48" y="60"/>'
-        '<rect fill="black" height="2" width="4" x="48" y="66"/>'
-        '<rect fill="black" height="2" width="2" x="46" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="44" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="38" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="42" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="40" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="52" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="54" y="64"/>'
-        '<rect fill="black" height="2" width="2" x="60" y="60"/>'
-        '<rect fill="black" height="2" width="2" x="56" y="62"/>'
-        '<rect fill="black" height="2" width="2" x="58" y="62"/>';
+        '<path d="M48 60h4v2h-4zM48 66h4v2h-4zM46 62h2v2h-2zM44 64h2v2h-2zM38 60h2v2h-2zM42 62h2v2h-2zM40 62h2v2h-2zM52 62h2v2h-2zM54 64h2v2h-2zM60 60h2v2h-2zM56 62h2v2h-2zM58 62h2v2h-2z" fill="#000"/>';
     string public constant mouthsSVGs19 =
-        '<rect fill="black" height="2" width="28" x="36" y="60"/>'
-        '<rect fill="#DEE5D9" height="5" width="8" x="46" y="62"/>'
-        '<rect fill="black" height="2" transform="rotate(90 46 60)" width="7" x="46" y="60"/>'
-        '<rect fill="black" height="2" transform="rotate(90 56 60)" width="7" x="56" y="60"/>'
-        '<rect fill="black" height="2" transform="rotate(90 51 60)" width="7" x="51" y="60"/>'
-        '<rect fill="black" height="2" width="12" x="44" y="65"/>';
-
+        '<path d="M36 60h28v2H36z" fill="#000"/><path d="M46 62h8v5h-8z" fill="#DEE5D9"/><path d="M46 60v7h-2v-7zM56 60v7h-2v-7zM51 60v7h-2v-7z" fill="#000"/><path d="M44 65h12v2H44z" fill="#000"/>';
     string public constant mouthTraits1 = "Grimace";
     string public constant mouthTraits2 = "Scared";
     string public constant mouthTraits3 = "Smirk";

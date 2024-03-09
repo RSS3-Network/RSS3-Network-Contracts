@@ -94,7 +94,7 @@ contract ChipsTest is CommonTest {
         assertEq(decodedTokenURI.readString(".name"), "Chip #1");
         assertEq(
             decodedTokenURI.readString(".description"),
-            "Chip is a unique NFT that represents a node in the network. It is generated based on the node's address and token ID."
+            "Chip Monsters are unique creatures living in the RSS3 Network, each one special because of where it was born. They represent the idea of FREE and OPEN INFORMATION, thriving in a world that values sharing and being different. These Chip Monsters are more than just digital; they symbolize the excitement and importance of being unique in a connected digital world."
         );
     }
 }

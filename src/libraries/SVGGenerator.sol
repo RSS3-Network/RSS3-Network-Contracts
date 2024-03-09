@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 
 import {DataTypes} from "./DataTypes.sol";
 import {Eyes} from "./SVGs/Eyes.sol";
-import {ChipDetail} from "./SVGs/ChipDetails/ChipDetail.sol";
+import {ChipDetail} from "./SVGs/ChipDetail.sol";
 import {Head} from "./SVGs/Head.sol";
 import {Mouths} from "./SVGs/Mouths.sol";
 import {Corners} from "./SVGs/Corners.sol";
@@ -23,11 +23,11 @@ library SVGGenerator {
     string public constant color5 = "#31C040";
 
     string public constant headShapeSVGs1 =
-        '<polygon class="st-base-head" points="72,48 72,64 70,64 70,66 68,66 68,68 64,68 64,70 60,70 60,72 40,72 40,70 36,70 36,68 32,68 32,66   30,66 30,64 28,64 28,48 30,48 30,46 32,46 32,44 68,44 68,46 70,46 70,48 "/>';
+        '<polygon class="b" points="72,48 72,64 70,64 70,66 68,66 68,68 64,68 64,70 60,70 60,72 40,72 40,70 36,70 36,68 32,68 32,66   30,66 30,64 28,64 28,48 30,48 30,46 32,46 32,44 68,44 68,46 70,46 70,48 "/>';
     string public constant headShapeSVGs2 =
-        '<polygon class="st-base-head" points="72,44 72,68 70,68 70,70 68,70 68,72 32,72 32,70 30,70 30,68 28,68 28,44 "/>';
+        '<polygon class="b" points="72,44 72,68 70,68 70,70 68,70 68,72 32,72 32,70 30,70 30,68 28,68 28,44 "/>';
     string public constant headShapeSVGs3 =
-        '<polygon class="st-base-head" points="72,46 72,64 70,64 70,66 68,66 68,68 66,68 66,70 64,70 64,72 36,72 36,70 34,70 34,68 32,68 32,66   30,66 30,64 28,64 28,46 30,46 30,44 70,44 70,46 "/>';
+        '<polygon class="b" points="72,46 72,64 70,64 70,66 68,66 68,68 66,68 66,70 64,70 64,72 36,72 36,70 34,70 34,68 32,68 32,66   30,66 30,64 28,64 28,46 30,46 30,44 70,44 70,46 "/>';
 
     string public constant headShapeTrait1 = "round";
     string public constant headShapeTrait2 = "square";
@@ -81,7 +81,9 @@ library SVGGenerator {
 
         string memory innerSVG1 = string.concat(
             frameSVGs,
+            '<svg class="c">',
             chipSVGs,
+            "</svg>",
             // chipDetailSVGs[nodeTraits.chipDetailId % chipDetailSVGs.length], chipCorner
             corner
         );
@@ -177,15 +179,15 @@ library SVGGenerator {
     ) internal pure returns (string memory) {
         return
             string.concat(
-                '<style type="text/css">.st-frames{fill:',
+                '<style type="text/css">.f{fill:',
                 getColor(frameColor),
-                ";}.cd{fill:",
+                ";}.c{fill:",
                 getColor(chipDetailColor),
-                ";}.st-base-head{fill:",
+                ";}.b{fill:",
                 getColor(headShapeColor),
-                ";}.st-head{fill:",
+                ";}.h{fill:",
                 getColor(headDetailColor),
-                ";}.st-alpha{fill:#1477FB;}.st-pg{fill:#FB1467;}.st-head-evenodd{fill-rule:evenodd;clip-rule:evenodd;}</style>"
+                ";}.alpha{fill:#1477FB;}.pg{fill:#FB1467;}.e{fill-rule:evenodd;clip-rule:evenodd;}</style>"
             );
     }
 
