@@ -51,7 +51,7 @@ library Mouths {
         ];
 
         uint256 idx = id % 16;
-        bytes memory mouthSVG = LibZip.flzCompress(bytes(mouthSVGs[idx]));
+        bytes memory mouthSVG = LibZip.flzDecompress(bytes(mouthSVGs[idx]));
         return (string(mouthSVG), mouthTraits[id % 9]);
     }
 }

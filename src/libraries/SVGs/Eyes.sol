@@ -49,7 +49,7 @@ library Eyes {
         ];
 
         uint256 idx = id % 18;
-        bytes memory eyesSVG = LibZip.flzCompress(bytes(eyeSVGs[idx]));
+        bytes memory eyesSVG = LibZip.flzDecompress(bytes(eyeSVGs[idx]));
         return (string(eyesSVG), eyeTraits[idx]);
     }
 }

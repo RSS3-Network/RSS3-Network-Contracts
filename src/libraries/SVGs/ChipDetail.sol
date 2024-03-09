@@ -35,7 +35,7 @@ library ChipDetail {
             "Detail 11"
         ];
 
-        bytes memory chipDetail = LibZip.flzCompress(bytes(chipDetailSVGs[idx]));
+        bytes memory chipDetail = LibZip.flzDecompress(bytes(chipDetailSVGs[idx]));
         return (string(chipDetail), chipDetailTraits[idx]);
     }
 }

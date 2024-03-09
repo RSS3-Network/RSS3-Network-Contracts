@@ -46,7 +46,7 @@ library Head {
         ];
 
         uint256 idx = id % 16;
-        bytes memory headSVG = LibZip.flzCompress(bytes(headSVGs[idx]));
+        bytes memory headSVG = LibZip.flzDecompress(bytes(headSVGs[idx]));
         return (string(headSVG), headTraits[id % 16]);
     }
 }

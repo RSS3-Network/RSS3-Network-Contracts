@@ -33,7 +33,7 @@ library Frame {
         ];
 
         uint256 idx = id % 9;
-        bytes memory frameSVG = LibZip.flzCompress(bytes(frameSVGs[idx]));
+        bytes memory frameSVG = LibZip.flzDecompress(bytes(frameSVGs[idx]));
         return (string(frameSVG), frameTraits[idx]);
     }
 }
