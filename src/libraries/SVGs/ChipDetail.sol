@@ -117,6 +117,7 @@ library ChipDetail {
             '<path d="M14 72v2h6v-2zm0-4v2h6v-2zm6 12h-2v6h2zm-4 0h-2v6h2z"/>'
             '<path d="M14 84v2h6v-2zm0-4v2h6v-2zm32 6h-2v2h2zm-4-2v-2H32v2zm-16-6h-2v2h2zm24 4h-2v2h2zm-26-6h-2v2h2zm-2-2h-2v2h2zm4 8h-6v2h6zm-10-8v6h2v-6z"/>'
         ];
+
         string[11] memory chipDetailTraits = [
             "Detail 1",
             "Detail 2",
