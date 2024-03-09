@@ -2,9 +2,11 @@
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
 
+import {LibZip} from "@solady/utils/LibZip.sol";
+
 library Mouths {
     function getMouth(uint256 id) external pure returns (string memory, string memory) {
-        string[19] memory res = [
+        string[19] memory mouthSVGs = [
             hex"193c7061746820643d224d333820363268327636682d327a4d3630e0030d0034400d01762d201e123076327a222066696c6c3d2223303030222f3ee0014240260338762d3640260036e0012605444545354439e008290036e000504038013730e0000ee0015f043030222f3e",
             hex"193c7061746820643d224d343220363268327632682d327a4d3434200d04762d3268312011037a4d3536200ee0001c043538203634e0000d013430e0030d601b014834203502683136200e403802483434400e2047402b0036e00039402be0020d202ae0010d408e023668312038204c0f7a222066696c6c3d2223303030222f3ee005b500342069e0062608444545354439222f3e",
             hex"1c3c7061746820643d224d343020363268327632682d327a4d3432203634e0040de0021b0034e0021b0e222066696c6c3d2223303030222f3ee0024f60250631367634483434e00226043030222f3e",
@@ -48,6 +50,8 @@ library Mouths {
             "Buck Teeth"
         ];
 
-        return (res[id % 9], mouthTraits[id % 9]);
+        uint256 idx = id % 16;
+        bytes memory mouthSVG = LibZip.flzCompress(bytes(mouthSVGs[idx]));
+        return (string(mouthSVG), mouthTraits[id % 9]);
     }
 }

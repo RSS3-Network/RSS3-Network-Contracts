@@ -2,10 +2,12 @@
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
 
+import {LibZip} from "@solady/utils/LibZip.sol";
+
 library Head {
     //h: st-head e:st-head-evenodd
     function getHead(uint256 id) external pure returns (string memory, string memory) {
-        string[16] memory res = [
+        string[16] memory headSVGs = [
             hex"1e3c7061746820636c6173733d22682220643d224d3636203430762d32682d32e014050034e0001d0348333876602e2004003440040332763468603c00372008c012201c003720040134382037127a6d2d382030483432762d326831367a222f3e",
             hex"1f3c7061746820636c6173733d226820652220643d224d3730203334762d34682d0332762d32c005013676600ae004040038e0021fe00f2b60460238683420510a387a6d2d323620344833304038203100344004013268405b402902327a6d201f03304835364015e0091f04327a222f3e",
             hex"1f3c7061746820636c6173733d226820652220643d224d37322033387634683276082d347a6d2d34362030e0000d0234322d2016013268a0050034e0000b03483430766016200400344004e000090032a03ce017080038206ee01723207b6004003220970f31362034682d34762d3468347a222f3e",
@@ -42,6 +44,9 @@ library Head {
             "Cyclops",
             "Top Hat"
         ];
-        return (res[id % 16], headTraits[id % 16]);
+
+        uint256 idx = id % 16;
+        bytes memory headSVG = LibZip.flzCompress(bytes(headSVGs[idx]));
+        return (string(headSVG), headTraits[id % 16]);
     }
 }

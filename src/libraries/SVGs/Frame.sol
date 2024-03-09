@@ -2,6 +2,8 @@
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
 
+import {LibZip} from "@solady/utils/LibZip.sol";
+
 library Frame {
     //class: f
 
@@ -31,7 +33,7 @@ library Frame {
         ];
 
         uint256 idx = id % 9;
-
-        return (frameSVGs[idx], frameTraits[idx]);
+        bytes memory frameSVG = LibZip.flzCompress(bytes(frameSVGs[idx]));
+        return (string(frameSVG), frameTraits[idx]);
     }
 }
