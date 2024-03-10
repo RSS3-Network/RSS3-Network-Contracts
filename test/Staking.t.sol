@@ -189,7 +189,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         );
     }
 
-    function testCreateNodexx(uint64 taxRateBasisPoints) public {
+    function testCreateNode(uint64 taxRateBasisPoints) public {
         vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
 
         string memory name = "Alice";
