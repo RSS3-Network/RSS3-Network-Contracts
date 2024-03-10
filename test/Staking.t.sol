@@ -783,6 +783,37 @@ contract StakingTest is CommonTest, IERC721Errors {
         _testRequestUnstakeApprovedChipFromNode(alice, false);
     }
 
+    function testRequestUnstakeWithTransferChip() public {
+        uint256 amount = 10000 ether;
+
+        _createNode(alice);
+
+        vm.startPrank(bob);
+        (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice);
+
+        // request unstake
+        uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
+        for (uint256 i = startTokenId; i <= endTokenId; i++) {
+            tokenIds[i - startTokenId] = i;
+
+            // bob transfers chips to carol
+            _chips.transferFrom(bob, carol, i);
+        }
+        vm.stopPrank();
+
+        _disableAlphaPhase();
+
+        // carol unstake
+        vm.prank(carol);
+        uint256 requestId = _staking.requestUnstake(alice, tokenIds);
+
+        // check status
+        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        assertEq(req.owner, carol);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.unstakeAmount, amount);
+    }
+
     function testRequestUnstakeApprovedChipsFromPublicGoodNode() public {
         _disableAlphaPhase();
 
