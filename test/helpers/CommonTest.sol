@@ -42,7 +42,7 @@ contract CommonTest is Utils, IErrors {
     uint256 public constant minTaxRateBasisPoints = 500;
     address public constant treasury = address(0xaaa);
 
-    string public constant chipsName = "RSS3 Chips";
+    string public constant chipsName = "Open Chips";
     string public constant chipsSymbol = "Chips";
 
     uint64 internal constant _defaultTaxRateBasisPoints = uint64(1000);

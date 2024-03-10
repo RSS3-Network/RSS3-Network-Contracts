@@ -163,6 +163,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         bool publicGood
     ) external payable override whenNotPaused {
         if (publicGood && msg.value > 0) revert PublicGoodNodeNotDeposited();
+        // can't create public good node in alpha phase
+        if (publicGood && _isAlphaPhase) revert PublicGoodNodeNotInAlphaPhase();
         if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
 
         _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
