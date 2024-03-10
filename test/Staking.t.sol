@@ -189,14 +189,15 @@ contract StakingTest is CommonTest, IERC721Errors {
         );
     }
 
-    function testCreateNode(uint64 taxRateBasisPoints) public {
+    function testCreateNodexx(uint64 taxRateBasisPoints) public {
         vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
 
         string memory name = "Alice";
         string memory description = "Alice's node";
 
+        // case 1: create a node before alpha phase
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, true);
         vm.prank(alice);
         _staking.createNode(name, description, taxRateBasisPoints, false);
 
@@ -204,14 +205,28 @@ contract StakingTest is CommonTest, IERC721Errors {
         _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, false, true);
         assertEq(_staking.getNodeCount(), 1);
 
-        // create node after alpha phase
+        // case 2: create a node after alpha phase
         _disableAlphaPhase();
         expectEmit();
-        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false);
+        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false, false);
         vm.prank(bob);
         _staking.createNode(name, description, taxRateBasisPoints, false);
         _checkNode(bob, 2, name, description, taxRateBasisPoints, 0, false, false);
         assertEq(_staking.getNodeCount(), 2);
+    }
+
+    function testCreatePGNode() public {
+        string memory name = "Alice";
+        string memory description = "Alice's node";
+        uint64 taxRateBasisPoints = 1000;
+
+        _disableAlphaPhase();
+        expectEmit();
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, true, false);
+        vm.prank(alice);
+        _staking.createNode(name, description, taxRateBasisPoints, true);
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, true, false);
+        assertEq(_staking.getNodeCount(), 1);
     }
 
     function testNodeAvatar() public {
@@ -244,7 +259,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, true);
         expectEmit();
         emit Events.Deposited(alice, amount);
 
@@ -258,7 +273,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // create node after alpha phase
         _disableAlphaPhase();
         expectEmit();
-        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false);
+        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false, false);
         vm.prank(bob);
         _staking.createNode(name, description, taxRateBasisPoints, false);
         _checkNode(bob, 2, name, description, taxRateBasisPoints, 0, false, false);
