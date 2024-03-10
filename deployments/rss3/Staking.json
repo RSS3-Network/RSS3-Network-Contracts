@@ -1,0 +1,2041 @@
+{
+  "abi": [
+    {
+      "type": "constructor",
+      "inputs": [
+        {
+          "name": "treasury",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "stakeRatio",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "stakeUnbondingPeriod",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "depositUnbondingPeriod",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "nodeSlashRateBasisPoints",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "userSlashRateBasisPoints",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "minDeposit",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "minTaxRateBasisPoints",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "DEFAULT_ADMIN_ROLE",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "DEPOSIT_UNBONDING_PERIOD",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "MIN_DEPOSIT",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "MIN_TAX_RATE_BASIS_POINTS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "NODE_SLASH_RATE_BASIS_POINTS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "ORACLE_ROLE",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "PAUSE_ROLE",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "SHARES_PER_CHIP",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "STAKE_RATIO",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "STAKE_UNBONDING_PERIOD",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "TREASURY",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "USER_SLASH_RATE_BASIS_POINTS",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "chipsContract",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "claimUnstake",
+      "inputs": [
+        {
+          "name": "requestIds",
+          "type": "uint256[]",
+          "internalType": "uint256[]"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "claimWithdrawal",
+      "inputs": [
+        {
+          "name": "requestIds",
+          "type": "uint256[]",
+          "internalType": "uint256[]"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "createNode",
+      "inputs": [
+        {
+          "name": "name",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "taxRateBasisPoints",
+          "type": "uint64",
+          "internalType": "uint64"
+        },
+        {
+          "name": "publicGood",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
+    },
+    {
+      "type": "function",
+      "name": "deposit",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "payable"
+    },
+    {
+      "type": "function",
+      "name": "disableAlphaPhase",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "distributeRewards",
+      "inputs": [
+        {
+          "name": "epochInfo",
+          "type": "uint256[3]",
+          "internalType": "uint256[3]"
+        },
+        {
+          "name": "nodeAddrs",
+          "type": "address[]",
+          "internalType": "address[]"
+        },
+        {
+          "name": "operationRewards",
+          "type": "uint256[]",
+          "internalType": "uint256[]"
+        },
+        {
+          "name": "stakingRewards",
+          "type": "uint256[]",
+          "internalType": "uint256[]"
+        },
+        {
+          "name": "publicPoolRewards",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
+    },
+    {
+      "type": "function",
+      "name": "getChipsInfo",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "tokens",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getNode",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct DataTypes.Node",
+          "components": [
+            {
+              "name": "nodeId",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "account",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "taxRateBasisPoints",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "publicGood",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "alpha",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "operationPoolTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "stakingPoolTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "totalShares",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "slashedTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getNodeAvatar",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getNodeCount",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getNodes",
+      "inputs": [
+        {
+          "name": "nodeAddrs",
+          "type": "address[]",
+          "internalType": "address[]"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "nodes",
+          "type": "tuple[]",
+          "internalType": "struct DataTypes.Node[]",
+          "components": [
+            {
+              "name": "nodeId",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "account",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "taxRateBasisPoints",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "publicGood",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "alpha",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "operationPoolTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "stakingPoolTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "totalShares",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "slashedTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getNodesWithPagination",
+      "inputs": [
+        {
+          "name": "offset",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "limit",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "nodes",
+          "type": "tuple[]",
+          "internalType": "struct DataTypes.Node[]",
+          "components": [
+            {
+              "name": "nodeId",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "account",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "taxRateBasisPoints",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "publicGood",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "alpha",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "operationPoolTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "stakingPoolTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "totalShares",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "slashedTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getPendingUnstake",
+      "inputs": [
+        {
+          "name": "requestId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct DataTypes.UnstakeRequest",
+          "components": [
+            {
+              "name": "owner",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "nodeAddr",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "unstakeAmount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getPendingWithdrawal",
+      "inputs": [
+        {
+          "name": "requestId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct DataTypes.WithdrawalRequest",
+          "components": [
+            {
+              "name": "owner",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint40",
+              "internalType": "uint40"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getPoolInfo",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "totalOperationPoolTokens",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "totalStakingPoolTokens",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getPublicPool",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct DataTypes.Node",
+          "components": [
+            {
+              "name": "nodeId",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "account",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "taxRateBasisPoints",
+              "type": "uint64",
+              "internalType": "uint64"
+            },
+            {
+              "name": "publicGood",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "alpha",
+              "type": "bool",
+              "internalType": "bool"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "operationPoolTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "stakingPoolTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "totalShares",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "slashedTokens",
+              "type": "uint256",
+              "internalType": "uint256"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getRoleAdmin",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getRoleMember",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "index",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getRoleMemberCount",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "grantRole",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "hasRole",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "initialize",
+      "inputs": [
+        {
+          "name": "chips",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "pauseAccount",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "oracleAccount",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "isAlphaPhase",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "isSettlementPhase",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "minTokensToStake",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "pause",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "paused",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "renounceRole",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "callerConfirmation",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "requestUnstake",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "chipsIds",
+          "type": "uint256[]",
+          "internalType": "uint256[]"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "requestId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "requestWithdrawal",
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "requestId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "revokeRole",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "setSettlementPhase",
+      "inputs": [
+        {
+          "name": "enabled",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "setTaxRateBasisPoints4Node",
+      "inputs": [
+        {
+          "name": "taxRateBasisPoints",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "setTaxRateBasisPoints4PublicPool",
+      "inputs": [
+        {
+          "name": "taxRateBasisPoints",
+          "type": "uint64",
+          "internalType": "uint64"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "slashNodes",
+      "inputs": [
+        {
+          "name": "nodeAddrs",
+          "type": "address[]",
+          "internalType": "address[]"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "stake",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "startTokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "endTokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "payable"
+    },
+    {
+      "type": "function",
+      "name": "stakeToPublicPool",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "startTokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "endTokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "payable"
+    },
+    {
+      "type": "function",
+      "name": "supportsInterface",
+      "inputs": [
+        {
+          "name": "interfaceId",
+          "type": "bytes4",
+          "internalType": "bytes4"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "unpause",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "updateToPublicGood",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "withdraw2Treasury",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "event",
+      "name": "Deposited",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "Initialized",
+      "inputs": [
+        {
+          "name": "version",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "NodeCreated",
+      "inputs": [
+        {
+          "name": "nodeId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "indexed": false,
+          "internalType": "string"
+        },
+        {
+          "name": "taxRateBasisPoints",
+          "type": "uint64",
+          "indexed": false,
+          "internalType": "uint64"
+        },
+        {
+          "name": "publicGood",
+          "type": "bool",
+          "indexed": false,
+          "internalType": "bool"
+        },
+        {
+          "name": "alpha",
+          "type": "bool",
+          "indexed": false,
+          "internalType": "bool"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "NodeSlashed",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "slashedOperationPool",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "slashedStakingPool",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "NodeTaxRateBasisPointsSet",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "taxRateBasisPoints",
+          "type": "uint64",
+          "indexed": true,
+          "internalType": "uint64"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "NodeUpdated2PublicGood",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "Paused",
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "PublicGoodRewardDistributed",
+      "inputs": [
+        {
+          "name": "epoch",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "startTimestamp",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "endTimestamp",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "publicPoolRewards",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "publicPoolTax",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "PublicPoolTaxRateBasisPointsSet",
+      "inputs": [
+        {
+          "name": "taxRateBasisPoints",
+          "type": "uint64",
+          "indexed": true,
+          "internalType": "uint64"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RewardDistributed",
+      "inputs": [
+        {
+          "name": "epoch",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "startTimestamp",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "endTimestamp",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "nodeAddrs",
+          "type": "address[]",
+          "indexed": false,
+          "internalType": "address[]"
+        },
+        {
+          "name": "operationRewards",
+          "type": "uint256[]",
+          "indexed": false,
+          "internalType": "uint256[]"
+        },
+        {
+          "name": "stakingRewards",
+          "type": "uint256[]",
+          "indexed": false,
+          "internalType": "uint256[]"
+        },
+        {
+          "name": "taxAmounts",
+          "type": "uint256[]",
+          "indexed": false,
+          "internalType": "uint256[]"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RoleAdminChanged",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "previousAdminRole",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "newAdminRole",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RoleGranted",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RoleRevoked",
+      "inputs": [
+        {
+          "name": "role",
+          "type": "bytes32",
+          "indexed": true,
+          "internalType": "bytes32"
+        },
+        {
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "Staked",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "startTokenId",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "endTokenId",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "Unpaused",
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address",
+          "indexed": false,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "UnstakeClaimed",
+      "inputs": [
+        {
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "user",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "unstakeAmount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "UnstakeRequested",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "unstakeAmount",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        },
+        {
+          "name": "chipsIds",
+          "type": "uint256[]",
+          "indexed": false,
+          "internalType": "uint256[]"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "WithdrawRequested",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        },
+        {
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "WithdrawalClaimed",
+      "inputs": [
+        {
+          "name": "requestId",
+          "type": "uint256",
+          "indexed": true,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "error",
+      "name": "AccessControlBadConfirmation",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "AccessControlUnauthorizedAccount",
+      "inputs": [
+        {
+          "name": "account",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "neededRole",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "AlphaWithdrawNotAllowed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "AlreadyClaimed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "AmountTooSmall",
+      "inputs": [
+        {
+          "name": "amount",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "BatchSizeZero",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "CallerNotStaking",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "CheckpointUnorderedInsertion",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ChipNotAuthorized",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ChipNotPublicGood",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ChipNotValid",
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ChipsIdOverflow",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ChipsNotSameOwner",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ClaimIdNotExists",
+      "inputs": [
+        {
+          "name": "claimId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ClaimTimeNotReady",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "CreateNodeToZeroAddress",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "EmptyChipsIds",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "EmptyNodeList",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "EnforcedPause",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ExcessWithdrawalAmount",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ExpectedPause",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InsufficientValue",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidArrayLength",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidEpoch",
+      "inputs": [
+        {
+          "name": "expected",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "actual",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "InvalidEpochNumber",
+      "inputs": [
+        {
+          "name": "current",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "got",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "InvalidInitialization",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidTraitId",
+      "inputs": [
+        {
+          "name": "traitId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NodeAlreadyPublicGood",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NodeExists",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NodeNotExists",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NodeNotPublicGood",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "NodeStakedOrDeposited",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotInitializing",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "OperationRewardsExceed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "PublicGoodNodeNotDeposited",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "PublicGoodNodeNotInAlphaPhase",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ReentrancyGuardReentrantCall",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "RewardsAlreadyDistributed",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "SafeCastOverflowedUintDowncast",
+      "inputs": [
+        {
+          "name": "bits",
+          "type": "uint8",
+          "internalType": "uint8"
+        },
+        {
+          "name": "value",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "SettlementPhase",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "StakeToPublicGoodNode",
+      "inputs": [
+        {
+          "name": "nodeAddr",
+          "type": "address",
+          "internalType": "address"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "StakingRewardsExceed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "SubmissionIntervalNotElapsed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "TaxRateBasisPointsTooLarge",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "TaxRateBasisPointsTooSmall",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "TransferFailed",
+      "inputs": []
+    }
+  ],
+  "address": "0x71332A9CB075054F636157c9A7eDC6798b84A262",
+  "args": [
+    "0x7BB0c7cE05f4A676F91055724F0Db0EcC31f742F",
+    "25",
+    "1944000",
+    "1944000",
+    "200",
+    "100",
+    "10000000000000000000000",
+    "500"
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "devdoc": null,
+  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"treasury\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"stakeRatio\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"stakeUnbondingPeriod\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"depositUnbondingPeriod\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"nodeSlashRateBasisPoints\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"userSlashRateBasisPoints\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"minDeposit\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"minTaxRateBasisPoints\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"AccessControlBadConfirmation\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"type\":\"error\",\"name\":\"AccessControlUnauthorizedAccount\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"AlphaWithdrawNotAllowed\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"AlreadyClaimed\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"AmountTooSmall\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"BatchSizeZero\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"CallerNotStaking\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"CheckpointUnorderedInsertion\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"ChipNotAuthorized\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"ChipNotPublicGood\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"ChipNotValid\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ChipsIdOverflow\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ChipsNotSameOwner\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"claimId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"ClaimIdNotExists\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ClaimTimeNotReady\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"CreateNodeToZeroAddress\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"EmptyChipsIds\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"EmptyNodeList\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"EnforcedPause\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ExcessWithdrawalAmount\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ExpectedPause\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"InsufficientValue\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"InvalidArrayLength\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"expected\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"actual\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"InvalidEpoch\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"current\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"got\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"InvalidEpochNumber\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"InvalidInitialization\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"traitId\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"InvalidTraitId\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"NodeAlreadyPublicGood\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"NodeExists\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"NodeNotExists\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"NodeNotPublicGood\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"NodeStakedOrDeposited\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"NotInitializing\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"OperationRewardsExceed\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"PublicGoodNodeNotDeposited\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"PublicGoodNodeNotInAlphaPhase\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"ReentrancyGuardReentrantCall\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"RewardsAlreadyDistributed\"},{\"inputs\":[{\"internalType\":\"uint8\",\"name\":\"bits\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"type\":\"error\",\"name\":\"SafeCastOverflowedUintDowncast\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"SettlementPhase\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"type\":\"error\",\"name\":\"StakeToPublicGoodNode\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"StakingRewardsExceed\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"SubmissionIntervalNotElapsed\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"TaxRateBasisPointsTooLarge\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"TaxRateBasisPointsTooSmall\"},{\"inputs\":[],\"type\":\"error\",\"name\":\"TransferFailed\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\",\"indexed\":true}],\"type\":\"event\",\"name\":\"Deposited\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\",\"indexed\":false}],\"type\":\"event\",\"name\":\"Initialized\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\",\"indexed\":false},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\",\"indexed\":false},{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\",\"indexed\":false},{\"internalType\":\"bool\",\"name\":\"publicGood\",\"type\":\"bool\",\"indexed\":false},{\"internalType\":\"bool\",\"name\":\"alpha\",\"type\":\"bool\",\"indexed\":false}],\"type\":\"event\",\"name\":\"NodeCreated\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"slashedOperationPool\",\"type\":\"uint256\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"slashedStakingPool\",\"type\":\"uint256\",\"indexed\":true}],\"type\":\"event\",\"name\":\"NodeSlashed\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\",\"indexed\":true}],\"type\":\"event\",\"name\":\"NodeTaxRateBasisPointsSet\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\",\"indexed\":true}],\"type\":\"event\",\"name\":\"NodeUpdated2PublicGood\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"indexed\":false}],\"type\":\"event\",\"name\":\"Paused\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"epoch\",\"type\":\"uint256\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\",\"indexed\":false},{\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\",\"indexed\":false},{\"internalType\":\"uint256\",\"name\":\"publicPoolRewards\",\"type\":\"uint256\",\"indexed\":false},{\"internalType\":\"uint256\",\"name\":\"publicPoolTax\",\"type\":\"uint256\",\"indexed\":false}],\"type\":\"event\",\"name\":\"PublicGoodRewardDistributed\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\",\"indexed\":true}],\"type\":\"event\",\"name\":\"PublicPoolTaxRateBasisPointsSet\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"epoch\",\"type\":\"uint256\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"startTimestamp\",\"type\":\"uint256\",\"indexed\":false},{\"internalType\":\"uint256\",\"name\":\"endTimestamp\",\"type\":\"uint256\",\"indexed\":false},{\"internalType\":\"address[]\",\"name\":\"nodeAddrs\",\"type\":\"address[]\",\"indexed\":false},{\"internalType\":\"uint256[]\",\"name\":\"operationRewards\",\"type\":\"uint256[]\",\"indexed\":false},{\"internalType\":\"uint256[]\",\"name\":\"stakingRewards\",\"type\":\"uint256[]\",\"indexed\":false},{\"internalType\":\"uint256[]\",\"name\":\"taxAmounts\",\"type\":\"uint256[]\",\"indexed\":false}],\"type\":\"event\",\"name\":\"RewardDistributed\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\",\"indexed\":true},{\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\",\"indexed\":true},{\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\",\"indexed\":true}],\"type\":\"event\",\"name\":\"RoleAdminChanged\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\",\"indexed\":true}],\"type\":\"event\",\"name\":\"RoleGranted\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\",\"indexed\":true}],\"type\":\"event\",\"name\":\"RoleRevoked\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"startTokenId\",\"type\":\"uint256\",\"indexed\":false},{\"internalType\":\"uint256\",\"name\":\"endTokenId\",\"type\":\"uint256\",\"indexed\":false}],\"type\":\"event\",\"name\":\"Staked\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"indexed\":false}],\"type\":\"event\",\"name\":\"Unpaused\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"requestId\",\"type\":\"uint256\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"unstakeAmount\",\"type\":\"uint256\",\"indexed\":false}],\"type\":\"event\",\"name\":\"UnstakeClaimed\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"requestId\",\"type\":\"uint256\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"unstakeAmount\",\"type\":\"uint256\",\"indexed\":false},{\"internalType\":\"uint256[]\",\"name\":\"chipsIds\",\"type\":\"uint256[]\",\"indexed\":false}],\"type\":\"event\",\"name\":\"UnstakeRequested\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\",\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"requestId\",\"type\":\"uint256\",\"indexed\":true}],\"type\":\"event\",\"name\":\"WithdrawRequested\",\"anonymous\":false},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"requestId\",\"type\":\"uint256\",\"indexed\":true}],\"type\":\"event\",\"name\":\"WithdrawalClaimed\",\"anonymous\":false},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"DEPOSIT_UNBONDING_PERIOD\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"MIN_DEPOSIT\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"MIN_TAX_RATE_BASIS_POINTS\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"NODE_SLASH_RATE_BASIS_POINTS\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"ORACLE_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"PAUSE_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"SHARES_PER_CHIP\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"STAKE_RATIO\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"STAKE_UNBONDING_PERIOD\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"TREASURY\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"USER_SLASH_RATE_BASIS_POINTS\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"chipsContract\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}]},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"requestIds\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"claimUnstake\"},{\"inputs\":[{\"internalType\":\"uint256[]\",\"name\":\"requestIds\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"claimWithdrawal\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\"},{\"internalType\":\"bool\",\"name\":\"publicGood\",\"type\":\"bool\"}],\"stateMutability\":\"payable\",\"type\":\"function\",\"name\":\"createNode\"},{\"inputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\",\"name\":\"deposit\"},{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"disableAlphaPhase\"},{\"inputs\":[{\"internalType\":\"uint256[3]\",\"name\":\"epochInfo\",\"type\":\"uint256[3]\"},{\"internalType\":\"address[]\",\"name\":\"nodeAddrs\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"operationRewards\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"stakingRewards\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256\",\"name\":\"publicPoolRewards\",\"type\":\"uint256\"}],\"stateMutability\":\"payable\",\"type\":\"function\",\"name\":\"distributeRewards\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getChipsInfo\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokens\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getNode\",\"outputs\":[{\"internalType\":\"struct DataTypes.Node\",\"name\":\"\",\"type\":\"tuple\",\"components\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\"},{\"internalType\":\"bool\",\"name\":\"publicGood\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"alpha\",\"type\":\"bool\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"operationPoolTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"stakingPoolTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalShares\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"slashedTokens\",\"type\":\"uint256\"}]}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getNodeAvatar\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getNodeCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"nodeAddrs\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getNodes\",\"outputs\":[{\"internalType\":\"struct DataTypes.Node[]\",\"name\":\"nodes\",\"type\":\"tuple[]\",\"components\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\"},{\"internalType\":\"bool\",\"name\":\"publicGood\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"alpha\",\"type\":\"bool\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"operationPoolTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"stakingPoolTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalShares\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"slashedTokens\",\"type\":\"uint256\"}]}]},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"offset\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"limit\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getNodesWithPagination\",\"outputs\":[{\"internalType\":\"struct DataTypes.Node[]\",\"name\":\"nodes\",\"type\":\"tuple[]\",\"components\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\"},{\"internalType\":\"bool\",\"name\":\"publicGood\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"alpha\",\"type\":\"bool\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"operationPoolTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"stakingPoolTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalShares\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"slashedTokens\",\"type\":\"uint256\"}]}]},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"requestId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getPendingUnstake\",\"outputs\":[{\"internalType\":\"struct DataTypes.UnstakeRequest\",\"name\":\"\",\"type\":\"tuple\",\"components\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"unstakeAmount\",\"type\":\"uint256\"}]}]},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"requestId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getPendingWithdrawal\",\"outputs\":[{\"internalType\":\"struct DataTypes.WithdrawalRequest\",\"name\":\"\",\"type\":\"tuple\",\"components\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint40\",\"name\":\"timestamp\",\"type\":\"uint40\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}]}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getPoolInfo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"totalOperationPoolTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalStakingPoolTokens\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getPublicPool\",\"outputs\":[{\"internalType\":\"struct DataTypes.Node\",\"name\":\"\",\"type\":\"tuple\",\"components\":[{\"internalType\":\"uint256\",\"name\":\"nodeId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\"},{\"internalType\":\"bool\",\"name\":\"publicGood\",\"type\":\"bool\"},{\"internalType\":\"bool\",\"name\":\"alpha\",\"type\":\"bool\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"operationPoolTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"stakingPoolTokens\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"totalShares\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"slashedTokens\",\"type\":\"uint256\"}]}]},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}]},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}]},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"grantRole\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"chips\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"pauseAccount\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"oracleAccount\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"initialize\"},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"isAlphaPhase\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}]},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"isSettlementPhase\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"minTokensToStake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}]},{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"pause\"},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}]},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"renounceRole\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"chipsIds\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"requestUnstake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"requestId\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"requestWithdrawal\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"requestId\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"revokeRole\"},{\"inputs\":[{\"internalType\":\"bool\",\"name\":\"enabled\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"setSettlementPhase\"},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"setTaxRateBasisPoints4Node\"},{\"inputs\":[{\"internalType\":\"uint64\",\"name\":\"taxRateBasisPoints\",\"type\":\"uint64\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"setTaxRateBasisPoints4PublicPool\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"nodeAddrs\",\"type\":\"address[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"slashNodes\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"stateMutability\":\"payable\",\"type\":\"function\",\"name\":\"stake\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"startTokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTokenId\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"nodeAddr\",\"type\":\"address\"}],\"stateMutability\":\"payable\",\"type\":\"function\",\"name\":\"stakeToPublicPool\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"startTokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endTokenId\",\"type\":\"uint256\"}]},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}]},{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"unpause\"},{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"updateToPublicGood\"},{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"withdraw2Treasury\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"chipsContract()\":{\"returns\":{\"_0\":\"address The address of the chips contract.\"}},\"claimUnstake(uint256[])\":{\"params\":{\"requestIds\":\"The unstake request ids to claim.\"}},\"constructor\":{\"params\":{\"depositUnbondingPeriod\":\"Time in seconds node operator need to wait to withdraw its deposit.\",\"minDeposit\":\"The deposit base line of the node operator.\",\"nodeSlashRateBasisPoints\":\"Slash rate in basis points for node operator.\",\"stakeRatio\":\"The stake ratio of the node operator.\",\"stakeUnbondingPeriod\":\"Time in seconds user need to wait to unstake its stake.\",\"treasury\":\"The address of treasury.\",\"userSlashRateBasisPoints\":\"Slash rate measured in basis points for user.\"}},\"createNode(string,string,uint64,bool)\":{\"params\":{\"description\":\"Description of node.\",\"name\":\"Human-readable name.\",\"publicGood\":\"Flag indicating if the node is a public good. msg.value carries the amount of tokens to deposit.\",\"taxRateBasisPoints\":\"Tax rate measured in basis points. Each basis point represents 0.01%.\"}},\"distributeRewards(uint256[3],address[],uint256[],uint256[],uint256)\":{\"details\":\"periodically called. Requirements: - The caller must have the `ORACLE_ROLE`.\",\"params\":{\"epochInfo\":\"The current epoch info. - epochInfo[0]: The current epoch number. - epochInfo[1]: The start timestamp of the current epoch. - epochInfo[2]: The end timestamp of the current epoch.\",\"nodeAddrs\":\"Addresses of node operator to receive the rewards.\",\"operationRewards\":\"Amounts of request bonuses.\",\"publicPoolReward\":\"Amount of rewards to public pool.\",\"stakingRewards\":\"Amounts of staking rewards to staking pool.\"}},\"getChipsInfo(uint256)\":{\"params\":{\"tokenId\":\"ID of Chip token.\"},\"returns\":{\"nodeAddr\":\"Address of node operator who issues the Chip.\",\"tokens\":\"Amount of tokens the chip is equivalent to .\"}},\"getNode(address)\":{\"params\":{\"nodeAddr\":\"Node address to query.\"},\"returns\":{\"_0\":\"DataTypes.Node Node info.\"}},\"getNodeAvatar(address)\":{\"params\":{\"nodeAddr\":\"Node address to query.\"},\"returns\":{\"_0\":\"string Node avatar info in json.\"}},\"getNodeCount()\":{\"returns\":{\"_0\":\"uint256 Total count of nodes.\"}},\"getNodes(address[])\":{\"params\":{\"nodeAddrs\":\"Node addresses to query.\"},\"returns\":{\"nodes\":\"DataTypes.Node[] Nodes info.\"}},\"getNodesWithPagination(uint256,uint256)\":{\"params\":{\"limit\":\"The limit of nodes to query.\",\"offset\":\"The offset of nodes to query.\"}},\"getPendingUnstake(uint256)\":{\"params\":{\"requestId\":\"The id of unstake request.\"},\"returns\":{\"_0\":\"DataTypes.UnstakeRequest The pending unstake request.\"}},\"getPendingWithdrawal(uint256)\":{\"params\":{\"requestId\":\"The id of withdrawal request.\"},\"returns\":{\"_0\":\"DataTypes.WithdrawalRequest The pending withdrawal request.\"}},\"getPoolInfo()\":{\"returns\":{\"totalOperationPoolTokens\":\"Total tokens in operation pool\",\"totalStakingPoolTokens\":\"Total tokens in staking pool\"}},\"getPublicPool()\":{\"returns\":{\"_0\":\"DataTypes.Node public pool info.\"}},\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"getRoleMember(bytes32,uint256)\":{\"details\":\"Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.\"},\"getRoleMemberCount(bytes32)\":{\"details\":\"Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.\"},\"grantRole(bytes32,address)\":{\"details\":\"Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"initialize(address,address,address)\":{\"params\":{\"chips\":\"Address of the chips contract.\",\"oracleAccount\":\"Address who can distribute rewards to the Staking contract.\",\"pauseAccount\":\"Address who can pause/unpause the Staking contract.\"}},\"isAlphaPhase()\":{\"returns\":{\"_0\":\"bool Whether the current time is in alpha phase.\"}},\"isSettlementPhase()\":{\"returns\":{\"_0\":\"bool Whether the current time is in settlement phase.\"}},\"minTokensToStake(address)\":{\"params\":{\"nodeAddr\":\"Address of node operator to stake.\"},\"returns\":{\"_0\":\"uint256 The minimal mount of tokens to stake for a node .\"}},\"paused()\":{\"details\":\"Returns true if the contract is paused, and false otherwise.\"},\"renounceRole(bytes32,address)\":{\"details\":\"Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`. May emit a {RoleRevoked} event.\"},\"requestUnstake(address,uint256[])\":{\"details\":\"This will burn the chips tokens.\",\"params\":{\"chipsIds\":\"The chips token ids for unstake.\",\"nodeAddr\":\"Address of node operator to unstake. For public pool, the nodeAddress is address(0).\"},\"returns\":{\"requestId\":\"THe created unstake request id.\"}},\"requestWithdrawal(uint256)\":{\"params\":{\"amount\":\"Amount of tokens to withdraw.\"},\"returns\":{\"requestId\":\"The created withdraw request id\"}},\"revokeRole(bytes32,address)\":{\"details\":\"Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event.\"},\"setSettlementPhase(bool)\":{\"params\":{\"enabled\":\"Enable/disable the settlement phase.\"}},\"setTaxRateBasisPoints4Node(uint64)\":{\"details\":\"Only node operator can call to set tax rate for itself.\",\"params\":{\"taxRateBasisPoints\":\"The basis points of tax rate to set for the node. Each basis point represents 0.01%.\"}},\"setTaxRateBasisPoints4PublicPool(uint64)\":{\"params\":{\"taxRateBasisPoints\":\"The basis points of the tax rate to set for the public pool.\"}},\"slashNodes(address[])\":{\"params\":{\"nodeAddrs\":\"The addresses of nodes to slash.\"}},\"stake(address)\":{\"params\":{\"nodeAddr\":\"The address of node to stake.\"},\"returns\":{\"endTokenId\":\"The end of new minted chips token ids. msg.value carries the amount of tokens to stake.\",\"startTokenId\":\"The start of new minted chips token ids.\"}},\"stakeToPublicPool(address)\":{\"params\":{\"nodeAddr\":\"The address of node to like.\"},\"returns\":{\"endTokenId\":\"The end of new minted chips token ids. msg.value carries the amount of tokens to stake.\",\"startTokenId\":\"The start of new minted chips token ids.\"}},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"PAUSE_ROLE()\":{\"notice\":\"ACL\"},\"chipsContract()\":{\"notice\":\"Returns the address of the chips contract.\"},\"claimUnstake(uint256[])\":{\"notice\":\"Claims a batch of unstake requests.\"},\"claimWithdrawal(uint256[])\":{\"notice\":\"Claims a batch of withdrawal requests.\"},\"constructor\":{\"notice\":\"constructor.\"},\"createNode(string,string,uint64,bool)\":{\"notice\":\"Creates a node and deposits tokens.\"},\"deposit()\":{\"notice\":\"Deposits tokens for node operator. msg.value carries the amount of tokens to deposit.\"},\"disableAlphaPhase()\":{\"notice\":\"Disable the alpha phase. Requirements: - The caller must have the `PAUSE_ROLE`.\"},\"distributeRewards(uint256[3],address[],uint256[],uint256[],uint256)\":{\"notice\":\"Updates accounting stats and distribute rewards.\"},\"getChipsInfo(uint256)\":{\"notice\":\"Gets chips info by `tokenId`.\"},\"getNode(address)\":{\"notice\":\"Gets node info by node address.\"},\"getNodeAvatar(address)\":{\"notice\":\"Gets node avatar data by node address.\"},\"getNodeCount()\":{\"notice\":\"Gets total count of nodes.\"},\"getNodes(address[])\":{\"notice\":\"Gets nodes info by node addresses.\"},\"getNodesWithPagination(uint256,uint256)\":{\"notice\":\"Gets nodes info by offset and limit.\"},\"getPendingUnstake(uint256)\":{\"notice\":\"Returns the pending unstake request by `requestId`.\"},\"getPendingWithdrawal(uint256)\":{\"notice\":\"Returns the pending withdrawal request by `requestId`.\"},\"getPoolInfo()\":{\"notice\":\"Gets the pool info.\"},\"getPublicPool()\":{\"notice\":\"Gets public pool info.\"},\"initialize(address,address,address)\":{\"notice\":\"Initializes the Staking contract.\"},\"isAlphaPhase()\":{\"notice\":\"Returns whether the current time is in alpha phase.\"},\"isSettlementPhase()\":{\"notice\":\"Returns whether the current time is in settlement phase.\"},\"minTokensToStake(address)\":{\"notice\":\"Returns the minimal tokens to stake for a node.\"},\"pause()\":{\"notice\":\"Pauses interaction with the Staking contract. Requirements: - The caller must have the `PAUSE_ROLE`.\"},\"requestUnstake(address,uint256[])\":{\"notice\":\"Requests unstake tokens from a node operator.\"},\"requestWithdrawal(uint256)\":{\"notice\":\"Requests withdraw tokens from operation pool for node operator.\"},\"setSettlementPhase(bool)\":{\"notice\":\"Sets the settlement phase. Requirements: - The caller must have the `ORACLE_ROLE`.\"},\"setTaxRateBasisPoints4Node(uint64)\":{\"notice\":\"Changes tax rate of the node.\"},\"setTaxRateBasisPoints4PublicPool(uint64)\":{\"notice\":\"Sets tax rate for public pool. Requirements: - The caller must have the `ORACLE_ROLE`.\"},\"slashNodes(address[])\":{\"notice\":\"Slashes nodes. Requirements: - The caller must have the `ORACLE_ROLE`.\"},\"stake(address)\":{\"notice\":\"Stakes tokens to a node operator.\"},\"stakeToPublicPool(address)\":{\"notice\":\"Stakes tokens to public pool.\"},\"unpause()\":{\"notice\":\"Resumes interaction with the Staking contract. Requirements: - The caller must have the `PAUSE_ROLE`.\"},\"updateToPublicGood()\":{\"notice\":\"Updates node of msg.sender to the public good node.\"},\"withdraw2Treasury()\":{\"notice\":\"Withdraws tokens from staking contract to treasury.\"}},\"version\":1}},\"settings\":{\"remappings\":[\"@openzeppelin/=node_modules/@openzeppelin/\",\"@solady/=lib/solady/src/\",\"ds-test/=lib/forge-std/lib/ds-test/src/\",\"forge-std/=lib/forge-std/src/\",\"solady/=lib/solady/src/\"],\"optimizer\":{\"enabled\":true,\"runs\":999999},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"compilationTarget\":{\"src/Staking.sol\":\"Staking\"},\"evmVersion\":\"paris\",\"libraries\":{}},\"sources\":{\"node_modules/@openzeppelin/contracts/access/AccessControl.sol\":{\"keccak256\":\"0xa0e92d42942f4f57c5be50568dac11e9d00c93efcb458026e18d2d9b9b2e7308\",\"urls\":[\"bzz-raw://46326c0bb1e296b67185e81c918e0b40501b8b6386165855df0a3f3c634b6a80\",\"dweb:/ipfs/QmTwyrDYtsxsk6pymJTK94PnEpzsmkpUxFuzEiakDopy4Z\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/access/IAccessControl.sol\":{\"keccak256\":\"0xb6b36edd6a2999fd243ff226d6cbf84bd71af2432bbd0dfe19392996a1d9cb41\",\"urls\":[\"bzz-raw://1fd2f35495652e57e3f99bc6c510bc5f7dd398a176ea2e72d8ed730aebc6ca26\",\"dweb:/ipfs/QmTQV6X4gkikTib49cho5iDX3JvSQbdsoEChoDwrk3CbbH\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol\":{\"keccak256\":\"0xb1c906fcd870fc8dfedb63bfb1bc58b4d2a7469bc13cc44d996fda430693850a\",\"urls\":[\"bzz-raw://bd98c7779af61b220166cf952a05f6aca82ec859744d407d29043f8100adfb9c\",\"dweb:/ipfs/Qmd6ftRk6cJgdooybM6F1X26R4SSUeNksv6Gni2NwEnKDw\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/access/extensions/IAccessControlEnumerable.sol\":{\"keccak256\":\"0xc1435f102633849858e75d7bed14c636f25448ceb3406d82992b0f2df52f4306\",\"urls\":[\"bzz-raw://ce1815e3a1da24f91b8e2ec24cf09d0d46e0fbeddcbe2cb0d8b2e05b91ceb7b3\",\"dweb:/ipfs/QmYTy1AQB5EV5jwuGsB49yykng2oG3x5ss4bDjFNxk3He4\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol\":{\"keccak256\":\"0x631188737069917d2f909d29ce62c4d48611d326686ba6683e26b72a23bfac0b\",\"urls\":[\"bzz-raw://7a61054ae84cd6c4d04c0c4450ba1d6de41e27e0a2c4f1bcdf58f796b401c609\",\"dweb:/ipfs/QmUvtdp7X1mRVyC3CsHrtPbgoqWaXHp3S1ZR24tpAQYJWM\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"keccak256\":\"0x5ef46daa3b58ef2702279d514780316efaa952915ee1aa3396f041ee2982b0b4\",\"urls\":[\"bzz-raw://2f8f2a76e23b02fc69e8cd24c3cb47da6c7af3a2d6c3a382f8ac25c6e094ade7\",\"dweb:/ipfs/QmPV4ZS4tPVv4mTCf9ejyZ1ai57EEibDRj7mN2ARDCLV5n\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2\",\"urls\":[\"bzz-raw://6a708e8a5bdb1011c2c381c9a5cfd8a9a956d7d0a9dc1bd8bcdaf52f76ef2f12\",\"dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/Pausable.sol\":{\"keccak256\":\"0xb2e5f50762c27fb4b123e3619c3c02bdcba5e515309382e5bfb6f7d6486510bd\",\"urls\":[\"bzz-raw://1a4b83328c98d518a2699c2cbe9e9b055e78aa57fa8639f1b88deb8b3750b5dc\",\"dweb:/ipfs/QmXdcYj5v7zQxXFPULShHkR5p4Wa2zYuupbHnFdV3cHYtc\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/ReentrancyGuard.sol\":{\"keccak256\":\"0xf980daa263b661ab8ddee7d4fd833c7da7e7995e2c359ff1f17e67e4112f2236\",\"urls\":[\"bzz-raw://7448ab095d6940130bcf76ba47a2eab14148c83119523b93dd89f6d84edd6c02\",\"dweb:/ipfs/QmawrZ4voKQjH3oomXT3Kuheb3Mnmo2VvVpxg8Ne5UJUrd\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"keccak256\":\"0x9e8778b14317ba9e256c30a76fd6c32b960af621987f56069e1e819c77c6a133\",\"urls\":[\"bzz-raw://1777404f1dcd0fac188e55a288724ec3c67b45288e49cc64723e95e702b49ab8\",\"dweb:/ipfs/QmZFdC626GButBApwDUvvTnUzdinevC3B24d7yyh57XkiA\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"keccak256\":\"0x4296879f55019b23e135000eb36896057e7101fb7fb859c5ef690cf14643757b\",\"urls\":[\"bzz-raw://87b3541437c8c443ccd36795e56a338ed12855eec17f8da624511b8d1a7e14df\",\"dweb:/ipfs/QmeJQCtZrQjtJLr6u7ZHWeH3pBnjtLWzvRrKViAi7UZqxL\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/math/Math.sol\":{\"keccak256\":\"0x005ec64c6313f0555d59e278f9a7a5ab2db5bdc72a027f255a37c327af1ec02d\",\"urls\":[\"bzz-raw://4ece9f0b9c8daca08c76b6b5405a6446b6f73b3a15fab7ff56e296cbd4a2c875\",\"dweb:/ipfs/QmQyRpyPRL5SQuAgj6SHmbir3foX65FJjbVTTQrA2EFg6L\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/math/SafeCast.sol\":{\"keccak256\":\"0xe19a4d5f31d2861e7344e8e535e2feafb913d806d3e2b5fe7782741a2a7094fe\",\"urls\":[\"bzz-raw://4aed79c0fa6f0546ed02f2f683e8f77f0fd2ed7eb34d8bbf3d373c9a6d95b13c\",\"dweb:/ipfs/QmWqVz6UAVqmnWU5pqYPt1o6iDEZyPaBraAA3rKfTTSfYj\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/structs/Checkpoints.sol\":{\"keccak256\":\"0xbdc5e074d7dd6678f67e92b1a51a20226801a407b0e1af3da367c5d1ff4519ad\",\"urls\":[\"bzz-raw://a36cca6b22fff3db16fc789ff6c60eea71d4b156065d4d0c83a0bc5e91a77a8b\",\"dweb:/ipfs/QmYN3exd5AemxjBrN8XMB1p5LbbE16uC3sjbYjwi8AjcGR\"],\"license\":\"MIT\"},\"node_modules/@openzeppelin/contracts/utils/structs/EnumerableSet.sol\":{\"keccak256\":\"0x86c1470cbfd878491e5de030072b647352d36bd27122cffb928970b1945282aa\",\"urls\":[\"bzz-raw://ad85dd393ee0a1917c57046abc5155f51f77844b2c6a42c05c1b8dd26d6ff3c1\",\"dweb:/ipfs/QmNqYc8To2NdnpP6E1tGz7t6A7beuENde5yovwov5pW1fA\"],\"license\":\"MIT\"},\"src/Staking.sol\":{\"keccak256\":\"0x3324b257b4d2578947711d22cd2f66443b9b0b9491e46e7b53f78ed89ed65586\",\"urls\":[\"bzz-raw://70ee5c76f9cf9fc0f1df760ee59033710a5099d5ef020bd426e49d4fbf03e782\",\"dweb:/ipfs/QmawtsEPvFccknyz8LH79zGYTwgUtVK1SvV4j4CDk6wUU2\"],\"license\":\"MIT\"},\"src/interfaces/IChips.sol\":{\"keccak256\":\"0x2cd1cb9c10fcaf5f682a9a8a8f306c39ecf4366acb268cfbc882c8f84cb9b56f\",\"urls\":[\"bzz-raw://044dc920cda34c8b15522b75ffb7459b62b7e2c9f11b7d428eed4956bf5e8366\",\"dweb:/ipfs/QmPzwqwy7xCwoyt25rpa9xYkHtZF3d43hProU4bHSyQZdj\"],\"license\":\"MIT\"},\"src/interfaces/IErrors.sol\":{\"keccak256\":\"0xb200dcc39b423759f1a0bca22d3bc10b5f7bb77676f77e5f09d0a91705174c03\",\"urls\":[\"bzz-raw://187d10fb0bcf20a14d24744ca46e887b2188893ed9f3c44d3a9b13b82508e42a\",\"dweb:/ipfs/Qmes4uiJtqGgeE1vUj82fqNeN6s2GZcJpuAfrzp9SgRgXf\"],\"license\":\"MIT\"},\"src/interfaces/IStaking.sol\":{\"keccak256\":\"0xaf529761085159c0a4fede7e762da982224f98477ac1152a87dcbb51edcb0b40\",\"urls\":[\"bzz-raw://679911f48b014b802746ebc0be6fdc8466acb01b815b7fee6233fb7478526aee\",\"dweb:/ipfs/QmeSeYHFZ8piSLDGFUwF1yuh7RJVvzQdJ8Y4onjek7KoVE\"],\"license\":\"MIT\"},\"src/libraries/DataTypes.sol\":{\"keccak256\":\"0x925292a4565050ab7d0f973f254fd7ffbbfb2941707a7cf043deea6af3140118\",\"urls\":[\"bzz-raw://e28598f735094b9e902e1181164f20f5fbea940f8a682facea3fcc71191ee32a\",\"dweb:/ipfs/QmZpsmpF1mkxxkaKyBnk5mz9dnqqaU47nSYvGpUsc48j89\"],\"license\":\"MIT\"},\"src/libraries/Events.sol\":{\"keccak256\":\"0xdaf6aebd57ac77d2e061ef08b185a0e7756d43abed211fcc8ace7f1240d4d4a6\",\"urls\":[\"bzz-raw://52ae21ae0d31d96d07c59ba2bcd431184190f18aa346ef2e2ec4533cbcf79a12\",\"dweb:/ipfs/QmRYuLwa24JXKvzsaDeCwcHzSdaxRhAdhEXnbRdBehnJqC\"],\"license\":\"MIT\"}},\"version\":1}",
+  "numDeployments": 1,
+  "receipt": {
+    "transactionHash": "0x852c349496534983cfbe7999fae3d83b74e1e6f478d26e8dd7db85a30d95a1d0",
+    "transactionIndex": "0x7",
+    "blockHash": "0x2b2144977b8f02ca22dae6d2b1b3ef5f6c7f93fdea0b3057a466f1f2f52acbd1",
+    "blockNumber": "0x1719a",
+    "from": "0x278e3A4776cCC7f41bbf296aa1Ef703387E473d0",
+    "to": null,
+    "cumulativeGasUsed": "0xb83d99",
+    "gasUsed": "0x4cefff",
+    "contractAddress": "0x71332A9CB075054F636157c9A7eDC6798b84A262",
+    "logs": [],
+    "status": "0x1",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "type": "0x2",
+    "effectiveGasPrice": "0xb2d05e32"
+  },
+  "solcInputHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "storageLayout": null,
+  "transactionHash": "0x852c349496534983cfbe7999fae3d83b74e1e6f478d26e8dd7db85a30d95a1d0",
+  "userdoc": null
+}
