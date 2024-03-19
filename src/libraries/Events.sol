@@ -99,7 +99,7 @@ library Events {
 
     /**
      * @dev Emitted on stake()
-     * @param user Address of user who stake tokens.
+     * @param user Address who receives the minted chips.
      * @param nodeAddr The address of node to stake.
      * @param amount Amount of tokens to stake.
      * @param startTokenId The start of new minted chips token ids.

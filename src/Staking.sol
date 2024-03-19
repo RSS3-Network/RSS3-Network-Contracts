@@ -257,7 +257,27 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (node.account == address(0)) revert NodeNotExists();
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
 
-        (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr);
+        (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr, msg.sender);
+    }
+
+    /// @inheritdoc IStaking
+    function stakeFor(
+        address nodeAddr,
+        address to
+    )
+        external
+        payable
+        override
+        whenNotPaused
+        whenNotSettlementPhase
+        returns (uint256 startTokenId, uint256 endTokenId)
+    {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        // validate node
+        if (node.account == address(0)) revert NodeNotExists();
+        if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
+
+        (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr, to);
     }
 
     /// @inheritdoc IStaking
@@ -321,7 +341,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (node.account == address(0)) revert NodeNotExists();
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
 
-        (startTokenId, endTokenId) = _stakeToNode(_publicPool, msg.value, nodeAddr);
+        (startTokenId, endTokenId) = _stakeToNode(_publicPool, msg.value, nodeAddr, msg.sender);
     }
 
     /// @inheritdoc IStaking
@@ -611,7 +631,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function _stakeToNode(
         DataTypes.Node storage node,
         uint256 amount,
-        address nodeAddr
+        address nodeAddr,
+        address receiver
     ) internal returns (uint256 startTokenId, uint256 endTokenId) {
         uint256 chipPrice = _tokensPerChip(nodeAddr);
         uint256 chipsCount = amount / chipPrice;
@@ -625,13 +646,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 sharesToMint = chipsCount * SHARES_PER_CHIP;
         node.totalShares += sharesToMint;
 
-        (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
+        (startTokenId, endTokenId) = IChips(_chips).mintBatch(receiver, chipsCount);
         _families.push(endTokenId.toUint96(), uint160(nodeAddr));
 
         // refund the exceeding part
-        _transfer(msg.sender, remaining);
+        _transfer(receiver, remaining);
 
-        emit Events.Staked(msg.sender, node.account, stakedAmount, startTokenId, endTokenId);
+        emit Events.Staked(receiver, node.account, stakedAmount, startTokenId, endTokenId);
     }
 
     /// @dev claim unstake request

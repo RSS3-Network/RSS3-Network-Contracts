@@ -91,6 +91,15 @@ interface IStaking {
     function stake(address nodeAddr) external payable returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
+     * @notice Stakes tokens to a node operator for another address.
+     * @param nodeAddr The address of node to stake.
+     * @param to The address to receive the minted chips tokens.
+     * @return startTokenId The start of new minted chips token ids.
+     * @return endTokenId The end of new minted chips token ids.
+     */
+    function stakeFor(address nodeAddr, address to) external payable returns (uint256 startTokenId, uint256 endTokenId);
+
+    /**
      * @notice Requests unstake tokens from a node operator.
      * @dev This will burn the chips tokens.
      * @param nodeAddr Address of node operator to unstake. For public pool, the nodeAddress is address(0).
