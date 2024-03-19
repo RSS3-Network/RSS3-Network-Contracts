@@ -85,6 +85,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
             _checkSubmissionInterval();
 
+            // update current epoch and epoch timestamp
             _updateEpochInfo(epoch);
 
             // send operationRewards and stakingRewards to staking contract
