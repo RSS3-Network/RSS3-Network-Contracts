@@ -174,8 +174,9 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @dev check submission interval
     function _checkSubmissionInterval() internal view {
+        // the current timestamp must be 17 hours greater than the end timestamp of the previous epoch
         uint256 submissionInterval = EPOCH_DURATION - 1 hours;
-        if (block.timestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+        if (block.timestamp - _endTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
     }
 
     /// @dev Returns staking rewards per epoch for public pool

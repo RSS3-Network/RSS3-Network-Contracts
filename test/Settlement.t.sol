@@ -542,6 +542,31 @@ contract SettlementTest is CommonTest {
         );
     }
 
+    function testDistributeRewardsFailSecondSubmissionIntervalNotElapsed() public {
+        _createNode(alice);
+
+        vm.startPrank(oracleAccount);
+        // epoch 1
+        skip(18 hours);
+        _settlement.distributeRewards(
+            1,
+            array(alice), // node addresses
+            array(100), // operation rewards
+            true
+        );
+
+        // epoch 2
+        skip(16 hours);
+        vm.expectRevert(abi.encodeWithSelector(SubmissionIntervalNotElapsed.selector));
+        _settlement.distributeRewards(
+            2,
+            array(alice), // node addresses
+            array(100), // operation rewards
+            true
+        );
+        vm.stopPrank();
+    }
+
     function testDistributeRewardsFailInvalidEpochNumber() public {
         _createNode(alice);
         skip(18 hours);
