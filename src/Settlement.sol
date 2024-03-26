@@ -84,7 +84,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         if (epoch == _currentEpoch + 1) {
             _updateEpochInfo(epoch);
 
-            // send operationRewards and stakingRewards to staking contract
+            // amount of rewards sent to staking contract at the start of each epoch
             data.rewardsToSend += _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch;
 
             // public pool rewards will be settled only at the start of each epoch
