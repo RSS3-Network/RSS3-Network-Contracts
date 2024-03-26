@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {IErrors} from "./interfaces/IErrors.sol";
+import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
@@ -34,7 +35,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     uint256 internal _endTimestamp;
 
     // total staking for each epoch
-    mapping(uint256 epoch => uint256 totalStaking) internal _totalStakings;
+    mapping(uint256 epoch => uint256 totalStaking) internal _totalStakingSnapshot;
     // distributed operation rewards for each epoch
     mapping(uint256 epoch => uint256 operationRewards) internal _distributedOperationRewards;
     // rewarded node addresses
@@ -66,50 +67,45 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         uint256 epoch,
         address[] calldata nodeAddrs,
         uint256[] calldata operationRewards,
+        uint256[] calldata requestCounts,
         bool isFinal
     ) external override onlyRole(ORACLE_ROLE) {
-        if (nodeAddrs.length != operationRewards.length) {
+        if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != requestCounts.length) {
             revert InvalidArrayLength();
         }
 
         // check epoch number
-        // epoch number must be the current epoch or the next epoch
-        if (epoch < _currentEpoch || epoch > _currentEpoch + 1) {
-            revert InvalidEpochNumber(_currentEpoch, epoch);
-        }
+        _checkEpoch(epoch);
+        // check operation rewards
+        _checkRewards(epoch, nodeAddrs, operationRewards);
 
-        uint256 publicPoolRewards;
-        uint256 amountToSend;
+        /// @dev we use a temp struct here to avoid `stack too deep`
+        DataTypes.RewardsData memory data;
         if (epoch == _currentEpoch + 1) {
-            // start of a new epoch
-
-            _checkSubmissionInterval();
-
             _updateEpochInfo(epoch);
 
             // send operationRewards and stakingRewards to staking contract
-            amountToSend += _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch;
+            data.rewardsToSend += _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch;
 
             // public pool rewards will be settled only at the start of each epoch
-            publicPoolRewards = _getPublicPoolStakingRewards();
+            data.publicPoolRewards = _getPublicPoolStakingRewards();
 
-            // save totalStaking for current epoch
-            (, _totalStakings[_currentEpoch]) = IStaking(_staking).getPoolInfo();
+            // save totalStaking snapshot
+            _saveTotalStakingSnapshot();
         }
 
         // settlement phase
         IStaking(_staking).setSettlementPhase(!isFinal);
 
-        _checkRewards(epoch, nodeAddrs, operationRewards);
-
-        uint256[3] memory epochInfo = [epoch, _startTimestamp, _endTimestamp];
-        uint256[] memory stakingRewards = _getStakingRewards(nodeAddrs);
-        IStaking(_staking).distributeRewards{value: amountToSend}(
-            epochInfo,
+        data.epochInfo = [epoch, _startTimestamp, _endTimestamp];
+        data.stakingRewards = _getStakingRewards(nodeAddrs);
+        IStaking(_staking).distributeRewards{value: data.rewardsToSend}(
+            data.epochInfo,
             nodeAddrs,
             operationRewards,
-            stakingRewards,
-            publicPoolRewards
+            data.stakingRewards,
+            requestCounts,
+            data.publicPoolRewards
         );
     }
 
@@ -162,20 +158,32 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         _distributedOperationRewards[epoch] = distributedOperationRewards;
     }
 
+    function _saveTotalStakingSnapshot() internal {
+        (, _totalStakingSnapshot[_currentEpoch]) = IStaking(_staking).getPoolInfo();
+    }
+
     function _updateEpochInfo(uint256 epoch) internal {
         // update current epoch
         _currentEpoch = epoch;
+
         // update epoch timestamp
         if (_endTimestamp > 0) {
             _startTimestamp = _endTimestamp;
         }
         _endTimestamp = block.timestamp;
+
+        // check epoch interval
+        uint256 submissionInterval = EPOCH_DURATION - 1 hours;
+        if (_endTimestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
     }
 
-    /// @dev check submission interval
-    function _checkSubmissionInterval() internal view {
-        uint256 submissionInterval = EPOCH_DURATION - 1 hours;
-        if (block.timestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+    /// @dev check epoch number
+    function _checkEpoch(uint256 epoch) internal view {
+        // epoch number must be the current epoch or the next epoch
+        uint256 curEpoch = _currentEpoch;
+        if (epoch < curEpoch || epoch > curEpoch + 1) {
+            revert InvalidEpochNumber(curEpoch, epoch);
+        }
     }
 
     /// @dev Returns staking rewards per epoch for public pool
@@ -204,7 +212,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @dev returns amount of total staking tokens
     function _getTotalStaking() internal view returns (uint256 totalStaking) {
-        totalStaking = _totalStakings[_currentEpoch];
+        totalStaking = _totalStakingSnapshot[_currentEpoch];
         if (totalStaking == 0) {
             (, totalStaking) = IStaking(_staking).getPoolInfo();
         }

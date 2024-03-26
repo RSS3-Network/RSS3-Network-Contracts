@@ -30,12 +30,14 @@ interface ISettlement {
      * @param epoch The current epoch number.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param operationRewards Amounts of operation rewards.
-     @ @param isFinal Whether the call is the final one in the epoch.
+     * @param requestCounts The number of requests each node operator processed.
+     * @param isFinal Whether the call is the final one in the epoch.
      */
     function distributeRewards(
         uint256 epoch,
         address[] calldata nodeAddrs,
         uint256[] calldata operationRewards,
+        uint256[] calldata requestCounts,
         bool isFinal
     ) external;
 

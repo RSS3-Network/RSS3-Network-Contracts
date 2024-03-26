@@ -185,6 +185,7 @@ contract StakingTest is CommonTest, IERC721Errors {
             array(alice, bob),
             array(1, 1),
             array(1, 1),
+            array(1, 2),
             1 ether // public pool reward
         );
     }
@@ -969,7 +970,8 @@ contract StakingTest is CommonTest, IERC721Errors {
             array(alice, bob),
             array(operationRewards, operationRewards),
             array(stakingRewards, stakingRewards),
-            taxAmounts
+            taxAmounts,
+            array(1, 2)
         );
         vm.prank(address(_settlement));
         _staking.distributeRewards(
@@ -977,6 +979,7 @@ contract StakingTest is CommonTest, IERC721Errors {
             array(alice, bob),
             array(operationRewards, operationRewards),
             array(stakingRewards, stakingRewards),
+            array(1, 2),
             0
         );
 
@@ -1003,6 +1006,7 @@ contract StakingTest is CommonTest, IERC721Errors {
             array(alice, bob),
             array(1),
             array(1, 1),
+            array(1, 2),
             1 ether // public pool reward
         );
     }

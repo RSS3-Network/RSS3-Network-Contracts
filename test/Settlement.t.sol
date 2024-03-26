@@ -105,6 +105,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice, bob), // node addresses
             array(operationReward, operationReward), // operation rewards
+            array(uint256(100), uint256(200)),
             false
         );
 
@@ -159,6 +160,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice, bob), // node addresses
             array(operationReward, operationReward), // operation rewards
+            array(uint256(100), uint256(200)),
             false
         );
         assertEq(_staking.isSettlementPhase(), true);
@@ -167,6 +169,7 @@ contract SettlementTest is CommonTest {
             1,
             array(carol, dave), // node addresses
             array(operationReward, operationReward), // operation rewards
+            array(uint256(100), uint256(200)),
             true
         );
         assertEq(_staking.isSettlementPhase(), false);
@@ -223,6 +226,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice, bob), // node addresses
             array(operationReward, operationReward), // operation rewards
+            array(uint256(100), uint256(200)),
             true
         );
 
@@ -295,12 +299,14 @@ contract SettlementTest is CommonTest {
                 i,
                 array(alice, bob), // node addresses
                 array(operationReward, operationReward), // operation rewards
+                array(uint256(100), uint256(200)),
                 false
             );
             _settlement.distributeRewards(
                 i,
                 array(carol, dave), // node addresses
                 array(operationReward, operationReward), // operation rewards
+                array(uint256(100), uint256(200)),
                 true
             );
             vm.stopPrank();
@@ -340,6 +346,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice, carol), // node addresses
             array(operationReward, operationReward), // operation rewards
+            array(uint256(100), uint256(200)),
             true
         );
 
@@ -382,6 +389,7 @@ contract SettlementTest is CommonTest {
             1,
             array(dave), // node addresses
             array(operationRewardsPerEpoch), // operation rewards
+            array(uint256(100)),
             true
         );
 
@@ -412,6 +420,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice), // node addresses
             array(operationRewardsPerEpoch), // operation rewards
+            array(uint256(100)),
             true
         );
 
@@ -447,6 +456,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice), // node addresses
             array(operationRewards), // operation rewards
+            array(uint256(100)),
             true
         );
 
@@ -483,6 +493,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice), // node addresses
             array(operationRewards), // operation rewards
+            array(uint256(100)),
             true
         );
 
@@ -503,6 +514,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice), // node addresses
             array(100), // operation rewards
+            array(uint256(100)),
             false
         );
     }
@@ -514,6 +526,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice, bob), // node addresses
             array(100), // operation rewards
+            array(uint256(100), uint256(200)),
             false
         );
 
@@ -523,6 +536,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice), // node addresses
             array(100, 100), // operation rewards
+            array(uint256(100), uint256(200)),
             false
         );
     }
@@ -538,8 +552,36 @@ contract SettlementTest is CommonTest {
             1,
             array(alice), // node addresses
             array(100), // operation rewards
+            array(uint256(100)),
             false
         );
+    }
+
+    function testDistributeRewardsFailSecondSubmissionIntervalNotElapsed() public {
+        _createNode(alice);
+
+        vm.startPrank(oracleAccount);
+        // epoch 1
+        skip(18 hours);
+        _settlement.distributeRewards(
+            1,
+            array(alice), // node addresses
+            array(100), // operation rewards
+            array(uint256(100)),
+            true
+        );
+
+        // epoch 2
+        skip(16 hours);
+        vm.expectRevert(abi.encodeWithSelector(SubmissionIntervalNotElapsed.selector));
+        _settlement.distributeRewards(
+            2,
+            array(alice), // node addresses
+            array(100), // operation rewards
+            array(uint256(100)),
+            true
+        );
+        vm.stopPrank();
     }
 
     function testDistributeRewardsFailInvalidEpochNumber() public {
@@ -551,6 +593,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice), // node addresses
             array(100), // operation rewards
+            array(uint256(100)),
             false
         );
 
@@ -562,6 +605,7 @@ contract SettlementTest is CommonTest {
             0,
             array(alice), // node addresses
             array(100), // operation rewards
+            array(uint256(100)),
             false
         );
 
@@ -571,6 +615,7 @@ contract SettlementTest is CommonTest {
             3,
             array(alice), // node addresses
             array(100), // operation rewards
+            array(uint256(100)),
             false
         );
         vm.stopPrank();
@@ -600,6 +645,7 @@ contract SettlementTest is CommonTest {
                 1,
                 array(user), // node addresses
                 array(operationReward), // operation rewards
+                array(uint256(100)),
                 false
             );
         }
@@ -607,7 +653,7 @@ contract SettlementTest is CommonTest {
         skip(18 hours);
         vm.expectRevert(abi.encodeWithSelector(OperationRewardsExceed.selector));
         vm.prank(oracleAccount);
-        _settlement.distributeRewards(1, array(vm.addr(10)), array(operationReward + 10), true);
+        _settlement.distributeRewards(1, array(vm.addr(10)), array(operationReward + 10), array(uint256(100)), true);
     }
 
     function testDistributeRewardsFailWithDuplicatedNodeAddr() public {
@@ -635,6 +681,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice, bob), // node addresses
             array(operationReward, operationReward), // operation rewards
+            array(uint256(100), uint256(200)),
             false
         );
 
@@ -644,6 +691,7 @@ contract SettlementTest is CommonTest {
             1,
             array(alice), // node addresses
             array(operationReward), // operation rewards
+            array(uint256(100)),
             false
         );
         vm.stopPrank();
@@ -669,9 +717,18 @@ contract SettlementTest is CommonTest {
         uint256 balanceBeforeStaking = address(_staking).balance;
 
         expectEmit();
-        emit Events.RewardDistributed(1, startTime, endTime, zeroAddrArr, zeroUintArr, zeroUintArr, zeroUintArr);
+        emit Events.RewardDistributed(
+            1,
+            startTime,
+            endTime,
+            zeroAddrArr,
+            zeroUintArr,
+            zeroUintArr,
+            zeroUintArr,
+            zeroUintArr
+        );
         vm.prank(oracleAccount);
-        _settlement.distributeRewards(1, new address[](0), new uint256[](0), false);
+        _settlement.distributeRewards(1, new address[](0), new uint256[](0), new uint256[](0), false);
 
         (uint256 totalOperationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
 
@@ -726,9 +783,18 @@ contract SettlementTest is CommonTest {
         expectEmit();
         emit Events.PublicGoodRewardDistributed(1, startTime, endTime, pgRewards, 0);
         expectEmit();
-        emit Events.RewardDistributed(1, startTime, endTime, zeroAddrArr, zeroUintArr, zeroUintArr, zeroUintArr);
+        emit Events.RewardDistributed(
+            1,
+            startTime,
+            endTime,
+            zeroAddrArr,
+            zeroUintArr,
+            zeroUintArr,
+            zeroUintArr,
+            zeroUintArr
+        );
         vm.prank(oracleAccount);
-        _settlement.distributeRewards(1, zeroAddrArr, zeroUintArr, false);
+        _settlement.distributeRewards(1, zeroAddrArr, zeroUintArr, zeroUintArr, false);
 
         // check balance diff
         uint256 balanceAfterStaking = address(_staking).balance;
