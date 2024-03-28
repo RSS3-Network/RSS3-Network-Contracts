@@ -43,12 +43,19 @@ library DataTypes {
     struct UnstakeRequest {
         /// @notice address that can claim request
         address owner;
-        /// @notice Address of the node operator
+        /// @notice address of the node operator
         address nodeAddr;
         /// @notice block.timestamp when the request was created
         uint256 timestamp;
         /// @notice amount of tokens to unstake
         uint256 unstakeAmount;
+    }
+
+    struct RewardsData {
+        uint256[3] epochInfo;
+        uint256 rewardsToSend;
+        uint256 publicPoolRewards;
+        uint256[] stakingRewards;
     }
 
     struct NodeTraits {

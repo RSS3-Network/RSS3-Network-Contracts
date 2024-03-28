@@ -127,6 +127,7 @@ interface IStaking {
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param operationRewards Amounts of request bonuses.
      * @param stakingRewards Amounts of staking rewards to staking pool.
+     * @param requestCounts The number of requests each node operator processed.
      * @param publicPoolReward Amount of rewards to public pool.
      */
     function distributeRewards(
@@ -134,6 +135,7 @@ interface IStaking {
         address[] calldata nodeAddrs,
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
+        uint256[] calldata requestCounts,
         uint256 publicPoolReward
     ) external payable;
 

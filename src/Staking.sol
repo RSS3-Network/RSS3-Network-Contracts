@@ -281,6 +281,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         address[] calldata nodeAddrs,
         uint256[] calldata operationRewards,
         uint256[] calldata stakingRewards,
+        uint256[] calldata requestCounts,
         uint256 publicPoolRewards
     ) external payable override whenNotPaused onlyRole(ORACLE_ROLE) {
         if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != stakingRewards.length)
@@ -302,7 +303,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             nodeAddrs,
             operationRewards,
             stakingRewards,
-            taxAmounts
+            taxAmounts,
+            requestCounts
         );
     }
 
