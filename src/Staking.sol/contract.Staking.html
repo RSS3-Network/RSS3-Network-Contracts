@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/10895781c9ac65b45cc9e7bb208838ccf21f3d89/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/f2e23c9b882cf45d48e31dab827ed4a0e29ec7d2/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="/src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -476,6 +476,7 @@ Requirements:</p>
     address[] calldata nodeAddrs,
     uint256[] calldata operationRewards,
     uint256[] calldata stakingRewards,
+    uint256[] calldata requestCounts,
     uint256 publicPoolRewards
 ) external payable override whenNotPaused onlyRole(ORACLE_ROLE);
 </code></pre>
@@ -485,6 +486,7 @@ Requirements:</p>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>operationRewards</code></td><td><code>uint256[]</code></td><td>Amounts of request bonuses.</td></tr>
 <tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amounts of staking rewards to staking pool.</td></tr>
+<tr><td><code>requestCounts</code></td><td><code>uint256[]</code></td><td>The number of requests each node operator processed.</td></tr>
 <tr><td><code>publicPoolRewards</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div>
