@@ -18,11 +18,11 @@ interface ISettlement {
     ) external;
 
     /**
-     * @notice Sets request bonus percentage.
-     * @param percent The percentage of the total rewards to be allocated to the request bonus.
+     * @notice Sets operation rewards percentage.
+     * @param operationRewardsPercent The percentage of the total rewards to be allocated to the operation rewards.
      * Others will be allocated to the staking rewards.
      */
-    function updateRewardsRatio(uint256 percent) external;
+    function updateRewardsRatio(uint256 operationRewardsPercent) external;
 
     /**
      * @notice Updates accounting stats and distribute rewards.
