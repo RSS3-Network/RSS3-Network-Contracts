@@ -58,11 +58,6 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @inheritdoc ISettlement
-    function updateRewardsRatio(uint256 operationRewardsPercent) external override onlyRole(ORACLE_ROLE) {
-        _updateRewardsRatio(operationRewardsPercent);
-    }
-
-    /// @inheritdoc ISettlement
     function distributeRewards(
         uint256 epoch,
         address[] calldata nodeAddrs,

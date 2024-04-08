@@ -35,31 +35,6 @@ contract SettlementTest is CommonTest {
         assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
     }
 
-    function testUpdateRewardsRatio(uint256 operationRewardsPercent) public {
-        vm.assume(operationRewardsPercent >= 0 && operationRewardsPercent <= 100);
-
-        vm.prank(oracleAccount);
-        _settlement.updateRewardsRatio(operationRewardsPercent);
-
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
-
-        uint256 expectedOperationRewardsPerEpoch = (_settlement.TOTAL_REWARDS_PER_YEAR() *
-            _settlement.EPOCH_DURATION() *
-            operationRewardsPercent) / (100 * 365 days);
-        uint256 expectedStakingRewardsPerEpoch = (_settlement.TOTAL_REWARDS_PER_YEAR() *
-            _settlement.EPOCH_DURATION() *
-            (100 - operationRewardsPercent)) / (100 * 365 days);
-
-        assertEq(operationRewardsPerEpoch, expectedOperationRewardsPerEpoch);
-        assertEq(totalStakingRewardsPerEpoch, expectedStakingRewardsPerEpoch);
-    }
-
-    function testUpdateRewardsRatioFail() public {
-        // caller has no `ORACLE_ROLE` permission
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
-        _settlement.updateRewardsRatio(1);
-    }
-
     function testSetTaxRateBasisPoints4PublicPool(uint64 taxRate) public {
         vm.assume(taxRate >= 0 && taxRate <= 10000);
 
