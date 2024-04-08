@@ -47,14 +47,21 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
-    ) external override initializer {
-        _staking = staking;
-        _startTimestamp = startTime;
+    ) external override reinitializer(2) {
+        if (staking != address(0)) {
+            _staking = staking;
+        }
+
+        if (startTime > 0) {
+            _startTimestamp = startTime;
+        }
 
         _updateRewardsRatio(operationRewardsPercent);
 
         // grants `ORACLE_ROLE`
-        _grantRole(ORACLE_ROLE, oracleAccount);
+        if (oracleAccount != address(0)) {
+            _grantRole(ORACLE_ROLE, oracleAccount);
+        }
     }
 
     /// @inheritdoc ISettlement
