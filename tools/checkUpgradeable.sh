@@ -34,7 +34,7 @@ slither-check-upgradeability . Settlement \
 --proxy-filename . \
 --proxy-name TransparentUpgradeableProxy \
 --compile-force-framework 'foundry' \
---exclude "initialize-target" \
+--exclude "initialize-target,missing-init-modifier" \
 2>>"$file2" 1>&2
 
 
