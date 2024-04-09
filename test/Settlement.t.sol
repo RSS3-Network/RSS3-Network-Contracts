@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Events} from "../src/libraries/Events.sol";
+import {Settlement} from "../src/Settlement.sol";
 
 contract SettlementTest is CommonTest {
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -33,6 +34,18 @@ contract SettlementTest is CommonTest {
         assertEq(_settlement.currentEpoch(), 0);
         assertEq(_settlement.EPOCH_DURATION(), 18 hours);
         assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
+    }
+
+    function testInitialize() public {
+        Settlement s = new Settlement();
+        s.initialize(address(0x1), address(0), 0, 0);
+        assertEq(s.stakingContract(), address(0x1));
+
+        s = new Settlement();
+        s.initialize(address(0x0), address(0x0), 0, 20);
+        (uint256 opRewards, ) = s.getBonusInfo();
+        uint256 totalStakingRewardsPerEpoch = (s.TOTAL_REWARDS_PER_YEAR() * s.EPOCH_DURATION() * 20) / (100 * 365 days);
+        assertEq(opRewards, totalStakingRewardsPerEpoch);
     }
 
     function testSetTaxRateBasisPoints4PublicPool(uint64 taxRate) public {
