@@ -47,7 +47,15 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
-    ) external override reinitializer(3) {
+    )
+        external
+        override
+        // warn: check the initializer version and if it should be initialized when deploying
+        // current initializer version is:
+        // mainnet: 1
+        // testnet: 2
+        reinitializer(3)
+    {
         if (staking != address(0)) {
             _staking = staking;
         }
