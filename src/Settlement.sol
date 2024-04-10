@@ -47,7 +47,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
-    ) external override reinitializer(2) {
+    ) external override reinitializer(3) {
         if (staking != address(0)) {
             _staking = staking;
         }
