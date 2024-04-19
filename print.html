@@ -209,7 +209,7 @@ forge script script/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $RPC_URL --broa
 <li><a href="src/base/ERC721.sol/abstract.ERC721.html">ERC721</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="erc721"><a class="header" href="#erc721">ERC721</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/base/ERC721.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/base/ERC721.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Context, ERC165, IERC721, IERC721Metadata, <a href="src/base/ERC721.sol//src/interfaces/IERC721Errors.sol/interface.IERC721Errors.html">IERC721Errors</a></p>
 <p><em>Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
@@ -240,7 +240,7 @@ the Metadata extension, but not including the Enumerable extension, which is ava
 <pre><code class="language-solidity">function __ERC721_init(string memory name_, string memory symbol_) internal;
 </code></pre>
 <h3 id="supportsinterface"><a class="header" href="#supportsinterface">supportsInterface</a></h3>
-<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC165.sol/interface.IERC165.html#supportsinterface">IERC165-supportsInterface</a>.</em></p>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#supportsinterface">IERC165-supportsInterface</a>.</em></p>
 <pre><code class="language-solidity">function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool);
 </code></pre>
 <h3 id="balanceof"><a class="header" href="#balanceof">balanceOf</a></h3>
@@ -252,11 +252,11 @@ the Metadata extension, but not including the Enumerable extension, which is ava
 <pre><code class="language-solidity">function ownerOf(uint256 tokenId) public view virtual returns (address);
 </code></pre>
 <h3 id="name"><a class="header" href="#name">name</a></h3>
-<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC20.sol/interface.IERC20.html#name">IERC721Metadata-name</a>.</em></p>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721Metadata.html#name">IERC721Metadata-name</a>.</em></p>
 <pre><code class="language-solidity">function name() public view virtual returns (string memory);
 </code></pre>
 <h3 id="symbol"><a class="header" href="#symbol">symbol</a></h3>
-<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC20.sol/interface.IERC20.html#symbol">IERC721Metadata-symbol</a>.</em></p>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721Metadata.html#symbol">IERC721Metadata-symbol</a>.</em></p>
 <pre><code class="language-solidity">function symbol() public view virtual returns (string memory);
 </code></pre>
 <h3 id="tokenuri"><a class="header" href="#tokenuri">tokenURI</a></h3>
@@ -264,7 +264,7 @@ the Metadata extension, but not including the Enumerable extension, which is ava
 <pre><code class="language-solidity">function tokenURI(uint256) public view virtual returns (string memory);
 </code></pre>
 <h3 id="approve"><a class="header" href="#approve">approve</a></h3>
-<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC20.sol/interface.IERC20.html#approve">IERC721-approve</a>.</em></p>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC20.sol/contract.MockERC20.html#approve">IERC721-approve</a>.</em></p>
 <pre><code class="language-solidity">function approve(address to, uint256 tokenId) public virtual;
 </code></pre>
 <h3 id="getapproved"><a class="header" href="#getapproved">getApproved</a></h3>
@@ -272,23 +272,23 @@ the Metadata extension, but not including the Enumerable extension, which is ava
 <pre><code class="language-solidity">function getApproved(uint256 tokenId) public view virtual returns (address);
 </code></pre>
 <h3 id="setapprovalforall"><a class="header" href="#setapprovalforall">setApprovalForAll</a></h3>
-<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#setapprovalforall">IERC721-setApprovalForAll</a>.</em></p>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#setapprovalforall">IERC721-setApprovalForAll</a>.</em></p>
 <pre><code class="language-solidity">function setApprovalForAll(address operator, bool approved) public virtual;
 </code></pre>
 <h3 id="isapprovedforall"><a class="header" href="#isapprovedforall">isApprovedForAll</a></h3>
-<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#isapprovedforall">IERC721-isApprovedForAll</a>.</em></p>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC721.sol/interface.IERC721.html#isapprovedforall">IERC721-isApprovedForAll</a>.</em></p>
 <pre><code class="language-solidity">function isApprovedForAll(address owner, address operator) public view virtual returns (bool);
 </code></pre>
 <h3 id="transferfrom"><a class="header" href="#transferfrom">transferFrom</a></h3>
-<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC20.sol/interface.IERC20.html#transferfrom">IERC721-transferFrom</a>.</em></p>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC20.sol/contract.MockERC20.html#transferfrom">IERC721-transferFrom</a>.</em></p>
 <pre><code class="language-solidity">function transferFrom(address from, address to, uint256 tokenId) public virtual;
 </code></pre>
 <h3 id="safetransferfrom"><a class="header" href="#safetransferfrom">safeTransferFrom</a></h3>
-<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
 <pre><code class="language-solidity">function safeTransferFrom(address from, address to, uint256 tokenId) public;
 </code></pre>
 <h3 id="safetransferfrom-1"><a class="header" href="#safetransferfrom-1">safeTransferFrom</a></h3>
-<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/interfaces/IERC1155.sol/interface.IERC1155.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
+<p><em>See <a href="src/base/ERC721.sol//lib/forge-std/src/mocks/MockERC721.sol/contract.MockERC721.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
 <pre><code class="language-solidity">function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public virtual;
 </code></pre>
 <h3 id="_ownerof"><a class="header" href="#_ownerof">_ownerOf</a></h3>
@@ -402,7 +402,7 @@ recipient doesn't accept the token transfer. The call is not executed if the tar
 <li><a href="src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ichips"><a class="header" href="#ichips">IChips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/interfaces/IChips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/interfaces/IChips.sol">Git Source</a></p>
 <h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the Chips contract.</p>
@@ -486,7 +486,7 @@ recipient doesn't accept the token transfer. The call is not executed if the tar
 <tr><td><code>&lt;none&gt;</code></td><td><code>string</code></td><td>SVG and attributes of the node image.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ierc721errors"><a class="header" href="#ierc721errors">IERC721Errors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/interfaces/IERC721Errors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/interfaces/IERC721Errors.sol">Git Source</a></p>
 <p><em>Standard ERC-721 Errors
 Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-721 tokens.</em></p>
 <h2 id="errors"><a class="header" href="#errors">Errors</a></h2>
@@ -566,7 +566,7 @@ Used in balance queries.</em></p>
 <tr><td><code>operator</code></td><td><code>address</code></td><td>Address that may be allowed to operate on tokens without being their owner.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="ierrors"><a class="header" href="#ierrors">IErrors</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/interfaces/IErrors.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/interfaces/IErrors.sol">Git Source</a></p>
 <h2 id="errors-1"><a class="header" href="#errors-1">Errors</a></h2>
 <h3 id="callernotstaking"><a class="header" href="#callernotstaking">CallerNotStaking</a></h3>
 <p><em>Caller is not staking contract.</em></p>
@@ -717,7 +717,7 @@ Used in balance queries.</em></p>
 <pre><code class="language-solidity">error AlphaWithdrawNotAllowed();
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="isettlement"><a class="header" href="#isettlement">ISettlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/interfaces/ISettlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/interfaces/ISettlement.sol">Git Source</a></p>
 <h2 id="functions-2"><a class="header" href="#functions-2">Functions</a></h2>
 <h3 id="initialize-1"><a class="header" href="#initialize-1">initialize</a></h3>
 <p>Initializes the Settlement contract.</p>
@@ -806,7 +806,7 @@ Requirements:</p>
 <tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td></td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/interfaces/IStaking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/interfaces/IStaking.sol">Git Source</a></p>
 <h2 id="functions-3"><a class="header" href="#functions-3">Functions</a></h2>
 <h3 id="initialize-2"><a class="header" href="#initialize-2">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
@@ -892,7 +892,7 @@ Requirements:</p>
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>taxRateBasisPoints</code></td><td><code>uint64</code></td><td>The basis points of the tax rate to set for the public pool.</td></tr>
+<tr><td><code>taxRateBasisPoints</code></td><td><code>uint64</code></td><td>The basis points of the tax rate to set for the public pool. Each basis point represents 0.01%.</td></tr>
 </tbody></table>
 </div>
 <h3 id="claimwithdrawal"><a class="header" href="#claimwithdrawal">claimWithdrawal</a></h3>
@@ -1198,13 +1198,13 @@ Requirements:</p>
 <li><a href="src/libraries/SVGs/Mouths.sol/library.Mouths.html">Mouths</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chipdetail"><a class="header" href="#chipdetail">ChipDetail</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/libraries/SVGs/ChipDetail.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/libraries/SVGs/ChipDetail.sol">Git Source</a></p>
 <h2 id="functions-4"><a class="header" href="#functions-4">Functions</a></h2>
 <h3 id="getchipdetail"><a class="header" href="#getchipdetail">getChipDetail</a></h3>
 <pre><code class="language-solidity">function getChipDetail(uint256 id) external pure returns (string memory, string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="corners"><a class="header" href="#corners">Corners</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/libraries/SVGs/Corners.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/libraries/SVGs/Corners.sol">Git Source</a></p>
 <h2 id="state-variables-1"><a class="header" href="#state-variables-1">State Variables</a></h2>
 <h3 id="alphasvg"><a class="header" href="#alphasvg">alphaSVG</a></h3>
 <pre><code class="language-solidity">string public constant alphaSVG =
@@ -1219,31 +1219,31 @@ Requirements:</p>
 <pre><code class="language-solidity">function getCorner(uint256 id) external pure returns (string memory, string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="eyes"><a class="header" href="#eyes">Eyes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/libraries/SVGs/Eyes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/libraries/SVGs/Eyes.sol">Git Source</a></p>
 <h2 id="functions-6"><a class="header" href="#functions-6">Functions</a></h2>
 <h3 id="geteyes"><a class="header" href="#geteyes">getEyes</a></h3>
 <pre><code class="language-solidity">function getEyes(uint256 id) external pure returns (string memory, string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="frame"><a class="header" href="#frame">Frame</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/libraries/SVGs/Frame.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/libraries/SVGs/Frame.sol">Git Source</a></p>
 <h2 id="functions-7"><a class="header" href="#functions-7">Functions</a></h2>
 <h3 id="getframe"><a class="header" href="#getframe">getFrame</a></h3>
 <pre><code class="language-solidity">function getFrame(uint256 id) external pure returns (string memory, string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="head"><a class="header" href="#head">Head</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/libraries/SVGs/Head.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/libraries/SVGs/Head.sol">Git Source</a></p>
 <h2 id="functions-8"><a class="header" href="#functions-8">Functions</a></h2>
 <h3 id="gethead"><a class="header" href="#gethead">getHead</a></h3>
 <pre><code class="language-solidity">function getHead(uint256 id) external pure returns (string memory, string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="mouths"><a class="header" href="#mouths">Mouths</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/libraries/SVGs/Mouths.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/libraries/SVGs/Mouths.sol">Git Source</a></p>
 <h2 id="functions-9"><a class="header" href="#functions-9">Functions</a></h2>
 <h3 id="getmouth"><a class="header" href="#getmouth">getMouth</a></h3>
 <pre><code class="language-solidity">function getMouth(uint256 id) external pure returns (string memory, string memory);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="datatypes"><a class="header" href="#datatypes">DataTypes</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/libraries/DataTypes.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/libraries/DataTypes.sol">Git Source</a></p>
 <p>A standard library of data types.</p>
 <h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
 <h3 id="node"><a class="header" href="#node">Node</a></h3>
@@ -1306,7 +1306,7 @@ Requirements:</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -1389,7 +1389,7 @@ Requirements:</p>
     address[] nodeAddrs,
     uint256[] operationRewards,
     uint256[] stakingRewards,
-    uint256[] taxAmounts,
+    uint256[] taxCollected,
     uint256[] requestCounts
 );
 </code></pre>
@@ -1401,7 +1401,7 @@ Requirements:</p>
 <tr><td><code>nodeAddrs</code></td><td><code>address[]</code></td><td>Addresses of node operator to receive the rewards.</td></tr>
 <tr><td><code>operationRewards</code></td><td><code>uint256[]</code></td><td>Amount of bonuses to staking pool.</td></tr>
 <tr><td><code>stakingRewards</code></td><td><code>uint256[]</code></td><td>Amount of rewards to staking pool.</td></tr>
-<tr><td><code>taxAmounts</code></td><td><code>uint256[]</code></td><td>Amount of tax to node operator.</td></tr>
+<tr><td><code>taxCollected</code></td><td><code>uint256[]</code></td><td>Amount of tax collected by node operator.</td></tr>
 <tr><td><code>requestCounts</code></td><td><code>uint256[]</code></td><td>The number of requests each node operator processed.</td></tr>
 </tbody></table>
 </div>
@@ -1508,7 +1508,7 @@ Requirements:</p>
 <tr><td><code>slashedStakingPool</code></td><td><code>uint256</code></td><td>Amount of staking pool tokens slashed.</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="svggenerator"><a class="header" href="#svggenerator">SVGGenerator</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/libraries/SVGGenerator.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/libraries/SVGGenerator.sol">Git Source</a></p>
 <h2 id="state-variables-2"><a class="header" href="#state-variables-2">State Variables</a></h2>
 <h3 id="basesvghead"><a class="header" href="#basesvghead">baseSVGHead</a></h3>
 <pre><code class="language-solidity">string public constant baseSVGHead =
@@ -1619,7 +1619,7 @@ Requirements:</p>
 <li><a href="src/mocks/RSS3Token.sol/contract.RSS3Token.html">RSS3Token</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rss3token"><a class="header" href="#rss3token">RSS3Token</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/mocks/RSS3Token.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/mocks/RSS3Token.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC20</p>
 <h2 id="functions-11"><a class="header" href="#functions-11">Functions</a></h2>
@@ -1632,7 +1632,7 @@ ERC20</p>
 <li><a href="src/upgradeability/TransparentUpgradeableProxy.sol/contract.TransparentUpgradeableProxy.html">TransparentUpgradeableProxy</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="itransparentupgradeableproxy"><a class="header" href="#itransparentupgradeableproxy">ITransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 IERC1967</p>
 <p><em>Interface for {TransparentUpgradeableProxy}. In order to implement transparency, {TransparentUpgradeableProxy}
@@ -1656,7 +1656,7 @@ include them in the ABI so this interface must be used to interact with it.</em>
 <pre><code class="language-solidity">function upgradeToAndCall(address, bytes memory) external payable;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="transparentupgradeableproxy"><a class="header" href="#transparentupgradeableproxy">TransparentUpgradeableProxy</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/upgradeability/TransparentUpgradeableProxy.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 ERC1967Proxy</p>
 <p>*This contract implements a proxy that is upgradeable by an admin.
@@ -1688,7 +1688,7 @@ render the admin operations inaccessible, which could prevent upgradeability. Tr
 <h2 id="functions-13"><a class="header" href="#functions-13">Functions</a></h2>
 <h3 id="constructor-1"><a class="header" href="#constructor-1">constructor</a></h3>
 <p><em>Initializes an upgradeable proxy managed by <code>_admin</code>, backed by the implementation at <code>_logic</code>, and
-optionally initialized with <code>_data</code> as explained in <a href="src/upgradeability/TransparentUpgradeableProxy.sol//src/Staking.sol/contract.Staking.html#constructor">ERC1967Proxy-constructor</a>.</em></p>
+optionally initialized with <code>_data</code> as explained in <a href="src/upgradeability/TransparentUpgradeableProxy.sol//src/mocks/RSS3Token.sol/contract.RSS3Token.html#constructor">ERC1967Proxy-constructor</a>.</em></p>
 <pre><code class="language-solidity">constructor(address _logic, address admin_, bytes memory _data) payable ERC1967Proxy(_logic, _data);
 </code></pre>
 <h3 id="ifadmin"><a class="header" href="#ifadmin">ifAdmin</a></h3>
@@ -1741,7 +1741,7 @@ emulate some proxy functions being non-payable while still allowing value to pas
 <pre><code class="language-solidity">function _requireZeroValue() private;
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="chips"><a class="header" href="#chips">Chips</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/Chips.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/Chips.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Chips.sol//src/interfaces/IChips.sol/interface.IChips.html">IChips</a>, <a href="src/Chips.sol//src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, <a href="src/Chips.sol//src/base/ERC721.sol/abstract.ERC721.html">ERC721</a></p>
 <h2 id="state-variables-3"><a class="header" href="#state-variables-3">State Variables</a></h2>
@@ -1858,7 +1858,7 @@ emulate some proxy functions being non-payable while still allowing value to pas
 <pre><code class="language-solidity">function _calTraitId(uint256 traitId, uint8 traitCount, uint256 divisionFactor) internal pure returns (uint8);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Settlement.sol//src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, <a href="src/Settlement.sol//src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables-4"><a class="header" href="#state-variables-4">State Variables</a></h2>
@@ -2026,7 +2026,7 @@ Requirements:</p>
 <pre><code class="language-solidity">function _isRewarded(uint256 epoch, address nodeAddr) internal view returns (bool);
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/826496cdefa65a8ac50ec9870d9aac6426033ee9/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/2437615f9e352cb7dff55b0f0862262929361093/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="src/Staking.sol//src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, <a href="src/Staking.sol//src/interfaces/IErrors.sol/interface.IErrors.html">IErrors</a>, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard</p>
 <h2 id="state-variables-5"><a class="header" href="#state-variables-5">State Variables</a></h2>
@@ -2253,7 +2253,7 @@ Requirements:</p>
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>taxRateBasisPoints</code></td><td><code>uint64</code></td><td>The basis points of the tax rate to set for the public pool.</td></tr>
+<tr><td><code>taxRateBasisPoints</code></td><td><code>uint64</code></td><td>The basis points of the tax rate to set for the public pool. Each basis point represents 0.01%.</td></tr>
 </tbody></table>
 </div>
 <h3 id="claimwithdrawal-1"><a class="header" href="#claimwithdrawal-1">claimWithdrawal</a></h3>
@@ -2601,7 +2601,7 @@ Requirements:</p>
     address[] memory nodeAddrs,
     uint256[] memory operationRewards,
     uint256[] memory stakingRewards
-) internal returns (uint256[] memory);
+) internal returns (uint256[] memory taxCollected);
 </code></pre>
 <h3 id="_unstakefromnode"><a class="header" href="#_unstakefromnode">_unstakeFromNode</a></h3>
 <p><em>unstake from a node by burning chips</em></p>
