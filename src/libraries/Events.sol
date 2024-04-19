@@ -63,7 +63,7 @@ library Events {
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param operationRewards Amount of bonuses to staking pool.
      * @param stakingRewards Amount of rewards to staking pool.
-     * @param taxAmounts Amount of tax to node operator.
+     * @param taxCollected Amount of tax collected by node operator.
      * @param requestCounts The number of requests each node operator processed.
      */
     event RewardDistributed(
@@ -73,7 +73,7 @@ library Events {
         address[] nodeAddrs,
         uint256[] operationRewards,
         uint256[] stakingRewards,
-        uint256[] taxAmounts,
+        uint256[] taxCollected,
         uint256[] requestCounts
     );
 

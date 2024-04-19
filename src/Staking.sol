@@ -294,7 +294,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
 
         // distribute rewards for other nodes
-        uint256[] memory taxAmounts = _distributeNodesRewards(nodeAddrs, operationRewards, stakingRewards);
+        uint256[] memory taxCollected = _distributeNodesRewards(nodeAddrs, operationRewards, stakingRewards);
 
         emit Events.RewardDistributed(
             epochInfo[0],
@@ -303,7 +303,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             nodeAddrs,
             operationRewards,
             stakingRewards,
-            taxAmounts,
+            taxCollected,
             requestCounts
         );
     }
@@ -512,8 +512,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         address[] memory nodeAddrs,
         uint256[] memory operationRewards,
         uint256[] memory stakingRewards
-    ) internal returns (uint256[] memory) {
-        uint256[] memory taxAmounts = new uint256[](nodeAddrs.length);
+    ) internal returns (uint256[] memory taxCollected) {
+        taxCollected = new uint256[](nodeAddrs.length);
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
             if (node.account == address(0) || node.publicGood || node.operationPoolTokens < MIN_DEPOSIT) {
@@ -529,7 +529,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
                 node.stakingPoolTokens
             );
 
-            taxAmounts[i] = receivedTax;
+            taxCollected[i] = receivedTax;
 
             // update node pool
             // receivedTax is sent to operation pool
@@ -538,7 +538,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             _increaseStakingPool(node, rewards - fullTax);
             // the remaining tax is sent to the treasury
         }
-        return taxAmounts;
+        return taxCollected;
     }
 
     /// @dev unstake from a node by burning chips

@@ -73,6 +73,7 @@ interface IStaking {
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool.
+     * Each basis point represents 0.01%.
      */
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 

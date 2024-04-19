@@ -97,16 +97,16 @@ contract SettlementTest is CommonTest {
             false
         );
 
-        uint256[] memory taxAmounts = new uint256[](2);
-        taxAmounts[0] = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
-        taxAmounts[1] = taxAmounts[0];
+        uint256[] memory taxCollected = new uint256[](2);
+        taxCollected[0] = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
+        taxCollected[1] = taxCollected[0];
 
         // check status
         _checkDistribution(
             array(depositAmount, depositAmount),
             array(stakeAmount, stakeAmount),
             array(alice, bob),
-            taxAmounts,
+            taxCollected,
             array(operationReward, operationReward),
             array(stakingReward, stakingReward)
         );
@@ -163,14 +163,14 @@ contract SettlementTest is CommonTest {
         assertEq(_staking.isSettlementPhase(), false);
         vm.stopPrank();
 
-        uint256 taxAmount = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
+        uint256 tax = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
 
         // check status
         _checkDistribution(
             array(depositAmount, depositAmount, depositAmount, depositAmount),
             array(stakeAmount, stakeAmount, stakeAmount, stakeAmount),
             array(alice, bob, carol, dave),
-            array(taxAmount, taxAmount, taxAmount, taxAmount),
+            array(tax, tax, tax, tax),
             array(operationReward, operationReward, operationReward, operationReward),
             array(stakingReward, stakingReward, stakingReward, stakingReward)
         );
@@ -218,14 +218,14 @@ contract SettlementTest is CommonTest {
             true
         );
 
-        uint256 taxAmount = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
+        uint256 tax = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
 
         // check status
         _checkDistribution(
             array(depositAmount, depositAmount),
             array(stakeAmount, stakeAmount),
             array(alice, bob),
-            array(taxAmount, taxAmount),
+            array(tax, tax),
             array(operationReward, operationReward),
             array(stakingReward, stakingReward)
         );
@@ -338,14 +338,14 @@ contract SettlementTest is CommonTest {
             true
         );
 
-        uint256 taxAmount = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
+        uint256 tax = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
 
         // check status
         _checkDistribution(
             array(depositAmount),
             array(stakeAmount),
             array(alice),
-            array(taxAmount),
+            array(tax),
             array(operationReward),
             array(stakingReward)
         );
