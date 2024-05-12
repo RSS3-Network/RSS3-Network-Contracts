@@ -52,8 +52,8 @@ library SVGGenerator {
     }
 
     function generateSVGAndAttributes(
-        DataTypes.NodeTraits memory nodeTraits,
-        DataTypes.ChipTraits memory chipTraits
+        DataTypes.NodeTraits calldata nodeTraits,
+        DataTypes.ChipTraits calldata chipTraits
     ) external pure returns (string memory, string memory) {
         string memory styleSVG = getSVGStyle(
             nodeTraits.frameColor,

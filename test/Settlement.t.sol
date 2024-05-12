@@ -116,6 +116,7 @@ contract SettlementTest is CommonTest {
         assertEq(treasuryAmount, 0);
     }
 
+    // solhint-disable-next-line function-max-lines
     function testDistributeRewardsMultiple() public {
         uint256 depositAmount = 10000 ether;
         uint256 stakeAmount = 30000 ether;
@@ -181,6 +182,7 @@ contract SettlementTest is CommonTest {
         assertApproxEqAbs(treasuryAmount, 0, 2); // 2 is the max diff
     }
 
+    // solhint-disable-next-line function-max-lines
     function testDistributeRewardsWithPartialNodeOffline() public {
         uint256 depositAmount = 10000 ether;
         uint256 stakeAmount = 10000 ether;

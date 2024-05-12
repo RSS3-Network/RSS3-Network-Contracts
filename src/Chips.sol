@@ -29,7 +29,11 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     }
 
     /// @inheritdoc IChips
-    function initialize(string memory name_, string memory symbol_, address staking_) external override initializer {
+    function initialize(
+        string calldata name_,
+        string calldata symbol_,
+        address staking_
+    ) external override initializer {
         _staking = staking_;
 
         __ERC721_init(name_, symbol_);

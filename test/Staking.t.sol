@@ -527,20 +527,17 @@ contract StakingTest is CommonTest, IERC721Errors {
         _disableAlphaPhase();
         _createNode(alice);
 
-        uint256 amount = 10000 ether;
+        uint256 depositAmount = 10000 ether;
 
         vm.startPrank(alice);
-        _staking.deposit{value: amount}();
+        _staking.deposit{value: depositAmount}();
 
-        uint256 value = 100 ether;
-        assertEq(amount % value, 0);
+        uint256 withdrawAmount = 10 ether;
+        assertEq(depositAmount % withdrawAmount, 0);
 
-        uint256[] memory requestIds = new uint256[](amount / value);
-
-        uint256 i = 0;
-        for (uint256 v = 0; v < amount; v += value) {
-            requestIds[i] = _staking.requestWithdrawal(value);
-            i++;
+        uint256[] memory requestIds = new uint256[](depositAmount / withdrawAmount);
+        for (uint256 i = 0; i < requestIds.length; i++) {
+            requestIds[i] = _staking.requestWithdrawal(withdrawAmount);
         }
 
         skip(depositUnbondingPeriod);
