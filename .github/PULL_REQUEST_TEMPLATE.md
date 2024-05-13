@@ -5,7 +5,7 @@
 - [ ] I have updated the abi and docs
 - [ ] I tested locally to make sure this feature/fix works
 - [ ] I have **not** modified the existed storage layout.
-- 
+
 ###  Which contracts need to be upgraded ?
 - [ ] Staking
 - [ ] Settlement

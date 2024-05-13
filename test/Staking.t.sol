@@ -216,17 +216,19 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.getNodeCount(), 2);
     }
 
-    function testCreatePGNode() public {
+    function testCreatePGNode(uint64 taxRateBasisPoints) public {
+        vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
+
         string memory name = "Alice";
         string memory description = "Alice's node";
-        uint64 taxRateBasisPoints = 1000;
 
-        _disableAlphaPhase();
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, true, false);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, true, true);
         vm.prank(alice);
         _staking.createNode(name, description, taxRateBasisPoints, true);
-        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, true, false);
+
+        // check node info
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, true, true);
         assertEq(_staking.getNodeCount(), 1);
     }
 
@@ -326,6 +328,24 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testUpdateNode() public {
         _createNode(alice);
+        string memory newName = "New Alice";
+        string memory newDescription = "New Alice's node";
+
+        expectEmit();
+        emit Events.NodeUpdated(alice, newName, newDescription);
+        vm.prank(alice);
+        _staking.updateNode(newName, newDescription);
+
+        _checkNodeProfile(alice, newName, newDescription);
+    }
+
+    function testUpdateNodeFail() public {
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.updateNode("New Alice", "New Alice's node");
+    }
+
+    function testUpdateToPublicGood() public {
+        _createNode(alice);
         uint256 dpAmount = 5000 ether;
         uint256 stAmount = 60000 ether;
 
@@ -366,6 +386,18 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(pendingWithdrawl.timestamp, block.timestamp);
     }
 
+    function testUpdateToPublicGoodFail() public {
+        // case 1: node not exists
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.updateToPublicGood();
+
+        // case 2: node is already a public good node
+        _createPublicGoodNode(alice);
+        vm.expectRevert(abi.encodeWithSelector(NodeAlreadyPublicGood.selector, alice));
+        vm.prank(alice);
+        _staking.updateToPublicGood();
+    }
+
     function testCreateNodeFailWithMultipleNodes() public {
         _createNode(alice);
 
@@ -396,11 +428,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testCreateNodeFailWithPublicGoodNodeDeposited() public {
         vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeNotDeposited.selector));
         _staking.createNode{value: 1}("Alice", "Alice's node", uint64(100), true);
-    }
-
-    function testCreatePGNodeFailInAlphaPhase() public {
-        vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeNotInAlphaPhase.selector));
-        _staking.createNode("Alice", "Alice's node", uint64(100), true);
     }
 
     function testDeposit(uint256 amount) public {
@@ -1274,6 +1301,12 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
     }
 
+    function _checkNodeProfile(address nodeAddr, string memory name, string memory description) internal {
+        DataTypes.Node memory node = _staking.getNode(nodeAddr);
+        assertEq(node.name, name);
+        assertEq(node.description, description);
+    }
+
     function _checkNode(
         address nodeAddr,
         uint256 nodeId,
@@ -1285,9 +1318,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         bool alpha
     ) internal {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
+        _checkNodeProfile(nodeAddr, name, description);
         assertEq(node.nodeId, nodeId);
-        assertEq(node.name, name);
-        assertEq(node.description, description);
         assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
         assertEq(node.operationPoolTokens, operationPoolTokens);
         assertEq(node.publicGood, publicGood);

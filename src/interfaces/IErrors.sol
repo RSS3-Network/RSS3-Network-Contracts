@@ -66,9 +66,6 @@ interface IErrors {
     /// @dev Deposit is not allowed for public good node.
     error PublicGoodNodeNotDeposited();
 
-    /// @dev Public good node is not allowed in alpha phase.
-    error PublicGoodNodeNotInAlphaPhase();
-
     /// @dev Public good node cannot be staked.
     error StakeToPublicGoodNode(address nodeAddr);
 

@@ -163,8 +163,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         bool publicGood
     ) external payable override whenNotPaused {
         if (publicGood && msg.value > 0) revert PublicGoodNodeNotDeposited();
-        // can't create public good node in alpha phase
-        if (publicGood && _isAlphaPhase) revert PublicGoodNodeNotInAlphaPhase();
         if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
 
         _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
@@ -172,6 +170,20 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (msg.value > 0) _deposit(msg.sender, msg.value);
     }
 
+    /// @inheritdoc IStaking
+    function updateNode(string calldata name, string calldata description) external override whenNotPaused {
+        address addr = msg.sender;
+
+        DataTypes.Node storage node = _nodes[addr];
+        if (node.account == address(0)) revert NodeNotExists();
+
+        node.name = name;
+        node.description = description;
+
+        emit Events.NodeUpdated(addr, name, description);
+    }
+
+    /// @inheritdoc IStaking
     function updateToPublicGood() external override whenNotPaused {
         address addr = msg.sender;
 
