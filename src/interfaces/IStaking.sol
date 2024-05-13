@@ -42,6 +42,13 @@ interface IStaking {
     ) external payable;
 
     /**
+     * @notice Updates node name and description.
+     * @param name Human-readable name.
+     * @param description Description of node.
+     */
+    function updateNode(string calldata name, string calldata description) external;
+
+    /**
      * @notice Updates node of msg.sender to the public good node.
      */
     function updateToPublicGood() external;

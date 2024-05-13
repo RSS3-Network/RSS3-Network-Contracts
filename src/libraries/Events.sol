@@ -23,6 +23,14 @@ library Events {
     );
 
     /**
+     * @dev Emitted on updateNode()
+     * @param nodeAddr Address of node operator.
+     * @param name Human-readable name.
+     * @param description Description of node.
+     */
+    event NodeUpdated(address indexed nodeAddr, string name, string description);
+
+    /**
      * @dev Emitted on update2PublicGood()
      * @param nodeAddr Address of node operator.
      */
