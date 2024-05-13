@@ -339,6 +339,11 @@ contract StakingTest is CommonTest, IERC721Errors {
         _checkNodeProfile(alice, newName, newDescription);
     }
 
+    function testUpdateNodeFail() public {
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.updateNode("New Alice", "New Alice's node");
+    }
+
     function testUpdateToPublicGood() public {
         _createNode(alice);
         uint256 dpAmount = 5000 ether;
@@ -379,6 +384,18 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(pendingWithdrawl.owner, alice);
         assertEq(pendingWithdrawl.amount, dpAmount);
         assertEq(pendingWithdrawl.timestamp, block.timestamp);
+    }
+
+    function testUpdateToPublicGoodFail() public {
+        // case 1: node not exists
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.updateToPublicGood();
+
+        // case 2: node is already a public good node
+        _createPublicGoodNode(alice);
+        vm.expectRevert(abi.encodeWithSelector(NodeAlreadyPublicGood.selector, alice));
+        vm.prank(alice);
+        _staking.updateToPublicGood();
     }
 
     function testCreateNodeFailWithMultipleNodes() public {
