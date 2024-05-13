@@ -328,6 +328,19 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testUpdateNode() public {
         _createNode(alice);
+        string memory newName = "New Alice";
+        string memory newDescription = "New Alice's node";
+
+        expectEmit();
+        emit Events.NodeUpdated(alice, newName, newDescription);
+        vm.prank(alice);
+        _staking.updateNode(newName, newDescription);
+
+        _checkNodeProfile(alice, newName, newDescription);
+    }
+
+    function testUpdateToPublicGood() public {
+        _createNode(alice);
         uint256 dpAmount = 5000 ether;
         uint256 stAmount = 60000 ether;
 
@@ -1271,6 +1284,12 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
     }
 
+    function _checkNodeProfile(address nodeAddr, string memory name, string memory description) internal {
+        DataTypes.Node memory node = _staking.getNode(nodeAddr);
+        assertEq(node.name, name);
+        assertEq(node.description, description);
+    }
+
     function _checkNode(
         address nodeAddr,
         uint256 nodeId,
@@ -1282,9 +1301,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         bool alpha
     ) internal {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
+        _checkNodeProfile(nodeAddr, name, description);
         assertEq(node.nodeId, nodeId);
-        assertEq(node.name, name);
-        assertEq(node.description, description);
         assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
         assertEq(node.operationPoolTokens, operationPoolTokens);
         assertEq(node.publicGood, publicGood);
