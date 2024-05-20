@@ -236,6 +236,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         DataTypes.Node storage node = _nodes[msg.sender];
         if (address(0) == node.account) revert NodeNotExists();
+        if (node.publicGood) revert NodeIsPublicGood();
 
         node.taxRateBasisPoints = taxRateBasisPoints;
 

@@ -659,6 +659,14 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.setTaxRateBasisPoints4Node(1000);
     }
 
+    function testSetTaxRateFailWithPublicGoodNode() public {
+        _createPublicGoodNode(dave);
+
+        vm.expectRevert(abi.encodeWithSelector(NodeIsPublicGood.selector));
+        vm.prank(dave);
+        _staking.setTaxRateBasisPoints4Node(1000);
+    }
+
     function testStake(uint256 amount) public {
         vm.assume(amount > 500 ether && amount <= 1000000 ether);
         amount = 200000 ether;
