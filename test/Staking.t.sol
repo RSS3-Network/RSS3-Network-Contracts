@@ -372,6 +372,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         assertEq(updatedNode.publicGood, true);
         assertEq(updatedNode.operationPoolTokens, 0);
+        assertEq(updatedNode.taxRateBasisPoints, 0);
 
         assertEq(updatedNode.stakingPoolTokens, 0);
         assertEq(publicPool.stakingPoolTokens, stAmount);

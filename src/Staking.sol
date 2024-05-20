@@ -196,6 +196,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (node.publicGood) revert NodeAlreadyPublicGood(addr);
 
         node.publicGood = true;
+        node.taxRateBasisPoints = 0;
 
         uint256 stakingTokens = node.stakingPoolTokens;
         _decreaseStakingPool(node, stakingTokens);
