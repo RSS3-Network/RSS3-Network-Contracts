@@ -78,7 +78,7 @@ interface IErrors {
     /// @dev Tax rate is not zero for public good node.
     error PublicGoodNodeTaxNotZero();
 
-    /// @dev Cant set tax for public good node
+    /// @dev Can't set tax for public good node
     error NodeIsPublicGood();
 
     /// @dev Batch size is zero.
