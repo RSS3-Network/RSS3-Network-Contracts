@@ -75,6 +75,9 @@ interface IErrors {
     /// @dev Basis points of tax rate too small.
     error TaxRateBasisPointsTooSmall();
 
+    /// @dev Tax rate is not zero for public good node.
+    error PublicGoodNodeTaxNotZero();
+
     /// @dev Batch size is zero.
     error BatchSizeZero();
 
