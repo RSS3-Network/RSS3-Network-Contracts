@@ -162,8 +162,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint64 taxRateBasisPoints,
         bool publicGood
     ) external payable override whenNotPaused {
-        if (publicGood && msg.value > 0) revert PublicGoodNodeNotDeposited();
-        if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
+        if (publicGood) {
+            if (msg.value > 0) revert PublicGoodNodeNotDeposited();
+            if (taxRateBasisPoints > 0) revert PublicGoodNodeTaxNotZero();
+        } else {
+            if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
+        }
 
         _createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
 
@@ -192,6 +196,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (node.publicGood) revert NodeAlreadyPublicGood(addr);
 
         node.publicGood = true;
+        node.taxRateBasisPoints = 0;
 
         uint256 stakingTokens = node.stakingPoolTokens;
         _decreaseStakingPool(node, stakingTokens);
@@ -231,6 +236,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         DataTypes.Node storage node = _nodes[msg.sender];
         if (address(0) == node.account) revert NodeNotExists();
+        if (node.publicGood) revert NodeIsPublicGood();
 
         node.taxRateBasisPoints = taxRateBasisPoints;
 

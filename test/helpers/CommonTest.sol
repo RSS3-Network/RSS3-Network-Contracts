@@ -131,7 +131,7 @@ contract CommonTest is Utils, IErrors {
 
     function _createPublicGoodNode(address to) internal {
         vm.prank(to);
-        _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, true);
+        _staking.createNode("Name", "Description", 0, true);
     }
 
     function _checkDistribution(

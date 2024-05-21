@@ -315,7 +315,6 @@ contract SettlementTest is CommonTest {
         // create node
         _createNode(alice);
         // create public good node
-        _disableAlphaPhase();
         _createPublicGoodNode(carol);
 
         // deposit
@@ -753,7 +752,6 @@ contract SettlementTest is CommonTest {
             _staking.stake{value: stakeAmount}(user);
         }
 
-        _disableAlphaPhase();
         _createPublicGoodNode(carol);
         _staking.stakeToPublicPool{value: 10000 ether}(carol);
 
@@ -804,7 +802,6 @@ contract SettlementTest is CommonTest {
 
         _createNode(alice);
         _createNode(bob);
-        _disableAlphaPhase();
         _createPublicGoodNode(carol);
 
         vm.prank(alice);

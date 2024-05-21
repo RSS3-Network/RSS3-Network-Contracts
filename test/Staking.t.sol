@@ -216,20 +216,23 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.getNodeCount(), 2);
     }
 
-    function testCreatePGNode(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
-
+    function testCreatePGNode() public {
         string memory name = "Alice";
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, true, true);
+        emit Events.NodeCreated(1, alice, name, description, 0, true, true);
         vm.prank(alice);
-        _staking.createNode(name, description, taxRateBasisPoints, true);
+        _staking.createNode(name, description, 0, true);
 
         // check node info
-        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, true, true);
+        _checkNode(alice, 1, name, description, 0, 0, true, true);
         assertEq(_staking.getNodeCount(), 1);
+    }
+
+    function testCreatePGNodeFail() public {
+        vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeTaxNotZero.selector));
+        _staking.createNode("Alice", "Alice's node", 1, true);
     }
 
     function testNodeAvatar() public {
@@ -286,8 +289,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testGetNodeCount() public {
         _createNode(alice);
         _createNode(bob);
-
-        _disableAlphaPhase();
         _createPublicGoodNode(carol);
 
         assertEq(_staking.getNodeCount(), 3);
@@ -296,8 +297,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testGetNodes() public {
         _createNode(alice);
         _createNode(bob);
-
-        _disableAlphaPhase();
         _createPublicGoodNode(carol);
         _createNode(dave);
 
@@ -373,6 +372,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         assertEq(updatedNode.publicGood, true);
         assertEq(updatedNode.operationPoolTokens, 0);
+        assertEq(updatedNode.taxRateBasisPoints, 0);
 
         assertEq(updatedNode.stakingPoolTokens, 0);
         assertEq(publicPool.stakingPoolTokens, stAmount);
@@ -659,6 +659,14 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.setTaxRateBasisPoints4Node(1000);
     }
 
+    function testSetTaxRateFailWithPublicGoodNode() public {
+        _createPublicGoodNode(dave);
+
+        vm.expectRevert(abi.encodeWithSelector(NodeIsPublicGood.selector));
+        vm.prank(dave);
+        _staking.setTaxRateBasisPoints4Node(1000);
+    }
+
     function testStake(uint256 amount) public {
         vm.assume(amount > 500 ether && amount <= 1000000 ether);
         amount = 200000 ether;
@@ -685,7 +693,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(node.totalShares, chipsCount * _staking.SHARES_PER_CHIP());
 
         // stake to public pool will fail
-        _disableAlphaPhase();
         _createPublicGoodNode(bob);
 
         vm.startPrank(alice);
@@ -697,7 +704,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testStakeToPublicPool() public {
         uint256 amount = 10000 ether;
 
-        _disableAlphaPhase();
         _createPublicGoodNode(alice);
 
         uint256 chipsCount = amount / _staking.SHARES_PER_CHIP();
@@ -724,7 +730,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testStakeToPublicPoolFailWithInsufficientValue() public {
-        _disableAlphaPhase();
         _createPublicGoodNode(alice);
 
         // stake to public pool with zero amount will fail
@@ -742,7 +747,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testStakeFailToPublicGoodNode() public {
-        _disableAlphaPhase();
         _createPublicGoodNode(alice);
 
         vm.expectRevert(abi.encodeWithSelector(StakeToPublicGoodNode.selector, alice));
@@ -770,7 +774,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testStakeToPublicPoolFailInSettlementPhase() public {
-        _disableAlphaPhase();
         _createPublicGoodNode(alice);
 
         vm.prank(address(_settlement));
@@ -781,9 +784,9 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestUnstakeFromPublic() public {
-        _disableAlphaPhase();
-
         _createPublicGoodNode(alice);
+
+        _disableAlphaPhase();
         _testRequestUnstakeFromNode(alice, true);
     }
 
@@ -840,16 +843,16 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestUnstakeApprovedChipsFromPublicGoodNode() public {
-        _disableAlphaPhase();
-
         _createPublicGoodNode(alice);
+
+        _disableAlphaPhase();
         _testRequestUnstakeApprovedChipsFromNode(alice, true);
     }
 
     function testRequestUnstakeApprovedChipFromPublicGoodNode() public {
-        _disableAlphaPhase();
-
         _createPublicGoodNode(alice);
+
+        _disableAlphaPhase();
         _testRequestUnstakeApprovedChipFromNode(alice, true);
     }
 
