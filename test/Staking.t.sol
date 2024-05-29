@@ -359,6 +359,9 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(node.operationPoolTokens, dpAmount);
         assertEq(node.stakingPoolTokens, stAmount);
 
+        // save for later use
+        uint256 totalShares = node.totalShares;
+
         expectEmit();
         emit Events.WithdrawRequested(alice, dpAmount, 1);
         emit Events.NodeUpdated2PublicGood(alice);
@@ -373,17 +376,19 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(updatedNode.publicGood, true);
         assertEq(updatedNode.operationPoolTokens, 0);
         assertEq(updatedNode.taxRateBasisPoints, 0);
-
         assertEq(updatedNode.stakingPoolTokens, 0);
+        assertEq(updatedNode.totalShares, 0);
+
         assertEq(publicPool.stakingPoolTokens, stAmount);
+        assertEq(publicPool.totalShares, totalShares);
 
         assertEq(totalOperationPoolTokens, 0);
         assertEq(totalStakingPoolTokens, stAmount);
 
-        DataTypes.WithdrawalRequest memory pendingWithdrawl = _staking.getPendingWithdrawal(1);
-        assertEq(pendingWithdrawl.owner, alice);
-        assertEq(pendingWithdrawl.amount, dpAmount);
-        assertEq(pendingWithdrawl.timestamp, block.timestamp);
+        DataTypes.WithdrawalRequest memory pendingWithdrawal = _staking.getPendingWithdrawal(1);
+        assertEq(pendingWithdrawal.owner, alice);
+        assertEq(pendingWithdrawal.amount, dpAmount);
+        assertEq(pendingWithdrawal.timestamp, block.timestamp);
     }
 
     function testUpdateToPublicGoodFail() public {
