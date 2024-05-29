@@ -198,9 +198,14 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         node.publicGood = true;
         node.taxRateBasisPoints = 0;
 
+        // update staking pool tokens
         uint256 stakingTokens = node.stakingPoolTokens;
         _decreaseStakingPool(node, stakingTokens);
         _increaseStakingPool(_publicPool, stakingTokens);
+
+        // update total shares
+        _increaseTotalShares(_publicPool, node.totalShares);
+        node.totalShares = 0;
 
         if (node.operationPoolTokens > 0) {
             _requestWithdrawal(node, node.operationPoolTokens);
@@ -517,6 +522,16 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _totalStakingPoolTokens -= amount;
     }
 
+    /// @dev increase total shares of a node
+    function _increaseTotalShares(DataTypes.Node storage node, uint256 amount) internal {
+        node.totalShares += amount;
+    }
+
+    /// @dev decrease total shares of a node
+    function _decreaseTotalShares(DataTypes.Node storage node, uint256 amount) internal {
+        node.totalShares -= amount;
+    }
+
     function _distributePublicPoolRewards(uint256 publicPoolRewards) internal returns (uint256) {
         // rewards for public pool
         uint256 tax = _getFullTax(publicPoolRewards, _publicPool.taxRateBasisPoints);
@@ -571,7 +586,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 sharesToBurn = SHARES_PER_CHIP * chipsIds.length;
         uint256 unstakeAmount = _sharesToTokens(sharesToBurn, node.totalShares, node.stakingPoolTokens);
         _decreaseStakingPool(node, unstakeAmount);
-        node.totalShares -= sharesToBurn;
+        _decreaseTotalShares(node, sharesToBurn);
 
         // add to request queue
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
@@ -643,7 +658,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         // update total shares
         uint256 sharesToMint = chipsCount * SHARES_PER_CHIP;
-        node.totalShares += sharesToMint;
+        _increaseTotalShares(node, sharesToMint);
 
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, chipsCount);
         _families.push(endTokenId.toUint96(), uint160(nodeAddr));
