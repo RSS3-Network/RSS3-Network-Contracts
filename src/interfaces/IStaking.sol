@@ -49,11 +49,6 @@ interface IStaking {
     function updateNode(string calldata name, string calldata description) external;
 
     /**
-     * @notice Updates node of msg.sender to the public good node.
-     */
-    function updateToPublicGood() external;
-
-    /**
      * @notice Deposits tokens for node operator.
      * msg.value carries the amount of tokens to deposit.
      *

@@ -188,33 +188,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function updateToPublicGood() external override whenNotPaused {
-        address addr = msg.sender;
-
-        DataTypes.Node storage node = _nodes[addr];
-        if (node.account == address(0)) revert NodeNotExists();
-        if (node.publicGood) revert NodeAlreadyPublicGood(addr);
-
-        node.publicGood = true;
-        node.taxRateBasisPoints = 0;
-
-        // update staking pool tokens
-        uint256 stakingTokens = node.stakingPoolTokens;
-        _decreaseStakingPool(node, stakingTokens);
-        _increaseStakingPool(_publicPool, stakingTokens);
-
-        // update total shares
-        _increaseTotalShares(_publicPool, node.totalShares);
-        node.totalShares = 0;
-
-        if (node.operationPoolTokens > 0) {
-            _requestWithdrawal(node, node.operationPoolTokens);
-        }
-
-        emit Events.NodeUpdated2PublicGood(addr);
-    }
-
-    /// @inheritdoc IStaking
     function deposit() external payable override whenNotPaused {
         if (msg.value == 0) revert InsufficientValue();
 

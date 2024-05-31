@@ -343,66 +343,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.updateNode("New Alice", "New Alice's node");
     }
 
-    function testUpdateToPublicGood() public {
-        _createNode(alice);
-        uint256 dpAmount = 5000 ether;
-        uint256 stAmount = 60000 ether;
-
-        vm.prank(alice);
-        _staking.deposit{value: dpAmount}();
-
-        vm.prank(bob);
-        _staking.stake{value: stAmount}(alice);
-
-        DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.publicGood, false);
-        assertEq(node.operationPoolTokens, dpAmount);
-        assertEq(node.stakingPoolTokens, stAmount);
-
-        // save for later use
-        uint256 totalShares = node.totalShares;
-
-        expectEmit();
-        emit Events.WithdrawRequested(alice, dpAmount, 1);
-        emit Events.NodeUpdated2PublicGood(alice);
-        vm.prank(alice);
-        _staking.updateToPublicGood();
-
-        // check status
-        DataTypes.Node memory updatedNode = _staking.getNode(alice);
-        DataTypes.Node memory publicPool = _staking.getPublicPool();
-        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
-
-        assertEq(updatedNode.publicGood, true);
-        assertEq(updatedNode.operationPoolTokens, 0);
-        assertEq(updatedNode.taxRateBasisPoints, 0);
-        assertEq(updatedNode.stakingPoolTokens, 0);
-        assertEq(updatedNode.totalShares, 0);
-
-        assertEq(publicPool.stakingPoolTokens, stAmount);
-        assertEq(publicPool.totalShares, totalShares);
-
-        assertEq(totalOperationPoolTokens, 0);
-        assertEq(totalStakingPoolTokens, stAmount);
-
-        DataTypes.WithdrawalRequest memory pendingWithdrawal = _staking.getPendingWithdrawal(1);
-        assertEq(pendingWithdrawal.owner, alice);
-        assertEq(pendingWithdrawal.amount, dpAmount);
-        assertEq(pendingWithdrawal.timestamp, block.timestamp);
-    }
-
-    function testUpdateToPublicGoodFail() public {
-        // case 1: node not exists
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.updateToPublicGood();
-
-        // case 2: node is already a public good node
-        _createPublicGoodNode(alice);
-        vm.expectRevert(abi.encodeWithSelector(NodeAlreadyPublicGood.selector, alice));
-        vm.prank(alice);
-        _staking.updateToPublicGood();
-    }
-
     function testCreateNodeFailWithMultipleNodes() public {
         _createNode(alice);
 
