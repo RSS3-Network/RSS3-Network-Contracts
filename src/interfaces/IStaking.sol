@@ -197,13 +197,6 @@ interface IStaking {
     function getPendingUnstake(uint256 requestId) external view returns (DataTypes.UnstakeRequest memory);
 
     /**
-     * @notice Returns the minimal tokens to stake for a node.
-     * @param nodeAddr Address of node operator to stake.
-     * @return uint256 The minimal mount of tokens to stake for a node .
-     */
-    function minTokensToStake(address nodeAddr) external view returns (uint256);
-
-    /**
      * @notice Gets chips info by `tokenId`.
      * @param tokenId ID of Chip token.
      * @return nodeAddr Address of node operator who issues the Chip.
