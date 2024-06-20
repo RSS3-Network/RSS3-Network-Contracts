@@ -731,6 +731,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createPublicGoodNode(alice);
 
         _disableAlphaPhase();
+        // stake and then request unstake
         _testRequestUnstakeFromNode(alice, true);
     }
 
@@ -738,20 +739,15 @@ contract StakingTest is CommonTest, IERC721Errors {
         _disableAlphaPhase();
 
         _createNode(alice);
+        // stake and then request unstake
         _testRequestUnstakeFromNode(alice, false);
-    }
-
-    function testRequestUnstakeApprovedChips() public {
-        _disableAlphaPhase();
-
-        _createNode(alice);
-        _testRequestUnstakeApprovedChipsFromNode(alice, false);
     }
 
     function testRequestUnstakeApprovedChip() public {
         _disableAlphaPhase();
 
         _createNode(alice);
+        // stake and then request unstake
         _testRequestUnstakeApprovedChipFromNode(alice, false);
     }
 
@@ -761,29 +757,25 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createNode(alice);
 
         vm.startPrank(bob);
-        (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice);
-
-        // request unstake
-        uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            tokenIds[i - startTokenId] = i;
-
-            // bob transfers chips to carol
-            _chips.transferFrom(bob, carol, i);
-        }
+        _staking.stake{value: amount}(alice);
+        _staking.stake{value: amount * 2}(alice);
+        // bob transfers chips to carol
+        _chips.transferFrom(bob, carol, 1);
+        _chips.transferFrom(bob, carol, 2);
         vm.stopPrank();
 
         _disableAlphaPhase();
 
-        // carol unstake
+        // request unstake
         vm.prank(carol);
-        uint256 requestId = _staking.requestUnstake(alice, tokenIds);
+        uint256 requestId = _staking.requestUnstake(alice, array(uint256(1), uint256(2)));
 
         // check status
         DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
         assertEq(req.owner, carol);
+        assertEq(req.nodeAddr, alice);
         assertEq(req.timestamp, block.timestamp);
-        assertEq(req.unstakeAmount, amount);
+        assertEq(req.unstakeAmount, amount * 3);
     }
 
     function testRequestUnstakeApprovedChipsFromPublicGoodNode() public {
@@ -849,20 +841,14 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // stake
         vm.startPrank(bob);
-
-        (uint256 startTokenId, uint256 endTokenId) = _staking.stake{value: amount}(alice);
+        (, uint256 tokenId) = _staking.stake{value: amount}(alice);
 
         // request unstake
-        uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            tokenIds[i - startTokenId] = i;
-        }
-        _staking.requestUnstake(alice, tokenIds);
+        _staking.requestUnstake(alice, array(tokenId));
 
         // requestUnstake again will fail
-        vm.expectRevert(abi.encodeWithSelector(ERC721NonexistentToken.selector, tokenIds[0]));
-        _staking.requestUnstake(alice, tokenIds);
-
+        vm.expectRevert(abi.encodeWithSelector(ERC721NonexistentToken.selector, tokenId));
+        _staking.requestUnstake(alice, array(tokenId));
         vm.stopPrank();
     }
 
@@ -1148,34 +1134,29 @@ contract StakingTest is CommonTest, IERC721Errors {
         // assert(tax / partialTax >= stakingPool / (operationPool * 25));
     }
 
+    /// @dev stake and then request unstake
     function _testRequestUnstakeFromNode(address nodeAddr, bool isPublicGood) internal {
         uint256 amount = 10000 ether;
 
         // stake
         vm.startPrank(bob);
-        (uint256 startTokenId, uint256 endTokenId) = isPublicGood
+        (, uint256 tokenId) = isPublicGood
             ? _staking.stakeToPublicPool{value: amount}(nodeAddr)
             : _staking.stake{value: amount}(nodeAddr);
 
         // request unstake
-        uint256[] memory tokenIds = new uint256[](endTokenId - startTokenId + 1);
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            tokenIds[i - startTokenId] = i;
-        }
         // chips should be burnt
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            expectEmit();
-            emit TestEvents.Transfer(bob, address(0), i);
-        }
         expectEmit();
-        emit Events.UnstakeRequested(bob, nodeAddr, 1, amount, tokenIds);
-        uint256 requestId = _staking.requestUnstake(nodeAddr, tokenIds);
-
+        emit TestEvents.Transfer(bob, address(0), tokenId);
+        expectEmit();
+        emit Events.UnstakeRequested(bob, nodeAddr, 1, amount, array(tokenId));
+        uint256 requestId = _staking.requestUnstake(nodeAddr, array(tokenId));
         vm.stopPrank();
 
         // check status
         DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
         assertEq(req.owner, bob);
+        assertEq(req.nodeAddr, nodeAddr);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.unstakeAmount, amount);
 
@@ -1190,31 +1171,26 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // stake
         vm.startPrank(bob);
-        (uint256 startTokenId, uint256 endTokenId) = isPublicGood
+        (, uint256 tokenId) = isPublicGood
             ? _staking.stakeToPublicPool{value: amount}(nodeAddr)
             : _staking.stake{value: amount}(nodeAddr);
 
-        uint256 tokensCount = endTokenId - startTokenId + 1;
-        uint256[] memory tokenIds = new uint256[](tokensCount);
-        for (uint256 i = startTokenId; i <= endTokenId; i++) {
-            tokenIds[i - startTokenId] = i;
-        }
-
-        // approve chips
+        // approve chips for carol
         _chips.setApprovalForAll(carol, true);
         vm.stopPrank();
 
+        // carol requests an unstake
+        expectEmit();
+        emit TestEvents.Transfer(bob, address(0), tokenId);
+        expectEmit();
+        emit Events.UnstakeRequested(bob, nodeAddr, 1, amount, array(tokenId));
         vm.prank(carol);
-        expectEmit();
-        emit TestEvents.Transfer(bob, address(0), startTokenId);
-
-        expectEmit();
-        emit Events.UnstakeRequested(bob, nodeAddr, 1, amount, tokenIds);
-        uint256 requestId = _staking.requestUnstake(nodeAddr, tokenIds);
+        uint256 requestId = _staking.requestUnstake(nodeAddr, array(tokenId));
 
         // check status
         DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
         assertEq(req.owner, bob);
+        assertEq(req.nodeAddr, nodeAddr);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.unstakeAmount, amount);
 
@@ -1229,26 +1205,24 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // stake
         vm.prank(bob);
-        (uint256 startTokenId, uint256 endTokenId) = isPublicGood
+        (, uint256 tokenId) = isPublicGood
             ? _staking.stakeToPublicPool{value: amount}(nodeAddr)
             : _staking.stake{value: amount}(nodeAddr);
-        uint256 tokensCount = endTokenId - startTokenId + 1;
 
         // approve only one chip
         vm.prank(bob);
-        _chips.approve(carol, startTokenId);
+        _chips.approve(carol, tokenId);
 
-        uint256[] memory singleTokenId = array(startTokenId);
+        uint256[] memory singleTokenId = array(tokenId);
 
+        expectEmit();
+        emit TestEvents.Transfer(bob, address(0), tokenId);
+        expectEmit();
+        emit Events.UnstakeRequested(bob, nodeAddr, 1, amount, singleTokenId);
         vm.prank(carol);
-        expectEmit();
-        emit TestEvents.Transfer(bob, address(0), startTokenId);
-        expectEmit();
-        uint256 unstakedAmount = amount / tokensCount;
-        emit Events.UnstakeRequested(bob, nodeAddr, 1, unstakedAmount, singleTokenId);
         uint256 requestId = _staking.requestUnstake(nodeAddr, singleTokenId);
         // check status
-        _checkUnstakeOneChip(nodeAddr, requestId, amount, unstakedAmount, isPublicGood);
+        _checkUnstakeOneChip(nodeAddr, requestId, amount, amount, isPublicGood);
     }
 
     function _checkUnstakeOneChip(
