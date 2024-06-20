@@ -570,7 +570,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             _increaseStakingPool(node, rewards - fullTax);
             // the remaining tax is sent to the treasury
         }
-        return taxCollected;
     }
 
     /// @dev unstake from a node by burning chips

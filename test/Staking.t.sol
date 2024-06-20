@@ -71,6 +71,11 @@ contract StakingTest is CommonTest, IERC721Errors {
                 })
             )
         );
+
+        // check an empty chip
+        (address nodeAddr, uint256 tokens) = _staking.getChipsInfo(1);
+        assertEq(nodeAddr, address(0));
+        assertEq(tokens, 0);
     }
 
     function testPause() public {
