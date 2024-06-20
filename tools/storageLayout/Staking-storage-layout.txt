@@ -18,4 +18,5 @@
 | _totalOperationPoolTokens | uint256                                                | 21   | 0      | 32    | src/Staking.sol:Staking |
 | _totalStakingPoolTokens   | uint256                                                | 22   | 0      | 32    | src/Staking.sol:Staking |
 | _families                 | struct Checkpoints.Trace160                            | 23   | 0      | 32    | src/Staking.sol:Staking |
-| _chipToShares             | mapping(uint256 => uint256)                            | 24   | 0      | 32    | src/Staking.sol:Staking |
+| _chipIssuers              | mapping(uint256 => address)                            | 24   | 0      | 32    | src/Staking.sol:Staking |
+| _chipToShares             | mapping(uint256 => uint256)                            | 25   | 0      | 32    | src/Staking.sol:Staking |
