@@ -587,27 +587,27 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 sharesToBurn;
         uint256 unstakeAmount;
         for (uint256 i = 0; i < chipIds.length; i++) {
-            (, uint256 amount, uint256 shares) = _chipInfo(chipIds[i]);
+            uint256 tokenId = chipIds[i];
+            (, uint256 amount, uint256 shares) = _chipInfo(tokenId);
             unstakeAmount += amount;
             sharesToBurn += shares;
+
+            // burn chips and reset corresponding shares
+            IChips(_chips).burn(tokenId);
+
+            _chipIssuers[tokenId] = address(0);
+            _chipToShares[tokenId] = 0;
         }
+
         _decreaseStakingPool(node, unstakeAmount);
         _decreaseTotalShares(node, sharesToBurn);
 
         // add to request queue
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
-        req.timestamp = block.timestamp;
         req.owner = owner;
-
         req.nodeAddr = nodeAddr;
+        req.timestamp = block.timestamp;
         req.unstakeAmount = unstakeAmount;
-
-        // burn chips and reset corresponding shares
-        for (uint256 i = 0; i < chipIds.length; i++) {
-            IChips(_chips).burn(chipIds[i]);
-
-            _chipToShares[chipIds[i]] = 0;
-        }
 
         emit Events.UnstakeRequested(owner, nodeAddr, requestId, unstakeAmount, chipIds);
     }
