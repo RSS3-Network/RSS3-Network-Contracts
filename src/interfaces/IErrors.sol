@@ -42,8 +42,8 @@ interface IErrors {
     /// @dev Not chips owner or approver.
     error ChipNotAuthorized(uint256 tokenId);
 
-    /// @dev ChipsIds are empty.
-    error EmptyChipsIds();
+    /// @dev ChipIds are empty.
+    error EmptyChipIds();
 
     /// @dev Chips are not same owner.
     error ChipsNotSameOwner();
