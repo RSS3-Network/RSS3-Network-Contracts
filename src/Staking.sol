@@ -402,8 +402,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function getChipsInfo(uint256 tokenId) external view override returns (address nodeAddr, uint256 tokens) {
-        (nodeAddr, tokens, ) = _chipInfo(tokenId);
+    function getChipInfo(
+        uint256 tokenId
+    ) external view override returns (address nodeAddr, uint256 tokens, uint256 shares) {
+        (nodeAddr, tokens, shares) = _chipInfo(tokenId);
     }
 
     /// @inheritdoc IStaking
@@ -739,6 +741,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     function _chipInfo(uint256 tokenId) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {
         nodeAddr = _issuerOf(tokenId);
+        if (nodeAddr == address(0)) return (address(0), 0, 0);
 
         shares = _chipToShares[tokenId];
         if (shares == 0) {

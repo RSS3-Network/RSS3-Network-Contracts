@@ -73,9 +73,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         );
 
         // check an empty chip
-        (address nodeAddr, uint256 tokens) = _staking.getChipsInfo(1);
+        (address nodeAddr, uint256 tokens, uint256 shares) = _staking.getChipInfo(1);
         assertEq(nodeAddr, address(0));
         assertEq(tokens, 0);
+        assertEq(shares, 0);
     }
 
     function testPause() public {
@@ -636,9 +637,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(node.stakingPoolTokens, amount);
         assertEq(node.totalShares, amount);
 
-        (address nodeAddr, uint256 tokens) = _staking.getChipsInfo(tokenId);
+        (address nodeAddr, uint256 tokens, uint256 shares) = _staking.getChipInfo(tokenId);
         assertEq(nodeAddr, alice);
         assertEq(tokens, amount);
+        assertEq(shares, amount);
     }
 
     function testStakeFailStakeToPGN() public {
@@ -661,9 +663,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.getPublicPool().stakingPoolTokens, amount);
         assertEq(_staking.getPublicPool().totalShares, amount);
 
-        (address nodeAddr, uint256 tokens) = _staking.getChipsInfo(tokenId);
+        (address nodeAddr, uint256 tokens, uint256 shares) = _staking.getChipInfo(tokenId);
         assertEq(nodeAddr, alice);
         assertEq(tokens, amount);
+        assertEq(shares, amount);
     }
 
     function testStakeToPublicPoolFailToNonPublicGoodNode() public {
@@ -906,13 +909,15 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
 
         // check new chip
-        (address nodeAddr, uint256 tokens) = _staking.getChipsInfo(newChipId);
+        (address nodeAddr, uint256 tokens, uint256 shares) = _staking.getChipInfo(newChipId);
         assertEq(nodeAddr, bob);
         assertEq(tokens, stakeAmount * 3);
+        assertEq(shares, stakeAmount * 3);
         // check old chips
         for (uint256 i = 1; i <= 3; i++) {
-            (nodeAddr, tokens) = _staking.getChipsInfo(i);
+            (nodeAddr, tokens, shares) = _staking.getChipInfo(i);
             assertEq(nodeAddr, address(0));
+            assertEq(shares, 0);
             assertEq(tokens, 0);
 
             vm.expectRevert(abi.encodeWithSelector(ERC721NonexistentToken.selector, i));
@@ -955,8 +960,11 @@ contract StakingTest is CommonTest, IERC721Errors {
         _deposit(bob, depositAmount);
 
         // stake
-        _staking.stake{value: stakeAmount}(alice);
-        _staking.stake{value: stakeAmount}(bob);
+        uint256 tokenId1 = _staking.stake{value: stakeAmount}(alice);
+        (, , uint256 shares1) = _staking.getChipInfo(tokenId1);
+
+        uint256 tokenId2 = _staking.stake{value: stakeAmount}(bob);
+        (, , uint256 shares2) = _staking.getChipInfo(tokenId2);
 
         // distribute rewards
         uint256 startTime = block.timestamp;
@@ -999,10 +1007,13 @@ contract StakingTest is CommonTest, IERC721Errors {
         );
 
         // chip price will goes up
-        (, uint256 tokens) = _staking.getChipsInfo(1);
+        (, uint256 tokens, uint256 shares) = _staking.getChipInfo(1);
         assert(tokens > stakeAmount);
-        (, tokens) = _staking.getChipsInfo(2);
+        assertEq(shares, shares1);
+
+        (, tokens, shares) = _staking.getChipInfo(2);
         assert(tokens > stakeAmount);
+        assertEq(shares, shares2);
     }
 
     function testDistributeRewardsFailInvalidArrayLength() public {

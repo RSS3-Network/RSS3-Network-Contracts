@@ -203,12 +203,13 @@ interface IStaking {
     function getPendingUnstake(uint256 requestId) external view returns (DataTypes.UnstakeRequest memory);
 
     /**
-     * @notice Gets chips info by `tokenId`.
-     * @param tokenId ID of Chip token.
-     * @return nodeAddr Address of node operator who issues the Chip.
-     * @return tokens Amount of tokens the chip is equivalent to .
+     * @notice Gets chip info by `tokenId`.
+     * @param tokenId ID of chip token.
+     * @return nodeAddr Address of node operator who issues the chip.
+     * @return tokens Amount of tokens the chip is equivalent to.
+     * @return shares Amount of shares the chip owns.
      */
-    function getChipsInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens);
+    function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares);
 
     /**
      * @notice Gets public pool info.

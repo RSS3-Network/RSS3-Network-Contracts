@@ -137,7 +137,7 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
     function _generateChipImage(
         uint256 tokenId
     ) internal view returns (DataTypes.NodeTraits memory, DataTypes.ChipTraits memory) {
-        (address nodeAddr, ) = IStaking(_staking).getChipsInfo(tokenId);
+        (address nodeAddr, , ) = IStaking(_staking).getChipInfo(tokenId);
 
         DataTypes.NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr);
 
