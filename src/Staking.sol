@@ -85,7 +85,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     uint256 internal _totalStakingPoolTokens;
 
     /// @dev the issuers of chips
-    Checkpoints.Trace160 internal _families; // for for compatibility with the previous version
+    Checkpoints.Trace160 internal _families; // for compatibility with the previous version
     mapping(uint256 chipId => address nodeAddr) internal _chipIssuers;
 
     /// @dev shares corresponding to each chip
