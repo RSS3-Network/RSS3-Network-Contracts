@@ -98,7 +98,7 @@ interface IStaking {
      * @dev This will burn the chips tokens.
      * @param nodeAddr Address of node operator to unstake. For public pool, the nodeAddress is address(0).
      * @param chipsIds The chips token ids for unstake.
-     * @return requestId THe created unstake request id.
+     * @return requestId The created unstake request id.
      */
     function requestUnstake(address nodeAddr, uint256[] calldata chipsIds) external returns (uint256 requestId);
 
@@ -117,6 +117,14 @@ interface IStaking {
      *
      */
     function stakeToPublicPool(address nodeAddr) external payable returns (uint256 startTokenId, uint256 endTokenId);
+
+    /**
+     * @notice Merges chips tokens into a new one.
+     * @dev This will burn the chips tokens and mint a new one.
+     * @param chipsIds The chips token ids to merge.
+     * @return tokenId The new minted chips token id.
+     */
+    function mergeChips(uint256[] calldata chipsIds) external returns (uint256 tokenId);
 
     /**
      * @notice Updates accounting stats and distribute rewards.

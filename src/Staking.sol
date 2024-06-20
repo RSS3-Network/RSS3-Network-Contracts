@@ -86,6 +86,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev the issuers of chips
     Checkpoints.Trace160 internal _families;
+    mapping(uint256 chipId => address nodeAddr) internal _chipIssuers;
 
     /// @dev shares corresponding to each chip
     mapping(uint256 chipId => uint256 shares) internal _chipToShares;
@@ -326,6 +327,35 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
+    function mergeChips(uint256[] calldata chipIds) external override returns (uint256 newTokenId) {
+        if (chipIds.length == 0) revert EmptyChipsIds();
+
+        address nodeAddr = _issuerOf(chipIds[0]);
+        address owner = _checkChipsConditions(nodeAddr, chipIds);
+
+        uint256 totalShares;
+        for (uint256 i = 0; i < chipIds.length; i++) {
+            (, , uint256 shares) = _chipsInfo(chipIds[i]);
+            totalShares += shares;
+        }
+
+        // burn chips and reset corresponding shares
+        for (uint256 i = 0; i < chipIds.length; i++) {
+            IChips(_chips).burn(chipIds[i]);
+
+            _chipToShares[chipIds[i]] = 0;
+            _chipIssuers[chipIds[i]] = address(0);
+        }
+
+        // mint new chip
+        newTokenId = IChips(_chips).mint(owner);
+        _chipIssuers[newTokenId] = nodeAddr;
+        _chipToShares[newTokenId] = totalShares;
+
+        emit Events.ChipsMerged(owner, nodeAddr, newTokenId, chipIds);
+    }
+
+    /// @inheritdoc IStaking
     function slashNodes(
         address[] calldata nodeAddrs
     ) external override whenNotPaused whenNotSettlementPhase onlyRole(ORACLE_ROLE) {
@@ -545,7 +575,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev unstake from a node by burning chips
     function _unstakeFromNode(address nodeAddr, uint256[] calldata chipsIds) internal returns (uint256 requestId) {
-        address owner = _checkUnstakeConditions(nodeAddr, chipsIds);
+        address owner = _checkChipsConditions(nodeAddr, chipsIds);
 
         DataTypes.Node storage node = _nodes[nodeAddr].publicGood ? _publicPool : _nodes[nodeAddr];
 
@@ -636,8 +666,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         // mint chips
         (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, 1);
-        _families.push(endTokenId.toUint96(), uint160(nodeAddr));
-        // update chip shares
+        _chipIssuers[startTokenId] = nodeAddr;
+        // set chip shares
         _chipToShares[endTokenId] = sharesToMint;
 
         emit Events.Staked(msg.sender, node.account, amount, startTokenId, endTokenId);
@@ -683,8 +713,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
-    /// @dev checks whether user is token owner or approved
-    function _checkAuthorized(address owner, uint256 tokenId, address user) internal view returns (bool) {
+    /// @dev returns whether user is token owner or approved
+    function _isAuthorized(address owner, uint256 tokenId, address user) internal view returns (bool) {
         return
             owner == user ||
             IERC721(_chips).getApproved(tokenId) == user ||
@@ -694,19 +724,19 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @dev checks that:
     /// 1. length of chipsIds is not zero
     /// 2. caller has the authorization to unstake the chips
-    /// 3. chips are issued by the node
+    /// 3. chips are issued by the same node
     /// 4. chips have the same owner
-    function _checkUnstakeConditions(address nodeAddr, uint256[] calldata chipsIds) internal view returns (address) {
-        if (chipsIds.length == 0) revert EmptyChipsIds();
+    function _checkChipsConditions(address nodeAddr, uint256[] calldata chipIds) internal view returns (address) {
+        if (chipIds.length == 0) revert EmptyChipsIds();
 
         address lastOwner;
-        for (uint256 i = 0; i < chipsIds.length; i++) {
-            uint256 tokenId = chipsIds[i];
+        for (uint256 i = 0; i < chipIds.length; i++) {
+            uint256 tokenId = chipIds[i];
             address owner = IERC721(_chips).ownerOf(tokenId);
             if (lastOwner != address(0) && owner != lastOwner) revert ChipsNotSameOwner();
             lastOwner = owner;
 
-            if (!_checkAuthorized(owner, tokenId, msg.sender)) revert ChipNotAuthorized(tokenId);
+            if (!_isAuthorized(owner, tokenId, msg.sender)) revert ChipNotAuthorized(tokenId);
 
             if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);
         }
@@ -718,7 +748,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function _issuerOf(uint256 tokenId) internal view returns (address) {
         // check the token was not burned, and fetch ownership from the anchors
         // Note: no need for safe cast, we know that tokenId <= type(uint96).max
-        return address(_families.lowerLookup(tokenId.toUint96()));
+        address issuer = address(_families.lowerLookup(tokenId.toUint96()));
+        return issuer != address(0) ? issuer : _chipIssuers[tokenId];
     }
 
     function _chipsInfo(uint256 tokenId) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {
@@ -761,16 +792,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
-    /// @dev returns the full tax amount
-    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
-        return (rewards * taxRateBasisPoints) / _denominator();
-    }
-
-    /// @dev convert shares to equivalent tokens
-    function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalTokens) internal pure returns (uint256) {
-        return totalShares == 0 ? 0 : (shares * totalTokens) / totalShares;
-    }
-
     /// @dev convert tokens to equivalent shares
     function _tokensToShares(uint256 tokens, address nodeAddr) internal view returns (uint256) {
         DataTypes.Node storage node = _nodes[nodeAddr];
@@ -783,6 +804,16 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
 
         return (tokens * node.totalShares) / node.stakingPoolTokens;
+    }
+
+    /// @dev returns the full tax amount
+    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
+        return (rewards * taxRateBasisPoints) / _denominator();
+    }
+
+    /// @dev convert shares to equivalent tokens
+    function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalTokens) internal pure returns (uint256) {
+        return totalShares == 0 ? 0 : (shares * totalTokens) / totalShares;
     }
 
     /**

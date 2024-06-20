@@ -890,9 +890,62 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.claimUnstake(requestIds);
 
         // claim again will fail
-        //        vm.expectRevert(abi.encodeWithSelector(ClaimIdNotExists.selector, requestId));
-        //        _staking.claimUnstake(requestIds);
+        vm.expectRevert(abi.encodeWithSelector(ClaimIdNotExists.selector, requestId));
+        _staking.claimUnstake(requestIds);
 
+        vm.stopPrank();
+    }
+
+    function testMergeChips() public {
+        uint256 depositAmount = 10000 ether;
+        uint256 stakeAmount = 20000 ether;
+
+        _createNode(bob);
+        _deposit(bob, depositAmount);
+
+        vm.startPrank(alice);
+        _staking.stake{value: stakeAmount}(bob);
+        _staking.stake{value: stakeAmount}(bob);
+        _staking.stake{value: stakeAmount}(bob);
+
+        uint256[] memory chipIds = array(uint256(1), uint256(2), uint256(3));
+        expectEmit();
+        emit Events.ChipsMerged(alice, bob, 4, chipIds);
+        uint256 newChipId = _staking.mergeChips(chipIds);
+        vm.stopPrank();
+
+        // check new chip
+        (address nodeAddr, uint256 tokens) = _staking.getChipsInfo(newChipId);
+        assertEq(nodeAddr, bob);
+        assertEq(tokens, stakeAmount * 3);
+        // check old chips
+        for (uint256 i = 1; i <= 3; i++) {
+            (nodeAddr, tokens) = _staking.getChipsInfo(i);
+            assertEq(nodeAddr, address(0));
+            assertEq(tokens, 0);
+
+            vm.expectRevert(abi.encodeWithSelector(ERC721NonexistentToken.selector, i));
+            _chips.ownerOf(i);
+        }
+    }
+
+    function testMergeChipsFail() public {
+        // case 1: empty chipIds
+        vm.expectRevert(abi.encodeWithSelector(EmptyChipsIds.selector));
+        _staking.mergeChips(new uint256[](0));
+
+        // case 2: chips are issued by the same node
+        _createNode(bob);
+        _createNode(carol);
+        _deposit(bob, 10000 ether);
+        _deposit(carol, 10000 ether);
+
+        vm.startPrank(alice);
+        _staking.stake{value: 100 ether}(bob);
+        _staking.stake{value: 100 ether}(carol);
+
+        vm.expectRevert(abi.encodeWithSelector(ChipNotValid.selector, 2, bob));
+        _staking.mergeChips(array(uint256(1), uint256(2)));
         vm.stopPrank();
     }
 
