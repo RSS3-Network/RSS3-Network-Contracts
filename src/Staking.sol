@@ -244,22 +244,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function stake(
         address nodeAddr
-    )
-        external
-        payable
-        override
-        whenNotPaused
-        whenNotSettlementPhase
-        returns (uint256 startTokenId, uint256 endTokenId)
-    {
+    ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // validate node
         if (node.account == address(0)) revert NodeNotExists();
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
 
-        // startTokenId is always equal to endTokenId, for compatibility with the previous version
-        endTokenId = _stakeToNode(node, msg.value, nodeAddr);
-        startTokenId = endTokenId;
+        tokenId = _stakeToNode(node, msg.value, nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -313,21 +304,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function stakeToPublicPool(
         address nodeAddr
-    )
-        external
-        payable
-        override
-        whenNotPaused
-        whenNotSettlementPhase
-        returns (uint256 startTokenId, uint256 endTokenId)
-    {
+    ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         if (node.account == address(0)) revert NodeNotExists();
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
 
-        // startTokenId is always equal to endTokenId, for compatibility with the previous version
-        endTokenId = _stakeToNode(_publicPool, msg.value, nodeAddr);
-        startTokenId = endTokenId;
+        tokenId = _stakeToNode(_publicPool, msg.value, nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -672,6 +654,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // set chip shares
         _chipToShares[tokenId] = sharesToMint;
 
+        // startTokenId is always equal to endTokenId, for compatibility with the previous version
         emit Events.Staked(msg.sender, node.account, amount, tokenId, tokenId);
     }
 

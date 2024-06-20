@@ -87,11 +87,10 @@ interface IStaking {
     /**
      * @notice Stakes tokens to a node operator.
      * @param nodeAddr The address of node to stake.
-     * @return startTokenId The start of new minted chips token ids.
-     * @return endTokenId The end of new minted chips token ids.
+     * @return tokenId The new minted chip token id.
      * msg.value carries the amount of tokens to stake.
      */
-    function stake(address nodeAddr) external payable returns (uint256 startTokenId, uint256 endTokenId);
+    function stake(address nodeAddr) external payable returns (uint256 tokenId);
 
     /**
      * @notice Requests unstake tokens from a node operator.
@@ -111,12 +110,11 @@ interface IStaking {
     /**
      * @notice Stakes tokens to public pool.
      * @param nodeAddr The address of node to like.
-     * @return startTokenId The start of new minted chips token ids.
-     * @return endTokenId The end of new minted chips token ids.
+     * @return tokenId The new minted chip token id.
      * msg.value carries the amount of tokens to stake.
      *
      */
-    function stakeToPublicPool(address nodeAddr) external payable returns (uint256 startTokenId, uint256 endTokenId);
+    function stakeToPublicPool(address nodeAddr) external payable returns (uint256 tokenId);
 
     /**
      * @notice Merges chips tokens into a new one.

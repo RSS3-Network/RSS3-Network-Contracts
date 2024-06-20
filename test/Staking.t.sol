@@ -629,7 +629,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         emit TestEvents.Transfer(address(0), bob, 1);
         expectEmit();
         emit Events.Staked(bob, alice, amount, 1, 1);
-        (uint256 tokenId, ) = _staking.stake{value: amount}(alice);
+        uint256 tokenId = _staking.stake{value: amount}(alice);
         vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
@@ -656,7 +656,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createPublicGoodNode(alice);
 
         vm.prank(alice);
-        (uint256 tokenId, ) = _staking.stakeToPublicPool{value: amount}(alice);
+        uint256 tokenId = _staking.stakeToPublicPool{value: amount}(alice);
 
         assertEq(_staking.getPublicPool().stakingPoolTokens, amount);
         assertEq(_staking.getPublicPool().totalShares, amount);
@@ -807,11 +807,11 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createNode(alice);
 
         vm.startPrank(bob);
-        (uint256 t1, ) = _staking.stake{value: 10000 ether}(alice);
+        uint256 t1 = _staking.stake{value: 10000 ether}(alice);
         _chips.approve(carol, t1);
 
         vm.startPrank(carol);
-        (uint256 t2, ) = _staking.stake{value: 10000 ether}(alice);
+        uint256 t2 = _staking.stake{value: 10000 ether}(alice);
 
         vm.expectRevert(abi.encodeWithSelector(ChipsNotSameOwner.selector));
         _staking.requestUnstake(alice, array(t1, t2));
@@ -841,7 +841,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // stake
         vm.startPrank(bob);
-        (, uint256 tokenId) = _staking.stake{value: amount}(alice);
+        uint256 tokenId = _staking.stake{value: amount}(alice);
 
         // request unstake
         _staking.requestUnstake(alice, array(tokenId));
@@ -862,7 +862,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // stake
         vm.startPrank(bob);
 
-        (uint256 tokenId, ) = _staking.stake{value: amount}(alice);
+        uint256 tokenId = _staking.stake{value: amount}(alice);
         uint256[] memory tokenIds = array(tokenId);
 
         // request unstake
@@ -1140,7 +1140,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // stake
         vm.startPrank(bob);
-        (, uint256 tokenId) = isPublicGood
+        uint256 tokenId = isPublicGood
             ? _staking.stakeToPublicPool{value: amount}(nodeAddr)
             : _staking.stake{value: amount}(nodeAddr);
 
@@ -1171,7 +1171,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // stake
         vm.startPrank(bob);
-        (, uint256 tokenId) = isPublicGood
+        uint256 tokenId = isPublicGood
             ? _staking.stakeToPublicPool{value: amount}(nodeAddr)
             : _staking.stake{value: amount}(nodeAddr);
 
@@ -1205,7 +1205,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // stake
         vm.prank(bob);
-        (, uint256 tokenId) = isPublicGood
+        uint256 tokenId = isPublicGood
             ? _staking.stakeToPublicPool{value: amount}(nodeAddr)
             : _staking.stake{value: amount}(nodeAddr);
 
