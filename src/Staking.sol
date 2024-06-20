@@ -257,7 +257,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (node.account == address(0)) revert NodeNotExists();
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
 
-        (startTokenId, endTokenId) = _stakeToNode(node, msg.value, nodeAddr);
+        // startTokenId is always equal to endTokenId, for compatibility with the previous version
+        endTokenId = _stakeToNode(node, msg.value, nodeAddr);
+        startTokenId = endTokenId;
     }
 
     /// @inheritdoc IStaking
@@ -323,7 +325,9 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         if (node.account == address(0)) revert NodeNotExists();
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
 
-        (startTokenId, endTokenId) = _stakeToNode(_publicPool, msg.value, nodeAddr);
+        // startTokenId is always equal to endTokenId, for compatibility with the previous version
+        endTokenId = _stakeToNode(_publicPool, msg.value, nodeAddr);
+        startTokenId = endTokenId;
     }
 
     /// @inheritdoc IStaking
@@ -652,7 +656,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.Node storage node,
         uint256 amount,
         address nodeAddr
-    ) internal returns (uint256 startTokenId, uint256 endTokenId) {
+    ) internal returns (uint256 tokenId) {
         if (amount == 0) revert StakeZeroAmount();
 
         uint256 sharesToMint = _tokensToShares(amount, nodeAddr);
@@ -663,12 +667,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _increaseTotalShares(node, sharesToMint);
 
         // mint chip
-        (startTokenId, endTokenId) = IChips(_chips).mintBatch(msg.sender, 1);
-        _chipIssuers[startTokenId] = nodeAddr;
+        tokenId = IChips(_chips).mint(msg.sender);
+        _chipIssuers[tokenId] = nodeAddr;
         // set chip shares
-        _chipToShares[endTokenId] = sharesToMint;
+        _chipToShares[tokenId] = sharesToMint;
 
-        emit Events.Staked(msg.sender, node.account, amount, startTokenId, endTokenId);
+        emit Events.Staked(msg.sender, node.account, amount, tokenId, tokenId);
     }
 
     /// @dev claim unstake request
