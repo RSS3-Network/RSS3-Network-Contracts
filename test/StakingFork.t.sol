@@ -7,9 +7,11 @@ import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
 import {TransparentUpgradeableProxy as Proxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {ITransparentUpgradeableProxy as IProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract StakingForkTest is CommonTest {
     address public constant diygod = 0xC8b960D09C0078c18Dcbe7eB9AB9d816BcCa8944;
+    address public constant chips = 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE;
 
     Staking public staking;
 
@@ -33,10 +35,14 @@ contract StakingForkTest is CommonTest {
 
         vm.prank(diygod);
         uint256 tokenId = staking.mergeChips(tokenIds);
+
+        // check chip info
         (address nodeAddr2, uint256 tokens2, uint256 shares2) = staking.getChipInfo(tokenId);
         assertEq(nodeAddr, nodeAddr2);
         assertEq(tokens * 4, tokens2);
         assertEq(shares * 4, shares2);
+
+        assertEq(IERC721(chips).ownerOf(tokenId), diygod);
     }
 
     function testStakeFork() public {
@@ -53,9 +59,40 @@ contract StakingForkTest is CommonTest {
         assertEq(nodeAddr, alice);
         assertEq(tokens, amount);
         assertEq(shares, amount);
+
+        assertEq(IERC721(chips).ownerOf(tokenId), bob);
     }
 
     function testRequestUnstakeFork() public {
+        vm.prank(0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E);
+        staking.disableAlphaPhase();
+
+        address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
+        (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
+        assertEq(shares, staking.SHARES_PER_CHIP());
+        assertTrue(tokens > shares);
+        DataTypes.Node memory nodeBefore = staking.getNode(nodeAddr);
+
+        vm.prank(diygod);
+        uint256 requestId = staking.requestUnstake(nodeAddr, array(uint256(1690), uint256(1691)));
+
+        // check status
+        DataTypes.UnstakeRequest memory req = staking.getPendingUnstake(requestId);
+        assertEq(req.owner, diygod);
+        assertEq(req.nodeAddr, nodeAddr);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.unstakeAmount, tokens * 2);
+
+        // check node
+        DataTypes.Node memory nodeAfter = staking.getNode(nodeAddr);
+        assertEq(nodeAfter.totalShares, nodeBefore.totalShares - shares * 2);
+        assertEq(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 2);
+    }
+
+    function testRequestUnstakeForkWithMerge() public {
+        vm.prank(0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E);
+        staking.disableAlphaPhase();
+
         address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
         DataTypes.Node memory nodeBefore = staking.getNode(nodeAddr);
@@ -63,9 +100,6 @@ contract StakingForkTest is CommonTest {
         uint256[] memory tokenIds = array(uint256(1690), uint256(1691), uint256(1693), uint256(1695));
         vm.prank(diygod);
         uint256 tokenId = staking.mergeChips(tokenIds);
-
-        vm.prank(0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E);
-        staking.disableAlphaPhase();
 
         vm.prank(diygod);
         uint256 requestId = staking.requestUnstake(nodeAddr, array(tokenId));
