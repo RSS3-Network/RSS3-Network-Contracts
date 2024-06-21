@@ -625,13 +625,12 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         _createNode(alice);
 
-        vm.startPrank(bob);
         expectEmit();
         emit TestEvents.Transfer(address(0), bob, 1);
         expectEmit();
         emit Events.Staked(bob, alice, amount, 1, 1);
+        vm.prank(bob);
         uint256 tokenId = _staking.stake{value: amount}(alice);
-        vm.stopPrank();
 
         DataTypes.Node memory node = _staking.getNode(alice);
         assertEq(node.stakingPoolTokens, amount);
@@ -657,7 +656,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         _createPublicGoodNode(alice);
 
-        vm.prank(alice);
+        vm.prank(bob);
         uint256 tokenId = _staking.stakeToPublicPool{value: amount}(alice);
 
         assertEq(_staking.getPublicPool().stakingPoolTokens, amount);
