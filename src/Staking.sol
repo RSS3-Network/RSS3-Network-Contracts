@@ -314,7 +314,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function mergeChips(uint256[] calldata chipIds) external override returns (uint256 newTokenId) {
-        if (chipIds.length == 0) revert EmptyChipIds();
+        if (chipIds.length < 2) revert ChipIdsLengthTooShort();
 
         address nodeAddr = _issuerOf(chipIds[0]);
         address owner = _checkChipsConditions(nodeAddr, chipIds);
@@ -561,6 +561,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev unstake from a node by burning chips
     function _unstakeFromNode(address nodeAddr, uint256[] calldata chipIds) internal returns (uint256 requestId) {
+        if (chipIds.length == 0) revert EmptyChipIds();
+
         address owner = _checkChipsConditions(nodeAddr, chipIds);
 
         DataTypes.Node storage node = _nodes[nodeAddr].publicGood ? _publicPool : _nodes[nodeAddr];
@@ -709,13 +711,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @dev checks that:
-    /// 1. length of chipsIds is not zero
-    /// 2. caller has the authorization to unstake the chips
-    /// 3. chips are issued by the same node
-    /// 4. chips have the same owner
+    /// 1. caller has the authorization to unstake the chips
+    /// 2. chips are issued by the same node
+    /// 3. chips have the same owner
     function _checkChipsConditions(address nodeAddr, uint256[] calldata chipIds) internal view returns (address) {
-        if (chipIds.length == 0) revert EmptyChipIds();
-
         address lastOwner;
         for (uint256 i = 0; i < chipIds.length; i++) {
             uint256 tokenId = chipIds[i];

@@ -45,6 +45,9 @@ interface IErrors {
     /// @dev ChipIds are empty.
     error EmptyChipIds();
 
+    /// @dev ChipIds array length is too short.
+    error ChipIdsLengthTooShort();
+
     /// @dev Chips are not same owner.
     error ChipsNotSameOwner();
 

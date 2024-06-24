@@ -111,7 +111,7 @@
     },
     {
         "inputs": [],
-        "name": "EmptyChipIds",
+        "name": "ChipIdsLengthTooShort",
         "type": "error"
     },
     {

@@ -925,8 +925,8 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testMergeChipsFail() public {
-        // case 1: empty chipIds
-        vm.expectRevert(abi.encodeWithSelector(EmptyChipIds.selector));
+        // case 1: chipIds array length too short
+        vm.expectRevert(abi.encodeWithSelector(ChipIdsLengthTooShort.selector));
         _staking.mergeChips(new uint256[](0));
 
         // case 2: chips are issued by the same node
