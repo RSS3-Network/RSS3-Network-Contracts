@@ -642,12 +642,38 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(shares, amount);
     }
 
-    function testStakeFailStakeToPGN() public {
-        // stake to public pool will fail
-        _createPublicGoodNode(bob);
+    function testStakeFailToNonExistentNode() public {
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.stake{value: 1}(alice);
+    }
 
-        vm.expectRevert(abi.encodeWithSelector(StakeToPublicGoodNode.selector, bob));
-        _staking.stake{value: 1 ether}(bob);
+    function testStakeFailToPublicGoodNode() public {
+        _createPublicGoodNode(alice);
+
+        vm.expectRevert(abi.encodeWithSelector(StakeToPublicGoodNode.selector, alice));
+        _staking.stake{value: 1}(alice);
+    }
+
+    function testStakeFailWithAmountTooSmall() public {
+        _createNode(alice);
+
+        // case 1: stake 0
+        vm.expectRevert(abi.encodeWithSelector(StakeAmountTooSmall.selector));
+        _staking.stake{value: 0}(alice);
+
+        // case 2: stake amount is less than 500
+        vm.expectRevert(abi.encodeWithSelector(StakeAmountTooSmall.selector));
+        _staking.stake{value: 499 ether}(alice);
+    }
+
+    function testStakeFailInSettlementPhase() public {
+        _createNode(alice);
+
+        vm.prank(address(_settlement));
+        _staking.setSettlementPhase(true);
+
+        vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
+        _staking.stake{value: 10000 ether}(alice);
     }
 
     function testStakeToPublicPool(uint256 amount) public {
@@ -688,40 +714,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         // stake to public pool with zero amount will fail
         vm.expectRevert(abi.encodeWithSelector(StakeAmountTooSmall.selector));
         _staking.stakeToPublicPool{value: 0}(alice);
-    }
-
-    function testStakeFailToNonExistentNode() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.stake{value: 1}(alice);
-    }
-
-    function testStakeFailToPublicGoodNode() public {
-        _createPublicGoodNode(alice);
-
-        vm.expectRevert(abi.encodeWithSelector(StakeToPublicGoodNode.selector, alice));
-        _staking.stake{value: 1}(alice);
-    }
-
-    function testStakeFailWithAmountTooSmall() public {
-        _createNode(alice);
-
-        // case 1: stake 0
-        vm.expectRevert(abi.encodeWithSelector(StakeAmountTooSmall.selector));
-        _staking.stake{value: 0}(alice);
-
-        // case 2: stake amount is less than 500
-        vm.expectRevert(abi.encodeWithSelector(StakeAmountTooSmall.selector));
-        _staking.stake{value: 499 ether}(alice);
-    }
-
-    function testStakeFailInSettlementPhase() public {
-        _createNode(alice);
-
-        vm.prank(address(_settlement));
-        _staking.setSettlementPhase(true);
-
-        vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
-        _staking.stake{value: 10000 ether}(alice);
     }
 
     function testStakeToPublicPoolFailInSettlementPhase() public {
@@ -859,32 +851,26 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
     }
 
-    function testClaimUnstake() public {
-        _disableAlphaPhase();
+    function testClaimUnstake(uint256 amount) public {
+        vm.assume(amount > 500 && amount < 10000);
+        amount *= 1 ether;
 
-        uint256 amount = 10000 ether;
+        _disableAlphaPhase();
 
         _createNode(alice);
 
-        // stake
         vm.startPrank(bob);
-
+        // stake
         uint256 tokenId = _staking.stake{value: amount}(alice);
-        uint256[] memory tokenIds = array(tokenId);
-
         // request unstake
-        uint256 requestId = _staking.requestUnstake(alice, tokenIds);
+        uint256 requestId = _staking.requestUnstake(alice, array(tokenId));
         uint256[] memory requestIds = array(requestId);
-
-        vm.expectRevert(abi.encodeWithSelector(ClaimTimeNotReady.selector));
-        _staking.claimUnstake(requestIds);
 
         // claim unstake
         skip(stakeUnbondingPeriod);
 
         expectEmit();
         emit Events.UnstakeClaimed(requestId, alice, bob, amount);
-
         _staking.claimUnstake(requestIds);
 
         // claim again will fail
@@ -892,6 +878,73 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.claimUnstake(requestIds);
 
         vm.stopPrank();
+
+        // check balances
+        assertEq(bob.balance, _initialAmount);
+
+        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        assertEq(req.owner, address(0));
+        assertEq(req.nodeAddr, address(0));
+        assertEq(req.timestamp, 0);
+        assertEq(req.unstakeAmount, 0);
+    }
+
+    function testClaimUnstakeFail() public {
+        _createNode(alice);
+        _disableAlphaPhase();
+
+        vm.startPrank(bob);
+
+        // case 1: claim id not exists
+        vm.expectRevert(abi.encodeWithSelector(ClaimIdNotExists.selector, uint256(1)));
+        _staking.claimUnstake(array(uint256(1)));
+
+        uint256 tokenId = _staking.stake{value: 10000 ether}(alice);
+        uint256 requestId = _staking.requestUnstake(alice, array(tokenId));
+
+        // case 2: claim time not ready
+        vm.expectRevert(abi.encodeWithSelector(ClaimTimeNotReady.selector));
+        _staking.claimUnstake(array(requestId));
+
+        vm.stopPrank();
+    }
+
+    function testRequestUnstakeWithMergedChips() public {
+        uint256 depositAmount = 10000 ether;
+        uint256 stakeAmount = 20000 ether;
+
+        _createNode(bob);
+        _deposit(bob, depositAmount);
+        _disableAlphaPhase();
+
+        vm.startPrank(alice);
+        _staking.stake{value: stakeAmount}(bob);
+        _staking.stake{value: stakeAmount}(bob);
+        _staking.stake{value: stakeAmount}(bob);
+
+        uint256 balBefore = alice.balance;
+
+        uint256 newChipId = _staking.mergeChips(array(uint256(1), uint256(2)));
+        assertEq(newChipId, uint256(4));
+
+        uint256 requestId = _staking.requestUnstake(bob, array(uint256(3), uint256(4)));
+        skip(22.5 days);
+        _staking.claimUnstake(array(requestId));
+        vm.stopPrank();
+
+        // check status
+        uint256 balAfter = alice.balance;
+        assertEq(balAfter - balBefore, stakeAmount * 3);
+
+        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        assertEq(req.owner, address(0));
+        assertEq(req.nodeAddr, address(0));
+        assertEq(req.timestamp, 0);
+        assertEq(req.unstakeAmount, 0);
+
+        // check node
+        DataTypes.Node memory node = _staking.getNode(bob);
+        assertEq(node.stakingPoolTokens, 0);
     }
 
     function testMergeChips() public {

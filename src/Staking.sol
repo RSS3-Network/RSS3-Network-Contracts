@@ -565,10 +565,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         address owner = _checkChipsConditions(nodeAddr, chipIds);
 
-        DataTypes.Node storage node = _nodes[nodeAddr].publicGood ? _publicPool : _nodes[nodeAddr];
-
-        requestId = ++_pendingUnstakeCounter;
-
         // update pool tokens and shares
         uint256 sharesToBurn;
         uint256 unstakeAmount;
@@ -584,9 +580,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             _chipIssuers[tokenId] = address(0);
             _chipToShares[tokenId] = 0;
         }
-
+        DataTypes.Node storage node = _getStakingNode(nodeAddr);
         _decreaseStakingPool(node, unstakeAmount);
         _decreaseTotalShares(node, sharesToBurn);
+
+        requestId = ++_pendingUnstakeCounter;
 
         // add to request queue
         DataTypes.UnstakeRequest storage req = _pendingUnstake[requestId];
@@ -779,13 +777,13 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
+    function _getStakingNode(address nodeAddr) internal view returns (DataTypes.Node storage node) {
+        node = _nodes[nodeAddr].publicGood ? _publicPool : _nodes[nodeAddr];
+    }
+
     /// @dev convert tokens to equivalent shares
     function _tokensToShares(uint256 tokens, address nodeAddr) internal view returns (uint256) {
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.publicGood) {
-            node = _publicPool;
-        }
-
+        DataTypes.Node storage node = _getStakingNode(nodeAddr);
         if (node.stakingPoolTokens == 0) {
             return tokens;
         }
@@ -795,11 +793,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @dev convert shares to equivalent tokens
     function _sharesToTokens(uint256 shares, address nodeAddr) internal view returns (uint256) {
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.publicGood) {
-            node = _publicPool;
-        }
-
+        DataTypes.Node storage node = _getStakingNode(nodeAddr);
         if (node.totalShares == 0) {
             return 0;
         }
