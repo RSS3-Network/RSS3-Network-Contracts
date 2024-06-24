@@ -350,7 +350,7 @@
     },
     {
         "inputs": [],
-        "name": "StakeZeroAmount",
+        "name": "StakeAmountTooSmall",
         "type": "error"
     },
     {

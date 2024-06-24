@@ -46,7 +46,7 @@ contract StakingForkTest is CommonTest {
     }
 
     function testStakeFork() public {
-        uint256 amount = 100 ether;
+        uint256 amount = 500 ether;
 
         vm.prank(alice);
         staking.createNode("Alice", "Alice", _defaultTaxRateBasisPoints, false);

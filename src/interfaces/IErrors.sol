@@ -36,8 +36,8 @@ interface IErrors {
     /// @dev Claim time not ready.
     error ClaimIdNotExists(uint256 claimId);
 
-    /// @dev Staking amount is 0.
-    error StakeZeroAmount();
+    /// @dev Staking amount is less than 500 ethers.
+    error StakeAmountTooSmall();
 
     /// @dev Not chips owner or approver.
     error ChipNotAuthorized(uint256 tokenId);

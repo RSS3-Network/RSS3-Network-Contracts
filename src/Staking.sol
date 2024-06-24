@@ -643,7 +643,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 amount,
         address nodeAddr
     ) internal returns (uint256 tokenId) {
-        if (amount == 0) revert StakeZeroAmount();
+        // staking amount must be greater than 500 tokens
+        if (amount < SHARES_PER_CHIP) revert StakeAmountTooSmall();
 
         uint256 sharesToMint = _tokensToShares(amount, nodeAddr);
 

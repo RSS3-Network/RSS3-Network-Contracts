@@ -401,7 +401,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.deposit{value: 1}();
     }
 
-    function testDepositFailWithStakeZeroAmount() public {
+    function testDepositFailWithStakeAmountTooSmall() public {
         vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
         _staking.deposit{value: 0}();
     }
@@ -620,7 +620,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testStake(uint256 amount) public {
-        vm.assume(amount > 0 ether && amount <= 1000000);
+        vm.assume(amount >= 500 && amount <= 1000000);
         amount *= 1 ether;
 
         _createNode(alice);
@@ -651,7 +651,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testStakeToPublicPool(uint256 amount) public {
-        vm.assume(amount > 0 && amount < 10000);
+        vm.assume(amount >= 500 && amount < 10000);
         amount = amount * 1 ether;
 
         _createPublicGoodNode(alice);
@@ -682,11 +682,11 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.stakeToPublicPool{value: 1}(address(0xabc));
     }
 
-    function testStakeToPublicPoolFailWithStakeZeroAmount() public {
+    function testStakeToPublicPoolFailWithStakeAmountTooSmall() public {
         _createPublicGoodNode(alice);
 
         // stake to public pool with zero amount will fail
-        vm.expectRevert(abi.encodeWithSelector(StakeZeroAmount.selector));
+        vm.expectRevert(abi.encodeWithSelector(StakeAmountTooSmall.selector));
         _staking.stakeToPublicPool{value: 0}(alice);
     }
 
@@ -702,11 +702,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.stake{value: 1}(alice);
     }
 
-    function testStakeFailWithZeroAmount() public {
+    function testStakeFailWithAmountTooSmall() public {
         _createNode(alice);
 
-        vm.expectRevert(abi.encodeWithSelector(StakeZeroAmount.selector));
+        // case 1: stake 0
+        vm.expectRevert(abi.encodeWithSelector(StakeAmountTooSmall.selector));
         _staking.stake{value: 0}(alice);
+
+        // case 2: stake amount is less than 500
+        vm.expectRevert(abi.encodeWithSelector(StakeAmountTooSmall.selector));
+        _staking.stake{value: 499 ether}(alice);
     }
 
     function testStakeFailInSettlementPhase() public {
@@ -936,8 +941,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         _deposit(carol, 10000 ether);
 
         vm.startPrank(alice);
-        _staking.stake{value: 100 ether}(bob);
-        _staking.stake{value: 100 ether}(carol);
+        _staking.stake{value: 500 ether}(bob);
+        _staking.stake{value: 600 ether}(carol);
 
         vm.expectRevert(abi.encodeWithSelector(ChipNotValid.selector, 2, bob));
         _staking.mergeChips(array(uint256(1), uint256(2)));
