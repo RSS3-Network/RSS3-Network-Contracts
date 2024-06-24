@@ -652,11 +652,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         // mint chip
         tokenId = IChips(_chips).mint(msg.sender);
+        // set chip issuer and shares
         _chipIssuers[tokenId] = nodeAddr;
-        // set chip shares
         _chipToShares[tokenId] = sharesToMint;
 
-        // startTokenId is always equal to endTokenId, for compatibility with the previous version
+        // set startTokenId and endTokenId to tokenId, for compatibility with the previous version
         emit Events.Staked(msg.sender, node.account, amount, tokenId, tokenId);
     }
 
@@ -749,8 +749,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             shares = SHARES_PER_CHIP;
         }
 
-        DataTypes.Node storage node = _nodes[nodeAddr].publicGood ? _publicPool : _nodes[nodeAddr];
-        tokens = _sharesToTokens(shares, node.totalShares, node.stakingPoolTokens);
+        tokens = _sharesToTokens(shares, nodeAddr);
     }
 
     /**
@@ -794,14 +793,23 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return (tokens * node.totalShares) / node.stakingPoolTokens;
     }
 
+    /// @dev convert shares to equivalent tokens
+    function _sharesToTokens(uint256 shares, address nodeAddr) internal view returns (uint256) {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (node.publicGood) {
+            node = _publicPool;
+        }
+
+        if (node.totalShares == 0) {
+            return 0;
+        }
+
+        return (shares * node.stakingPoolTokens) / node.totalShares;
+    }
+
     /// @dev returns the full tax amount
     function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
         return (rewards * taxRateBasisPoints) / _denominator();
-    }
-
-    /// @dev convert shares to equivalent tokens
-    function _sharesToTokens(uint256 shares, uint256 totalShares, uint256 totalTokens) internal pure returns (uint256) {
-        return totalShares == 0 ? 0 : (shares * totalTokens) / totalShares;
     }
 
     /**
