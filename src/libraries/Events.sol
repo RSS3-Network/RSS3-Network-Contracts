@@ -31,12 +31,6 @@ library Events {
     event NodeUpdated(address indexed nodeAddr, string name, string description);
 
     /**
-     * @dev Emitted on update2PublicGood()
-     * @param nodeAddr Address of node operator.
-     */
-    event NodeUpdated2PublicGood(address indexed nodeAddr);
-
-    /**
      * @dev Emitted on deposit()
      * @param nodeAddr Address of node operator.
      * @param amount Amount of tokens deposited by node operator.
@@ -50,6 +44,20 @@ library Events {
      * @param requestId The created withdraw request id.
      */
     event WithdrawRequested(address indexed nodeAddr, uint256 indexed amount, uint256 indexed requestId);
+
+    /**
+     * @dev Emitted on mergeChips()
+     * @param user Address of user who merge chips tokens.
+     * @param nodeAddr Address of node operator.
+     * @param newTokenId New minted chips token id.
+     * @param burnedTokenIds Chips token ids burned.
+     */
+    event ChipsMerged(
+        address indexed user,
+        address indexed nodeAddr,
+        uint256 indexed newTokenId,
+        uint256[] burnedTokenIds
+    );
 
     /**
      * @dev Emitted on setTaxRateBasisPoints4Node().
@@ -138,20 +146,6 @@ library Events {
         uint256 unstakeAmount,
         uint256[] chipsIds
     );
-    /**
-     * @dev Emitted on delegate()
-     * @param user Address of user who delegate Chips.
-     * @param nodeAddr The address of node to delegate.
-     * @param chipsIds The chips token ids to delegate.
-     */
-    event Delegated(address indexed user, address indexed nodeAddr, uint256[] chipsIds);
-    /**
-     * @dev Emitted on undelegate()
-     * @param user Address of user who undelegate tokens.
-     * @param nodeAddr The address of node to undelegate.
-     * @param chipsIds The chips token ids to undelegate.
-     */
-    event Undelegated(address indexed user, address indexed nodeAddr, uint256[] chipsIds);
 
     /**
      * @dev Emitted on claimUnstake()

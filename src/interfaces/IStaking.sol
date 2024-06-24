@@ -87,18 +87,17 @@ interface IStaking {
     /**
      * @notice Stakes tokens to a node operator.
      * @param nodeAddr The address of node to stake.
-     * @return startTokenId The start of new minted chips token ids.
-     * @return endTokenId The end of new minted chips token ids.
+     * @return tokenId The new minted chip token id.
      * msg.value carries the amount of tokens to stake.
      */
-    function stake(address nodeAddr) external payable returns (uint256 startTokenId, uint256 endTokenId);
+    function stake(address nodeAddr) external payable returns (uint256 tokenId);
 
     /**
      * @notice Requests unstake tokens from a node operator.
      * @dev This will burn the chips tokens.
      * @param nodeAddr Address of node operator to unstake. For public pool, the nodeAddress is address(0).
      * @param chipsIds The chips token ids for unstake.
-     * @return requestId THe created unstake request id.
+     * @return requestId The created unstake request id.
      */
     function requestUnstake(address nodeAddr, uint256[] calldata chipsIds) external returns (uint256 requestId);
 
@@ -111,12 +110,19 @@ interface IStaking {
     /**
      * @notice Stakes tokens to public pool.
      * @param nodeAddr The address of node to like.
-     * @return startTokenId The start of new minted chips token ids.
-     * @return endTokenId The end of new minted chips token ids.
+     * @return tokenId The new minted chip token id.
      * msg.value carries the amount of tokens to stake.
      *
      */
-    function stakeToPublicPool(address nodeAddr) external payable returns (uint256 startTokenId, uint256 endTokenId);
+    function stakeToPublicPool(address nodeAddr) external payable returns (uint256 tokenId);
+
+    /**
+     * @notice Merges chips tokens into a new one.
+     * @dev This will burn the chips tokens and mint a new one.
+     * @param chipsIds The chips token ids to merge.
+     * @return tokenId The new minted chips token id.
+     */
+    function mergeChips(uint256[] calldata chipsIds) external returns (uint256 tokenId);
 
     /**
      * @notice Updates accounting stats and distribute rewards.
@@ -197,19 +203,13 @@ interface IStaking {
     function getPendingUnstake(uint256 requestId) external view returns (DataTypes.UnstakeRequest memory);
 
     /**
-     * @notice Returns the minimal tokens to stake for a node.
-     * @param nodeAddr Address of node operator to stake.
-     * @return uint256 The minimal mount of tokens to stake for a node .
+     * @notice Gets chip info by `tokenId`.
+     * @param tokenId ID of chip token.
+     * @return nodeAddr Address of node operator who issues the chip.
+     * @return tokens Amount of tokens the chip is equivalent to.
+     * @return shares Amount of shares the chip owns.
      */
-    function minTokensToStake(address nodeAddr) external view returns (uint256);
-
-    /**
-     * @notice Gets chips info by `tokenId`.
-     * @param tokenId ID of Chip token.
-     * @return nodeAddr Address of node operator who issues the Chip.
-     * @return tokens Amount of tokens the chip is equivalent to .
-     */
-    function getChipsInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens);
+    function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares);
 
     /**
      * @notice Gets public pool info.

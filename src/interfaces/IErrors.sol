@@ -36,14 +36,17 @@ interface IErrors {
     /// @dev Claim time not ready.
     error ClaimIdNotExists(uint256 claimId);
 
-    /// @dev Staking amount too small.
-    error AmountTooSmall(uint256 amount);
+    /// @dev Staking amount is less than 500 ethers.
+    error StakeAmountTooSmall();
 
     /// @dev Not chips owner or approver.
     error ChipNotAuthorized(uint256 tokenId);
 
-    /// @dev ChipsIds are empty.
-    error EmptyChipsIds();
+    /// @dev ChipIds are empty.
+    error EmptyChipIds();
+
+    /// @dev ChipIds array length is too short.
+    error ChipIdsLengthTooShort();
 
     /// @dev Chips are not same owner.
     error ChipsNotSameOwner();
