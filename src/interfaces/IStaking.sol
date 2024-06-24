@@ -28,6 +28,7 @@ interface IStaking {
 
     /**
      * @notice Creates a node and deposits tokens.
+     * @dev Emits the `NodeCreated` event and `Deposited` event.
      * @param name Human-readable name.
      * @param description Description of node.
      * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents 0.01%.
@@ -43,6 +44,7 @@ interface IStaking {
 
     /**
      * @notice Updates node name and description.
+     * @dev Emits the `NodeUpdated` event.
      * @param name Human-readable name.
      * @param description Description of node.
      */
@@ -50,6 +52,7 @@ interface IStaking {
 
     /**
      * @notice Deposits tokens for node operator.
+     * @dev Emits the `Deposited` event.
      * msg.value carries the amount of tokens to deposit.
      *
      */
@@ -57,6 +60,7 @@ interface IStaking {
 
     /**
      * @notice Requests withdraw tokens from operation pool for node operator.
+     * @dev Emits the `WithdrawRequested` event.
      * @param amount Amount of tokens to withdraw.
      * @return requestId The created withdraw request id
      */
@@ -64,6 +68,7 @@ interface IStaking {
 
     /**
      * @notice Changes tax rate of the node.
+     * @dev Emits the `NodeTaxRateBasisPointsSet` event.
      * @dev Only node operator can call to set tax rate for itself.
      * @param taxRateBasisPoints The basis points of tax rate to set for the node.
      * Each basis point represents 0.01%.
@@ -73,7 +78,8 @@ interface IStaking {
     /**
      * @notice Sets tax rate for public pool.
      * Requirements:
-     * - The caller must have the `ORACLE_ROLE`.
+     * The caller must have the `ORACLE_ROLE`.
+     * @dev Emits the `PublicPoolTaxRateBasisPointsSet` event.
      * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool.
      * Each basis point represents 0.01%.
      */
@@ -81,11 +87,14 @@ interface IStaking {
 
     /**
      * @notice Claims a batch of withdrawal requests.
+     * @dev Emits the `WithdrawalClaimed` event.
+     * @param requestIds The withdrawal request ids to claim.
      */
     function claimWithdrawal(uint256[] calldata requestIds) external;
 
     /**
      * @notice Stakes tokens to a node operator.
+     * @dev Emits the `Staked` event.
      * @param nodeAddr The address of node to stake.
      * @return tokenId The new minted chip token id.
      * msg.value carries the amount of tokens to stake.
@@ -94,7 +103,7 @@ interface IStaking {
 
     /**
      * @notice Requests unstake tokens from a node operator.
-     * @dev This will burn the chips tokens.
+     * @dev This will burn the chips tokens and emits the `UnstakeRequested` event.
      * @param nodeAddr Address of node operator to unstake. For public pool, the nodeAddress is address(0).
      * @param chipsIds The chips token ids for unstake.
      * @return requestId The created unstake request id.
@@ -103,12 +112,14 @@ interface IStaking {
 
     /**
      * @notice Claims a batch of unstake requests.
+     * @dev Emits the `UnstakeClaimed` event.
      * @param requestIds The unstake request ids to claim.
      */
     function claimUnstake(uint256[] calldata requestIds) external;
 
     /**
      * @notice Stakes tokens to public pool.
+     * @dev Emits the `Staked` event.
      * @param nodeAddr The address of node to like.
      * @return tokenId The new minted chip token id.
      * msg.value carries the amount of tokens to stake.
@@ -118,11 +129,11 @@ interface IStaking {
 
     /**
      * @notice Merges chips tokens into a new one.
-     * @dev This will burn the chips tokens and mint a new one.
-     * @param chipsIds The chips token ids to merge.
-     * @return tokenId The new minted chips token id.
+     * @dev This will burn the chips tokens and mint a new one, and emits the `ChipsMerged` event.
+     * @param chipIds The chips token ids to merge.
+     * @return newTokenId The new minted chips token id.
      */
-    function mergeChips(uint256[] calldata chipsIds) external returns (uint256 tokenId);
+    function mergeChips(uint256[] calldata chipIds) external returns (uint256 newTokenId);
 
     /**
      * @notice Updates accounting stats and distribute rewards.
