@@ -22,6 +22,7 @@ fs_permissions = [
     { access='read', path='./deploy-config/' },
     { access='read', path='./broadcast/' },
     { access='read', path = './out/' },
+    { access='read', path='./script/input' },
 ]
 
 # Extreme Fuzzing CI Profile :P
