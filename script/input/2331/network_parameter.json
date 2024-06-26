@@ -1,0 +1,50 @@
+{
+    "NetworkTolerance": {
+        "Arbitrum": 1000,
+        "Arweave": 100,
+        "Avalanche": 100,
+        "Base": 100,
+        "BinanceSmartChain": 100,
+        "Crossbell": 500,
+        "Ethereum": 100,
+        "Farcaster": 3600000,
+        "Gnosis": 100,
+        "Linea": 100,
+        "Optimism": 100,
+        "Polygon": 100,
+        "SatoshiVM": 100,
+        "VSL": 100
+    },
+    "NetworkStartBlock": {
+        "Arbitrum": 185724972,
+        "Arweave": 1374360,
+        "Avalanche": 100,
+        "Base": 100,
+        "BinanceSmartChain": 100,
+        "Crossbell": 500,
+        "Ethereum": 100,
+        "Farcaster": 3600000,
+        "Gnosis": 100,
+        "Linea": 100,
+        "Optimism": 100,
+        "Polygon": 54103805,
+        "SatoshiVM": 60741,
+        "VSL": 14192
+    },
+    "NetworkCoreWorkerDiskSpacePerMonth": {
+        "Arbitrum": 26,
+        "Arweave": 0,
+        "Avalanche": 0,
+        "Base": 0,
+        "BinanceSmartChain": 10,
+        "Crossbell": 500,
+        "Ethereum": 100,
+        "Farcaster": 3600000,
+        "Gnosis": 100,
+        "Linea": 100,
+        "Optimism": 100,
+        "Polygon": 54103805,
+        "SatoshiVM": 60741,
+        "VSL": 1
+    }
+}

@@ -60,3 +60,10 @@ lint :; npx prettier --plugin=prettier-plugin-solidity  --write "{src,test,scrip
 
 # Generate Gas Snapshots
 snapshot :; forge clean && forge snapshot
+
+# set testnet network param
+set-param-dev:
+	@NETWORK_PARAMS_ADDRESS=$(DEV_NETWORK_PARAMS_ADDRESS) forge script script/SetParams.s.sol:SetParams --chain-id $(CHAIN_ID) \
+	--rpc-url $(RPC_URL) \
+	--private-key $(PRIVATE_KEY) \
+	--broadcast --ffi
