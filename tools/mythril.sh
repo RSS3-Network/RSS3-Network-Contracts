@@ -17,6 +17,8 @@ echo "Staking: "
 myth analyze src/Staking.sol --solc-json mythril.config.json --solv 0.8.20 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
 echo "Chips: "
 myth analyze src/Chips.sol --solc-json mythril.config.json --solv 0.8.20 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
+echo "NetworkParams: "
+myth analyze src/NetworkParams.sol --solc-json mythril.config.json --solv 0.8.20 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
 echo "Settlement: "
 myth analyze src/Settlement.sol --solc-json mythril.config.json --solv 0.8.20 --max-depth 10 --execution-timeout 900  --solver-timeout 900 &&
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" ' |

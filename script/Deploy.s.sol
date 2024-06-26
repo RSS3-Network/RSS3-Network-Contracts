@@ -7,6 +7,7 @@ import {DeployConfig} from "./DeployConfig.s.sol";
 import {Staking} from "../src/Staking.sol";
 import {Chips} from "../src/Chips.sol";
 import {Settlement} from "../src/Settlement.sol";
+import {NetworkParams} from "../src/NetworkParams.sol";
 import {console2 as console} from "forge-std/console2.sol";
 import {TransparentUpgradeableProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 
@@ -132,6 +133,14 @@ contract Deploy is Deployer {
         save("Settlement", address(settlement));
         console.log("Settlement deployed at %s", address(settlement));
         addr_ = address(settlement);
+    }
+
+    function deployNetworkParams() public broadcast returns (address addr_) {
+        NetworkParams params = new NetworkParams();
+
+        save("NetworkParams", address(params));
+        console.log("NetworkParams deployed at %s", address(params));
+        addr_ = address(params);
     }
 
     function initializeStaking() public broadcast {
