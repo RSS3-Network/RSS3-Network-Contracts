@@ -14,7 +14,8 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
 
     /**
      * @notice Initializes the NetworkParams contract.
-     * @param adminAccount Address who can set the NetworkParams contract.
+     * @dev Emits the `ParamsSet` event.
+     * @param adminAccount Address who can set params to the NetworkParams contract.
      */
     function initialize(address adminAccount) external initializer {
         _grantRole(ADMIN_ROLE, adminAccount);
@@ -22,7 +23,7 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
     }
 
     /**
-     * @notice Sets params for the contract.
+     * @notice Sets params to the contract.
      * @param params The params to set.
      */
     function setParams(string calldata params) external onlyRole(ADMIN_ROLE) {
