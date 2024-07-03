@@ -124,6 +124,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
      * @param userSlashRateBasisPoints Slash rate measured in basis points for user.
      * @param stakeRatio The stake ratio of the node operator.
      * @param minDeposit The deposit base line of the node operator.
+     * @param minTaxRateBasisPoints The minimal tax rate basis points.
+     * @param slashReporterBonusRateBasisPoints The bonus rate basis points for the reporter of slash.
      */
     constructor(
         address treasury,
