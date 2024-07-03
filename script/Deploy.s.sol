@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable no-console,ordering
+// solhint-disable no-console,ordering,custom-errors
 pragma solidity 0.8.20;
 
 import {Deployer} from "./Deployer.sol";

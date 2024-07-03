@@ -40,7 +40,7 @@ contract CommonTest is Utils, IErrors {
     uint256 public constant stakeRatio = 25;
     uint256 public constant minDeposit = 10000 ether;
     uint256 public constant minTaxRateBasisPoints = 500;
-    uint256 public constant slashReporterBonusRateBasisPoints = 200; 
+    uint256 public constant slashReporterBonusRateBasisPoints = 200;
     address public constant treasury = address(0xaaa);
 
     string public constant chipsName = "Open Chips";
