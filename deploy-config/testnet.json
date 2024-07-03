@@ -13,5 +13,6 @@
   "chipsName": "Open Chips",
   "chipsSymbol": "Chips",
   "settlementStartTime": "1708771296",
-  "operationRewardsPercent": 0
+  "operationRewardsPercent": 0,
+  "slashReporterBonusRateBasisPoints": "200"
 }

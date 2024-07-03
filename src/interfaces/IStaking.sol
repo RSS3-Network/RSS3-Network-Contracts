@@ -160,12 +160,34 @@ interface IStaking {
     ) external payable;
 
     /**
-     * @notice Slashes nodes.
+     * @notice Record slashing nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @param nodeAddrs The addresses of nodes to slash.
+     * @param reporters The addresses of reporters.
+     * @param epochIds The epoch ids of slashing.
      */
-    function slashNodes(address[] calldata nodeAddrs) external;
+    function recordSlashing(
+        address[] calldata nodeAddrs,
+        address[] calldata reporters,
+        uint256[] calldata epochIds
+    ) external returns (uint256 startSlashId, uint256 endSlashId);
+
+    /**
+     * @notice Commit slashing nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param slashIds The ids of slashes to commit.
+     */
+    function commitSlashing(uint256[] calldata slashIds) external;
+
+    /**
+     * @notice Revoke slashing nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param slashIds The addresses of nodes to revoke.
+     */
+    function revokeSlashing(uint256[] calldata slashIds) external;
 
     /**
      * @notice Sets the settlement phase.
@@ -221,6 +243,15 @@ interface IStaking {
      * @return shares Amount of shares the chip owns.
      */
     function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares);
+
+    /**
+     * @notice Gets slashing records info by `slashIds`.
+     * @param slashIds IDs of slashing records
+     * @return records DataTypes.SlashRecord[] slashing records info
+     */
+    function getSlashingRecords(
+        uint256[] calldata slashIds
+    ) external view returns (DataTypes.SlashRecord[] memory records);
 
     /**
      * @notice Gets public pool info.

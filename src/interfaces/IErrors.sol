@@ -119,4 +119,16 @@ interface IErrors {
 
     /// @dev Node is not staked.
     error AlphaWithdrawNotAllowed();
+
+    /// @dev Slash is not able to be committed.
+    error UnableToCommit(uint256 id);
+
+    /// @dev Slash is not able to be revoked.
+    error UnableToRevoke(uint256 id);
+
+    /// @dev Slash Public Good node.
+    error SlashPublicGoodNode(address);
+
+    /// @dev Slash more than once in one epoch for nodeAddr
+    error SlashMoreThanOnce(address nodeAddr, uint256 epoch);
 }

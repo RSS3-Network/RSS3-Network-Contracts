@@ -47,8 +47,14 @@ interface ISettlement {
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @param nodeAddrs The addresses of nodes to slash.
+     * @param reporters The addresses of reporters.
+     * @param epochIds The epoch numbers to slash.
      */
-    function slashNodes(address[] calldata nodeAddrs) external;
+    function slashNodes(
+        address[] calldata nodeAddrs,
+        address[] calldata reporters,
+        uint256[] calldata epochIds
+    ) external;
 
     /**
      * @notice  Returns the address of the Staking contract.

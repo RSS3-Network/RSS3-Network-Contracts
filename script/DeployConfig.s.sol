@@ -28,6 +28,7 @@ contract DeployConfig is Script {
     string public chipsSymbol;
     uint256 public settlementStartTime;
     uint256 public operationRewardsPercent;
+    uint256 public slashReporterBonusRateBasisPoints;
 
     constructor(string memory _path) {
         console.log("DeployConfig: reading file %s", _path);
@@ -53,5 +54,6 @@ contract DeployConfig is Script {
         chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");
         settlementStartTime = stdJson.readUint(_json, "$.settlementStartTime");
         operationRewardsPercent = stdJson.readUint(_json, "$.operationRewardsPercent");
+        slashReporterBonusRateBasisPoints = stdJson.readUint(_json, "$.slashReporterBonusRateBasisPoints");
     }
 }

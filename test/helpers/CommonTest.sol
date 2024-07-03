@@ -40,6 +40,7 @@ contract CommonTest is Utils, IErrors {
     uint256 public constant stakeRatio = 25;
     uint256 public constant minDeposit = 10000 ether;
     uint256 public constant minTaxRateBasisPoints = 500;
+    uint256 public constant slashReporterBonusRateBasisPoints = 200; 
     address public constant treasury = address(0xaaa);
 
     string public constant chipsName = "Open Chips";
@@ -69,7 +70,8 @@ contract CommonTest is Utils, IErrors {
             nodeSlashRateBasisPoints,
             userSlashRateBasisPoints,
             minDeposit,
-            minTaxRateBasisPoints
+            minTaxRateBasisPoints,
+            slashReporterBonusRateBasisPoints
         );
         // deploy chips token
         Chips chipsImpl = new Chips();
@@ -101,7 +103,8 @@ contract CommonTest is Utils, IErrors {
             nodeSlashRateBasisPoints,
             userSlashRateBasisPoints,
             minDeposit,
-            minTaxRateBasisPoints
+            minTaxRateBasisPoints,
+            slashReporterBonusRateBasisPoints
         );
         _internalStakingTest.initialize(address(_chips), address(_settlement), oracleAccount);
 

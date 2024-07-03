@@ -95,6 +95,15 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 
+    uint256 public immutable SLASH_REPORTER_BONUS_RATE_BASIS_POINTS;
+
+    /// @dev counter of slash
+    uint256 internal _slashCounter;
+    /// @dev records of slash
+    mapping(uint256 slashId => DataTypes.SlashRecord) internal _slashRecords;
+
+    mapping(address nodeAddr => mapping(uint256 epochId => bool)) internal _slashRecordsByNodeAddrAndEpochId;
+
     modifier whenNotAlphaPhase() {
         if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
         _;
@@ -124,7 +133,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 nodeSlashRateBasisPoints,
         uint256 userSlashRateBasisPoints,
         uint256 minDeposit,
-        uint256 minTaxRateBasisPoints
+        uint256 minTaxRateBasisPoints,
+        uint256 slashReporterBonusRateBasisPoints
     ) {
         TREASURY = treasury;
         STAKE_RATIO = stakeRatio;
@@ -137,6 +147,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         MIN_DEPOSIT = minDeposit;
         MIN_TAX_RATE_BASIS_POINTS = minTaxRateBasisPoints;
+
+        SLASH_REPORTER_BONUS_RATE_BASIS_POINTS = slashReporterBonusRateBasisPoints;
     }
 
     /// @inheritdoc IStaking
@@ -145,6 +157,8 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
         _grantRole(PAUSE_ROLE, pauseAccount);
         _grantRole(ORACLE_ROLE, oracleAccount);
+
+        _grantRole(0x00, pauseAccount);
 
         _isAlphaPhase = true;
     }
@@ -341,25 +355,89 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function slashNodes(
-        address[] calldata nodeAddrs
-    ) external override whenNotPaused whenNotSettlementPhase onlyRole(ORACLE_ROLE) {
+    function recordSlashing(
+        address[] calldata nodeAddrs,
+        address[] calldata reporters,
+        uint256[] calldata epochIds
+    ) external override whenNotPaused onlyRole(ORACLE_ROLE) returns (uint256 startSlashId, uint256 endSlashId) {
+        if (nodeAddrs.length != epochIds.length) revert InvalidArrayLength();
+        if (nodeAddrs.length != reporters.length) revert InvalidArrayLength();
+
+        startSlashId = _slashCounter;
+        uint256 slashId = startSlashId;
+
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = _nodes[nodeAddrs[i]];
+            address nodeAddr = nodeAddrs[i];
             if (node.account == address(0)) revert NodeNotExists();
+            if (node.publicGood) revert SlashPublicGoodNode(nodeAddr);
+
+            uint256 epoch = epochIds[i];
+
+            if (_slashRecordsByNodeAddrAndEpochId[nodeAddr][epoch]) {
+                revert SlashMoreThanOnce(nodeAddr, epoch);
+            }
+            _slashRecordsByNodeAddrAndEpochId[nodeAddr][epoch] = true;
 
             // slash operation pool tokens
             uint256 slashedOperationPool = (node.operationPoolTokens * NODE_SLASH_RATE_BASIS_POINTS) / _denominator();
-            _decreaseOperationPool(node, slashedOperationPool);
 
             // slash staking pool tokens
             uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_RATE_BASIS_POINTS) / _denominator();
-            _decreaseStakingPool(node, slashedStakingPool);
 
-            node.slashedTokens += slashedOperationPool + slashedStakingPool;
+            slashId = ++_slashCounter;
+            endSlashId = slashId;
 
-            emit Events.NodeSlashed(nodeAddrs[i], slashedOperationPool, slashedStakingPool);
+            address reporter = reporters[i];
+            DataTypes.SlashRecord storage record = _slashRecords[slashId];
+            record.nodeAddr = nodeAddr;
+            record.epoch = epoch;
+            record.amountForOperationPool = slashedOperationPool;
+            record.amountForStakingPool = slashedStakingPool;
+            record.reporter = reporter;
+
+            emit Events.SlashRecorded(slashId, nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
         }
+    }
+
+    /// @inheritdoc IStaking
+    function commitSlashing(uint256[] calldata slashIds) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        for (uint256 i = 0; i < slashIds.length; i++) {
+            DataTypes.SlashRecord storage record = _slashRecords[slashIds[i]];
+
+            if (record.nodeAddr == address(0)) revert UnableToCommit(slashIds[i]);
+
+            DataTypes.Node storage node = _nodes[record.nodeAddr];
+
+            if (record.status != DataTypes.SlashStatus.Recorded) revert UnableToCommit(slashIds[i]);
+
+            record.status = DataTypes.SlashStatus.Committed;
+
+            // transfer slashed tokens to treasury
+            _decreaseOperationPool(node, record.amountForOperationPool);
+            _decreaseStakingPool(node, record.amountForStakingPool);
+            _transfer(
+                record.reporter,
+                ((record.amountForOperationPool + record.amountForStakingPool) *
+                    SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / _denominator()
+            );
+        }
+        emit Events.SlashCommitted(slashIds);
+    }
+
+    /// @inheritdoc IStaking
+    function revokeSlashing(uint256[] calldata slashIds) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        for (uint256 i = 0; i < slashIds.length; i++) {
+            DataTypes.SlashRecord storage record = _slashRecords[slashIds[i]];
+
+            if (record.nodeAddr == address(0x0)) revert UnableToRevoke(slashIds[i]);
+            if (record.status != DataTypes.SlashStatus.Recorded) revert UnableToRevoke(slashIds[i]);
+
+            _slashRecordsByNodeAddrAndEpochId[record.nodeAddr][record.epoch] = false;
+
+            record.status = DataTypes.SlashStatus.Revoked;
+        }
+        emit Events.SlashRevoked(slashIds);
     }
 
     /// @inheritdoc IStaking
@@ -406,6 +484,15 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         uint256 tokenId
     ) external view override returns (address nodeAddr, uint256 tokens, uint256 shares) {
         (nodeAddr, tokens, shares) = _chipInfo(tokenId);
+    }
+
+    function getSlashingRecords(
+        uint256[] calldata slashIds
+    ) external view override returns (DataTypes.SlashRecord[] memory records) {
+        records = new DataTypes.SlashRecord[](slashIds.length);
+        for (uint256 i = 0; i < slashIds.length; i++) {
+            records[i] = _slashRecords[slashIds[i]];
+        }
     }
 
     /// @inheritdoc IStaking

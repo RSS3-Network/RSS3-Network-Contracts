@@ -162,14 +162,32 @@ library Events {
     );
 
     /**
-     * @dev Emitted on slashNode()
+     * @dev Emitted on recordSlashing()
+     * @param slashId The unique identifier of the slash record.
      * @param nodeAddr The address of node to slash.
+     * @param epoch The epoch number.
+     * @param reporter The address of the reporter.
      * @param slashedOperationPool Amount of operation pool tokens slashed.
      * @param slashedStakingPool Amount of staking pool tokens slashed.
      */
-    event NodeSlashed(
+    event SlashRecorded(
+        uint256 indexed slashId,
         address indexed nodeAddr,
-        uint256 indexed slashedOperationPool,
-        uint256 indexed slashedStakingPool
+        uint256 indexed epoch,
+        address reporter,
+        uint256 slashedOperationPool,
+        uint256 slashedStakingPool
     );
+
+    /**
+     * @dev Emitted on commitSlashing()
+     * @param slashIds The unique ids of the slash record.
+     */
+    event SlashCommitted(uint256[] indexed slashIds);
+
+    /**
+     * @dev Emitted on revokeSlashing()
+     * @param slashIds The unique ids of the slash record.
+     */
+    event SlashRevoked(uint256[] slashIds);
 }

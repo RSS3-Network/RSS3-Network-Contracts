@@ -18,7 +18,7 @@ contract StakingForkTest is CommonTest {
     function setUp() public {
         vm.createSelectFork("https://rpc.rss3.io", 4515437);
 
-        Staking st = new Staking(address(1111), 25, 1944000, 1944000, 200, 100, 10000000000000000000000, 500);
+        Staking st = new Staking(address(1111), 25, 1944000, 1944000, 200, 100, 10000000000000000000000, 500, 200);
 
         Proxy proxy = Proxy(payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578));
         vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);

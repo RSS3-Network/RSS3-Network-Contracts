@@ -125,8 +125,12 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @inheritdoc ISettlement
-    function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).slashNodes(nodeAddrs);
+    function slashNodes(
+        address[] calldata nodeAddrs,
+        address[] calldata reporters,
+        uint256[] calldata epochIds
+    ) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).recordSlashing(nodeAddrs, reporters, epochIds);
     }
 
     /// @inheritdoc ISettlement

@@ -13,7 +13,8 @@ contract InternalStaking is Staking {
         uint256 nodeSlashRateBasisPoints,
         uint256 userSlashRateBasisPoints,
         uint256 minDeposit,
-        uint256 minTaxRateBasisPoints
+        uint256 minTaxRateBasisPoints,
+        uint256 slashReporterBonusRateBasisPoints
     )
         Staking(
             treasury,
@@ -23,7 +24,8 @@ contract InternalStaking is Staking {
             nodeSlashRateBasisPoints,
             userSlashRateBasisPoints,
             minDeposit,
-            minTaxRateBasisPoints
+            minTaxRateBasisPoints,
+            slashReporterBonusRateBasisPoints
         )
     {}
 
