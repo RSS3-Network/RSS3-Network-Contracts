@@ -40,6 +40,9 @@ mythx :
 	@echo " > \033[32mChecking contracts with mythx...\033[0m"
 	mythx analyze
 
+# cargo install aderyn
+aderyn :; aderyn .
+
 # upgradeable check
 upgradeable:
 	@echo " > \033[32mChecking upgradeable...\033[0m"
