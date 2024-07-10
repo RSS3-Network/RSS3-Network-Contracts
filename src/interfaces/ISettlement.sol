@@ -47,12 +47,12 @@ interface ISettlement {
      * @notice Slashes nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param slashIds The addresses of nodes and epoch ids to slash.
+     * @param slashings The addresses of nodes and epoch ids to slash.
      * @param reporters The addresses of reporters.
      * @param reasons The reasons for slashing.
      */
     function recordSlashing(
-        DataTypes.Slashing[] calldata slashIds,
+        DataTypes.Slashing[] calldata slashings,
         address[] calldata reporters,
         string[] calldata reasons
     ) external;

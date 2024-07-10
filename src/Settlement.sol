@@ -126,11 +126,11 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @inheritdoc ISettlement
     function recordSlashing(
-        DataTypes.Slashing[] calldata slashIds,
+        DataTypes.Slashing[] calldata slashings,
         address[] calldata reporters,
         string[] calldata reasons
     ) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).recordSlashing(slashIds, reporters, reasons);
+        IStaking(_staking).recordSlashing(slashings, reporters, reasons);
     }
 
     /// @inheritdoc ISettlement

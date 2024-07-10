@@ -1178,7 +1178,7 @@ contract StakingTest is CommonTest, IERC721Errors {
             assertEq(records[i].reporter, reporters[i]);
             assertEq(records[i].amountForOperationPool, expectedSlashedTokensOnOperationPool);
             assertEq(records[i].amountForStakingPool, expectedSlashedTokensOnStakingPool);
-            vm.assume(records[i].status == DataTypes.SlashStatus.Recorded);
+            assertTrue(records[i].status == DataTypes.SlashStatus.Recorded);
         }
 
         // 3. check staking pool and operation tokens
@@ -1254,8 +1254,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         DataTypes.Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
 
-        uint256[] memory expectedSlashIds = array(1, 2);
-
         uint256 stakingPoolTokens = _staking.getNode(alice).stakingPoolTokens;
         uint256 operationPoolTokens = _staking.getNode(alice).operationPoolTokens;
 
@@ -1275,7 +1273,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // 3. check: slashed tokens distributed as expected
         // 3.1 reporters balance correct
-        for (uint256 i = 0; i < expectedSlashIds.length; i++) {
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
             uint256 value = ((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
                 slashReporterBonusRateBasisPoints) / _denominator();
             assertEq(reporters[i].balance, value);
@@ -1297,7 +1295,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         DataTypes.SlashRecord[] memory records = _staking.getSlashingRecords(slashings);
         // 4. Record status updated correctly
         for (uint256 i = 0; i < records.length; i++) {
-            vm.assume(records[i].status == DataTypes.SlashStatus.Committed);
+            assertTrue(records[i].status == DataTypes.SlashStatus.Committed);
         }
         assertEq(aliceNode.slashStatus, false);
     }

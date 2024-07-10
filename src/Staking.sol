@@ -158,8 +158,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         _grantRole(PAUSE_ROLE, pauseAccount);
         _grantRole(ORACLE_ROLE, oracleAccount);
 
-        _grantRole(0x00, pauseAccount);
-
         _isAlphaPhase = true;
     }
 
@@ -483,11 +481,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     function getSlashingRecords(
-        DataTypes.Slashing[] calldata slashIds
+        DataTypes.Slashing[] calldata slashings
     ) external view override returns (DataTypes.SlashRecord[] memory records) {
-        records = new DataTypes.SlashRecord[](slashIds.length);
-        for (uint256 i = 0; i < slashIds.length; i++) {
-            records[i] = _getSlashRecordById(slashIds[i]);
+        records = new DataTypes.SlashRecord[](slashings.length);
+        for (uint256 i = 0; i < slashings.length; i++) {
+            records[i] = _getSlashRecord(slashings[i]);
         }
     }
 
@@ -867,10 +865,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         return issuer != address(0) ? issuer : _chipIssuers[tokenId];
     }
 
-    function _getSlashRecordById(
-        DataTypes.Slashing calldata slashId
+    function _getSlashRecord(
+        DataTypes.Slashing calldata slashing
     ) internal view returns (DataTypes.SlashRecord memory) {
-        return _slashRecords[slashId.nodeAddr][slashId.epoch];
+        return _slashRecords[slashing.nodeAddr][slashing.epoch];
     }
 
     /// @dev check if the status of a slash record is recorded

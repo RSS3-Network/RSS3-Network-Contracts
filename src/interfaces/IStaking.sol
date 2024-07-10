@@ -163,12 +163,12 @@ interface IStaking {
      * @notice Record slashing nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param slashIds The addresses of nodes and epochIds to slash.
+     * @param slashings The addresses of nodes and epochIds to slash.
      * @param reporters The addresses of reporters.
      * @param reasons The reasons of slashing.
      */
     function recordSlashing(
-        DataTypes.Slashing[] calldata slashIds,
+        DataTypes.Slashing[] calldata slashings,
         address[] calldata reporters,
         string[] calldata reasons
     ) external;
@@ -177,17 +177,17 @@ interface IStaking {
      * @notice Commit slashing nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param slashIds The ids of slashes to commit.
+     * @param slashings The ids of slashes to commit.
      */
-    function commitSlashing(DataTypes.Slashing[] calldata slashIds) external;
+    function commitSlashing(DataTypes.Slashing[] calldata slashings) external;
 
     /**
      * @notice Revoke slashing nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param slashIds The addresses of nodes to revoke.
+     * @param slashings The addresses of nodes to revoke.
      */
-    function revokeSlashing(DataTypes.Slashing[] calldata slashIds) external;
+    function revokeSlashing(DataTypes.Slashing[] calldata slashings) external;
 
     /**
      * @notice Sets the settlement phase.
@@ -245,12 +245,12 @@ interface IStaking {
     function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares);
 
     /**
-     * @notice Gets slashing records info by `slashIds`.
-     * @param slashIds IDs of slashing records
+     * @notice Gets slashing records info by `slashings`.
+     * @param slashings IDs of slashing records
      * @return records DataTypes.SlashRecord[] slashing records info
      */
     function getSlashingRecords(
-        DataTypes.Slashing[] calldata slashIds
+        DataTypes.Slashing[] calldata slashings
     ) external view returns (DataTypes.SlashRecord[] memory records);
 
     /**
