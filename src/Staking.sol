@@ -97,12 +97,10 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     uint256 public immutable SLASH_REPORTER_BONUS_RATE_BASIS_POINTS;
 
-    /// @dev counter of slash
-    uint256 internal _slashCounter;
-    /// @dev records of slash
-    mapping(uint256 slashId => DataTypes.SlashRecord) internal _slashRecords;
+    uint256 internal _totalSlashingPoolTokens;
 
-    mapping(address nodeAddr => mapping(uint256 epochId => bool)) internal _slashRecordsByNodeAddrAndEpochId;
+    /// @dev (nodeAddr, epochId) => slash record
+    mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
 
     modifier whenNotAlphaPhase() {
         if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
@@ -358,28 +356,24 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
 
     /// @inheritdoc IStaking
     function recordSlashing(
-        address[] calldata nodeAddrs,
+        DataTypes.Slashing[] calldata slashings,
         address[] calldata reporters,
-        uint256[] calldata epochIds
-    ) external override whenNotPaused onlyRole(ORACLE_ROLE) returns (uint256 startSlashId, uint256 endSlashId) {
-        if (nodeAddrs.length != epochIds.length) revert InvalidArrayLength();
-        if (nodeAddrs.length != reporters.length) revert InvalidArrayLength();
+        string[] calldata reasons
+    ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        if (slashings.length != reporters.length) revert InvalidArrayLength();
+        if (slashings.length != reasons.length) revert InvalidArrayLength();
 
-        startSlashId = _slashCounter;
-        uint256 slashId = startSlashId;
+        for (uint256 i = 0; i < slashings.length; i++) {
+            (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
+            address reporter = reporters[i];
 
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            DataTypes.Node storage node = _nodes[nodeAddrs[i]];
-            address nodeAddr = nodeAddrs[i];
-            if (node.account == address(0)) revert NodeNotExists();
+            DataTypes.Node storage node = _nodes[nodeAddr];
+
+            if (nodeAddr == address(0)) revert NodeNotExists();
             if (node.publicGood) revert SlashPublicGoodNode(nodeAddr);
+            if (node.slashStatus) revert SlashMoreThanOnce(nodeAddr, epoch);
 
-            uint256 epoch = epochIds[i];
-
-            if (_slashRecordsByNodeAddrAndEpochId[nodeAddr][epoch]) {
-                revert SlashMoreThanOnce(nodeAddr, epoch);
-            }
-            _slashRecordsByNodeAddrAndEpochId[nodeAddr][epoch] = true;
+            _setSlashStatus(nodeAddr, true);
 
             // slash operation pool tokens
             uint256 slashedOperationPool = (node.operationPoolTokens * NODE_SLASH_RATE_BASIS_POINTS) / _denominator();
@@ -387,59 +381,59 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             // slash staking pool tokens
             uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_RATE_BASIS_POINTS) / _denominator();
 
-            slashId = ++_slashCounter;
-            endSlashId = slashId;
-
-            address reporter = reporters[i];
-            DataTypes.SlashRecord storage record = _slashRecords[slashId];
-            record.nodeAddr = nodeAddr;
-            record.epoch = epoch;
+            DataTypes.SlashRecord storage record = _slashRecords[nodeAddr][epoch];
             record.amountForOperationPool = slashedOperationPool;
             record.amountForStakingPool = slashedStakingPool;
             record.reporter = reporter;
+            record.status = DataTypes.SlashStatus.Recorded;
+            record.slashreason = reasons[i];
 
-            emit Events.SlashRecorded(slashId, nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
+            _recordSlashingAmount(nodeAddr, record);
+
+            emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
         }
     }
 
     /// @inheritdoc IStaking
-    function commitSlashing(uint256[] calldata slashIds) external override whenNotPaused onlyRole(ORACLE_ROLE) {
-        for (uint256 i = 0; i < slashIds.length; i++) {
-            DataTypes.SlashRecord storage record = _slashRecords[slashIds[i]];
+    function commitSlashing(
+        DataTypes.Slashing[] calldata slashings
+    ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        for (uint256 i = 0; i < slashings.length; i++) {
+            (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
 
-            if (record.nodeAddr == address(0)) revert UnableToCommit(slashIds[i]);
+            DataTypes.SlashRecord storage record = _slashRecords[nodeAddr][epoch];
 
-            DataTypes.Node storage node = _nodes[record.nodeAddr];
-
-            if (record.status != DataTypes.SlashStatus.Recorded) revert UnableToCommit(slashIds[i]);
+            _checkRecordedStatus(record, nodeAddr, epoch);
 
             record.status = DataTypes.SlashStatus.Committed;
 
-            // transfer slashed tokens to treasury
-            _decreaseOperationPool(node, record.amountForOperationPool);
-            _decreaseStakingPool(node, record.amountForStakingPool);
-            _transfer(
-                record.reporter,
-                ((record.amountForOperationPool + record.amountForStakingPool) *
-                    SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / _denominator()
-            );
+            _setSlashStatus(nodeAddr, false);
+
+            _commitSlashingAmount(record);
+
+            emit Events.SlashCommitted(nodeAddr, epoch);
         }
-        emit Events.SlashCommitted(slashIds);
     }
 
     /// @inheritdoc IStaking
-    function revokeSlashing(uint256[] calldata slashIds) external override whenNotPaused onlyRole(ORACLE_ROLE) {
-        for (uint256 i = 0; i < slashIds.length; i++) {
-            DataTypes.SlashRecord storage record = _slashRecords[slashIds[i]];
+    function revokeSlashing(
+        DataTypes.Slashing[] calldata slashings
+    ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        for (uint256 i = 0; i < slashings.length; i++) {
+            (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
 
-            if (record.nodeAddr == address(0x0)) revert UnableToRevoke(slashIds[i]);
-            if (record.status != DataTypes.SlashStatus.Recorded) revert UnableToRevoke(slashIds[i]);
+            DataTypes.SlashRecord storage record = _slashRecords[nodeAddr][epoch];
 
-            _slashRecordsByNodeAddrAndEpochId[record.nodeAddr][record.epoch] = false;
+            _checkRecordedStatus(record, nodeAddr, epoch);
 
             record.status = DataTypes.SlashStatus.Revoked;
+
+            _setSlashStatus(nodeAddr, false);
+
+            _revokeSlashingAmount(nodeAddr, record);
+
+            emit Events.SlashRevoked(nodeAddr, epoch);
         }
-        emit Events.SlashRevoked(slashIds);
     }
 
     /// @inheritdoc IStaking
@@ -455,7 +449,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 balance = address(this).balance;
-        uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens;
+        uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens - _totalSlashingPoolTokens;
         _transfer(TREASURY, amount);
     }
 
@@ -489,11 +483,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     function getSlashingRecords(
-        uint256[] calldata slashIds
+        DataTypes.Slashing[] calldata slashIds
     ) external view override returns (DataTypes.SlashRecord[] memory records) {
         records = new DataTypes.SlashRecord[](slashIds.length);
         for (uint256 i = 0; i < slashIds.length; i++) {
-            records[i] = _slashRecords[slashIds[i]];
+            records[i] = _getSlashRecordById(slashIds[i]);
         }
     }
 
@@ -547,10 +541,11 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         external
         view
         override
-        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens)
+        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens)
     {
         totalOperationPoolTokens = _totalOperationPoolTokens;
         totalStakingPoolTokens = _totalStakingPoolTokens;
+        totalSlashingPoolTokens = _totalSlashingPoolTokens;
     }
 
     /// @inheritdoc IStaking
@@ -595,6 +590,16 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     function _decreaseStakingPool(DataTypes.Node storage node, uint256 amount) internal {
         node.stakingPoolTokens -= amount;
         _totalStakingPoolTokens -= amount;
+    }
+
+    /// @dev increase slashing pool tokens
+    function _increaseSlashingPoolByRecord(DataTypes.SlashRecord memory record) internal {
+        _totalSlashingPoolTokens += _totalSlashedAmount(record);
+    }
+
+    /// @dev decrease slashing pool tokens
+    function _decreaseSlashingPoolByRecord(DataTypes.SlashRecord memory record) internal {
+        _totalSlashingPoolTokens -= _totalSlashedAmount(record);
     }
 
     /// @dev increase total shares of a node
@@ -790,6 +795,48 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         }
     }
 
+    /// @dev set the status of a slash record
+    function _setSlashStatus(address nodeAddr, bool status) internal {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        node.slashStatus = status;
+    }
+
+    /// @dev
+    function _recordSlashingAmount(address nodeAddr, DataTypes.SlashRecord memory record) internal {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+
+        _decreaseOperationPool(node, record.amountForOperationPool);
+        _decreaseStakingPool(node, record.amountForStakingPool);
+        _increaseSlashingPoolByRecord(record);
+    }
+
+    /// @dev return slashing amount
+    function _revokeSlashingAmount(address nodeAddr, DataTypes.SlashRecord memory record) internal {
+        DataTypes.Node storage node = _nodes[nodeAddr];
+
+        _decreaseSlashingPoolByRecord(record);
+        _increaseOperationPool(node, record.amountForOperationPool);
+        _increaseStakingPool(node, record.amountForStakingPool);
+    }
+
+    /// @dev commit slashing amount, distributes the amount to reporter and treasury
+    function _commitSlashingAmount(DataTypes.SlashRecord memory record) internal {
+        _decreaseSlashingPoolByRecord(record);
+
+        // transfer slashed tokens to reporter
+        _transfer(
+            record.reporter,
+            ((record.amountForOperationPool + record.amountForStakingPool) * SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) /
+                _denominator()
+        );
+    }
+
+    /// @dev check if the status of a slash record is recorded
+    function _checkRecordedStatus(DataTypes.SlashRecord memory record, address nodeAddr, uint256 epoch) internal pure {
+        if (record.status == DataTypes.SlashStatus.NonExistent) revert SlashRecordNotExists(nodeAddr, epoch);
+        if (record.status != DataTypes.SlashStatus.Recorded) revert SlashStatusNotRecorded(nodeAddr, epoch);
+    }
+
     /// @dev returns whether user is token owner or approved
     function _isAuthorized(address owner, uint256 tokenId, address user) internal view returns (bool) {
         return
@@ -824,6 +871,16 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         // Note: no need for safe cast, we know that tokenId <= type(uint96).max
         address issuer = address(_families.lowerLookup(tokenId.toUint96()));
         return issuer != address(0) ? issuer : _chipIssuers[tokenId];
+    }
+
+    function _getSlashRecordById(
+        DataTypes.Slashing calldata slashId
+    ) internal view returns (DataTypes.SlashRecord memory) {
+        return _slashRecords[slashId.nodeAddr][slashId.epoch];
+    }
+
+    function _totalSlashedAmount(DataTypes.SlashRecord memory record) internal pure returns (uint256) {
+        return record.amountForOperationPool + record.amountForStakingPool;
     }
 
     function _chipInfo(uint256 tokenId) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {

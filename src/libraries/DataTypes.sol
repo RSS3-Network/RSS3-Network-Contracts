@@ -27,8 +27,8 @@ library DataTypes {
         uint256 stakingPoolTokens;
         /// @notice total shares of the pool
         uint256 totalShares;
-        /// @notice total amount of slashed tokens
-        uint256 reservedData;
+        /// @notice slashing status of the node
+        bool slashStatus;
     }
 
     struct WithdrawalRequest {
@@ -59,19 +59,23 @@ library DataTypes {
     }
 
     enum SlashStatus {
+        NonExistent,
         Recorded,
         Committed,
         Revoked
     }
 
     struct SlashRecord {
-        address nodeAddr;
         address reporter;
-        uint256 epoch;
         uint256 amountForOperationPool;
         uint256 amountForStakingPool;
         SlashStatus status; // 0: recorded, 1: committed, 2: revoked
-        bytes reservedData;
+        string slashreason;
+    }
+
+    struct Slashing {
+        address nodeAddr;
+        uint256 epoch;
     }
 
     struct NodeTraits {

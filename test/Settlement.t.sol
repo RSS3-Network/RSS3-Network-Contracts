@@ -25,8 +25,11 @@ contract SettlementTest is CommonTest {
     }
 
     function invariantTreasuryBalance() public {
-        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
-        assertTrue(address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens >= 0);
+        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = _staking
+            .getPoolInfo();
+        assertTrue(
+            address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens - totalSlashingPoolTokens >= 0
+        );
     }
 
     function testCheckSetupStatus() public {
@@ -761,7 +764,7 @@ contract SettlementTest is CommonTest {
         uint256 endTime = block.timestamp;
 
         uint256 pgStakingPoolTokens = _staking.getPublicPool().stakingPoolTokens;
-        (, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
+        (, uint256 totalStakingPoolTokens, ) = _staking.getPoolInfo();
         (uint256 totalOpRewards, uint256 totalStRewards) = _settlement.getBonusInfo();
         uint256 pgRewards = (pgStakingPoolTokens * totalStRewards) / totalStakingPoolTokens;
 

@@ -125,12 +125,22 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @inheritdoc ISettlement
-    function slashNodes(
-        address[] calldata nodeAddrs,
+    function recordSlashing(
+        DataTypes.Slashing[] calldata slashIds,
         address[] calldata reporters,
-        uint256[] calldata epochIds
+        string[] calldata reasons
     ) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).recordSlashing(nodeAddrs, reporters, epochIds);
+        IStaking(_staking).recordSlashing(slashIds, reporters, reasons);
+    }
+
+    /// @inheritdoc ISettlement
+    function revokeSlashing(DataTypes.Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).revokeSlashing(epochIds);
+    }
+
+    /// @inheritdoc ISettlement
+    function commitSlashing(DataTypes.Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).commitSlashing(epochIds);
     }
 
     /// @inheritdoc ISettlement
@@ -173,7 +183,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     function _saveTotalStakingSnapshot() internal {
-        (, _totalStakingSnapshot[_currentEpoch]) = IStaking(_staking).getPoolInfo();
+        (, _totalStakingSnapshot[_currentEpoch], ) = IStaking(_staking).getPoolInfo();
     }
 
     function _updateEpochInfo(uint256 epoch) internal {
@@ -202,7 +212,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @dev Returns staking rewards per epoch for public pool
     function _getPublicPoolStakingRewards() internal view returns (uint256) {
-        (, uint256 totalStaking) = IStaking(_staking).getPoolInfo();
+        (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
         if (totalStaking == 0) return 0;
 
         uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
@@ -228,7 +238,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     function _getTotalStaking() internal view returns (uint256 totalStaking) {
         totalStaking = _totalStakingSnapshot[_currentEpoch];
         if (totalStaking == 0) {
-            (, totalStaking) = IStaking(_staking).getPoolInfo();
+            (, totalStaking, ) = IStaking(_staking).getPoolInfo();
         }
     }
 

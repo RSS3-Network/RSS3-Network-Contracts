@@ -120,8 +120,11 @@ interface IErrors {
     /// @dev Node is not staked.
     error AlphaWithdrawNotAllowed();
 
-    /// @dev Slash is not able to be committed.
-    error UnableToCommit(uint256 id);
+    /// @dev Slash is non-existent.
+    error SlashRecordNotExists(address nodeAddr, uint256 epochId);
+
+    /// @dev Slash is not able to be committed or revoked.
+    error SlashStatusNotRecorded(address nodeAddr, uint256 epochId);
 
     /// @dev Slash is not able to be revoked.
     error UnableToRevoke(uint256 id);

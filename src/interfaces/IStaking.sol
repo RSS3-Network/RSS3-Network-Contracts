@@ -163,15 +163,15 @@ interface IStaking {
      * @notice Record slashing nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param nodeAddrs The addresses of nodes to slash.
+     * @param slashIds The addresses of nodes and epochIds to slash.
      * @param reporters The addresses of reporters.
-     * @param epochIds The epoch ids of slashing.
+     * @param reasons The reasons of slashing.
      */
     function recordSlashing(
-        address[] calldata nodeAddrs,
+        DataTypes.Slashing[] calldata slashIds,
         address[] calldata reporters,
-        uint256[] calldata epochIds
-    ) external returns (uint256 startSlashId, uint256 endSlashId);
+        string[] calldata reasons
+    ) external;
 
     /**
      * @notice Commit slashing nodes.
@@ -179,7 +179,7 @@ interface IStaking {
      * - The caller must have the `ORACLE_ROLE`.
      * @param slashIds The ids of slashes to commit.
      */
-    function commitSlashing(uint256[] calldata slashIds) external;
+    function commitSlashing(DataTypes.Slashing[] calldata slashIds) external;
 
     /**
      * @notice Revoke slashing nodes.
@@ -187,7 +187,7 @@ interface IStaking {
      * - The caller must have the `ORACLE_ROLE`.
      * @param slashIds The addresses of nodes to revoke.
      */
-    function revokeSlashing(uint256[] calldata slashIds) external;
+    function revokeSlashing(DataTypes.Slashing[] calldata slashIds) external;
 
     /**
      * @notice Sets the settlement phase.
@@ -250,7 +250,7 @@ interface IStaking {
      * @return records DataTypes.SlashRecord[] slashing records info
      */
     function getSlashingRecords(
-        uint256[] calldata slashIds
+        DataTypes.Slashing[] calldata slashIds
     ) external view returns (DataTypes.SlashRecord[] memory records);
 
     /**
@@ -298,7 +298,10 @@ interface IStaking {
      * @return totalOperationPoolTokens Total tokens in operation pool
      * @return totalStakingPoolTokens Total tokens in staking pool
      */
-    function getPoolInfo() external view returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens);
+    function getPoolInfo()
+        external
+        view
+        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens);
 
     /**
      * @notice Returns the address of the chips contract.
