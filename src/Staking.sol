@@ -831,12 +831,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         );
     }
 
-    /// @dev check if the status of a slash record is recorded
-    function _checkRecordedStatus(DataTypes.SlashRecord memory record, address nodeAddr, uint256 epoch) internal pure {
-        if (record.status == DataTypes.SlashStatus.NonExistent) revert SlashRecordNotExists(nodeAddr, epoch);
-        if (record.status != DataTypes.SlashStatus.Recorded) revert SlashStatusNotRecorded(nodeAddr, epoch);
-    }
-
     /// @dev returns whether user is token owner or approved
     function _isAuthorized(address owner, uint256 tokenId, address user) internal view returns (bool) {
         return
@@ -877,6 +871,12 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
         DataTypes.Slashing calldata slashId
     ) internal view returns (DataTypes.SlashRecord memory) {
         return _slashRecords[slashId.nodeAddr][slashId.epoch];
+    }
+
+    /// @dev check if the status of a slash record is recorded
+    function _checkRecordedStatus(DataTypes.SlashRecord memory record, address nodeAddr, uint256 epoch) internal pure {
+        if (record.status == DataTypes.SlashStatus.NonExistent) revert SlashRecordNotExists(nodeAddr, epoch);
+        if (record.status != DataTypes.SlashStatus.Recorded) revert SlashStatusNotRecorded(nodeAddr, epoch);
     }
 
     function _totalSlashedAmount(DataTypes.SlashRecord memory record) internal pure returns (uint256) {
