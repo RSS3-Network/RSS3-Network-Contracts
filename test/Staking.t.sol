@@ -1188,6 +1188,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(aliceNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
         assertEq(bobNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
         assertEq(bobNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
+
+        // 4. slash status updated correctly
+        assertEq(aliceNode.slashStatus, true);
+        assertEq(bobNode.slashStatus, true);
     }
 
     // Test errors: SlashRecordNotExists, SlashStatusNotRecorded
@@ -1286,17 +1290,16 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         assertEq(treasuryAmountAfterSlashing, expectedTreasuryAmount);
         // 3.3 Node pool tokens correct
-        assertEq(_staking.getNode(alice).stakingPoolTokens, stakingPoolTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(
-            _staking.getNode(alice).operationPoolTokens,
-            operationPoolTokens - expectedSlashedTokensOnOperationPool
-        );
+        DataTypes.Node memory aliceNode = _staking.getNode(alice);
+        assertEq(aliceNode.stakingPoolTokens, stakingPoolTokens - expectedSlashedTokensOnStakingPool);
+        assertEq(aliceNode.operationPoolTokens, operationPoolTokens - expectedSlashedTokensOnOperationPool);
 
         DataTypes.SlashRecord[] memory records = _staking.getSlashingRecords(slashings);
         // 4. Record status updated correctly
         for (uint256 i = 0; i < records.length; i++) {
             vm.assume(records[i].status == DataTypes.SlashStatus.Committed);
         }
+        assertEq(aliceNode.slashStatus, false);
     }
 
     // Test Errors: SlashRecordNotExists, SlashStatusNotRecorded
@@ -1375,6 +1378,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         // 3.3 treasury balance correct
         uint256 amount = _getTreasuryAmount();
         assertEq(amount, 0);
+
+        // 4. slash status updated correctly
+        assertEq(aliceNode.slashStatus, false);
+        assertEq(bobNode.slashStatus, false);
     }
 
     // Test multiple slashings
