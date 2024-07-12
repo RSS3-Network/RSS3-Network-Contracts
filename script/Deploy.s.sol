@@ -192,9 +192,7 @@ contract Deploy is Deployer {
     function initializeNetworkParams() public broadcast {
         NetworkParams networkParamsProxy = NetworkParams(mustGetAddress("NetworkParamsProxy"));
 
-        networkParamsProxy.initialize(
-            cfg.networkParamsManager()
-        );
+        networkParamsProxy.initialize(cfg.networkParamsManager());
 
         // check states
         require(networkParamsProxy.hasRole(ADMIN_ROLE, cfg.networkParamsManager()), "check admin role error");
