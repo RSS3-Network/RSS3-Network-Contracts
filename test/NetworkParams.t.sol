@@ -77,4 +77,8 @@ contract NetworkParamsTest is CommonTest {
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ADMIN_ROLE));
         _params.setParams(100, "hello world");
     }
+
+    function testEmptyParams() public {
+        assertEq(_params.getParams(100), "");
+    }
 }
