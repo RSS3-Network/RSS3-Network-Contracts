@@ -14,7 +14,7 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
 
     // Mapping from epoch to configuration parameters
     mapping(uint64 => string) private _params;
-    // Sorted set of epoch keys using EnumerableSet to maintain order
+    // Sorted set of epoch keys using EnumerableSet and an array to maintain order
     EnumerableSet.UintSet private _epochs;
     uint64[] private _orderedEpochs;
 
@@ -22,7 +22,6 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
 
     /**
      * @notice Initializes the NetworkParams contract.
-     * @dev Emits the `ParamsSet` event.
      * @param adminAccount Address who can set params to the NetworkParams contract.
      */
     function initialize(address adminAccount) external initializer {
@@ -32,7 +31,7 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
 
     /**
      * @notice Sets configuration parameters for a specific epoch.
-     * @dev Adds the epoch to the sorted set and maps it to the provided parameters.
+     * @dev Adds the epoch to the sorted list and maps it to the provided parameters.
      * @param epoch The epoch (as a uint64) to which the parameters should be associated.
      * @param params The configuration parameters (as a string) to be set.
      */
@@ -62,6 +61,10 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
         return _params[nearestEpoch];
     }
 
+    /**
+     * @notice inserts the epoch into the ordered list of epochs.
+     * @param epoch The epoch to be inserted.
+     */
     function _insertOrderedEpoch(uint64 epoch) private {
         uint256 insertIndex = _findInsertIndex(epoch);
         _orderedEpochs.push(0);
@@ -72,6 +75,11 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
         _orderedEpochs[insertIndex] = epoch;
     }
 
+    /**
+     * @notice Finds the index at which the epoch should be inserted in the ordered list of epochs.
+     * @param epoch The epoch for which the index is to be found.
+     * @return The index at which the epoch should be inserted.
+     */
     function _findInsertIndex(uint64 epoch) private view returns (uint256) {
         uint256 low = 0;
         uint256 high = _orderedEpochs.length;
@@ -86,6 +94,11 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
         return high;
     }
 
+    /**
+     * @notice Finds the nearest epoch to the target epoch.
+     * @param targetEpoch The epoch for which the nearest epoch is to be found.
+     * @return The nearest epoch to the target epoch.
+     */
     function _findNearestEpoch(uint64 targetEpoch) private view returns (uint64) {
         uint256 low = 0;
         uint256 high = _orderedEpochs.length - 1;
