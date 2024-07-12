@@ -3,19 +3,15 @@
 pragma solidity 0.8.20;
 
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract NetworkParams is Initializable, AccessControlEnumerable {
-    using EnumerableSet for EnumerableSet.UintSet;
 
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     // Mapping from epoch to configuration parameters
     mapping(uint64 => string) private _params;
-    // Sorted set of epoch keys using EnumerableSet and an array to maintain order
-    EnumerableSet.UintSet private _epochs;
     uint64[] private _orderedEpochs;
 
     event ParamsSet(uint64 epoch, string params);
@@ -36,9 +32,7 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
      * @param params The configuration parameters (as a string) to be set.
      */
     function setParams(uint64 epoch, string calldata params) external onlyRole(ADMIN_ROLE) {
-        bool updated = _epochs.contains(epoch);
-        if (!updated) {
-            _epochs.add(epoch);
+        if (bytes(_params[epoch]).length == 0) {
             _insertOrderedEpoch(epoch);
         }
 
