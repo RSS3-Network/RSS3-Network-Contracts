@@ -5,6 +5,7 @@ pragma solidity 0.8.20;
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract NetworkParams is Initializable, AccessControlEnumerable {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -68,39 +69,34 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
         for (uint256 i = _orderedEpochs.length - 1; i > insertIndex; i--) {
             _orderedEpochs[i] = _orderedEpochs[i - 1];
         }
-
         _orderedEpochs[insertIndex] = epoch;
     }
 
     function _findInsertIndex(uint64 epoch) private view returns (uint256) {
-        uint256 left = 0;
-        uint256 right = _orderedEpochs.length;
-
-        while (left < right) {
-            uint256 mid = left + (right - left) / 2;
+        uint256 low = 0;
+        uint256 high = _orderedEpochs.length;
+        while (low < high) {
+            uint256 mid = Math.average(low, high);
             if (_orderedEpochs[mid] < epoch) {
-                left = mid + 1;
+                low = mid + 1;
             } else {
-                right = mid;
+                high = mid;
             }
         }
-
-        return left;
+        return high;
     }
 
     function _findNearestEpoch(uint64 targetEpoch) private view returns (uint64) {
-        uint256 left = 0;
-        uint256 right = _orderedEpochs.length - 1;
-
-        while (left < right) {
-            uint256 mid = left + (right - left + 1) / 2;
+        uint256 low = 0;
+        uint256 high = _orderedEpochs.length - 1;
+        while (low < high) {
+            uint256 mid = Math.average(low, high + 1);
             if (_orderedEpochs[mid] <= targetEpoch) {
-                left = mid;
+                low = mid;
             } else {
-                right = mid - 1;
+                high = mid - 1;
             }
         }
-
-        return _orderedEpochs[left];
+        return _orderedEpochs[low];
     }
 }
