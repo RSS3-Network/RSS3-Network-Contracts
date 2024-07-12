@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="networkparams"><a class="header" href="#networkparams">NetworkParams</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/af7b8a652ffd91362719a0e36984478d3a4e2ec2/src/NetworkParams.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/8068dc22eb3f7c67e19462f703c8f4c7e2985bbd/src/NetworkParams.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -186,12 +186,14 @@ Initializable, AccessControlEnumerable</p>
 <pre><code class="language-solidity">bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 </code></pre>
 <h3 id="_params"><a class="header" href="#_params">_params</a></h3>
-<pre><code class="language-solidity">string internal _params;
+<pre><code class="language-solidity">mapping(uint64 =&gt; string) private _params;
+</code></pre>
+<h3 id="_orderedepochs"><a class="header" href="#_orderedepochs">_orderedEpochs</a></h3>
+<pre><code class="language-solidity">uint64[] private _orderedEpochs;
 </code></pre>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the NetworkParams contract.</p>
-<p><em>Emits the <code>ParamsSet</code> event.</em></p>
 <pre><code class="language-solidity">function initialize(address adminAccount) external initializer;
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -200,26 +202,71 @@ Initializable, AccessControlEnumerable</p>
 </tbody></table>
 </div>
 <h3 id="setparams"><a class="header" href="#setparams">setParams</a></h3>
-<p>Sets params to the contract.</p>
-<pre><code class="language-solidity">function setParams(string calldata params) external onlyRole(ADMIN_ROLE);
+<p>Sets configuration parameters for a specific epoch.</p>
+<p><em>Adds the epoch to the sorted list and maps it to the provided parameters.</em></p>
+<pre><code class="language-solidity">function setParams(uint64 epoch, string calldata params) external onlyRole(ADMIN_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>params</code></td><td><code>string</code></td><td>The params to set.</td></tr>
+<tr><td><code>epoch</code></td><td><code>uint64</code></td><td>The epoch (as a uint64) to which the parameters should be associated.</td></tr>
+<tr><td><code>params</code></td><td><code>string</code></td><td>The configuration parameters (as a string) to be set.</td></tr>
 </tbody></table>
 </div>
 <h3 id="getparams"><a class="header" href="#getparams">getParams</a></h3>
-<p>Gets params from the contract.</p>
-<pre><code class="language-solidity">function getParams() external view returns (string memory);
+<p>Retrieves configuration parameters based on the epoch provided.</p>
+<p><em>Performs a binary search on the sorted set of epochs to find the closest preceding or exact match.</em></p>
+<pre><code class="language-solidity">function getParams(uint64 epoch) external view returns (string memory);
 </code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>epoch</code></td><td><code>uint64</code></td><td>The epoch for which the parameters are requested.</td></tr>
+</tbody></table>
+</div>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>&lt;none&gt;</code></td><td><code>string</code></td><td>params The params to get.</td></tr>
+<tr><td><code>&lt;none&gt;</code></td><td><code>string</code></td><td>params The configuration parameters associated with the nearest epoch.</td></tr>
+</tbody></table>
+</div>
+<h3 id="_insertorderedepoch"><a class="header" href="#_insertorderedepoch">_insertOrderedEpoch</a></h3>
+<p>inserts the epoch into the ordered list of epochs.</p>
+<pre><code class="language-solidity">function _insertOrderedEpoch(uint64 epoch) private;
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>epoch</code></td><td><code>uint64</code></td><td>The epoch to be inserted.</td></tr>
+</tbody></table>
+</div>
+<h3 id="_findinsertindex"><a class="header" href="#_findinsertindex">_findInsertIndex</a></h3>
+<p>Finds the index at which the epoch should be inserted in the ordered list of epochs.</p>
+<pre><code class="language-solidity">function _findInsertIndex(uint64 epoch) private view returns (uint256);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>epoch</code></td><td><code>uint64</code></td><td>The epoch for which the index is to be found.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint256</code></td><td>The index at which the epoch should be inserted.</td></tr>
+</tbody></table>
+</div>
+<h3 id="_findnearestepoch"><a class="header" href="#_findnearestepoch">_findNearestEpoch</a></h3>
+<p>Finds the nearest epoch to the target epoch.</p>
+<pre><code class="language-solidity">function _findNearestEpoch(uint64 targetEpoch) private view returns (uint64);
+</code></pre>
+<p><strong>Parameters</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>targetEpoch</code></td><td><code>uint64</code></td><td>The epoch for which the nearest epoch is to be found.</td></tr>
+</tbody></table>
+</div>
+<p><strong>Returns</strong></p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>&lt;none&gt;</code></td><td><code>uint64</code></td><td>The nearest epoch to the target epoch.</td></tr>
 </tbody></table>
 </div>
 <h2 id="events"><a class="header" href="#events">Events</a></h2>
 <h3 id="paramsset"><a class="header" href="#paramsset">ParamsSet</a></h3>
-<pre><code class="language-solidity">event ParamsSet(string params);
+<pre><code class="language-solidity">event ParamsSet(uint64 indexed epoch, string params);
 </code></pre>
 
                     </main>
