@@ -7,14 +7,13 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract NetworkParams is Initializable, AccessControlEnumerable {
-
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     // Mapping from epoch to configuration parameters
     mapping(uint64 => string) private _params;
     uint64[] private _orderedEpochs;
 
-    event ParamsSet(uint64 epoch, string params);
+    event ParamsSet(uint64 indexed epoch, string params);
 
     /**
      * @notice Initializes the NetworkParams contract.

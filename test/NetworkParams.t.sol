@@ -9,7 +9,7 @@ import {NoETHMock} from "../lib/solady/ext/wake/NoETHMock.sol";
 contract NetworkParamsTest is CommonTest {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
-    event ParamsSet(uint64 epoch, string params);
+    event ParamsSet(uint64 indexed epoch, string params);
 
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
