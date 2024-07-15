@@ -4,16 +4,15 @@ pragma solidity 0.8.20;
 
 import {NetworkParams} from "../src/NetworkParams.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
-import {NoETHMock} from "../lib/solady/ext/wake/NoETHMock.sol";
 
 contract NetworkParamsTest is CommonTest {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
+    NetworkParams internal _params;
+
     event ParamsSet(uint64 indexed epoch, string params);
 
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-
-    NetworkParams internal _params;
 
     function setUp() public {
         _params = new NetworkParams();
@@ -40,7 +39,9 @@ contract NetworkParamsTest is CommonTest {
 
         string memory epoch100ParamsStr = "{epoch100ParamsStr}";
         string memory epoch200ParamsStr = "{epoch200ParamsStr}";
+        string memory epoch200ParamsStrModified = "{epoch200ParamsStrModified}";
         string memory epoch300ParamsStr = "{epoch300ParamsStr}";
+        string memory epoch30ParamsStr = "{epoch30ParamsStr}";
 
         expectEmit();
         emit ParamsSet(100, epoch100ParamsStr);
@@ -71,6 +72,30 @@ contract NetworkParamsTest is CommonTest {
         assertEq(_params.getParams(300), epoch300ParamsStr);
         // Above 300
         assertEq(_params.getParams(350), epoch300ParamsStr);
+        // Pass epoch 0
+        assertEq(_params.getParams(0), epoch100ParamsStr);
+
+        // Update existing epoch 200
+        expectEmit();
+        emit ParamsSet(200, epoch200ParamsStrModified);
+        vm.prank(bob);
+        _params.setParams(200, epoch200ParamsStrModified);
+
+        // Equal to 200
+        assertEq(_params.getParams(200), epoch200ParamsStrModified);
+
+        // Update earlier epoch
+        expectEmit();
+        emit ParamsSet(30, epoch30ParamsStr);
+        vm.prank(bob);
+        _params.setParams(30, epoch30ParamsStr);
+
+        // Pass epoch 30
+        assertEq(_params.getParams(0), epoch30ParamsStr);
+        // Pass epoch 99
+        assertEq(_params.getParams(99), epoch30ParamsStr);
+        // Pass epoch 100
+        assertEq(_params.getParams(100), epoch100ParamsStr);
     }
 
     function testSetParamsFail() public {
