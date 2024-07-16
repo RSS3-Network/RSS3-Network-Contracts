@@ -384,7 +384,7 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
             record.amountForStakingPool = slashedStakingPool;
             record.reporter = reporter;
             record.status = DataTypes.SlashStatus.Recorded;
-            record.slashreason = reasons[i];
+            record.slashReason = reasons[i];
 
             _recordSlashingAmount(nodeAddr, record);
 

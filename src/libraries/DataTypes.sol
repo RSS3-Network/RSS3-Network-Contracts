@@ -70,7 +70,7 @@ library DataTypes {
         uint256 amountForOperationPool;
         uint256 amountForStakingPool;
         SlashStatus status; // 0: recorded, 1: committed, 2: revoked
-        string slashreason;
+        string slashReason;
     }
 
     struct Slashing {
