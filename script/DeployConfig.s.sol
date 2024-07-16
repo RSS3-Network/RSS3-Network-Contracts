@@ -29,6 +29,7 @@ contract DeployConfig is Script {
     uint256 public settlementStartTime;
     uint256 public operationRewardsPercent;
     uint256 public slashReporterBonusRateBasisPoints;
+    address public networkParamsManager;
 
     constructor(string memory _path) {
         console.log("DeployConfig: reading file %s", _path);
@@ -55,5 +56,6 @@ contract DeployConfig is Script {
         settlementStartTime = stdJson.readUint(_json, "$.settlementStartTime");
         operationRewardsPercent = stdJson.readUint(_json, "$.operationRewardsPercent");
         slashReporterBonusRateBasisPoints = stdJson.readUint(_json, "$.slashReporterBonusRateBasisPoints");
+        networkParamsManager = stdJson.readAddress(_json, "$.networkParamsManager");
     }
 }

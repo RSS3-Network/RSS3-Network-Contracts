@@ -15,7 +15,7 @@ contract SetParams is Script {
 
         // invoke the setParams function
         vm.startBroadcast();
-        networkParams.setParams(params);
+        networkParams.setParams(1, params);
         vm.stopBroadcast();
     }
 

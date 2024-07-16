@@ -17,6 +17,8 @@ contract Deploy is Deployer {
     bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
     // keccak256("ORACLE_ROLE");
     bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+    // keccak256("ADMIN_ROLE")
+    bytes32 public constant ADMIN_ROLE = 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
     // solhint-disable private-vars-leading-underscore
     DeployConfig internal cfg;
@@ -57,6 +59,7 @@ contract Deploy is Deployer {
         initializeStaking();
         initializeChips();
         initializeSettlement();
+        initializeNetworkParams();
     }
 
     /// @notice Deploy all of the proxies
@@ -64,6 +67,7 @@ contract Deploy is Deployer {
         deployProxy("Staking");
         deployProxy("Chips");
         deployProxy("Settlement");
+        deployProxy("NetworkParams");
     }
 
     /// @notice Deploy all of the logic contracts
@@ -71,6 +75,7 @@ contract Deploy is Deployer {
         deployStaking();
         deployChips();
         deploySettlement();
+        deployNetworkParams();
     }
 
     function deployProxy(string memory _name) public broadcast returns (address addr_) {
@@ -183,5 +188,14 @@ contract Deploy is Deployer {
         require(settlementProxy.currentEpoch() == 0, "check start epoch error");
         require(settlementProxy.EPOCH_DURATION() == 18 hours, "check start epoch error");
         require(settlementProxy.TOTAL_REWARDS_PER_YEAR() == 30000000 ether, "check start epoch error");
+    }
+
+    function initializeNetworkParams() public broadcast {
+        NetworkParams networkParamsProxy = NetworkParams(mustGetAddress("NetworkParamsProxy"));
+
+        networkParamsProxy.initialize(cfg.networkParamsManager());
+
+        // check states
+        require(networkParamsProxy.hasRole(ADMIN_ROLE, cfg.networkParamsManager()), "check admin role error");
     }
 }
