@@ -1,5 +1,5 @@
 {
-  "proxyAdminOwner": "0x523a45b356b016aB0F4DA886A5D3e7E5B245D17B",
+  "proxyAdminOwner": "0x8AC80fa0993D95C9d6B8Cb494E561E6731038941",
   "pauseAccount": "0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E",
   "oracleAccount": "0xb150439406a3798dC253504fcd940c63c3aeab80",
   "depositUnbondingPeriod": "1944000",
@@ -14,5 +14,5 @@
   "chipsSymbol": "Chips",
   "settlementStartTime": "1710208800",
   "operationRewardsPercent": 0,
-  "networkParamsManager": ""
+  "networkParamsManager": "0xdDA34Ad1a90d9EA830cf9fC59DC5eBB3D864BE4E"
 }
