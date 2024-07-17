@@ -6,13 +6,13 @@ import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {SVGGenerator} from "./libraries/SVGGenerator.sol";
-import {IErrors} from "./interfaces/IErrors.sol";
 import {ERC721} from "./base/ERC721.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {CallerNotStaking, BatchSizeZero} from "./libraries/Errors.sol";
 
-contract Chips is IChips, IErrors, Initializable, ERC721 {
+contract Chips is IChips, Initializable, ERC721 {
     using Strings for uint256;
 
     /// @dev Staking contract address.

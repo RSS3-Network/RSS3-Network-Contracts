@@ -3,7 +3,6 @@
 pragma solidity 0.8.20;
 
 import {Utils} from "./Utils.sol";
-import {IErrors} from "../../src/interfaces/IErrors.sol";
 import {DataTypes} from "../../src/libraries/DataTypes.sol";
 import {Staking} from "../../src/Staking.sol";
 import {Chips} from "../../src/Chips.sol";
@@ -13,7 +12,7 @@ import {TransparentUpgradeableProxy as Proxy} from "../../src/upgradeability/Tra
 import {InternalStaking} from "./InternalStaking.sol";
 import {InternalSettlement} from "./InternalSettlement.sol";
 
-contract CommonTest is Utils, IErrors {
+contract CommonTest is Utils {
     address public constant alice = address(0x111);
     address public constant bob = address(0x222);
     address public constant carol = address(0x333);

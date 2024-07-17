@@ -5,6 +5,14 @@ pragma solidity 0.8.20;
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {Settlement} from "../src/Settlement.sol";
+import {
+    InvalidArrayLength,
+    InvalidEpochNumber,
+    SubmissionIntervalNotElapsed,
+    RewardsAlreadyDistributed,
+    OperationRewardsExceed,
+    TaxRateBasisPointsTooLarge
+} from "../src/libraries/Errors.sol";
 
 contract SettlementTest is CommonTest {
     event Transfer(address indexed from, address indexed to, uint256 value);

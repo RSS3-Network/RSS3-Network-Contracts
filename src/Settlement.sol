@@ -3,14 +3,20 @@ pragma solidity 0.8.20;
 
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
-import {IErrors} from "./interfaces/IErrors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {
+    InvalidArrayLength,
+    InvalidEpochNumber,
+    SubmissionIntervalNotElapsed,
+    RewardsAlreadyDistributed,
+    OperationRewardsExceed
+} from "./libraries/Errors.sol";
 
-contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
+contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using SafeCast for uint256;
 
