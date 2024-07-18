@@ -15,7 +15,7 @@ jobs:
         uses: platisd/duplicate-code-detection-tool@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          file_extensions: "h, py, cpp, c, html, css, js, cs, md"
+          file_extensions: "sol"
           # Only report similarities above 89%
           ignore_below: 60
           # If a file is more than 90% similar to another, then the job fails
