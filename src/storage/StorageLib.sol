@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// solhint-disable no-inline-assembly
 pragma solidity 0.8.20;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -71,30 +73,6 @@ library StorageLib {
     function setTotalSlashingPoolTokens(uint256 totalSlashingPoolTokens) external {
         assembly {
             sstore(TOTAL_SLASHING_POOL_TOKENS_SLOT, totalSlashingPoolTokens)
-        }
-    }
-
-    function getPendingUnstake(
-        uint256 requestId
-    ) external pure returns (DataTypes.UnstakeRequest storage unstakeRequest) {
-        assembly {
-            mstore(0x00, requestId)
-            mstore(0x20, PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            unstakeRequest.slot := slot
-        }
-    }
-
-    function getPendingWithdrawal(
-        uint256 requestId
-    ) external pure returns (DataTypes.WithdrawalRequest storage withdrawalRequest) {
-        assembly {
-            mstore(0x00, requestId)
-            mstore(0x20, PENDING_WITHDRAWAL_MAPPING_BY_REQUEST_ID_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            withdrawalRequest.slot := slot
         }
     }
 
@@ -177,18 +155,6 @@ library StorageLib {
         }
     }
 
-    function nodeAddrs() external pure returns (EnumerableSet.AddressSet storage nodeAddrs) {
-        assembly {
-            nodeAddrs.slot := NODES_ADDRESS_SET_SLOT
-        }
-    }
-
-    function nodes() external pure returns (mapping(address => DataTypes.Node) storage nodes) {
-        assembly {
-            nodes.slot := NODES_MAPPING_BY_NODE_ADDRESS_SLOT
-        }
-    }
-
     function getIssuerFromFamilies(uint256 tokenId) external view returns (address issuer) {
         Checkpoints.Trace160 storage families;
         assembly {
@@ -217,19 +183,61 @@ library StorageLib {
         }
     }
 
-    function slashRecords()
-        external
+    function getSlashRecord(address nodeAddr, uint256 epochId) external view returns (DataTypes.SlashRecord storage) {
+        mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord))
+            storage slashRecords = _slashRecords();
+        return slashRecords[nodeAddr][epochId];
+    }
+
+    function getPendingUnstake(
+        uint256 requestId
+    ) external pure returns (DataTypes.UnstakeRequest storage unstakeRequest) {
+        assembly {
+            mstore(0x00, requestId)
+            mstore(0x20, PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT)
+            let slot := keccak256(0x00, 0x40)
+
+            unstakeRequest.slot := slot
+        }
+    }
+
+    function getPendingWithdrawal(
+        uint256 requestId
+    ) external pure returns (DataTypes.WithdrawalRequest storage withdrawalRequest) {
+        assembly {
+            mstore(0x00, requestId)
+            mstore(0x20, PENDING_WITHDRAWAL_MAPPING_BY_REQUEST_ID_SLOT)
+            let slot := keccak256(0x00, 0x40)
+
+            withdrawalRequest.slot := slot
+        }
+    }
+
+    function nodeAddrs() external pure returns (EnumerableSet.AddressSet storage nodeAddrs) {
+        assembly {
+            nodeAddrs.slot := NODES_ADDRESS_SET_SLOT
+        }
+    }
+
+    function nodes() external pure returns (mapping(address => DataTypes.Node) storage nodes) {
+        assembly {
+            nodes.slot := NODES_MAPPING_BY_NODE_ADDRESS_SLOT
+        }
+    }
+
+    function publicPool() external pure returns (DataTypes.Node storage _publicPool) {
+        assembly {
+            _publicPool.slot := PUBLIC_POOL_SLOT
+        }
+    }
+
+    function _slashRecords()
+        internal
         pure
         returns (mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) storage slashRecords)
     {
         assembly {
             slashRecords.slot := SLASH_RECORDS_SLOT
-        }
-    }
-
-    function publicPool() external pure returns (DataTypes.Node storage publicPool) {
-        assembly {
-            publicPool.slot := PUBLIC_POOL_SLOT
         }
     }
 }

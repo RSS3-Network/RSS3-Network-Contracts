@@ -35,18 +35,18 @@ library StakingCommonLib {
     }
 
     /// @dev increase slashing pool tokens
-    function increaseSlashingPoolByRecord(DataTypes.SlashRecord memory record) external {
+    function increaseSlashingPoolByRecord(DataTypes.SlashRecord calldata record) external {
         uint256 newSlashingPoolTokens = StorageLib.getTotalSlashingPoolTokens() + _totalSlashedAmount(record);
         StorageLib.setTotalSlashingPoolTokens(newSlashingPoolTokens);
     }
 
     /// @dev decrease slashing pool tokens
-    function decreaseSlashingPoolByRecord(DataTypes.SlashRecord memory record) external {
+    function decreaseSlashingPoolByRecord(DataTypes.SlashRecord calldata record) external {
         uint256 newSlashingPoolTokens = StorageLib.getTotalSlashingPoolTokens() - _totalSlashedAmount(record);
         StorageLib.setTotalSlashingPoolTokens(newSlashingPoolTokens);
     }
 
-    function _totalSlashedAmount(DataTypes.SlashRecord memory record) internal pure returns (uint256) {
+    function _totalSlashedAmount(DataTypes.SlashRecord calldata record) internal pure returns (uint256) {
         return record.amountForOperationPool + record.amountForStakingPool;
     }
 }

@@ -10,7 +10,6 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
@@ -207,8 +206,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function updateNode(string calldata name, string calldata description) external override whenNotPaused {
-        address from = msg.sender;
-        NodeSettingsLib.updateNode(from, name, description);
+        NodeSettingsLib.updateNode(msg.sender, name, description);
     }
 
     /// @inheritdoc IStaking
@@ -361,9 +359,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         for (uint256 i = 0; i < slashings.length; i++) {
             (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
 
-            DataTypes.SlashRecord storage record = _slashRecords[nodeAddr][epoch];
-
-            RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, record, SLASH_REPORTER_BONUS_RATE_BASIS_POINTS);
+            RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, SLASH_REPORTER_BONUS_RATE_BASIS_POINTS);
         }
     }
 
@@ -374,9 +370,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         for (uint256 i = 0; i < slashings.length; i++) {
             (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
 
-            DataTypes.SlashRecord storage record = _slashRecords[nodeAddr][epoch];
-
-            RewardsAndSlashingLib.revokeSlashing(nodeAddr, epoch, record);
+            RewardsAndSlashingLib.revokeSlashing(nodeAddr, epoch);
         }
     }
 
@@ -423,7 +417,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     function getChipInfo(
         uint256 tokenId
     ) external view override returns (address nodeAddr, uint256 tokens, uint256 shares) {
-        (nodeAddr, tokens, shares) = _chipInfo(tokenId);
+        (nodeAddr, tokens, shares) = StakingLib.getChipInfo(tokenId, SHARES_PER_CHIP);
     }
 
     function getSlashingRecords(
@@ -431,7 +425,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     ) external view override returns (DataTypes.SlashRecord[] memory records) {
         records = new DataTypes.SlashRecord[](slashings.length);
         for (uint256 i = 0; i < slashings.length; i++) {
-            records[i] = _getSlashRecord(slashings[i]);
+            records[i] = StorageLib.getSlashRecord(slashings[i].nodeAddr, slashings[i].epoch);
         }
     }
 
@@ -513,25 +507,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         // Note: no need for safe cast, we know that tokenId <= type(uint96).max
         address issuer = address(_families.lowerLookup(tokenId.toUint96()));
         return issuer != address(0) ? issuer : _chipIssuers[tokenId];
-    }
-
-    function _getSlashRecord(
-        DataTypes.Slashing calldata slashing
-    ) internal view returns (DataTypes.SlashRecord memory) {
-        return _slashRecords[slashing.nodeAddr][slashing.epoch];
-    }
-
-    function _chipInfo(uint256 tokenId) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {
-        nodeAddr = _issuerOf(tokenId);
-        if (nodeAddr == address(0)) return (address(0), 0, 0);
-
-        shares = _chipToShares[tokenId];
-        if (shares == 0) {
-            // old chip is always:  1 token = SHARES_PER_CHIP shares
-            shares = SHARES_PER_CHIP;
-        }
-
-        tokens = _sharesToTokens(shares, nodeAddr);
     }
 
     /**

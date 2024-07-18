@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable private-vars-leading-underscore,var-name-mixedcase
+// solhint-disable var-name-mixedcase
 
 pragma solidity 0.8.20;
 import {DataTypes} from "./DataTypes.sol";
@@ -40,7 +40,8 @@ library RewardsAndSlashingLib {
         // slash staking pool tokens
         uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_RATE_BASIS_POINTS) / _denominator();
 
-        DataTypes.SlashRecord storage record = StorageLib.slashRecords()[nodeAddr][epoch];
+        DataTypes.SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
+
         record.amountForOperationPool = slashedOperationPool;
         record.amountForStakingPool = slashedStakingPool;
         record.reporter = reporter;
@@ -52,20 +53,19 @@ library RewardsAndSlashingLib {
         emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
     }
 
-    function commitSlashing(
-        address nodeAddr,
-        uint256 epoch,
-        DataTypes.SlashRecord storage record,
-        uint256 SLASH_REPORTER_BONUS_RATE_BASIS_POINTS
-    ) external {
+    function commitSlashing(address nodeAddr, uint256 epoch, uint256 SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) external {
+        DataTypes.SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
         _checkRecordedStatus(record, nodeAddr, epoch);
         record.status = DataTypes.SlashStatus.Committed;
         _setSlashStatus(nodeAddr, false);
+
         _commitSlashingAmount(record, SLASH_REPORTER_BONUS_RATE_BASIS_POINTS);
         emit Events.SlashCommitted(nodeAddr, epoch);
     }
 
-    function revokeSlashing(address nodeAddr, uint256 epoch, DataTypes.SlashRecord storage record) external {
+    function revokeSlashing(address nodeAddr, uint256 epoch) external {
+        DataTypes.SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
+
         _checkRecordedStatus(record, nodeAddr, epoch);
 
         record.status = DataTypes.SlashStatus.Revoked;
@@ -87,9 +87,9 @@ library RewardsAndSlashingLib {
     }
 
     function distributeNodesRewards(
-        address[] memory nodeAddrs,
-        uint256[] memory operationRewards,
-        uint256[] memory stakingRewards,
+        address[] calldata nodeAddrs,
+        uint256[] calldata operationRewards,
+        uint256[] calldata stakingRewards,
         uint256 MIN_DEPOSIT,
         uint256 STAKE_RATIO
     ) external returns (uint256[] memory taxCollected) {
@@ -122,12 +122,6 @@ library RewardsAndSlashingLib {
             StakingCommonLib.increaseStakingPool(node, rewards - fullTax);
             // the remaining tax is sent to the treasury
         }
-    }
-
-    /// @dev check if the status of a slash record is recorded
-    function _checkRecordedStatus(DataTypes.SlashRecord memory record, address nodeAddr, uint256 epoch) internal pure {
-        if (record.status == DataTypes.SlashStatus.NonExistent) revert SlashRecordNotExists(nodeAddr, epoch);
-        if (record.status != DataTypes.SlashStatus.Recorded) revert SlashStatusNotRecorded(nodeAddr, epoch);
     }
 
     /// @dev set the status of a slash record
@@ -173,6 +167,22 @@ library RewardsAndSlashingLib {
         StakingCommonLib.increaseStakingPool(node, record.amountForStakingPool);
     }
 
+    /// @dev transfer native tokens by a low-level call.
+    /// _transfer should always be at the end of the function,
+    /// to apply the checks-effects-interactions pattern
+    function _transfer(address to, uint256 amount) internal {
+        if (amount > 0) {
+            (bool success, ) = address(to).call{value: amount}("");
+            if (!success) revert TransferFailed();
+        }
+    }
+
+    /// @dev check if the status of a slash record is recorded
+    function _checkRecordedStatus(DataTypes.SlashRecord memory record, address nodeAddr, uint256 epoch) internal pure {
+        if (record.status == DataTypes.SlashStatus.NonExistent) revert SlashRecordNotExists(nodeAddr, epoch);
+        if (record.status != DataTypes.SlashStatus.Recorded) revert SlashStatusNotRecorded(nodeAddr, epoch);
+    }
+
     /**
      * @dev get tax amount
      *  For a node operator to receive its full tax,
@@ -212,15 +222,5 @@ library RewardsAndSlashingLib {
      */
     function _denominator() internal pure returns (uint64) {
         return 10000;
-    }
-
-    /// @dev transfer native tokens by a low-level call.
-    /// _transfer should always be at the end of the function,
-    /// to apply the checks-effects-interactions pattern
-    function _transfer(address to, uint256 amount) internal {
-        if (amount > 0) {
-            (bool success, ) = address(to).call{value: amount}("");
-            if (!success) revert TransferFailed();
-        }
     }
 }

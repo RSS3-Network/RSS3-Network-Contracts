@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable private-vars-leading-underscore,var-name-mixedcase
+// solhint-disable var-name-mixedcase
 
 pragma solidity 0.8.20;
 
@@ -44,7 +44,7 @@ library StakingLib {
         // staking amount must be greater than 500 tokens
         if (amount < SHARES_PER_CHIP) revert StakeAmountTooSmall();
 
-        uint256 sharesToMint = tokensToShares(amount, nodeAddr);
+        uint256 sharesToMint = _tokensToShares(amount, nodeAddr);
 
         // update staking pool
         StakingCommonLib.increaseStakingPool(node, amount);
@@ -71,7 +71,7 @@ library StakingLib {
     ) external returns (uint256 requestId) {
         if (chipIds.length == 0) revert EmptyChipIds();
 
-        address owner = checkChipsConditions(nodeAddr, chipIds);
+        address owner = _checkChipsConditions(nodeAddr, chipIds);
 
         // update pool tokens and shares
         uint256 sharesToBurn;
@@ -90,7 +90,7 @@ library StakingLib {
             StorageLib.setChipIssuerByTokenId(tokenId, address(0));
             StorageLib.setChipsToSharesByTokenId(tokenId, 0);
         }
-        DataTypes.Node storage node = getStakingNode(nodeAddr);
+        DataTypes.Node storage node = _getStakingNode(nodeAddr);
         StakingCommonLib.decreaseStakingPool(node, unstakeAmount);
         _decreaseTotalShares(node, sharesToBurn);
 
@@ -158,7 +158,7 @@ library StakingLib {
         address chips = StorageLib.getChipsContract();
 
         address nodeAddr = _issuerOf(chipIds[0]);
-        address owner = checkChipsConditions(nodeAddr, chipIds);
+        address owner = _checkChipsConditions(nodeAddr, chipIds);
         uint256 totalShares;
         for (uint256 i = 0; i < chipIds.length; i++) {
             uint256 tokenId = chipIds[i];
@@ -182,11 +182,38 @@ library StakingLib {
         emit Events.ChipsMerged(owner, nodeAddr, newTokenId, chipIds);
     }
 
+    function getChipInfo(
+        uint256 tokenId,
+        uint256 SHARES_PER_CHIP
+    ) external view returns (address nodeAddr, uint256 tokens, uint256 shares) {
+        (nodeAddr, tokens, shares) = _chipInfo(tokenId, SHARES_PER_CHIP);
+    }
+
+    /// @dev increase total shares of a node
+    function _increaseTotalShares(DataTypes.Node storage node, uint256 amount) internal {
+        node.totalShares += amount;
+    }
+
+    /// @dev decrease total shares of a node
+    function _decreaseTotalShares(DataTypes.Node storage node, uint256 amount) internal {
+        node.totalShares -= amount;
+    }
+
+    /// @dev transfer native tokens by a low-level call.
+    /// _transfer should always be at the end of the function,
+    /// to apply the checks-effects-interactions pattern
+    function _transfer(address to, uint256 amount) internal {
+        if (amount > 0) {
+            (bool success, ) = address(to).call{value: amount}("");
+            if (!success) revert TransferFailed();
+        }
+    }
+
     /// @dev checks that:
     /// 1. caller has the authorization to unstake the chips
     /// 2. chips are issued by the same node
     /// 3. chips have the same owner
-    function checkChipsConditions(address nodeAddr, uint256[] calldata chipIds) internal view returns (address) {
+    function _checkChipsConditions(address nodeAddr, uint256[] calldata chipIds) internal view returns (address) {
         address lastOwner;
         for (uint256 i = 0; i < chipIds.length; i++) {
             uint256 tokenId = chipIds[i];
@@ -205,8 +232,8 @@ library StakingLib {
     }
 
     /// @dev convert tokens to equivalent shares
-    function tokensToShares(uint256 tokens, address nodeAddr) internal view returns (uint256) {
-        DataTypes.Node storage node = getStakingNode(nodeAddr);
+    function _tokensToShares(uint256 tokens, address nodeAddr) internal view returns (uint256) {
+        DataTypes.Node storage node = _getStakingNode(nodeAddr);
         if (node.stakingPoolTokens == 0) {
             return tokens;
         }
@@ -214,8 +241,8 @@ library StakingLib {
         return (tokens * node.totalShares) / node.stakingPoolTokens;
     }
 
-    function sharesToTokens(uint256 shares, address nodeAddr) internal view returns (uint256) {
-        DataTypes.Node storage node = getStakingNode(nodeAddr);
+    function _sharesToTokens(uint256 shares, address nodeAddr) internal view returns (uint256) {
+        DataTypes.Node storage node = _getStakingNode(nodeAddr);
         if (node.totalShares == 0) {
             return 0;
         }
@@ -223,20 +250,10 @@ library StakingLib {
         return (shares * node.stakingPoolTokens) / node.totalShares;
     }
 
-    function getStakingNode(address nodeAddr) internal view returns (DataTypes.Node storage node) {
+    function _getStakingNode(address nodeAddr) internal view returns (DataTypes.Node storage node) {
         mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
         DataTypes.Node storage publicPool = StorageLib.publicPool();
         node = nodes[nodeAddr].publicGood ? publicPool : nodes[nodeAddr];
-    }
-
-    /// @dev increase total shares of a node
-    function _increaseTotalShares(DataTypes.Node storage node, uint256 amount) internal {
-        node.totalShares += amount;
-    }
-
-    /// @dev decrease total shares of a node
-    function _decreaseTotalShares(DataTypes.Node storage node, uint256 amount) internal {
-        node.totalShares -= amount;
     }
 
     function _chipInfo(
@@ -253,7 +270,7 @@ library StakingLib {
             shares = SHARES_PER_CHIP;
         }
 
-        tokens = sharesToTokens(shares, nodeAddr);
+        tokens = _sharesToTokens(shares, nodeAddr);
     }
 
     /// @dev returns whether user is token owner or approved
@@ -273,15 +290,5 @@ library StakingLib {
 
         address issuer = StorageLib.getIssuerFromFamilies(tokenId);
         return issuer != address(0) ? issuer : StorageLib.getIssuerFromChipIssuers(tokenId);
-    }
-
-    /// @dev transfer native tokens by a low-level call.
-    /// _transfer should always be at the end of the function,
-    /// to apply the checks-effects-interactions pattern
-    function _transfer(address to, uint256 amount) internal {
-        if (amount > 0) {
-            (bool success, ) = address(to).call{value: amount}("");
-            if (!success) revert TransferFailed();
-        }
     }
 }

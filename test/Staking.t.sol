@@ -11,9 +11,8 @@ import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Base64} from "solady/utils/Base64.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {StorageLib} from "../src/storage/StorageLib.sol";
 
-import {console2 as console} from "forge-std/console2.sol";
+// import {console2 as console} from "forge-std/console2.sol";
 
 import {
     NodeNotExists,
