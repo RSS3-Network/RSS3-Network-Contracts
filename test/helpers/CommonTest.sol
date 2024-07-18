@@ -34,8 +34,8 @@ contract CommonTest is Utils {
 
     uint256 internal _initialAmount = 100000000 ether;
 
-    uint256 public constant nodeSlashRateBasisPoints = 200;
-    uint256 public constant userSlashRateBasisPoints = 100;
+    uint256 public constant nodeSlashRateBasisPoints = 100;
+    uint256 public constant userSlashRateBasisPoints = 50;
     uint256 public constant stakeRatio = 25;
     uint256 public constant minDeposit = 10000 ether;
     uint256 public constant minTaxRateBasisPoints = 500;
