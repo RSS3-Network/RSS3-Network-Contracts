@@ -15,6 +15,8 @@ jobs:
         uses: platisd/duplicate-code-detection-tool@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Ignore the specified directories
+          ignore_directories: "src/interfaces"
           file_extensions: "sol"
           # Only report similarities above 30%
           ignore_below: 30
