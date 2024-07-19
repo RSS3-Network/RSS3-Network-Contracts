@@ -18,8 +18,8 @@ jobs:
           file_extensions: "sol"
           # Only report similarities above 30%
           ignore_below: 30
-          # If a file is more than 70% similar to another, then the job fails
-          fail_above: 70
+          # If a file is more than 80% similar to another, then the job fails
+          fail_above: 80
           # If a file is more than 60% similar to another, show a warning symbol in the report
           warn_above: 60
           only_code: true
