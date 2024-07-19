@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 
 import {Events} from "./Events.sol";
 import {DataTypes} from "./DataTypes.sol";
-import {StorageLib} from "../storage/StorageLib.sol";
+import {StorageLib} from "./StorageLib.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {IChips} from "../interfaces/IChips.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";

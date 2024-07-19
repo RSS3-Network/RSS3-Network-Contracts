@@ -14,7 +14,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {StorageLib} from "./storage/StorageLib.sol";
+import {StorageLib} from "./libraries/StorageLib.sol";
 import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
 import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
 import {StakingLib} from "./libraries/StakingLib.sol";
@@ -499,76 +499,5 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
             (bool success, ) = address(to).call{value: amount}("");
             if (!success) revert TransferFailed();
         }
-    }
-
-    /// @dev returns the node address which issued the chips
-    function _issuerOf(uint256 tokenId) internal view returns (address) {
-        // check the token was not burned, and fetch ownership from the anchors
-        // Note: no need for safe cast, we know that tokenId <= type(uint96).max
-        address issuer = address(_families.lowerLookup(tokenId.toUint96()));
-        return issuer != address(0) ? issuer : _chipIssuers[tokenId];
-    }
-
-    /**
-     * @dev get tax amount
-     *  For a node operator to receive its full tax,
-     * it needs to stake at least 1/25 of the tokens staked by external delegators,
-     * or the exceeding part of the tax will be sent to the staking pool.
-     */
-    function _getTax(
-        uint256 rewards,
-        uint64 taxRateBasisPoints,
-        uint256 operationPool,
-        uint256 stakingPool
-    ) internal view returns (uint256, uint256) {
-        uint256 fullTax = _getFullTax(rewards, taxRateBasisPoints);
-
-        if (operationPool < MIN_DEPOSIT) {
-            // node will receive no tax
-            return (fullTax, 0);
-        } else if (operationPool >= MIN_DEPOSIT && operationPool * STAKE_RATIO >= stakingPool) {
-            // node will receive its full tax
-            return (fullTax, fullTax);
-        } else {
-            // node will receive part of its tax
-            uint256 partialTax = (fullTax * operationPool * STAKE_RATIO) / stakingPool;
-            return (fullTax, partialTax);
-        }
-    }
-
-    function _getStakingNode(address nodeAddr) internal view returns (DataTypes.Node storage node) {
-        node = _nodes[nodeAddr].publicGood ? _publicPool : _nodes[nodeAddr];
-    }
-
-    // /// @dev convert tokens to equivalent shares
-    // function _tokensToShares(uint256 tokens, address nodeAddr) internal view returns (uint256) {
-    //     DataTypes.Node storage node = _getStakingNode(nodeAddr);
-    //     if (node.stakingPoolTokens == 0) {
-    //         return tokens;
-    //     }
-
-    //     return (tokens * node.totalShares) / node.stakingPoolTokens;
-    // }
-
-    /// @dev convert shares to equivalent tokens
-    function _sharesToTokens(uint256 shares, address nodeAddr) internal view returns (uint256) {
-        DataTypes.Node storage node = _getStakingNode(nodeAddr);
-        if (node.totalShares == 0) {
-            return 0;
-        }
-
-        return (shares * node.stakingPoolTokens) / node.totalShares;
-    }
-
-    /// @dev returns the full tax amount
-    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
-        return (rewards * taxRateBasisPoints) / _denominator();
-    }
-
-    /**
-     * @dev denominator
-     */
-    function _denominator() internal pure virtual returns (uint64) {
-        return 10000;
     }
 }

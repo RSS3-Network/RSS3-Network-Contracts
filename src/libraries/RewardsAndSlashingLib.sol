@@ -4,8 +4,9 @@
 pragma solidity 0.8.20;
 import {DataTypes} from "./DataTypes.sol";
 import {Events} from "./Events.sol";
-import {StorageLib} from "../storage/StorageLib.sol";
+import {StorageLib} from "./StorageLib.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
+import {Const} from "./Const.sol";
 import {
     NodeNotExists,
     SlashPublicGoodNode,
@@ -35,10 +36,10 @@ library RewardsAndSlashingLib {
         _setSlashStatus(nodeAddr, true);
 
         // slash operation pool tokens
-        uint256 slashedOperationPool = (node.operationPoolTokens * NODE_SLASH_RATE_BASIS_POINTS) / _denominator();
+        uint256 slashedOperationPool = (node.operationPoolTokens * NODE_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         // slash staking pool tokens
-        uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_RATE_BASIS_POINTS) / _denominator();
+        uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         DataTypes.SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
 
@@ -152,7 +153,7 @@ library RewardsAndSlashingLib {
         _transfer(
             record.reporter,
             ((record.amountForOperationPool + record.amountForStakingPool) * SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) /
-                _denominator()
+                Const.DENOMINATOR
         );
     }
 
@@ -214,13 +215,6 @@ library RewardsAndSlashingLib {
 
     /// @dev returns the full tax amount
     function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
-        return (rewards * taxRateBasisPoints) / _denominator();
-    }
-
-    /**
-     * @dev denominator
-     */
-    function _denominator() internal pure returns (uint64) {
-        return 10000;
+        return (rewards * taxRateBasisPoints) / Const.DENOMINATOR;
     }
 }

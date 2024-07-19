@@ -213,15 +213,15 @@ library StorageLib {
         }
     }
 
-    function nodeAddrs() external pure returns (EnumerableSet.AddressSet storage nodeAddrs) {
+    function nodeAddrs() external pure returns (EnumerableSet.AddressSet storage _nodeAddrs) {
         assembly {
-            nodeAddrs.slot := NODES_ADDRESS_SET_SLOT
+            _nodeAddrs.slot := NODES_ADDRESS_SET_SLOT
         }
     }
 
-    function nodes() external pure returns (mapping(address => DataTypes.Node) storage nodes) {
+    function nodes() external pure returns (mapping(address => DataTypes.Node) storage _nodes) {
         assembly {
-            nodes.slot := NODES_MAPPING_BY_NODE_ADDRESS_SLOT
+            _nodes.slot := NODES_MAPPING_BY_NODE_ADDRESS_SLOT
         }
     }
 

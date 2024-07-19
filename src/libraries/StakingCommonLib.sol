@@ -3,7 +3,7 @@
 
 pragma solidity 0.8.20;
 import {DataTypes} from "./DataTypes.sol";
-import {StorageLib} from "../storage/StorageLib.sol";
+import {StorageLib} from "./StorageLib.sol";
 
 library StakingCommonLib {
     /// @dev increase staking pool tokens of a node, and total staking pool tokens

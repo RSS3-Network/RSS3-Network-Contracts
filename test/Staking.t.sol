@@ -8,6 +8,7 @@ import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
+import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {Base64} from "solady/utils/Base64.sol";
 import {stdJson} from "forge-std/StdJson.sol";
@@ -1463,11 +1464,13 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 stakingPool = 1000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
-        (uint256 tax1, uint256 partialTax1) = _internalStakingTest.calculateReward(
+        (uint256 tax1, uint256 partialTax1) = RewardsAndSlashingLib._getTax(
             rewards,
             taxRateBasisPoints,
             operationPool,
-            stakingPool
+            stakingPool,
+            _staking.MIN_DEPOSIT(),
+            _staking.STAKE_RATIO()
         );
 
         assertEq(tax1, _getFullTax(rewards, taxRateBasisPoints));
@@ -1485,11 +1488,13 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 rewards = 10000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
-        (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
+        (uint256 tax, uint256 partialTax) = RewardsAndSlashingLib._getTax(
             rewards,
             taxRateBasisPoints,
             operationPool,
-            stakingPool
+            stakingPool,
+            _staking.MIN_DEPOSIT(),
+            _staking.STAKE_RATIO()
         );
 
         assertEq(tax, partialTax);
@@ -1504,11 +1509,13 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 rewards = 10000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
-        (uint256 tax, uint256 partialTax) = _internalStakingTest.calculateReward(
+        (uint256 tax, uint256 partialTax) = RewardsAndSlashingLib._getTax(
             rewards,
             taxRateBasisPoints,
             operationPool,
-            stakingPool
+            stakingPool,
+            _staking.MIN_DEPOSIT(),
+            _staking.STAKE_RATIO()
         );
 
         // partialTax has precision 1

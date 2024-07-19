@@ -3,8 +3,8 @@
 pragma solidity 0.8.20;
 import {DataTypes} from "./DataTypes.sol";
 import {Events} from "./Events.sol";
-import {StorageLib} from "../storage/StorageLib.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {StorageLib} from "./StorageLib.sol";
+import {Const} from "./Const.sol";
 import {
     CreateNodeToZeroAddress,
     NodeExists,
@@ -13,6 +13,7 @@ import {
     TaxRateBasisPointsTooLarge,
     TaxRateBasisPointsTooSmall
 } from "./Errors.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 library NodeSettingsLib {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -22,7 +23,7 @@ library NodeSettingsLib {
         uint256 MIN_TAX_RATE_BASIS_POINTS,
         address from
     ) external {
-        if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
+        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
         if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
 
         mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
@@ -39,7 +40,7 @@ library NodeSettingsLib {
     }
 
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external {
-        if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
+        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
 
         DataTypes.Node storage publicPool = StorageLib.publicPool();
 
@@ -69,7 +70,7 @@ library NodeSettingsLib {
         bool publicGood
     ) external {
         if (nodeAddr == address(0)) revert CreateNodeToZeroAddress();
-        if (taxRateBasisPoints > _denominator()) revert TaxRateBasisPointsTooLarge();
+        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
 
         uint256 nodeId = StorageLib.nextNodeId();
 
@@ -91,12 +92,5 @@ library NodeSettingsLib {
         StorageLib.nodeAddrs().add(nodeAddr);
 
         emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood, isAlphaPhase);
-    }
-
-    /**
-     * @dev _denominator
-     */
-    function _denominator() internal pure returns (uint64) {
-        return 10000;
     }
 }
