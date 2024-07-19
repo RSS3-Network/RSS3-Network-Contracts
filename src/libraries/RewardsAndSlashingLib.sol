@@ -125,6 +125,9 @@ library RewardsAndSlashingLib {
         }
     }
 
+    function withdraw2Treasury(address treasury, uint256 amount) external {
+        _transfer(treasury, amount);
+    }
     /// @dev set the status of a slash record
     function _setSlashStatus(address nodeAddr, bool status) internal {
         mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();

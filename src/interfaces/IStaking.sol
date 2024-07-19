@@ -257,7 +257,7 @@ interface IStaking {
      * @notice Gets public pool info.
      * @return DataTypes.Node public pool info.
      */
-    function getPublicPool() external view returns (DataTypes.Node memory);
+    function getPublicPool() external pure returns (DataTypes.Node memory);
 
     /**
      * @notice Gets total count of nodes.

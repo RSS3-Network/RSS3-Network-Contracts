@@ -87,19 +87,6 @@ library StorageLib {
         }
     }
 
-    function deletePendingUnstake(uint256 requestId) external {
-        assembly {
-            mstore(0x00, requestId)
-            mstore(0x20, PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            sstore(slot, 0)
-            sstore(add(slot, 1), 0)
-            sstore(add(slot, 2), 0)
-            sstore(add(slot, 3), 0)
-        }
-    }
-
     function nextNodeId() external returns (uint256 newCounter) {
         assembly {
             let currentCounter := sload(NODE_ID_COUNTER_SLOT)
@@ -189,27 +176,23 @@ library StorageLib {
         return slashRecords[nodeAddr][epochId];
     }
 
-    function getPendingUnstake(
-        uint256 requestId
-    ) external pure returns (DataTypes.UnstakeRequest storage unstakeRequest) {
+    function getPendingUnstake()
+        external
+        pure
+        returns (mapping(uint256 => DataTypes.UnstakeRequest) storage _pendingUnstake)
+    {
         assembly {
-            mstore(0x00, requestId)
-            mstore(0x20, PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            unstakeRequest.slot := slot
+            _pendingUnstake.slot := PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT
         }
     }
 
-    function getPendingWithdrawal(
-        uint256 requestId
-    ) external pure returns (DataTypes.WithdrawalRequest storage withdrawalRequest) {
+    function getPendingWithdrawal()
+        external
+        pure
+        returns (mapping(uint256 => DataTypes.WithdrawalRequest) storage _pendingWithdrawals)
+    {
         assembly {
-            mstore(0x00, requestId)
-            mstore(0x20, PENDING_WITHDRAWAL_MAPPING_BY_REQUEST_ID_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            withdrawalRequest.slot := slot
+            _pendingWithdrawals.slot := PENDING_WITHDRAWAL_MAPPING_BY_REQUEST_ID_SLOT
         }
     }
 
@@ -234,7 +217,7 @@ library StorageLib {
     function _slashRecords()
         internal
         pure
-        returns (mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) storage slashRecords)
+        returns (mapping(address => mapping(uint256 => DataTypes.SlashRecord)) storage slashRecords)
     {
         assembly {
             slashRecords.slot := SLASH_RECORDS_SLOT

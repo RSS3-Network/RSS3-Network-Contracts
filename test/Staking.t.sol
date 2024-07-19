@@ -523,7 +523,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         skip(depositUnbondingPeriod);
 
         expectEmit();
-        emit Events.WithdrawalClaimed(requestId);
+        emit Events.WithdrawalClaimed(requestId, alice, amount);
         _staking.claimWithdrawal(requestIds);
 
         // Claim again will fail

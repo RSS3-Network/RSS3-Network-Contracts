@@ -112,8 +112,10 @@ library Events {
     /**
      * @dev Emitted on claimWithdrawal()
      * @param requestId The withdrawal request id.
+     * @param nodeAddr The address of node to withdraw.
+     * @param amount Amount of tokens to withdraw.
      */
-    event WithdrawalClaimed(uint256 indexed requestId);
+    event WithdrawalClaimed(uint256 indexed requestId, address indexed nodeAddr, uint256 indexed amount);
 
     /**
      * @dev Emitted on stake()

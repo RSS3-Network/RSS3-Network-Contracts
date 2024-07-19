@@ -388,7 +388,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     function withdraw2Treasury() external override {
         uint256 balance = address(this).balance;
         uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens - _totalSlashingPoolTokens;
-        _transfer(TREASURY, amount);
+        RewardsAndSlashingLib.withdraw2Treasury(TREASURY, amount);
     }
 
     /// @inheritdoc IStaking
@@ -398,7 +398,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function isAlphaPhase() external view override returns (bool) {
-        return _isAlphaPhase;
+        return StorageLib.getIsAlphaPhase();
     }
 
     /// @inheritdoc IStaking
@@ -430,18 +430,18 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getPublicPool() external view override returns (DataTypes.Node memory) {
-        return _publicPool;
+    function getPublicPool() external pure override returns (DataTypes.Node memory) {
+        return StorageLib.publicPool();
     }
 
     /// @inheritdoc IStaking
     function getNodeCount() external view override returns (uint256) {
-        return _nodeAddrs.length();
+        return StorageLib.nodeAddrs().length();
     }
 
     /// @inheritdoc IStaking
     function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
-        return _nodes[nodeAddr];
+        return StorageLib.nodes()[nodeAddr];
     }
 
     /// @inheritdoc IStaking
@@ -453,7 +453,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     function getNodes(address[] calldata nodeAddrs) external view override returns (DataTypes.Node[] memory nodes) {
         nodes = new DataTypes.Node[](nodeAddrs.length);
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            nodes[i] = _nodes[nodeAddrs[i]];
+            nodes[i] = StorageLib.nodes()[nodeAddrs[i]];
         }
     }
 
@@ -462,15 +462,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         uint256 offset,
         uint256 limit
     ) external view override returns (DataTypes.Node[] memory nodes) {
-        uint256 totalNodes = _nodeAddrs.length();
+        uint256 totalNodes = StorageLib.nodeAddrs().length();
         uint256 len = (totalNodes - offset).min(limit);
         nodes = new DataTypes.Node[](len);
 
         if (offset >= totalNodes) return nodes;
 
         for (uint256 i = offset; i < len + offset; i++) {
-            address nodeAddr = _nodeAddrs.at(i);
-            nodes[i - offset] = _nodes[nodeAddr];
+            address nodeAddr = StorageLib.nodeAddrs().at(i);
+            nodes[i - offset] = StorageLib.nodes()[nodeAddr];
         }
     }
 
@@ -488,16 +488,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
-        return _chips;
-    }
-
-    /// @dev transfer native tokens by a low-level call.
-    /// _transfer should always be at the end of the function,
-    /// to apply the checks-effects-interactions pattern
-    function _transfer(address to, uint256 amount) internal {
-        if (amount > 0) {
-            (bool success, ) = address(to).call{value: amount}("");
-            if (!success) revert TransferFailed();
-        }
+        return StorageLib.getChipsContract();
     }
 }

@@ -97,7 +97,7 @@ library StakingLib {
         requestId = StorageLib.nextPendingUnstakeId();
 
         // add to request queue
-        DataTypes.UnstakeRequest storage req = StorageLib.getPendingUnstake(requestId);
+        DataTypes.UnstakeRequest storage req = StorageLib.getPendingUnstake()[requestId];
         req.owner = owner;
         req.nodeAddr = nodeAddr;
         req.timestamp = block.timestamp;
@@ -111,7 +111,7 @@ library StakingLib {
 
         requestId = StorageLib.nextPendingWithdrawlId();
 
-        DataTypes.WithdrawalRequest storage req = StorageLib.getPendingWithdrawal(requestId);
+        DataTypes.WithdrawalRequest storage req = StorageLib.getPendingWithdrawal()[requestId];
         req.timestamp = uint40(block.timestamp);
         req.owner = node.account;
         req.amount = amount;
@@ -123,28 +123,28 @@ library StakingLib {
 
     /// @dev claim withdrawal request
     function claimWithdrawal(uint256 requestId, uint256 DEPOSIT_UNBONDING_PERIOD) external {
-        DataTypes.WithdrawalRequest memory req = StorageLib.getPendingWithdrawal(requestId);
+        DataTypes.WithdrawalRequest memory req = StorageLib.getPendingWithdrawal()[requestId];
 
         if (req.owner == address(0)) revert ClaimIdNotExists(requestId);
         if (block.timestamp < req.timestamp + DEPOSIT_UNBONDING_PERIOD) revert ClaimTimeNotReady();
 
-        StorageLib.deletePendingWithdrawal(requestId);
+        delete StorageLib.getPendingWithdrawal()[requestId];
 
         // transfer tokens
         _transfer(req.owner, req.amount);
 
-        emit Events.WithdrawalClaimed(requestId);
+        emit Events.WithdrawalClaimed(requestId, req.owner, req.amount);
     }
 
     /// @dev claim unstake request
     function claimUnstake(uint256 requestId, uint256 STAKE_UNBONDING_PERIOD) external {
-        DataTypes.UnstakeRequest memory req = StorageLib.getPendingUnstake(requestId);
+        DataTypes.UnstakeRequest memory req = StorageLib.getPendingUnstake()[requestId];
 
         if (req.owner == address(0)) revert ClaimIdNotExists(requestId);
 
         if (block.timestamp < req.timestamp + STAKE_UNBONDING_PERIOD) revert ClaimTimeNotReady();
 
-        StorageLib.deletePendingUnstake(requestId);
+        delete StorageLib.getPendingUnstake()[requestId];
 
         // transfer tokens
         _transfer(req.owner, req.unstakeAmount);
