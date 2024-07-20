@@ -447,7 +447,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
-        // requestWithdrawl again will fail
+        // requestWithdrawal again will fail
         vm.expectRevert(abi.encodeWithSelector(ExcessWithdrawalAmount.selector));
         _staking.requestWithdrawal(amount);
         vm.stopPrank();

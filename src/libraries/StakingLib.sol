@@ -109,7 +109,7 @@ library StakingLib {
     function requestWithdrawal(DataTypes.Node storage node, uint256 amount) external returns (uint256 requestId) {
         StakingCommonLib.decreaseOperationPool(node, amount);
 
-        requestId = StorageLib.nextPendingWithdrawlId();
+        requestId = StorageLib.nextPendingWithdrawalId();
 
         DataTypes.WithdrawalRequest storage req = StorageLib.getPendingWithdrawal()[requestId];
         req.timestamp = uint40(block.timestamp);

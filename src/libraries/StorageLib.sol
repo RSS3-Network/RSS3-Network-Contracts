@@ -76,17 +76,6 @@ library StorageLib {
         }
     }
 
-    function deletePendingWithdrawal(uint256 requestId) external {
-        assembly {
-            mstore(0x00, requestId)
-            mstore(0x20, PENDING_WITHDRAWAL_MAPPING_BY_REQUEST_ID_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            sstore(slot, 0)
-            sstore(add(slot, 1), 0)
-        }
-    }
-
     function nextNodeId() external returns (uint256 newCounter) {
         assembly {
             let currentCounter := sload(NODE_ID_COUNTER_SLOT)
@@ -103,7 +92,7 @@ library StorageLib {
         }
     }
 
-    function nextPendingWithdrawlId() external returns (uint256 newCounter) {
+    function nextPendingWithdrawalId() external returns (uint256 newCounter) {
         assembly {
             let currentCounter := sload(PENDING_WITHDRAWAL_COUNTER_SLOT)
             newCounter := add(currentCounter, 1)
