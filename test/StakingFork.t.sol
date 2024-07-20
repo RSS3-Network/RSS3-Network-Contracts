@@ -16,7 +16,7 @@ contract StakingForkTest is CommonTest {
     Staking public staking;
 
     function setUp() public {
-        vm.createSelectFork("https://rpc.rss3.io", 4515437);
+        vm.createSelectFork("https://rpc.rss3.io", 5787906);
 
         Staking st = new Staking(address(1111), 25, 1944000, 1944000, 200, 100, 10000000000000000000000, 500, 200);
 
@@ -115,5 +115,105 @@ contract StakingForkTest is CommonTest {
         DataTypes.Node memory nodeAfter = staking.getNode(nodeAddr);
         assertEq(nodeAfter.totalShares, nodeBefore.totalShares - shares * 4);
         assertEq(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 4);
+    }
+
+    function testStakingStorageLayout() public {
+        assertEq(staking.chipsContract(), 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE);
+        assertEq(staking.isSettlementPhase(), false);
+        assertEq(staking.isAlphaPhase(), true);
+        // check node info
+        // node 1
+        DataTypes.Node memory node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
+        _checkNode(
+            0x827431510a5D249cE4fdB7F00C83a3353F471848,
+            1,
+            "Henry",
+            "Henry's awesome Node",
+            1000,
+            uint256(12793157235268997410007),
+            uint256(188607752333832530148001),
+            uint256(148500000000000000000000),
+            false,
+            true,
+            false
+        );
+        // node 83
+        node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
+        _checkNode(
+            0xCe56132aB93bfA39241Ad844433b58e926295186,
+            83,
+            "Money Tree RSS3",
+            "Those who stay here are full of luck\n",
+            600,
+            uint256(10357200000000000000000),
+            0,
+            0,
+            false,
+            true,
+            false
+        );
+
+        // check node counter
+        assertEq(staking.getNodeCount(), 83);
+
+        // check _pendingWithdrawalCounter, slot 9
+        assertEq(vm.load(address(staking), bytes32(uint256(9))), 0);
+
+        // check _pendingUnstakeCounter, slot 11
+        assertEq(vm.load(address(staking), bytes32(uint256(11))), 0);
+
+        // check public pool
+        node = staking.getPublicPool();
+        assertEq(node.nodeId, 0);
+        assertEq(node.taxRateBasisPoints, uint64(1168));
+        assertEq(node.operationPoolTokens, uint256(0));
+        assertEq(node.stakingPoolTokens, uint256(102726750648321495462628));
+        assertEq(node.totalShares, uint256(100000000000000000000000));
+        assertEq(node.publicGood, false);
+        assertEq(node.alpha, false);
+
+        // check pool info
+        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = staking
+            .getPoolInfo();
+        assertEq(totalOperationPoolTokens, uint256(3430942886901868893005511));
+        assertEq(totalStakingPoolTokens, uint256(88666655712935490505541127));
+        assertEq(totalSlashingPoolTokens, uint256(0));
+
+        // check chip info
+        (address nodeAddr, uint256 tokens, uint256 shares) = staking.getChipInfo(1);
+        assertEq(nodeAddr, 0x827431510a5D249cE4fdB7F00C83a3353F471848);
+        assertEq(tokens, uint256(635042937150951279959));
+        assertEq(shares, 500 ether);
+
+        (nodeAddr, tokens, shares) = staking.getChipInfo(139020);
+        assertEq(nodeAddr, 0xc29f2Aec9dC8cdbC58da0bE1b9F612A629c83Ac5);
+        assertEq(tokens, uint256(590053490751951480978));
+        assertEq(shares, 500 ether);
+    }
+
+    function _checkNode(
+        address nodeAddr,
+        uint256 nodeId,
+        string memory name,
+        string memory description,
+        uint64 taxRateBasisPoints,
+        uint256 operationPoolTokens,
+        uint256 stakingPoolTokens,
+        uint256 totalShares,
+        bool publicGood,
+        bool alpha,
+        bool slashStatus
+    ) internal {
+        DataTypes.Node memory node = staking.getNode(nodeAddr);
+        assertEq(node.name, name);
+        assertEq(node.description, description);
+        assertEq(node.nodeId, nodeId);
+        assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
+        assertEq(node.operationPoolTokens, operationPoolTokens);
+        assertEq(node.stakingPoolTokens, stakingPoolTokens);
+        assertEq(node.totalShares, totalShares);
+        assertEq(node.publicGood, publicGood);
+        assertEq(node.alpha, alpha);
+        assertEq(node.slashStatus, slashStatus);
     }
 }
