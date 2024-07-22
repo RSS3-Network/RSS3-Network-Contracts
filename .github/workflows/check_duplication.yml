@@ -1,0 +1,31 @@
+name: Check code duplication
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  duplicate-code-check:
+    name: Check for duplicate code
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check for duplicate code
+        uses: platisd/duplicate-code-detection-tool@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Ignore the specified directories
+          ignore_directories: "src/interfaces, src/libraries/SVGs, src/libraries/Events.sol, test"
+          file_extensions: "sol"
+          # Only report similarities above 30%
+          ignore_below: 30
+          # If a file is more than 70% similar to another, then the job fails
+          fail_above: 70
+          # If a file is more than 50% similar to another, show a warning symbol in the report
+          warn_above: 50
+          only_code: true
+           # Leave only one comment with the report and update it for consecutive runs
+          one_comment: true
+          # The message to be displayed at the start of the report
+          header_message_start: "The following files have a similarity above the threshold:"

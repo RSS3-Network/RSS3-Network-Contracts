@@ -8,6 +8,7 @@ import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Base64} from "solady/utils/Base64.sol";
 import {SVGGenerator} from "../src/libraries/SVGGenerator.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
+import {BatchSizeZero} from "../src/libraries/Errors.sol";
 
 contract ChipsTest is CommonTest {
     using stdJson for string;

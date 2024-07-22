@@ -5,6 +5,14 @@ pragma solidity 0.8.20;
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {Settlement} from "../src/Settlement.sol";
+import {
+    InvalidArrayLength,
+    InvalidEpochNumber,
+    SubmissionIntervalNotElapsed,
+    RewardsAlreadyDistributed,
+    OperationRewardsExceed,
+    TaxRateBasisPointsTooLarge
+} from "../src/libraries/Errors.sol";
 
 contract SettlementTest is CommonTest {
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -25,8 +33,11 @@ contract SettlementTest is CommonTest {
     }
 
     function invariantTreasuryBalance() public {
-        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
-        assertTrue(address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens >= 0);
+        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = _staking
+            .getPoolInfo();
+        assertTrue(
+            address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens - totalSlashingPoolTokens >= 0
+        );
     }
 
     function testCheckSetupStatus() public {
@@ -761,7 +772,7 @@ contract SettlementTest is CommonTest {
         uint256 endTime = block.timestamp;
 
         uint256 pgStakingPoolTokens = _staking.getPublicPool().stakingPoolTokens;
-        (, uint256 totalStakingPoolTokens) = _staking.getPoolInfo();
+        (, uint256 totalStakingPoolTokens, ) = _staking.getPoolInfo();
         (uint256 totalOpRewards, uint256 totalStRewards) = _settlement.getBonusInfo();
         uint256 pgRewards = (pgStakingPoolTokens * totalStRewards) / totalStakingPoolTokens;
 
