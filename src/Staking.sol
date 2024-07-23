@@ -118,12 +118,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     uint256 internal _totalSlashingPoolTokens;
 
+    /// @dev (nodeAddr, epochId) => slash record
+    mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
+
     /// @dev block.timestamp when the node operator requests an exit
     mapping(address nodeAddr => uint256 timestamp) internal _nodeExitTime;
     mapping(address nodeAddr => DataTypes.NodeExitStatus) internal _nodeExitStatus;
-
-    /// @dev (nodeAddr, epochId) => slash record
-    mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
 
     modifier whenNotAlphaPhase() {
         if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
