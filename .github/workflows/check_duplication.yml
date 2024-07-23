@@ -1,9 +1,6 @@
 name: Check code duplication
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
 
 jobs:
