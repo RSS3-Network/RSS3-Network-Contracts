@@ -164,6 +164,12 @@ library Events {
     );
 
     /**
+     * @dev Emitted on requestExit()
+     * @param nodeAddr The address of node to exit.
+     */
+    event NodeExitRequested(address indexed nodeAddr);
+
+    /**
      * @dev Emitted on recordSlashing()
      * @param nodeAddr The address of node to slash.
      * @param epoch The epoch number.

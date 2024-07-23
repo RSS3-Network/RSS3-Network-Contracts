@@ -4,6 +4,7 @@
   "oracleAccount": "0xEB72D842Dc186FB1d1CAb93A56E7308ABD2E9d0E",
   "depositUnbondingPeriod": "360",
   "stakeUnbondingPeriod": "180",
+  "nodeExitPeriod": "360",
   "nodeSlashRateBasisPoints": "100",
   "userSlashRateBasisPoints": "50",
   "stakeRatio": "25",

@@ -33,6 +33,7 @@ contract NetworkParamsTest is CommonTest {
         assertEq(_params.getParams(100), paramsStr);
     }
 
+    // solhint-disable-next-line function-max-lines
     function testGetCurrentParams() public {
         vm.prank(alice);
         _params.grantRole(ADMIN_ROLE, bob);

@@ -65,6 +65,12 @@ library DataTypes {
         Revoked
     }
 
+    enum NodeExitStatus {
+        None,
+        Exiting,
+        Exited
+    }
+
     struct SlashRecord {
         address reporter;
         uint256 amountForOperationPool;

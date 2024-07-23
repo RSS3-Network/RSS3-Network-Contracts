@@ -30,6 +30,7 @@ contract CommonTest is Utils {
 
     uint256 public constant stakeUnbondingPeriod = 22.5 days;
     uint256 public constant depositUnbondingPeriod = 22.5 days;
+    uint256 public constant nodeExitPeriod = 3 * 18 hours;
 
     uint256 internal _initialAmount = 100000000 ether;
 
@@ -62,6 +63,7 @@ contract CommonTest is Utils {
             stakeRatio,
             stakeUnbondingPeriod,
             depositUnbondingPeriod,
+            nodeExitPeriod,
             nodeSlashRateBasisPoints,
             userSlashRateBasisPoints,
             minDeposit,

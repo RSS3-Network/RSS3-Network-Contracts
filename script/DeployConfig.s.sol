@@ -18,6 +18,7 @@ contract DeployConfig is Script {
     address public oracleAccount;
     uint256 public depositUnbondingPeriod;
     uint256 public stakeUnbondingPeriod;
+    uint256 public nodeExitPeriod;
     uint256 public nodeSlashRateBasisPoints;
     uint256 public userSlashRateBasisPoints;
     uint256 public stakeRatio;
@@ -45,6 +46,7 @@ contract DeployConfig is Script {
         oracleAccount = stdJson.readAddress(_json, "$.oracleAccount");
         depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
         stakeUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
+        nodeExitPeriod = stdJson.readUint(_json, "$.nodeExitPeriod");
         nodeSlashRateBasisPoints = stdJson.readUint(_json, "$.nodeSlashRateBasisPoints");
         userSlashRateBasisPoints = stdJson.readUint(_json, "$.userSlashRateBasisPoints");
         stakeRatio = stdJson.readUint(_json, "$.stakeRatio");

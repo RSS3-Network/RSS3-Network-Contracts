@@ -205,9 +205,22 @@ interface IStaking {
     function disableAlphaPhase() external;
 
     /**
+     * @notice Requests an exit from network.
+     * @dev The caller must be the owner of node operator.
+     */
+    function requestExit() external;
+
+    /**
      * @notice Withdraws tokens from staking contract to treasury.
      */
     function withdraw2Treasury() external;
+
+    /**
+     * @notice Gets exit status by node address.
+     * @param nodeAddr Node address to query.
+     * @return DataTypes.NodeExitStatus Exit status.
+     */
+    function getNodeExitStatus(address nodeAddr) external view returns (DataTypes.NodeExitStatus);
 
     /**
      * @notice Returns whether the current time is in settlement phase.

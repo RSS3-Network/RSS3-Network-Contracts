@@ -26,11 +26,12 @@ import {
     NodeNotExists,
     TaxRateBasisPointsTooSmall,
     ExcessWithdrawalAmount,
+    WithdrawalAmountExceedsOperationPoolTokens,
+    NodeAlreadyInExitStatus,
     InvalidArrayLength,
     SettlementPhase,
     StakeToPublicGoodNode,
-    NodeNotPublicGood,
-    TransferFailed
+    NodeNotPublicGood
 } from "./libraries/Errors.sol";
 
 contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard {
@@ -60,6 +61,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     uint256 public immutable DEPOSIT_UNBONDING_PERIOD;
     /// @dev the period of time that user can't withdraw staked tokens
     uint256 public immutable STAKE_UNBONDING_PERIOD;
+    /// @dev the period of time that node operator can safely exit the network
+    uint256 public immutable NODE_EXIT_PERIOD;
 
     /// @dev the minimum value of tax rate basis points
     uint256 public immutable MIN_TAX_RATE_BASIS_POINTS;
@@ -115,6 +118,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     uint256 internal _totalSlashingPoolTokens;
 
+    /// @dev block.timestamp when the node operator requests an exit
+    mapping(address nodeAddr => uint256 timestamp) internal _nodeExitTime;
+    mapping(address nodeAddr => DataTypes.NodeExitStatus) internal _nodeExitStatus;
+
     /// @dev (nodeAddr, epochId) => slash record
     mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
 
@@ -134,6 +141,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
      * @param stakeRatio The stake ratio of the node operator.
      * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
      * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its deposit.
+     * @param nodeExitPeriod Time in seconds node operator can safely exit the network.
      * @param nodeSlashRateBasisPoints Slash rate in basis points for node operator.
      * @param userSlashRateBasisPoints Slash rate measured in basis points for user.
      * @param stakeRatio The stake ratio of the node operator.
@@ -146,6 +154,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         uint256 stakeRatio,
         uint256 stakeUnbondingPeriod,
         uint256 depositUnbondingPeriod,
+        uint256 nodeExitPeriod,
         uint256 nodeSlashRateBasisPoints,
         uint256 userSlashRateBasisPoints,
         uint256 minDeposit,
@@ -153,13 +162,18 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         uint256 slashReporterBonusRateBasisPoints
     ) {
         TREASURY = treasury;
+
         STAKE_RATIO = stakeRatio;
         STAKE_UNBONDING_PERIOD = stakeUnbondingPeriod;
         DEPOSIT_UNBONDING_PERIOD = depositUnbondingPeriod;
+        NODE_EXIT_PERIOD = nodeExitPeriod;
+
         NODE_SLASH_RATE_BASIS_POINTS = nodeSlashRateBasisPoints;
         USER_SLASH_RATE_BASIS_POINTS = userSlashRateBasisPoints;
+
         MIN_DEPOSIT = minDeposit;
         MIN_TAX_RATE_BASIS_POINTS = minTaxRateBasisPoints;
+
         SLASH_REPORTER_BONUS_RATE_BASIS_POINTS = slashReporterBonusRateBasisPoints;
     }
 
@@ -211,8 +225,17 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function deposit() external payable override whenNotPaused {
+        address nodeAddr = msg.sender;
+
         if (msg.value == 0) revert InsufficientValue();
-        StakingLib.deposit(msg.sender, msg.value);
+        StakingLib.deposit(nodeAddr, msg.value);
+
+        // reset node exit status
+        DataTypes.NodeExitStatus status = _getNodeExitStatus(msg.sender);
+        if (DataTypes.NodeExitStatus.None != status && _nodes[nodeAddr].operationPoolTokens >= MIN_DEPOSIT) {
+            delete _nodeExitTime[nodeAddr];
+            delete _nodeExitStatus[nodeAddr];
+        }
     }
 
     /// @inheritdoc IStaking
@@ -223,7 +246,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         if (node.account == address(0)) revert NodeNotExists();
 
         //  withdrawal amount should not exceed the operation pool tokens
-        if (amount > node.operationPoolTokens) revert ExcessWithdrawalAmount();
+        if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
+
+        // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
+        DataTypes.NodeExitStatus status = _getNodeExitStatus(msg.sender);
+        if (DataTypes.NodeExitStatus.Exited != status && node.operationPoolTokens - amount < MIN_DEPOSIT)
+            revert ExcessWithdrawalAmount();
 
         return StakingLib.requestWithdrawal(node, amount);
     }
@@ -385,10 +413,31 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
+    function requestExit() external override whenNotPaused {
+        address nodeAddr = msg.sender;
+
+        DataTypes.Node storage node = _nodes[nodeAddr];
+        if (node.account == address(0)) revert NodeNotExists();
+
+        DataTypes.NodeExitStatus status = _getNodeExitStatus(nodeAddr);
+        if (DataTypes.NodeExitStatus.None != status) revert NodeAlreadyInExitStatus();
+
+        _nodeExitTime[nodeAddr] = block.timestamp;
+        _nodeExitStatus[nodeAddr] = DataTypes.NodeExitStatus.Exiting;
+
+        emit Events.NodeExitRequested(nodeAddr);
+    }
+
+    /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         uint256 balance = address(this).balance;
         uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens - _totalSlashingPoolTokens;
         RewardsAndSlashingLib.withdraw2Treasury(TREASURY, amount);
+    }
+
+    /// @inheritdoc IStaking
+    function getNodeExitStatus(address nodeAddr) external view override returns (DataTypes.NodeExitStatus) {
+        return _getNodeExitStatus(nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -489,5 +538,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
         return StorageLib.getChipsContract();
+    }
+
+    function _getNodeExitStatus(address nodeAddr) internal view returns (DataTypes.NodeExitStatus status) {
+        status = _nodeExitStatus[nodeAddr];
+
+        if (
+            status == DataTypes.NodeExitStatus.Exiting && _nodeExitTime[nodeAddr] + NODE_EXIT_PERIOD <= block.timestamp
+        ) {
+            status = DataTypes.NodeExitStatus.Exited;
+        }
     }
 }

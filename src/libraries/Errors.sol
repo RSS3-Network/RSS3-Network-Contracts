@@ -64,6 +64,12 @@ error NodeAlreadyPublicGood(address nodeAddr);
 /// @dev Excess withdrawal amount.
 error ExcessWithdrawalAmount();
 
+/// @dev Withdrawal amount exceeds operationPoolTokens
+error WithdrawalAmountExceedsOperationPoolTokens();
+
+/// @dev Node is already in an exit status
+error NodeAlreadyInExitStatus();
+
 /// @dev Deposit is not allowed for public good node.
 error PublicGoodNodeNotDeposited();
 

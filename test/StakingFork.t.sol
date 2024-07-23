@@ -18,7 +18,18 @@ contract StakingForkTest is CommonTest {
     function setUp() public {
         vm.createSelectFork("https://rpc.rss3.io", 5787906);
 
-        Staking st = new Staking(address(1111), 25, 1944000, 1944000, 200, 100, 10000000000000000000000, 500, 200);
+        Staking st = new Staking(
+            address(1111),
+            25,
+            1944000,
+            1944000,
+            3 * 18 hours,
+            200,
+            100,
+            10000000000000000000000,
+            500,
+            200
+        );
 
         Proxy proxy = Proxy(payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578));
         vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);
@@ -117,6 +128,7 @@ contract StakingForkTest is CommonTest {
         assertEq(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 4);
     }
 
+    // solhint-disable-next-line function-max-lines
     function testStakingStorageLayout() public {
         assertEq(staking.chipsContract(), 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE);
         assertEq(staking.isSettlementPhase(), false);
