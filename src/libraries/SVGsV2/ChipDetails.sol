@@ -21,17 +21,17 @@ library ChipDetails {
         ];
 
         string[11] memory chipDetailsTraits = [
-            "Details 1",
-            "Details 2",
-            "Details 3",
-            "Details 4",
-            "Details 5",
-            "Details 6",
-            "Details 7",
-            "Details 8",
-            "Details 9",
-            "Details 10",
-            "Details 11"
+            "Detail 1",
+            "Detail 2",
+            "Detail 3",
+            "Detail 4",
+            "Detail 5",
+            "Detail 6",
+            "Detail 7",
+            "Detail 8",
+            "Detail 9",
+            "Detail 10",
+            "Detail 11"
         ];
 
         uint256 idx = id % 11;

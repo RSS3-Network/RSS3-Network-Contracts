@@ -11,12 +11,6 @@ interface IChips {
     function initialize(string memory name_, string memory symbol_, address staking_) external;
 
     /**
-     * @notice Sets the token id that chip v2 starts.
-     * @param tokenId The new token id.
-     */
-    function setChipV2StartingTokenId(uint256 tokenId) external;
-
-    /**
      * @notice Mints a token to `account`.
      * @param account Address to receive the minted token.
      * @return tokenId The new minted token id.

@@ -41,11 +41,10 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         _staking = staking_;
 
         __ERC721_init(name_, symbol_);
-    }
 
-    /// @inheritdoc IChips
-    function setChipV2StartingTokenId(uint256 tokenId) external override onlyStaking {
-        _chipV2StartId = tokenId;
+        if (_chipV2StartId == 0) {
+            _chipV2StartId = _totalSupply;
+        }
     }
 
     /// @inheritdoc IChips
@@ -93,14 +92,13 @@ contract Chips is IChips, IErrors, Initializable, ERC721 {
         return _totalSupply;
     }
 
-    // TODO
     function nodeImageAndAttributesURI(address nodeAddr) external view override returns (string memory) {
         DataTypes.NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr, DataTypes.ChipVersion.V2);
         uint256 seed = uint256(keccak256(abi.encodePacked(nodeAddr)));
         (DataTypes.ChipTraits memory chipTraits, ) = _getOtherTraitsBySeed(seed, DataTypes.ChipVersion.V2);
         chipTraits.headShapeColor = 0;
         chipTraits.headDetailColor = 0;
-        (string memory imageSVG, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
+        (string memory imageSVG, string memory attributes) = SVGGeneratorV2.generateSVGAndAttributes(
             nodeTraits,
             chipTraits
         );

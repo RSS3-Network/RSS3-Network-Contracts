@@ -363,11 +363,6 @@ contract Staking is IStaking, IErrors, Pausable, Initializable, AccessControlEnu
     }
 
     /// @inheritdoc IStaking
-    function setChipV2StartingTokenId(uint256 tokenId) external override onlyRole(ORACLE_ROLE) {
-        IChips(_chips).setChipV2StartingTokenId(tokenId);
-    }
-
-    /// @inheritdoc IStaking
     function setSettlementPhase(bool enabled) external override whenNotPaused onlyRole(ORACLE_ROLE) {
         _isSettlementPhase = enabled;
     }

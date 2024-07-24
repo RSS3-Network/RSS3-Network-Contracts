@@ -19,9 +19,6 @@ library SVGGeneratorV2 {
     using Strings for uint256;
     using Strings for address;
 
-    string public constant baseSVGHead =
-        '<?xml version="1.0" encoding="utf-8"?><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 124 182" style="enable-background:new 0 0 124 182;background-color:black;" xml:space="preserve">';
-
     string public constant baseSVGTail = "</svg>";
 
     string public constant color1 = "#DEE5D9";
@@ -33,7 +30,7 @@ library SVGGeneratorV2 {
     function getNodeTraitsCount() external pure returns (uint8, uint8, uint8, uint8) {
         return (
             5, // uint8(_colors.length),
-            9, // uint8(_frameSVGs.length),
+            9, // uint8(_chipSVGs.length),
             7, // uint8(_ChipCornersVGs.length),
             11 // uint8(_chipDetailSVGs.length)
         );
@@ -58,7 +55,8 @@ library SVGGeneratorV2 {
             nodeTraits.frameColor,
             nodeTraits.chipDetailColor,
             chipTraits.headShapeColor,
-            chipTraits.headDetailColor
+            chipTraits.headDetailColor,
+            true
         );
 
         (string memory nftCard, string memory nftCardTrait) = nodeTraits.pg
@@ -73,7 +71,7 @@ library SVGGeneratorV2 {
 
         return (
             string.concat(
-                baseSVGHead,
+                _getSVGHead(124, 182),
                 styleSVG,
                 getNftCardSvgs(nftCard, nftCardTraits),
                 '<g transform="translate(12, 41)">',
@@ -83,6 +81,28 @@ library SVGGeneratorV2 {
                 baseSVGTail
             ),
             string.concat(attributes1, ",", attributes2, ', {"trait_type": "NFT Card", "value": "', nftCardTrait, '"}')
+        );
+    }
+
+    function generateSVGAndAttributes(
+        DataTypes.NodeTraits calldata nodeTraits,
+        DataTypes.ChipTraits calldata chipTraits
+    ) external pure returns (string memory, string memory) {
+        string memory styleSVG = getSVGStyle(
+            nodeTraits.frameColor,
+            nodeTraits.chipDetailColor,
+            chipTraits.headShapeColor,
+            chipTraits.headDetailColor,
+            false
+        );
+
+        (string memory nodeSVG, string memory attributes1) = getNodeTraitsInnerSVGAndAttributes(nodeTraits);
+
+        (string memory chipSVG, string memory attributes2) = getChipTraitsInnerSVGAndAttributes(chipTraits);
+
+        return (
+            string.concat(_getSVGHead(100, 100), styleSVG, nodeSVG, chipSVG, baseSVGTail),
+            string.concat(attributes1, ",", attributes2)
         );
     }
 
@@ -226,14 +246,14 @@ library SVGGeneratorV2 {
         string memory attrs,
         DataTypes.NodeTraits memory nodeTraits
     ) internal pure returns (string memory, string memory) {
-        (string memory frameSVGs, string memory frameTrait) = ChipFrames.getChipFrame(nodeTraits.frameId);
+        (string memory chipSVGs, string memory chipTrait) = ChipFrames.getChipFrame(nodeTraits.frameId);
 
         return (
-            string.concat(svgs, frameSVGs),
+            string.concat(svgs, chipSVGs),
             string.concat(
                 attrs,
-                '{"trait_type": "Frame", "value": "',
-                frameTrait,
+                '{"trait_type": "Chip", "value": "',
+                chipTrait,
                 '"}, {"trait_type": "Frame Color", "value": "',
                 getColor(nodeTraits.frameColor),
                 '"}'
@@ -265,13 +285,14 @@ library SVGGeneratorV2 {
         uint8 frameColor,
         uint8 chipDetailColor,
         uint8 headShapeColor,
-        uint8 headDetailColor
+        uint8 headDetailColor,
+        bool includeFonts
     ) internal pure returns (string memory) {
+        string memory fontStr = includeFonts ? string.concat(Fonts1.getFont(), Fonts2.getFont()) : "";
         return
             string.concat(
                 '<style type="text/css">',
-                Fonts1.getFont(),
-                Fonts2.getFont(),
+                fontStr,
                 ".b{fill:",
                 getColor(frameColor),
                 ";}.c{fill:",
@@ -281,6 +302,21 @@ library SVGGeneratorV2 {
                 ";}.e{fill:",
                 getColor(headDetailColor),
                 ";}</style>"
+            );
+    }
+
+    function _getSVGHead(uint256 w, uint256 h) internal pure returns (string memory) {
+        return
+            string.concat(
+                '<?xml version="1.0" encoding="utf-8"?><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 ',
+                w.toString(),
+                " ",
+                h.toString(),
+                '" style="enable-background:new 0 0 ',
+                w.toString(),
+                " ",
+                h.toString(),
+                ';background-color:black;" xml:space="preserve">'
             );
     }
 

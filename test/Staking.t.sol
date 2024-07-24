@@ -257,10 +257,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         string memory decodedImageURI = string(
             Base64.decode(LibString.slice(base64Image, bytes(base64Imageprefix).length))
         );
-        uint256 found1 = LibString.indexOf(decodedImageURI, "b{fill:#DEE5D9;}"); // head color white
+        uint256 found1 = LibString.indexOf(decodedImageURI, "d{fill:#DEE5D9;}"); // head color white
         assertEq(found1 != LibString.NOT_FOUND, true);
 
-        uint256 found2 = LibString.indexOf(decodedImageURI, "h{fill:#DEE5D9;}"); // head detail color white
+        uint256 found2 = LibString.indexOf(decodedImageURI, "e{fill:#DEE5D9;}"); // head detail color white
         assertEq(found2 != LibString.NOT_FOUND, true);
     }
 
