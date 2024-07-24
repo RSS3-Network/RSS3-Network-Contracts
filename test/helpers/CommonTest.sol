@@ -3,17 +3,15 @@
 pragma solidity 0.8.20;
 
 import {Utils} from "./Utils.sol";
-import {IErrors} from "../../src/interfaces/IErrors.sol";
 import {DataTypes} from "../../src/libraries/DataTypes.sol";
 import {Staking} from "../../src/Staking.sol";
 import {Chips} from "../../src/Chips.sol";
 import {Settlement} from "../../src/Settlement.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
 import {TransparentUpgradeableProxy as Proxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
-import {InternalStaking} from "./InternalStaking.sol";
 import {InternalSettlement} from "./InternalSettlement.sol";
 
-contract CommonTest is Utils, IErrors {
+contract CommonTest is Utils {
     address public constant alice = address(0x111);
     address public constant bob = address(0x222);
     address public constant carol = address(0x333);
@@ -40,6 +38,7 @@ contract CommonTest is Utils, IErrors {
     uint256 public constant stakeRatio = 25;
     uint256 public constant minDeposit = 10000 ether;
     uint256 public constant minTaxRateBasisPoints = 500;
+    uint256 public constant slashReporterBonusRateBasisPoints = 200;
     address public constant treasury = address(0xaaa);
 
     string public constant chipsName = "Open Chips";
@@ -51,10 +50,7 @@ contract CommonTest is Utils, IErrors {
     Staking internal _staking;
     Chips internal _chips;
     Settlement internal _settlement;
-    InternalStaking internal _internalStakingTest;
     InternalSettlement internal _internalSettlementTest;
-
-    // SVGGenerator internal _svgGenerator;
 
     function _setUp() internal {
         // deploy rss3 token
@@ -69,7 +65,8 @@ contract CommonTest is Utils, IErrors {
             nodeSlashRateBasisPoints,
             userSlashRateBasisPoints,
             minDeposit,
-            minTaxRateBasisPoints
+            minTaxRateBasisPoints,
+            slashReporterBonusRateBasisPoints
         );
         // deploy chips token
         Chips chipsImpl = new Chips();
@@ -92,18 +89,6 @@ contract CommonTest is Utils, IErrors {
         _staking.initialize(address(_chips), pauseAccount, address(_settlement));
         _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
         _chips.initialize(chipsName, chipsSymbol, address(_staking));
-
-        _internalStakingTest = new InternalStaking(
-            treasury,
-            stakeRatio,
-            stakeUnbondingPeriod,
-            depositUnbondingPeriod,
-            nodeSlashRateBasisPoints,
-            userSlashRateBasisPoints,
-            minDeposit,
-            minTaxRateBasisPoints
-        );
-        _internalStakingTest.initialize(address(_chips), address(_settlement), oracleAccount);
 
         _internalSettlementTest = new InternalSettlement();
         _internalSettlementTest.initialize(address(_staking), oracleAccount, 0, 0);

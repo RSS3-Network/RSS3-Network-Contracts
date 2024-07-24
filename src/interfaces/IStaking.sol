@@ -160,12 +160,34 @@ interface IStaking {
     ) external payable;
 
     /**
-     * @notice Slashes nodes.
+     * @notice Record slashing nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param nodeAddrs The addresses of nodes to slash.
+     * @param slashings The addresses of nodes and epochIds to slash.
+     * @param reporters The addresses of reporters.
+     * @param reasons The reasons of slashing.
      */
-    function slashNodes(address[] calldata nodeAddrs) external;
+    function recordSlashing(
+        DataTypes.Slashing[] calldata slashings,
+        address[] calldata reporters,
+        string[] calldata reasons
+    ) external;
+
+    /**
+     * @notice Commit slashing nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param slashings The ids of slashes to commit.
+     */
+    function commitSlashing(DataTypes.Slashing[] calldata slashings) external;
+
+    /**
+     * @notice Revoke slashing nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param slashings The addresses of nodes to revoke.
+     */
+    function revokeSlashing(DataTypes.Slashing[] calldata slashings) external;
 
     /**
      * @notice Sets the settlement phase.
@@ -223,10 +245,19 @@ interface IStaking {
     function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares);
 
     /**
+     * @notice Gets slashing records info by `slashings`.
+     * @param slashings IDs of slashing records
+     * @return records DataTypes.SlashRecord[] slashing records info
+     */
+    function getSlashingRecords(
+        DataTypes.Slashing[] calldata slashings
+    ) external view returns (DataTypes.SlashRecord[] memory records);
+
+    /**
      * @notice Gets public pool info.
      * @return DataTypes.Node public pool info.
      */
-    function getPublicPool() external view returns (DataTypes.Node memory);
+    function getPublicPool() external pure returns (DataTypes.Node memory);
 
     /**
      * @notice Gets total count of nodes.
@@ -267,7 +298,10 @@ interface IStaking {
      * @return totalOperationPoolTokens Total tokens in operation pool
      * @return totalStakingPoolTokens Total tokens in staking pool
      */
-    function getPoolInfo() external view returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens);
+    function getPoolInfo()
+        external
+        view
+        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens);
 
     /**
      * @notice Returns the address of the chips contract.

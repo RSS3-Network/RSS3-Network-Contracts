@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
+import {DataTypes} from "../libraries/DataTypes.sol";
 
 interface ISettlement {
     /**
@@ -46,9 +47,27 @@ interface ISettlement {
      * @notice Slashes nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param nodeAddrs The addresses of nodes to slash.
+     * @param slashings The addresses of nodes and epoch ids to slash.
+     * @param reporters The addresses of reporters.
+     * @param reasons The reasons for slashing.
      */
-    function slashNodes(address[] calldata nodeAddrs) external;
+    function recordSlashing(
+        DataTypes.Slashing[] calldata slashings,
+        address[] calldata reporters,
+        string[] calldata reasons
+    ) external;
+
+    /**
+     * @notice Revokes slashing.
+     * @param epochIds The epoch numbers to revoke slashing.
+     */
+    function revokeSlashing(DataTypes.Slashing[] calldata epochIds) external;
+
+    /**
+     * @notice Commit slashing.
+     * @param epochIds The epoch numbers to commit slashing.
+     */
+    function commitSlashing(DataTypes.Slashing[] calldata epochIds) external;
 
     /**
      * @notice  Returns the address of the Staking contract.

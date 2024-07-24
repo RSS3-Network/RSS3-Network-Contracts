@@ -3,14 +3,20 @@ pragma solidity 0.8.20;
 
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
-import {IErrors} from "./interfaces/IErrors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {
+    InvalidArrayLength,
+    InvalidEpochNumber,
+    SubmissionIntervalNotElapsed,
+    RewardsAlreadyDistributed,
+    OperationRewardsExceed
+} from "./libraries/Errors.sol";
 
-contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumerable {
+contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using SafeCast for uint256;
 
@@ -125,8 +131,22 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     /// @inheritdoc ISettlement
-    function slashNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).slashNodes(nodeAddrs);
+    function recordSlashing(
+        DataTypes.Slashing[] calldata slashings,
+        address[] calldata reporters,
+        string[] calldata reasons
+    ) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).recordSlashing(slashings, reporters, reasons);
+    }
+
+    /// @inheritdoc ISettlement
+    function revokeSlashing(DataTypes.Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).revokeSlashing(epochIds);
+    }
+
+    /// @inheritdoc ISettlement
+    function commitSlashing(DataTypes.Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).commitSlashing(epochIds);
     }
 
     /// @inheritdoc ISettlement
@@ -169,7 +189,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     }
 
     function _saveTotalStakingSnapshot() internal {
-        (, _totalStakingSnapshot[_currentEpoch]) = IStaking(_staking).getPoolInfo();
+        (, _totalStakingSnapshot[_currentEpoch], ) = IStaking(_staking).getPoolInfo();
     }
 
     function _updateEpochInfo(uint256 epoch) internal {
@@ -198,7 +218,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
 
     /// @dev Returns staking rewards per epoch for public pool
     function _getPublicPoolStakingRewards() internal view returns (uint256) {
-        (, uint256 totalStaking) = IStaking(_staking).getPoolInfo();
+        (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
         if (totalStaking == 0) return 0;
 
         uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
@@ -224,7 +244,7 @@ contract Settlement is ISettlement, IErrors, Initializable, AccessControlEnumera
     function _getTotalStaking() internal view returns (uint256 totalStaking) {
         totalStaking = _totalStakingSnapshot[_currentEpoch];
         if (totalStaking == 0) {
-            (, totalStaking) = IStaking(_staking).getPoolInfo();
+            (, totalStaking, ) = IStaking(_staking).getPoolInfo();
         }
     }
 

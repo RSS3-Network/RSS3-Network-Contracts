@@ -4,16 +4,16 @@ pragma solidity 0.8.20;
 
 import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
+import {CallerNotStaking, BatchSizeZero} from "./libraries/Errors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {SVGGenerator} from "./libraries/SVGGenerator.sol";
 import {SVGGeneratorV2} from "./libraries/SVGGeneratorV2.sol";
-import {IErrors} from "./interfaces/IErrors.sol";
 import {ERC721} from "./base/ERC721.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-contract Chips is IChips, IErrors, Initializable, ERC721 {
+contract Chips is IChips, Initializable, ERC721 {
     using Strings for uint256;
 
     /// @dev Staking contract address.

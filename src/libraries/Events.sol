@@ -112,8 +112,10 @@ library Events {
     /**
      * @dev Emitted on claimWithdrawal()
      * @param requestId The withdrawal request id.
+     * @param nodeAddr The address of node to withdraw.
+     * @param amount Amount of tokens to withdraw.
      */
-    event WithdrawalClaimed(uint256 indexed requestId);
+    event WithdrawalClaimed(uint256 indexed requestId, address indexed nodeAddr, uint256 indexed amount);
 
     /**
      * @dev Emitted on stake()
@@ -162,14 +164,32 @@ library Events {
     );
 
     /**
-     * @dev Emitted on slashNode()
+     * @dev Emitted on recordSlashing()
      * @param nodeAddr The address of node to slash.
+     * @param epoch The epoch number.
+     * @param reporter The address of the reporter.
      * @param slashedOperationPool Amount of operation pool tokens slashed.
      * @param slashedStakingPool Amount of staking pool tokens slashed.
      */
-    event NodeSlashed(
+    event SlashRecorded(
         address indexed nodeAddr,
-        uint256 indexed slashedOperationPool,
-        uint256 indexed slashedStakingPool
+        uint256 indexed epoch,
+        address reporter,
+        uint256 slashedOperationPool,
+        uint256 slashedStakingPool
     );
+
+    /**
+     * @dev Emitted on commitSlashing()
+     * @param nodeAddr The address of node to slash.
+     * @param epoch The epoch number.
+     */
+    event SlashCommitted(address nodeAddr, uint256 epoch);
+
+    /**
+     * @dev Emitted on revokeSlashing()
+     * @param nodeAddr The address of node to slash.
+     * @param epoch The epoch number.
+     */
+    event SlashRevoked(address nodeAddr, uint256 epoch);
 }
