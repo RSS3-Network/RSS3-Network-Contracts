@@ -23,6 +23,11 @@
             },
             {
                 "internalType": "uint256",
+                "name": "nodeExitPeriod",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
                 "name": "nodeSlashRateBasisPoints",
                 "type": "uint256"
             },
@@ -39,6 +44,11 @@
             {
                 "internalType": "uint256",
                 "name": "minTaxRateBasisPoints",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "slashReporterBonusRateBasisPoints",
                 "type": "uint256"
             }
         ],
@@ -73,100 +83,6 @@
     },
     {
         "inputs": [],
-        "name": "AlreadyClaimed",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "BatchSizeZero",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "CallerNotStaking",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
-            }
-        ],
-        "name": "ChipNotAuthorized",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
-            }
-        ],
-        "name": "ChipNotPublicGood",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "tokenId",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            }
-        ],
-        "name": "ChipNotValid",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "ChipsIdOverflow",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "ChipsNotSameOwner",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "claimId",
-                "type": "uint256"
-            }
-        ],
-        "name": "ClaimIdNotExists",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "ClaimTimeNotReady",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "CreateNodeToZeroAddress",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "ChipIdsLengthTooShort",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "EmptyNodeList",
-        "type": "error"
-    },
-    {
-        "inputs": [],
         "name": "EnforcedPause",
         "type": "error"
     },
@@ -191,72 +107,13 @@
         "type": "error"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "expected",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "actual",
-                "type": "uint256"
-            }
-        ],
-        "name": "InvalidEpoch",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "current",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "got",
-                "type": "uint256"
-            }
-        ],
-        "name": "InvalidEpochNumber",
-        "type": "error"
-    },
-    {
         "inputs": [],
         "name": "InvalidInitialization",
         "type": "error"
     },
     {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "traitId",
-                "type": "uint256"
-            }
-        ],
-        "name": "InvalidTraitId",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            }
-        ],
-        "name": "NodeAlreadyPublicGood",
-        "type": "error"
-    },
-    {
         "inputs": [],
-        "name": "NodeExists",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "NodeIsPublicGood",
+        "name": "NodeAlreadyInExitStatus",
         "type": "error"
     },
     {
@@ -277,17 +134,7 @@
     },
     {
         "inputs": [],
-        "name": "NodeStakedOrDeposited",
-        "type": "error"
-    },
-    {
-        "inputs": [],
         "name": "NotInitializing",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "OperationRewardsExceed",
         "type": "error"
     },
     {
@@ -303,33 +150,6 @@
     {
         "inputs": [],
         "name": "ReentrancyGuardReentrantCall",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            }
-        ],
-        "name": "RewardsAlreadyDistributed",
-        "type": "error"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint8",
-                "name": "bits",
-                "type": "uint8"
-            },
-            {
-                "internalType": "uint256",
-                "name": "value",
-                "type": "uint256"
-            }
-        ],
-        "name": "SafeCastOverflowedUintDowncast",
         "type": "error"
     },
     {
@@ -350,83 +170,13 @@
     },
     {
         "inputs": [],
-        "name": "StakeAmountTooSmall",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "StakingRewardsExceed",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "SubmissionIntervalNotElapsed",
-        "type": "error"
-    },
-    {
-        "inputs": [],
-        "name": "TaxRateBasisPointsTooLarge",
-        "type": "error"
-    },
-    {
-        "inputs": [],
         "name": "TaxRateBasisPointsTooSmall",
         "type": "error"
     },
     {
         "inputs": [],
-        "name": "TransferFailed",
+        "name": "WithdrawalAmountExceedsOperationPoolTokens",
         "type": "error"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "newTokenId",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256[]",
-                "name": "burnedTokenIds",
-                "type": "uint256[]"
-            }
-        ],
-        "name": "ChipsMerged",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
-        "name": "Deposited",
-        "type": "event"
     },
     {
         "anonymous": false,
@@ -446,117 +196,12 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "uint256",
-                "name": "nodeId",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
                 "internalType": "address",
                 "name": "nodeAddr",
                 "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "description",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint64",
-                "name": "taxRateBasisPoints",
-                "type": "uint64"
-            },
-            {
-                "indexed": false,
-                "internalType": "bool",
-                "name": "publicGood",
-                "type": "bool"
-            },
-            {
-                "indexed": false,
-                "internalType": "bool",
-                "name": "alpha",
-                "type": "bool"
             }
         ],
-        "name": "NodeCreated",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "slashedOperationPool",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "slashedStakingPool",
-                "type": "uint256"
-            }
-        ],
-        "name": "NodeSlashed",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint64",
-                "name": "taxRateBasisPoints",
-                "type": "uint64"
-            }
-        ],
-        "name": "NodeTaxRateBasisPointsSet",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-            },
-            {
-                "indexed": false,
-                "internalType": "string",
-                "name": "description",
-                "type": "string"
-            }
-        ],
-        "name": "NodeUpdated",
+        "name": "NodeExitRequested",
         "type": "event"
     },
     {
@@ -607,19 +252,6 @@
             }
         ],
         "name": "PublicGoodRewardDistributed",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint64",
-                "name": "taxRateBasisPoints",
-                "type": "uint64"
-            }
-        ],
-        "name": "PublicPoolTaxRateBasisPointsSet",
         "type": "event"
     },
     {
@@ -756,43 +388,6 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "startTokenId",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "endTokenId",
-                "type": "uint256"
-            }
-        ],
-        "name": "Staked",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
                 "indexed": false,
                 "internalType": "address",
                 "name": "account",
@@ -800,112 +395,6 @@
             }
         ],
         "name": "Unpaused",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "requestId",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "unstakeAmount",
-                "type": "uint256"
-            }
-        ],
-        "name": "UnstakeClaimed",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "requestId",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "unstakeAmount",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256[]",
-                "name": "chipsIds",
-                "type": "uint256[]"
-            }
-        ],
-        "name": "UnstakeRequested",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "nodeAddr",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            },
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "requestId",
-                "type": "uint256"
-            }
-        ],
-        "name": "WithdrawRequested",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "uint256",
-                "name": "requestId",
-                "type": "uint256"
-            }
-        ],
-        "name": "WithdrawalClaimed",
         "type": "event"
     },
     {
@@ -962,6 +451,19 @@
     },
     {
         "inputs": [],
+        "name": "NODE_EXIT_PERIOD",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "NODE_SLASH_RATE_BASIS_POINTS",
         "outputs": [
             {
@@ -1002,6 +504,19 @@
     {
         "inputs": [],
         "name": "SHARES_PER_CHIP",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "SLASH_REPORTER_BONUS_RATE_BASIS_POINTS",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -1099,6 +614,31 @@
             }
         ],
         "name": "claimWithdrawal",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "nodeAddr",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "epoch",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct DataTypes.Slashing[]",
+                "name": "slashings",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "commitSlashing",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1275,9 +815,9 @@
                         "type": "uint256"
                     },
                     {
-                        "internalType": "uint256",
-                        "name": "slashedTokens",
-                        "type": "uint256"
+                        "internalType": "bool",
+                        "name": "slashStatus",
+                        "type": "bool"
                     }
                 ],
                 "internalType": "struct DataTypes.Node",
@@ -1315,6 +855,25 @@
                 "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "nodeAddr",
+                "type": "address"
+            }
+        ],
+        "name": "getNodeExitStatus",
+        "outputs": [
+            {
+                "internalType": "enum DataTypes.NodeExitStatus",
+                "name": "",
+                "type": "uint8"
             }
         ],
         "stateMutability": "view",
@@ -1383,9 +942,9 @@
                         "type": "uint256"
                     },
                     {
-                        "internalType": "uint256",
-                        "name": "slashedTokens",
-                        "type": "uint256"
+                        "internalType": "bool",
+                        "name": "slashStatus",
+                        "type": "bool"
                     }
                 ],
                 "internalType": "struct DataTypes.Node[]",
@@ -1464,9 +1023,9 @@
                         "type": "uint256"
                     },
                     {
-                        "internalType": "uint256",
-                        "name": "slashedTokens",
-                        "type": "uint256"
+                        "internalType": "bool",
+                        "name": "slashStatus",
+                        "type": "bool"
                     }
                 ],
                 "internalType": "struct DataTypes.Node[]",
@@ -1567,6 +1126,11 @@
                 "internalType": "uint256",
                 "name": "totalStakingPoolTokens",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalSlashingPoolTokens",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -1629,9 +1193,9 @@
                         "type": "uint256"
                     },
                     {
-                        "internalType": "uint256",
-                        "name": "slashedTokens",
-                        "type": "uint256"
+                        "internalType": "bool",
+                        "name": "slashStatus",
+                        "type": "bool"
                     }
                 ],
                 "internalType": "struct DataTypes.Node",
@@ -1639,7 +1203,7 @@
                 "type": "tuple"
             }
         ],
-        "stateMutability": "view",
+        "stateMutability": "pure",
         "type": "function"
     },
     {
@@ -1699,6 +1263,64 @@
                 "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "nodeAddr",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "epoch",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct DataTypes.Slashing[]",
+                "name": "slashings",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "getSlashingRecords",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "reporter",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amountForOperationPool",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amountForStakingPool",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "enum DataTypes.SlashStatus",
+                        "name": "status",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "slashReason",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct DataTypes.SlashRecord[]",
+                "name": "records",
+                "type": "tuple[]"
             }
         ],
         "stateMutability": "view",
@@ -1837,6 +1459,41 @@
     {
         "inputs": [
             {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "nodeAddr",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "epoch",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct DataTypes.Slashing[]",
+                "name": "slashings",
+                "type": "tuple[]"
+            },
+            {
+                "internalType": "address[]",
+                "name": "reporters",
+                "type": "address[]"
+            },
+            {
+                "internalType": "string[]",
+                "name": "reasons",
+                "type": "string[]"
+            }
+        ],
+        "name": "recordSlashing",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bytes32",
                 "name": "role",
                 "type": "bytes32"
@@ -1848,6 +1505,13 @@
             }
         ],
         "name": "renounceRole",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "requestExit",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1916,6 +1580,31 @@
     {
         "inputs": [
             {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "nodeAddr",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "epoch",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct DataTypes.Slashing[]",
+                "name": "slashings",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "revokeSlashing",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bool",
                 "name": "enabled",
                 "type": "bool"
@@ -1948,19 +1637,6 @@
             }
         ],
         "name": "setTaxRateBasisPoints4PublicPool",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address[]",
-                "name": "nodeAddrs",
-                "type": "address[]"
-            }
-        ],
-        "name": "slashNodes",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
