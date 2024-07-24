@@ -168,6 +168,12 @@ interface IStaking {
     function slashNodes(address[] calldata nodeAddrs) external;
 
     /**
+     * @notice Sets the token id that chip v2 starts.
+     * @param tokenId The new token id.
+     */
+    function setChipV2StartingTokenId(uint256 tokenId) external;
+
+    /**
      * @notice Sets the settlement phase.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.

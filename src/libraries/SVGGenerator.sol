@@ -87,7 +87,7 @@ library SVGGenerator {
         string memory attributes1 = string.concat(
             '{"trait_type": "Frame", "value": "',
             frameTrait,
-            '"}, {"trait_type": "Chip Detail", "value": "',
+            '"}, {"trait_type": "Frame Color", "value": "',
             getColor(nodeTraits.frameColor),
             '"}, {"trait_type": "Chip Detail", "value": "',
             chipTrait,
