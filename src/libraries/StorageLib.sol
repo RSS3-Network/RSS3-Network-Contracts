@@ -38,6 +38,8 @@ library StorageLib {
     uint256 public constant TOTAL_SLASHING_POOL_TOKENS_SLOT = 26;
     uint256 public constant SLASH_RECORDS_SLOT = 27;
 
+    uint256 public constant NODE_EXIT_TIME_SLOT = 28;
+
     function setTotalOperationPoolTokens(uint256 totalOperatingPoolTokens) external {
         assembly {
             sstore(TOTAL_OPERATION_POOL_TOKENS_SLOT, totalOperatingPoolTokens)
@@ -200,6 +202,26 @@ library StorageLib {
     function publicPool() external pure returns (DataTypes.Node storage _publicPool) {
         assembly {
             _publicPool.slot := PUBLIC_POOL_SLOT
+        }
+    }
+
+    function setNodeExitTime(address nodeAddr, uint256 time) internal {
+        assembly {
+            mstore(0x00, nodeAddr)
+            mstore(0x20, NODE_EXIT_TIME_SLOT)
+            let slot := keccak256(0x00, 0x40)
+
+            sstore(slot, time)
+        }
+    }
+
+    function getNodeExitTime(address nodeAddr) internal view returns (uint256 time) {
+        assembly {
+            mstore(0x00, nodeAddr)
+            mstore(0x20, NODE_EXIT_TIME_SLOT)
+            let slot := keccak256(0x00, 0x40)
+
+            time := sload(slot)
         }
     }
 

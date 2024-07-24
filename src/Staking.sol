@@ -122,8 +122,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
 
     /// @dev block.timestamp when the node operator requests an exit
-    mapping(address nodeAddr => uint256 timestamp) internal _nodeExitTime;
-    mapping(address nodeAddr => DataTypes.NodeExitStatus) internal _nodeExitStatus;
+    mapping(address nodeAddr => uint256 timestamp) internal _nodeExitTime; // slot 28
 
     modifier whenNotAlphaPhase() {
         if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
@@ -233,8 +232,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         // reset node exit status
         DataTypes.NodeExitStatus status = _getNodeExitStatus(msg.sender);
         if (DataTypes.NodeExitStatus.None != status && _nodes[nodeAddr].operationPoolTokens >= MIN_DEPOSIT) {
-            delete _nodeExitTime[nodeAddr];
-            delete _nodeExitStatus[nodeAddr];
+            StorageLib.setNodeExitTime(nodeAddr, 0);
         }
     }
 
@@ -243,7 +241,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         uint256 amount
     ) external override whenNotPaused whenNotAlphaPhase returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
-        if (node.account == address(0)) revert NodeNotExists();
+        _validateNodeAddress(node.account);
 
         //  withdrawal amount should not exceed the operation pool tokens
         if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
@@ -269,7 +267,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
         // validate node
-        if (node.account == address(0)) revert NodeNotExists();
+        _validateNodeAddress(node.account);
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
 
         tokenId = StakingLib.stakeToNode(node, msg.value, nodeAddr, msg.sender, SHARES_PER_CHIP);
@@ -280,7 +278,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         address nodeAddr
     ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
         DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.account == address(0)) revert NodeNotExists();
+        _validateNodeAddress(node.account);
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
 
         tokenId = StakingLib.stakeToNode(_publicPool, msg.value, nodeAddr, msg.sender, SHARES_PER_CHIP);
@@ -415,15 +413,13 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @inheritdoc IStaking
     function requestExit() external override whenNotPaused {
         address nodeAddr = msg.sender;
+        _validateNodeAddress(_nodes[nodeAddr].account);
 
-        DataTypes.Node storage node = _nodes[nodeAddr];
-        if (node.account == address(0)) revert NodeNotExists();
-
+        // validate node exit status
         DataTypes.NodeExitStatus status = _getNodeExitStatus(nodeAddr);
         if (DataTypes.NodeExitStatus.None != status) revert NodeAlreadyInExitStatus();
 
-        _nodeExitTime[nodeAddr] = block.timestamp;
-        _nodeExitStatus[nodeAddr] = DataTypes.NodeExitStatus.Exiting;
+        StorageLib.setNodeExitTime(nodeAddr, block.timestamp);
 
         emit Events.NodeExitRequested(nodeAddr);
     }
@@ -476,11 +472,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         for (uint256 i = 0; i < slashings.length; i++) {
             records[i] = StorageLib.getSlashRecord(slashings[i].nodeAddr, slashings[i].epoch);
         }
-    }
-
-    /// @inheritdoc IStaking
-    function getPublicPool() external pure override returns (DataTypes.Node memory) {
-        return StorageLib.publicPool();
     }
 
     /// @inheritdoc IStaking
@@ -540,13 +531,23 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         return StorageLib.getChipsContract();
     }
 
-    function _getNodeExitStatus(address nodeAddr) internal view returns (DataTypes.NodeExitStatus status) {
-        status = _nodeExitStatus[nodeAddr];
+    /// @inheritdoc IStaking
+    function getPublicPool() external pure override returns (DataTypes.Node memory) {
+        return StorageLib.publicPool();
+    }
 
-        if (
-            status == DataTypes.NodeExitStatus.Exiting && _nodeExitTime[nodeAddr] + NODE_EXIT_PERIOD <= block.timestamp
-        ) {
+    function _getNodeExitStatus(address nodeAddr) internal view returns (DataTypes.NodeExitStatus status) {
+        uint256 exitTime = StorageLib.getNodeExitTime(nodeAddr);
+        if (exitTime == 0) {
+            status = DataTypes.NodeExitStatus.None;
+        } else if (exitTime + NODE_EXIT_PERIOD <= block.timestamp) {
             status = DataTypes.NodeExitStatus.Exited;
+        } else {
+            status = DataTypes.NodeExitStatus.Exiting;
         }
+    }
+
+    function _validateNodeAddress(address nodeAddr) internal pure {
+        if (nodeAddr == address(0)) revert NodeNotExists();
     }
 }

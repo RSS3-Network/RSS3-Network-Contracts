@@ -267,12 +267,6 @@ interface IStaking {
     ) external view returns (DataTypes.SlashRecord[] memory records);
 
     /**
-     * @notice Gets public pool info.
-     * @return DataTypes.Node public pool info.
-     */
-    function getPublicPool() external pure returns (DataTypes.Node memory);
-
-    /**
      * @notice Gets total count of nodes.
      * @return uint256 Total count of nodes.
      */
@@ -321,4 +315,10 @@ interface IStaking {
      * @return address The address of the chips contract.
      */
     function chipsContract() external view returns (address);
+
+    /**
+     * @notice Gets public pool info.
+     * @return DataTypes.Node public pool info.
+     */
+    function getPublicPool() external pure returns (DataTypes.Node memory);
 }

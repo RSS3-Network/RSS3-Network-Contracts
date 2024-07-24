@@ -6,6 +6,7 @@ pragma solidity 0.8.20;
  * @notice A standard library of data types.
  */
 library DataTypes {
+    // solhint-disable-next-line gas-struct-packing
     struct Node {
         /// @notice unique identifier of the node
         uint256 nodeId;
