@@ -14,6 +14,7 @@ import {LibZip} from "@solady/utils/LibZip.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Fonts1} from "./Fonts/Fonts1.sol";
 import {Fonts2} from "./Fonts/Fonts2.sol";
+import {LibString} from "solady/utils/LibString.sol";
 
 library SVGGeneratorV2 {
     using Strings for uint256;
@@ -116,14 +117,14 @@ library SVGGeneratorV2 {
         string memory ops = string.concat(
             '<text font-family="AuxMono" x="21" y="3.5" font-size="3.8" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 158)" fill="url(#a)"> OPS: ',
             opTokens > 1000 ? (opTokens / 1000).toString() : opTokens.toString(),
-            opTokens > 1000 ? " K</text>" : "</text>"
+            opTokens > 1000 ? "K</text>" : "</text>"
         );
 
         uint256 stTokens = nftCardTraits.stakingPoolTokens / 1 ether;
         string memory sps = string.concat(
-            '<text font-family="AuxMono" x="21" y="3.5" font-size="3.8" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(63 158)" fill="url(#a)"> SPS:',
+            '<text font-family="AuxMono" x="21" y="3.5" font-size="3.8" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(63 158)" fill="url(#a)"> SPS: ',
             stTokens > 1000 ? (stTokens / 1000).toString() : stTokens.toString(),
-            stTokens > 1000 ? " K</text>" : "</text>"
+            stTokens > 1000 ? "K</text>" : "</text>"
         );
 
         return
@@ -136,9 +137,9 @@ library SVGGeneratorV2 {
                 '<g fill="#000" font-size="6" font-family="AuxMono"><text text-anchor="end" y="-1em" transform="translate(106 14.53)">',
                 (nftCardTraits.chipTokens / 1 ether).toString(),
                 '</text><text text-anchor="end" transform="translate(106 14.53)">$RSS3</text></g>',
-                '<g fill="url(#a)" font-size="3.8" font-family="AuxMono"><text x="43.5" y="6.1" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 140)">',
+                '<g fill="url(#a)" font-size="5" font-family="AuxMono"><text x="43.5" y="6.1" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 140)">',
                 addrPart1,
-                '</text><text x="43.5" y="9.9" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 140)">',
+                '</text><text x="43.5" y="9.9" letter-spacing="-.38" dominant-baseline="middle" transform="translate(-20 140)">',
                 addrPart2,
                 "</text></g>",
                 ops,
@@ -347,7 +348,7 @@ library SVGGeneratorV2 {
 
     function _splitAddress(address addr) internal pure returns (string memory, string memory) {
         string memory addrHex = addr.toHexString();
-        return (_getSlice(0, 21, addrHex), _getSlice(21, 42, addrHex));
+        return (LibString.slice(addrHex, 0, 25), LibString.slice(addrHex, 26, 42));
     }
 
     function _getSlice(uint256 begin, uint256 end, string memory text) public pure returns (string memory) {
