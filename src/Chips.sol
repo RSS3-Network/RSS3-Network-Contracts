@@ -38,7 +38,9 @@ contract Chips is IChips, Initializable, ERC721 {
         string calldata symbol_,
         address staking_
     ) external override reinitializer(2) {
-        _staking = staking_;
+        if (staking_ != address(0)) {
+            _staking = staking_;
+        }
 
         __ERC721_init(name_, symbol_);
 
