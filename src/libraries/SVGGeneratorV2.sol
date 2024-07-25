@@ -9,6 +9,7 @@ import {HeadDetails} from "./SVGsV2/HeadDetails.sol";
 import {Mouths} from "./SVGsV2/Mouths.sol";
 import {ChipCorners} from "./SVGsV2/ChipCorners.sol";
 import {ChipFrames} from "./SVGsV2/ChipFrames.sol";
+import {HeadShapes} from "./SVGsV2/HeadShapes.sol";
 import {NftCards} from "./SVGsV2/NftCards.sol";
 import {LibZip} from "@solady/utils/LibZip.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
@@ -179,7 +180,7 @@ library SVGGeneratorV2 {
     function getChipTraitsInnerSVGAndAttributes(
         DataTypes.ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
-        (string memory svgParts, string memory headShapeTrait) = getHeadShape(chipTraits.headShapeId % 3);
+        (string memory svgParts, string memory headShapeTrait) = HeadShapes.getHeadShape(chipTraits.headShapeId % 3);
 
         string memory attributes = string.concat(
             '{"trait_type": "Head Shape", "value": "',
@@ -325,25 +326,6 @@ library SVGGeneratorV2 {
         assert(id < 5);
         string[5] memory colors = [color1, color2, color3, color4, color5];
         return colors[id];
-    }
-
-    function getHeadShape(uint8 id) internal pure returns (string memory, string memory) {
-        assert(id < 3);
-        return (_getHeadShapeSVG(id), _getHeadShapeTrait(id));
-    }
-
-    function _getHeadShapeSVG(uint8 id) internal pure returns (string memory) {
-        string[3] memory baseHeadsSVGs = [
-            hex"1c3c7061746820643d224d333020363468327632682d327a4d3332203636e0010d0334203638e0010d0e3620373068323876324833367a4d37202a40342039203800376046c00d0136384046e0000d00364046c00d0d323820343668343476313648323820720030600f0230762d20570030601f205700342057801e20660334683336200e00332067409202366833401d013334200e605ac0930c2220636c6173733d2264222f3e",
-            hex"1f3c7061746820643d224d333020363468327632682d327a4d34302037306832300776324834307a4d37601c002d401d201c202a1834366834307631364833307a2220636c6173733d2264222f3ee001500d32382034386834347631344832388035200f0330762d32e01235405be00225024d3332406b0133366035807b01363240450034e01244207a4024003420bd6079023220366043207840420636203638683238400e0e367a2220636c6173733d2264222f3e",
-            hex"1f3c7061746820643d224d333020363468327632682d327a4d33322037306833360376324833200e0037601c002d401d200d202a1834366834307631364833307a2220636c6173733d2264222f3ee001500d32382034386834347631344832388035200f0230762d2053e01935202540354045206be0000f207b01363240450034e015444024023476364043e00e9f20e2013636e001e24058609ee0049d042264222f3e"
-        ];
-        return string(LibZip.flzDecompress(bytes(baseHeadsSVGs[id])));
-    }
-
-    function _getHeadShapeTrait(uint8 id) internal pure returns (string memory) {
-        string[3] memory baseHeadsTraits = ["Default", "Round", "Square"];
-        return baseHeadsTraits[id];
     }
 
     function _splitAddress(address addr) internal pure returns (string memory, string memory) {
