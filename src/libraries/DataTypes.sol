@@ -96,4 +96,18 @@ library DataTypes {
         uint8 headDetailColor;
         uint8 headDetailId;
     }
+
+    struct NftCardTraits {
+        uint8 nftCardId; // TODO: in the future
+        uint256 tokenId;
+        uint256 chipTokens;
+        address nodeAddr;
+        uint256 stakingPoolTokens;
+        uint256 operationPoolTokens;
+    }
+
+    enum ChipVersion {
+        V1,
+        V2
+    }
 }

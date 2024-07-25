@@ -50,8 +50,8 @@ library Mouths {
             "Buck Teeth"
         ];
 
-        uint256 idx = id % 16;
+        uint256 idx = id % 19;
         bytes memory mouthSVG = LibZip.flzDecompress(bytes(mouthSVGs[idx]));
-        return (string(mouthSVG), mouthTraits[id % 9]);
+        return (string(mouthSVG), mouthTraits[id % 19]);
     }
 }

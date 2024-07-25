@@ -4,13 +4,14 @@ pragma solidity 0.8.20;
 
 import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
+import {CallerNotStaking, BatchSizeZero} from "./libraries/Errors.sol";
 import {DataTypes} from "./libraries/DataTypes.sol";
 import {SVGGenerator} from "./libraries/SVGGenerator.sol";
+import {SVGGeneratorV2} from "./libraries/SVGGeneratorV2.sol";
 import {ERC721} from "./base/ERC721.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {CallerNotStaking, BatchSizeZero} from "./libraries/Errors.sol";
 
 contract Chips is IChips, Initializable, ERC721 {
     using Strings for uint256;
@@ -23,6 +24,9 @@ contract Chips is IChips, Initializable, ERC721 {
     /// @dev Total supply of tokens.
     uint256 internal _totalSupply;
 
+    /// @dev Token id that chip v2 will start with.
+    uint256 internal _chipV2StartId;
+
     modifier onlyStaking() {
         if (msg.sender != _staking) revert CallerNotStaking();
         _;
@@ -33,10 +37,16 @@ contract Chips is IChips, Initializable, ERC721 {
         string calldata name_,
         string calldata symbol_,
         address staking_
-    ) external override initializer {
-        _staking = staking_;
+    ) external override reinitializer(2) {
+        if (staking_ != address(0)) {
+            _staking = staking_;
+        }
 
         __ERC721_init(name_, symbol_);
+
+        if (_chipV2StartId == 0) {
+            _chipV2StartId = _totalSupply;
+        }
     }
 
     /// @inheritdoc IChips
@@ -85,12 +95,12 @@ contract Chips is IChips, Initializable, ERC721 {
     }
 
     function nodeImageAndAttributesURI(address nodeAddr) external view override returns (string memory) {
-        DataTypes.NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr);
+        DataTypes.NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr, DataTypes.ChipVersion.V2);
         uint256 seed = uint256(keccak256(abi.encodePacked(nodeAddr)));
-        DataTypes.ChipTraits memory chipTraits = _getChipTraitsBySeed(seed);
+        (DataTypes.ChipTraits memory chipTraits, ) = _getOtherTraitsBySeed(seed, DataTypes.ChipVersion.V2);
         chipTraits.headShapeColor = 0;
         chipTraits.headDetailColor = 0;
-        (string memory imageSVG, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
+        (string memory imageSVG, string memory attributes) = SVGGeneratorV2.generateSVGAndAttributes(
             nodeTraits,
             chipTraits
         );
@@ -109,12 +119,13 @@ contract Chips is IChips, Initializable, ERC721 {
     function tokenURI(uint256 id) public view override returns (string memory) {
         DataTypes.NodeTraits memory nodeTraits;
         DataTypes.ChipTraits memory chipTraits;
-        (nodeTraits, chipTraits) = _generateChipImage(id);
+        DataTypes.NftCardTraits memory nftCardTraits;
 
-        (string memory imageSVG, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
-            nodeTraits,
-            chipTraits
-        );
+        (nodeTraits, chipTraits, nftCardTraits) = _generateChipImage(id);
+
+        (string memory imageSVG, string memory attributes) = _getChipVersion(id) == DataTypes.ChipVersion.V2
+            ? SVGGeneratorV2.generateSVGAndAttributes(nodeTraits, chipTraits, nftCardTraits)
+            : SVGGenerator.generateSVGAndAttributes(nodeTraits, chipTraits);
 
         string memory json = string.concat(
             '{"name": "Open Chips #',
@@ -136,21 +147,41 @@ contract Chips is IChips, Initializable, ERC721 {
 
     function _generateChipImage(
         uint256 tokenId
-    ) internal view returns (DataTypes.NodeTraits memory, DataTypes.ChipTraits memory) {
-        (address nodeAddr, , ) = IStaking(_staking).getChipInfo(tokenId);
+    ) internal view returns (DataTypes.NodeTraits memory, DataTypes.ChipTraits memory, DataTypes.NftCardTraits memory) {
+        (address nodeAddr, uint256 tokens, ) = IStaking(_staking).getChipInfo(tokenId);
 
-        DataTypes.NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr);
+        DataTypes.ChipVersion version = _getChipVersion(tokenId);
 
-        DataTypes.ChipTraits memory chipTraits = _getChipTraits(nodeAddr, tokenId);
+        DataTypes.NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr, version);
 
-        return (nodeTraits, chipTraits);
+        (DataTypes.ChipTraits memory chipTraits, uint8 nftCardId) = _getOtherTraits(nodeAddr, tokenId);
+
+        DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddr);
+        DataTypes.Node memory poolNode = node.publicGood ? IStaking(_staking).getPublicPool() : node;
+
+        DataTypes.NftCardTraits memory nftCardTraits = DataTypes.NftCardTraits({
+            nftCardId: nftCardId,
+            tokenId: tokenId,
+            chipTokens: tokens,
+            nodeAddr: nodeAddr,
+            stakingPoolTokens: poolNode.stakingPoolTokens,
+            operationPoolTokens: poolNode.operationPoolTokens
+        });
+
+        return (nodeTraits, chipTraits, nftCardTraits);
     }
 
-    function _getNodeTraits(address nodeAddr) internal view returns (DataTypes.NodeTraits memory) {
+    function _getNodeTraits(
+        address nodeAddr,
+        DataTypes.ChipVersion version
+    ) internal view returns (DataTypes.NodeTraits memory) {
         DataTypes.Node memory node = IStaking(_staking).getNode(nodeAddr);
 
-        (uint8 colorCount, uint8 frameCount, uint8 chipCornerCount, uint8 chipDetailCount) = SVGGenerator
-            .getNodeTraitsCount();
+        (uint8 colorCount, uint8 frameCount, uint8 chipCornerCount, uint8 chipDetailCount) = version ==
+            DataTypes.ChipVersion.V1
+            ? SVGGenerator.getNodeTraitsCount()
+            : SVGGeneratorV2.getNodeTraitsCount();
+
         uint256 nodeTraitCount = uint256(frameCount) *
             uint256(colorCount) *
             uint256(chipDetailCount) *
@@ -181,55 +212,115 @@ contract Chips is IChips, Initializable, ERC721 {
         return nodeTraits;
     }
 
-    function _getChipTraits(address nodeAddr, uint256 tokenId) internal pure returns (DataTypes.ChipTraits memory) {
+    function _getOtherTraits(
+        address nodeAddr,
+        uint256 tokenId
+    ) internal view returns (DataTypes.ChipTraits memory, uint8) {
         uint256 seed = uint256(keccak256(abi.encodePacked(nodeAddr, tokenId)));
-        return _getChipTraitsBySeed(seed);
+        DataTypes.ChipVersion version = _getChipVersion(tokenId);
+        return _getOtherTraitsBySeed(seed, version);
     }
 
-    function _getChipTraitsBySeed(uint256 seed) internal pure returns (DataTypes.ChipTraits memory) {
-        (uint8 eyeCount, uint8 mouthCount, uint8 headShapeCount, uint8 headDetailCount) = SVGGenerator
-            .getChipTraitsCount();
+    function _getOtherTraitsBySeed(
+        uint256 seed,
+        DataTypes.ChipVersion version
+    ) internal pure returns (DataTypes.ChipTraits memory, uint8 nftCardId) {
+        uint8 eyeCount;
+        uint8 mouthCount;
+        uint8 headShapeCount;
+        uint8 headDetailCount;
+        uint8 colorCount;
+        uint8 nftCardCount;
 
-        (uint8 colorCount, , , ) = SVGGenerator.getNodeTraitsCount();
+        if (version == DataTypes.ChipVersion.V1) {
+            (eyeCount, mouthCount, headShapeCount, headDetailCount) = SVGGenerator.getChipTraitsCount();
+            (colorCount, , , ) = SVGGenerator.getNodeTraitsCount();
+            nftCardCount = 1; // V1 doesn't have nftCardCount, set to 1
+        } else {
+            (eyeCount, mouthCount, headShapeCount, headDetailCount, nftCardCount) = SVGGeneratorV2.getChipTraitsCount();
+            (colorCount, , , ) = SVGGeneratorV2.getNodeTraitsCount();
+        }
 
         uint256 chipTraitCount = uint256(eyeCount) *
-            uint256(mouthCount) *
-            uint256(headShapeCount) *
-            uint256(colorCount) *
-            uint256(headDetailCount) *
-            uint256(colorCount);
+            (mouthCount) *
+            (headShapeCount) *
+            (colorCount) *
+            (headDetailCount) *
+            (colorCount) *
+            (nftCardCount);
 
         uint256 chipTraitId = seed % chipTraitCount;
 
-        DataTypes.ChipTraits memory chipTraits = DataTypes.ChipTraits({
-            eyesId: _calTraitId(
+        return (
+            _getChipTraitsByCount(
                 chipTraitId,
                 eyeCount,
-                uint256(mouthCount) *
-                    uint256(headShapeCount) *
-                    uint256(colorCount) *
-                    uint256(headDetailCount) *
-                    uint256(colorCount)
-            ),
-            mouthId: _calTraitId(
-                chipTraitId,
                 mouthCount,
-                uint256(headShapeCount) * uint256(colorCount) * uint256(headDetailCount) * uint256(colorCount)
-            ),
-            headShapeColor: _calTraitId(
-                chipTraitId,
+                headShapeCount,
+                headDetailCount,
                 colorCount,
-                uint256(colorCount) * uint256(headDetailCount) * uint256(colorCount)
+                nftCardCount
             ),
-            headShapeId: _calTraitId(chipTraitId, headShapeCount, colorCount * headDetailCount),
-            headDetailColor: _calTraitId(chipTraitId, colorCount, headDetailCount),
-            headDetailId: _calTraitId(chipTraitId, headDetailCount, 1)
-        });
+            _calTraitId(chipTraitId, nftCardCount, 1)
+        );
+    }
 
-        return chipTraits;
+    function _getChipTraitsByCount(
+        uint256 chipTraitId,
+        uint8 eyeCount,
+        uint8 mouthCount,
+        uint8 headShapeCount,
+        uint8 headDetailCount,
+        uint8 colorCount,
+        uint8 nftCardCount
+    ) internal pure returns (DataTypes.ChipTraits memory) {
+        uint256 factor = uint256(mouthCount) *
+            uint256(headShapeCount) *
+            uint256(colorCount) *
+            uint256(headDetailCount) *
+            uint256(colorCount) *
+            uint256(nftCardCount);
+
+        return (
+            DataTypes.ChipTraits({
+                eyesId: _calTraitId(chipTraitId, eyeCount, factor),
+                mouthId: _calTraitId(chipTraitId, mouthCount, factor / uint256(mouthCount)),
+                headShapeId: _calTraitId(
+                    chipTraitId,
+                    headShapeCount,
+                    (factor / uint256(mouthCount)) / uint256(headShapeCount)
+                ),
+                headShapeColor: _calTraitId(
+                    chipTraitId,
+                    colorCount,
+                    (factor / uint256(mouthCount)) / uint256(headShapeCount) / uint256(colorCount)
+                ),
+                headDetailId: _calTraitId(
+                    chipTraitId,
+                    headDetailCount,
+                    (factor / uint256(mouthCount)) /
+                        uint256(headShapeCount) /
+                        uint256(colorCount) /
+                        uint256(headDetailCount)
+                ),
+                headDetailColor: _calTraitId(
+                    chipTraitId,
+                    colorCount,
+                    (factor / uint256(mouthCount)) /
+                        uint256(headShapeCount) /
+                        uint256(colorCount) /
+                        uint256(headDetailCount) /
+                        uint256(colorCount)
+                )
+            })
+        );
     }
 
     function _calTraitId(uint256 traitId, uint8 traitCount, uint256 divisionFactor) internal pure returns (uint8) {
         return uint8((traitId / divisionFactor) % traitCount);
+    }
+
+    function _getChipVersion(uint256 tokenId) internal view returns (DataTypes.ChipVersion) {
+        return _chipV2StartId < tokenId ? DataTypes.ChipVersion.V2 : DataTypes.ChipVersion.V1;
     }
 }
