@@ -11,6 +11,7 @@ import {IChips} from "../interfaces/IChips.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {
     NodeNotExists,
+    DepositForPublicGoodNode,
     StakeAmountTooSmall,
     ChipNotValid,
     ChipNotAuthorized,
@@ -29,6 +30,7 @@ library StakingLib {
         DataTypes.Node storage node = nodes[nodeAddr];
 
         if (node.account == address(0)) revert NodeNotExists();
+        if (node.publicGood) revert DepositForPublicGoodNode();
 
         StakingCommonLib.increaseOperationPool(node, amount);
         emit Events.Deposited(nodeAddr, amount);

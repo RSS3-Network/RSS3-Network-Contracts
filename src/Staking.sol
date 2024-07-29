@@ -21,7 +21,6 @@ import {StakingLib} from "./libraries/StakingLib.sol";
 import {
     AlphaWithdrawNotAllowed,
     InsufficientValue,
-    PublicGoodNodeNotDeposited,
     PublicGoodNodeTaxNotZero,
     NodeNotExists,
     TaxRateBasisPointsTooSmall,
@@ -33,6 +32,7 @@ import {
     InvalidArrayLength,
     SettlementPhase,
     StakeToPublicGoodNode,
+    NodeInExitStatus,
     NodeNotPublicGood
 } from "./libraries/Errors.sol";
 
@@ -208,7 +208,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         bool publicGood
     ) external payable override whenNotPaused {
         if (publicGood) {
-            if (msg.value > 0) revert PublicGoodNodeNotDeposited();
             if (taxRateBasisPoints > 0) revert PublicGoodNodeTaxNotZero();
         } else {
             if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
@@ -268,6 +267,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         _validateNodeAddress(node.account);
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
 
+        // node should not in exit status
+        _validateNodeStatus(nodeAddr);
+
         tokenId = StakingLib.stakeToNode(node, msg.value, nodeAddr, msg.sender, SHARES_PER_CHIP);
     }
 
@@ -278,6 +280,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         DataTypes.Node storage node = _nodes[nodeAddr];
         _validateNodeAddress(node.account);
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
+
+        // node should not in exit status
+        _validateNodeStatus(nodeAddr);
 
         tokenId = StakingLib.stakeToNode(_publicPool, msg.value, nodeAddr, msg.sender, SHARES_PER_CHIP);
     }
@@ -564,5 +569,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     function _validateNodeAddress(address nodeAddr) internal pure {
         if (nodeAddr == address(0)) revert NodeNotExists();
+    }
+
+    function _validateNodeStatus(address nodeAddr) internal {
+        DataTypes.NodeExitStatus status = _getNodeExitStatus(nodeAddr);
+        if (DataTypes.NodeExitStatus.None != status) revert NodeInExitStatus();
     }
 }

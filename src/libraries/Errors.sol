@@ -40,6 +40,9 @@ error ClaimIdNotExists(uint256 claimId);
 /// @dev Staking amount is less than 500 ethers.
 error StakeAmountTooSmall();
 
+/// @dev Node is in exit status
+error NodeInExitStatus();
+
 /// @dev Not chips owner or approver.
 error ChipNotAuthorized(uint256 tokenId);
 
@@ -77,7 +80,7 @@ error NodeAlreadyInExitStatus();
 error NodeNotInExitStatus();
 
 /// @dev Deposit is not allowed for public good node.
-error PublicGoodNodeNotDeposited();
+error DepositForPublicGoodNode();
 
 /// @dev Public good node cannot be staked.
 error StakeToPublicGoodNode(address nodeAddr);

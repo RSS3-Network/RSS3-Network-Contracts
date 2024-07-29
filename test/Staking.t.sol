@@ -17,6 +17,7 @@ import {stdJson} from "forge-std/StdJson.sol";
 
 import {
     NodeNotExists,
+    NodeInExitStatus,
     TaxRateBasisPointsTooSmall,
     TaxRateBasisPointsTooLarge,
     PublicGoodNodeTaxNotZero,
@@ -44,7 +45,7 @@ import {
     StakeAmountTooSmall,
     NodeNotPublicGood,
     StakeToPublicGoodNode,
-    PublicGoodNodeNotDeposited
+    DepositForPublicGoodNode
 } from "../src/libraries/Errors.sol";
 
 contract StakingTest is CommonTest, IERC721Errors {
@@ -413,8 +414,8 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testCreateNodeFailWithPublicGoodNodeDeposited() public {
-        vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeNotDeposited.selector));
-        _staking.createNode{value: 1}("Alice", "Alice's node", uint64(100), true);
+        vm.expectRevert(abi.encodeWithSelector(DepositForPublicGoodNode.selector));
+        _staking.createNode{value: 1}("Alice", "Alice's node", uint64(0), true);
     }
 
     function testDeposit(uint256 amount) public {
@@ -462,6 +463,13 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testDepositFailWithStakeAmountTooSmall() public {
         vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
         _staking.deposit{value: 0}();
+    }
+
+    function testDepositFailWithPublicGoodNodeDeposited() public {
+        _staking.createNode("Alice", "Alice's node", uint64(0), true);
+
+        vm.expectRevert(abi.encodeWithSelector(DepositForPublicGoodNode.selector));
+        _staking.deposit{value: 1}();
     }
 
     function testRequestWithdrawalSucceeds() public {
@@ -834,6 +842,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.setSettlementPhase(true);
 
         vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
+        _staking.stake{value: 10000 ether}(alice);
+    }
+
+    function testStakeFailWithNodeInExitStatus() public {
+        _createNode(alice);
+
+        vm.prank(alice);
+        _staking.requestExit();
+
+        vm.expectRevert(abi.encodeWithSelector(NodeInExitStatus.selector));
         _staking.stake{value: 10000 ether}(alice);
     }
 
