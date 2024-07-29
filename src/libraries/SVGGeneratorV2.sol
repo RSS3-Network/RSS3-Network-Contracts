@@ -9,11 +9,13 @@ import {HeadDetails} from "./SVGsV2/HeadDetails.sol";
 import {Mouths} from "./SVGsV2/Mouths.sol";
 import {ChipCorners} from "./SVGsV2/ChipCorners.sol";
 import {ChipFrames} from "./SVGsV2/ChipFrames.sol";
+import {HeadShapes} from "./SVGsV2/HeadShapes.sol";
 import {NftCards} from "./SVGsV2/NftCards.sol";
 import {LibZip} from "@solady/utils/LibZip.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Fonts1} from "./Fonts/Fonts1.sol";
 import {Fonts2} from "./Fonts/Fonts2.sol";
+import {LibString} from "solady/utils/LibString.sol";
 
 library SVGGeneratorV2 {
     using Strings for uint256;
@@ -116,14 +118,14 @@ library SVGGeneratorV2 {
         string memory ops = string.concat(
             '<text font-family="AuxMono" x="21" y="3.5" font-size="3.8" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 158)" fill="url(#a)"> OPS: ',
             opTokens > 1000 ? (opTokens / 1000).toString() : opTokens.toString(),
-            opTokens > 1000 ? " K</text>" : "</text>"
+            opTokens > 1000 ? "K</text>" : "</text>"
         );
 
         uint256 stTokens = nftCardTraits.stakingPoolTokens / 1 ether;
         string memory sps = string.concat(
-            '<text font-family="AuxMono" x="21" y="3.5" font-size="3.8" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(63 158)" fill="url(#a)"> SPS:',
+            '<text font-family="AuxMono" x="21" y="3.5" font-size="3.8" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(63 158)" fill="url(#a)"> SPS: ',
             stTokens > 1000 ? (stTokens / 1000).toString() : stTokens.toString(),
-            stTokens > 1000 ? " K</text>" : "</text>"
+            stTokens > 1000 ? "K</text>" : "</text>"
         );
 
         return
@@ -136,9 +138,9 @@ library SVGGeneratorV2 {
                 '<g fill="#000" font-size="6" font-family="AuxMono"><text text-anchor="end" y="-1em" transform="translate(106 14.53)">',
                 (nftCardTraits.chipTokens / 1 ether).toString(),
                 '</text><text text-anchor="end" transform="translate(106 14.53)">$RSS3</text></g>',
-                '<g fill="url(#a)" font-size="3.8" font-family="AuxMono"><text x="43.5" y="6.1" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 140)">',
+                '<g fill="url(#a)" font-size="5" font-family="AuxMono"><text x="43.5" y="6.1" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 140)">',
                 addrPart1,
-                '</text><text x="43.5" y="9.9" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 140)">',
+                '</text><text x="43.5" y="9.9" letter-spacing="-.38" dominant-baseline="middle" transform="translate(-20 140)">',
                 addrPart2,
                 "</text></g>",
                 ops,
@@ -178,7 +180,7 @@ library SVGGeneratorV2 {
     function getChipTraitsInnerSVGAndAttributes(
         DataTypes.ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
-        (string memory svgParts, string memory headShapeTrait) = getHeadShape(chipTraits.headShapeId % 3);
+        (string memory svgParts, string memory headShapeTrait) = HeadShapes.getHeadShape(chipTraits.headShapeId % 3);
 
         string memory attributes = string.concat(
             '{"trait_type": "Head Shape", "value": "',
@@ -326,28 +328,9 @@ library SVGGeneratorV2 {
         return colors[id];
     }
 
-    function getHeadShape(uint8 id) internal pure returns (string memory, string memory) {
-        assert(id < 3);
-        return (_getHeadShapeSVG(id), _getHeadShapeTrait(id));
-    }
-
-    function _getHeadShapeSVG(uint8 id) internal pure returns (string memory) {
-        string[3] memory baseHeadsSVGs = [
-            hex"1c3c7061746820643d224d333020363468327632682d327a4d3332203636e0010d0334203638e0010d0e3620373068323876324833367a4d37202a40342039203800376046c00d0136384046e0000d00364046c00d0d323820343668343476313648323820720030600f0230762d20570030601f205700342057801e20660334683336200e00332067409202366833401d013334200e605ac0930c2220636c6173733d2264222f3e",
-            hex"1f3c7061746820643d224d333020363468327632682d327a4d34302037306832300776324834307a4d37601c002d401d201c202a1834366834307631364833307a2220636c6173733d2264222f3ee001500d32382034386834347631344832388035200f0330762d32e01235405be00225024d3332406b0133366035807b01363240450034e01244207a4024003420bd6079023220366043207840420636203638683238400e0e367a2220636c6173733d2264222f3e",
-            hex"1f3c7061746820643d224d333020363468327632682d327a4d33322037306833360376324833200e0037601c002d401d200d202a1834366834307631364833307a2220636c6173733d2264222f3ee001500d32382034386834347631344832388035200f0230762d2053e01935202540354045206be0000f207b01363240450034e015444024023476364043e00e9f20e2013636e001e24058609ee0049d042264222f3e"
-        ];
-        return string(LibZip.flzDecompress(bytes(baseHeadsSVGs[id])));
-    }
-
-    function _getHeadShapeTrait(uint8 id) internal pure returns (string memory) {
-        string[3] memory baseHeadsTraits = ["Default", "Round", "Square"];
-        return baseHeadsTraits[id];
-    }
-
     function _splitAddress(address addr) internal pure returns (string memory, string memory) {
         string memory addrHex = addr.toHexString();
-        return (_getSlice(0, 21, addrHex), _getSlice(21, 42, addrHex));
+        return (LibString.slice(addrHex, 0, 25), LibString.slice(addrHex, 26, 42));
     }
 
     function _getSlice(uint256 begin, uint256 end, string memory text) public pure returns (string memory) {
