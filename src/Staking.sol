@@ -28,6 +28,8 @@ import {
     ExcessWithdrawalAmount,
     WithdrawalAmountExceedsOperationPoolTokens,
     NodeAlreadyInExitStatus,
+    NodeNotInExitStatus,
+    NodeDepositBelowMinimum,
     InvalidArrayLength,
     SettlementPhase,
     StakeToPublicGoodNode,
@@ -39,6 +41,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
     using Checkpoints for Checkpoints.Trace160;
+
+    string public constant version = "2.0.0";
 
     uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 
@@ -228,12 +232,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
         if (msg.value == 0) revert InsufficientValue();
         StakingLib.deposit(nodeAddr, msg.value);
-
-        // reset node exit status
-        DataTypes.NodeExitStatus status = _getNodeExitStatus(msg.sender);
-        if (DataTypes.NodeExitStatus.None != status && _nodes[nodeAddr].operationPoolTokens >= MIN_DEPOSIT) {
-            StorageLib.setNodeExitTime(nodeAddr, 0);
-        }
     }
 
     /// @inheritdoc IStaking
@@ -422,6 +420,23 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         StorageLib.setNodeExitTime(nodeAddr, block.timestamp);
 
         emit Events.NodeExitRequested(nodeAddr);
+    }
+
+    /// @inheritdoc IStaking
+    function requestReentry() external override whenNotPaused {
+        address nodeAddr = msg.sender;
+        _validateNodeAddress(_nodes[nodeAddr].account);
+
+        DataTypes.NodeExitStatus status = _getNodeExitStatus(nodeAddr);
+        if (DataTypes.NodeExitStatus.None == status) revert NodeNotInExitStatus();
+
+        uint256 opPoolTokens = StorageLib.nodes()[nodeAddr].operationPoolTokens;
+        if (opPoolTokens < MIN_DEPOSIT) revert NodeDepositBelowMinimum();
+
+        // reset node exit status
+        StorageLib.setNodeExitTime(nodeAddr, 0);
+
+        emit Events.NodeReentryRequested(nodeAddr);
     }
 
     /// @inheritdoc IStaking

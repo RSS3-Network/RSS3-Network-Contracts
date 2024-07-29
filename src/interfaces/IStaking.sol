@@ -211,6 +211,12 @@ interface IStaking {
     function requestExit() external;
 
     /**
+     * @notice Requests an reentry to the network.
+     * @dev The caller must be the owner of node operator.
+     */
+    function requestReentry() external;
+
+    /**
      * @notice Withdraws tokens from staking contract to treasury.
      */
     function withdraw2Treasury() external;

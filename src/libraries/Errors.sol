@@ -11,6 +11,9 @@ error NodeExists();
 /// @dev Node staked or deposited.
 error NodeStakedOrDeposited();
 
+/// @dev Node deposit is below the minimum amount
+error NodeDepositBelowMinimum();
+
 /// @dev Node not exists.
 error NodeNotExists();
 
@@ -69,6 +72,9 @@ error WithdrawalAmountExceedsOperationPoolTokens();
 
 /// @dev Node is already in an exit status
 error NodeAlreadyInExitStatus();
+
+/// @dev Node is not in an exit status
+error NodeNotInExitStatus();
 
 /// @dev Deposit is not allowed for public good node.
 error PublicGoodNodeNotDeposited();

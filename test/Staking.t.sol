@@ -33,6 +33,8 @@ import {
     ExcessWithdrawalAmount,
     WithdrawalAmountExceedsOperationPoolTokens,
     NodeAlreadyInExitStatus,
+    NodeDepositBelowMinimum,
+    NodeNotInExitStatus,
     ClaimTimeNotReady,
     ClaimIdNotExists,
     ChipIdsLengthTooShort,
@@ -448,7 +450,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exited));
 
         _staking.deposit{value: amount}();
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.None));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exited));
         vm.stopPrank();
     }
 
@@ -571,12 +573,52 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.None));
 
+        // exiting
         _staking.requestExit();
         assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exiting));
 
+        // exited
         skip(_staking.NODE_EXIT_PERIOD());
         assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exited));
 
+        // none
+        _staking.requestReentry();
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.None));
+
+        vm.stopPrank();
+    }
+
+    function testRequestReentry() public {
+        _createNode(alice);
+
+        vm.startPrank(alice);
+        _staking.deposit{value: 10000 ether}();
+
+        _staking.requestExit();
+
+        vm.expectEmit();
+        emit Events.NodeReentryRequested(alice);
+        _staking.requestReentry();
+        vm.stopPrank();
+    }
+    function testRequestReentryFail() public {
+        _createNode(alice);
+
+        // case 1: node not exists
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        _staking.requestReentry();
+
+        // case 2: node not in exit status
+        vm.expectRevert(abi.encodeWithSelector(NodeNotInExitStatus.selector));
+        vm.prank(alice);
+        _staking.requestReentry();
+
+        // case 3: node deposit is below minimum
+        vm.startPrank(alice);
+        _staking.requestExit();
+
+        vm.expectRevert(abi.encodeWithSelector(NodeDepositBelowMinimum.selector));
+        _staking.requestReentry();
         vm.stopPrank();
     }
 

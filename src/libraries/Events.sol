@@ -170,6 +170,12 @@ library Events {
     event NodeExitRequested(address indexed nodeAddr);
 
     /**
+     * @dev Emitted on requestReentry()
+     * @param nodeAddr The address of node to request.
+     */
+    event NodeReentryRequested(address indexed nodeAddr);
+
+    /**
      * @dev Emitted on recordSlashing()
      * @param nodeAddr The address of node to slash.
      * @param epoch The epoch number.
