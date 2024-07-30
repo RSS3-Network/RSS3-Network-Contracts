@@ -17,6 +17,11 @@ import {
 } from "./Errors.sol";
 
 library RewardsAndSlashingLib {
+    /// @dev the bonus rate basis points for the reporter and burn of slash amount,
+    //  the remaining part will be for treasury
+    uint256 public constant SLASH_REPORTER_BONUS_RATE_BASIS_POINTS = 2000;
+    uint256 public constant SLASH_BURN_RATE_BASIS_POINTS = 3000;
+
     function recordSlashing(
         address nodeAddr,
         uint256 epoch,
@@ -54,13 +59,13 @@ library RewardsAndSlashingLib {
         emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
     }
 
-    function commitSlashing(address nodeAddr, uint256 epoch, uint256 SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) external {
+    function commitSlashing(address nodeAddr, uint256 epoch, address paymentProcessor) external {
         DataTypes.SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
         _checkRecordedStatus(record, nodeAddr, epoch);
         record.status = DataTypes.SlashStatus.Committed;
         _setSlashStatus(nodeAddr, false);
 
-        _commitSlashingAmount(record, SLASH_REPORTER_BONUS_RATE_BASIS_POINTS);
+        _commitSlashingAmount(record, paymentProcessor);
         emit Events.SlashCommitted(nodeAddr, epoch);
     }
 
@@ -130,8 +135,7 @@ library RewardsAndSlashingLib {
     }
     /// @dev set the status of a slash record
     function _setSlashStatus(address nodeAddr, bool status) internal {
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
-        DataTypes.Node storage node = nodes[nodeAddr];
+        DataTypes.Node storage node = StorageLib.nodes()[nodeAddr];
         node.slashStatus = status;
     }
 
@@ -146,18 +150,25 @@ library RewardsAndSlashingLib {
     }
 
     /// @dev commit slashing amount, distributes the amount to reporter and treasury
-    function _commitSlashingAmount(
-        DataTypes.SlashRecord memory record,
-        uint256 SLASH_REPORTER_BONUS_RATE_BASIS_POINTS
-    ) internal {
+    function _commitSlashingAmount(DataTypes.SlashRecord memory record, address paymentProcessor) internal {
         StakingCommonLib.decreaseSlashingPoolByRecord(record);
 
-        // transfer slashed tokens to reporter
-        _transfer(
-            record.reporter,
-            ((record.amountForOperationPool + record.amountForStakingPool) * SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) /
-                Const.DENOMINATOR
-        );
+        uint256 amount = record.amountForOperationPool + record.amountForStakingPool;
+
+        uint256 reporterAmount = (amount * SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+
+        uint256 burnAmount = (amount * SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+
+        if (record.reporter == address(0)) {
+            // transfer slashed tokens to payment processor
+            _transfer(paymentProcessor, reporterAmount);
+        } else {
+            // transfer slashed tokens to reporter
+            _transfer(record.reporter, reporterAmount);
+        }
+        _transfer(address(0x0), burnAmount);
+
+        // remaining amount is in this contract for the treasury
     }
 
     /// @dev return slashing amount
