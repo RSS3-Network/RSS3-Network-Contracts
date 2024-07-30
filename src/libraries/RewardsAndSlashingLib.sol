@@ -21,7 +21,6 @@ library RewardsAndSlashingLib {
     //  the remaining part will be for treasury
     uint256 public constant SLASH_REPORTER_BONUS_RATE_BASIS_POINTS = 2000;
     uint256 public constant SLASH_BURN_RATE_BASIS_POINTS = 3000;
-    address public constant billingContract = address(0x0);
 
     function recordSlashing(
         address nodeAddr,
@@ -165,11 +164,7 @@ library RewardsAndSlashingLib {
             _transfer(paymentProcessor, reporterAmount);
         } else {
             // transfer slashed tokens to reporter
-            _transfer(
-                record.reporter,
-                ((record.amountForOperationPool + record.amountForStakingPool) *
-                    SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR
-            );
+            _transfer(record.reporter, reporterAmount);
         }
         _transfer(address(0x0), burnAmount);
 
