@@ -107,7 +107,7 @@ contract Deploy is Deployer {
             cfg.userSlashRateBasisPoints(),
             cfg.depositBaseline(),
             cfg.taxRateBasisPointsBaseline(),
-            cfg.slashReporterBonusRateBasisPoints()
+            cfg.paymentProcessor()
         );
 
         // check states

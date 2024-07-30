@@ -1304,16 +1304,18 @@ contract StakingTest is CommonTest, IERC721Errors {
         // 3.1 reporters balance correct
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             uint256 value = ((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                slashReporterBonusRateBasisPoints) / _denominator();
+                RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / _denominator();
             assertEq(reporters[i].balance, value);
         }
+
         // 3.2 Treasury amount correct
         uint256 treasuryAmountAfterSlashing = _getTreasuryAmount();
         uint256 expectedTreasuryAmount = 2 *
             (expectedSlashedTokensOnOperationPool +
                 expectedSlashedTokensOnStakingPool -
                 (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (slashReporterBonusRateBasisPoints)) / _denominator()));
+                    (RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
+                        RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS)) / _denominator()));
 
         assertEq(treasuryAmountAfterSlashing, expectedTreasuryAmount);
         // 3.3 Node pool tokens correct
@@ -1444,7 +1446,8 @@ contract StakingTest is CommonTest, IERC721Errors {
             (expectedSlashedTokensOnOperationPool +
                 expectedSlashedTokensOnStakingPool -
                 (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (slashReporterBonusRateBasisPoints)) / _denominator()));
+                    (RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
+                        RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS)) / _denominator()));
         assertEq(treasuryAmount, expectedTreasuryAmount);
 
         // 6. record slashing alice twice will reverted
