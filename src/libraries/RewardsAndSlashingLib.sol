@@ -136,8 +136,7 @@ library RewardsAndSlashingLib {
     }
     /// @dev set the status of a slash record
     function _setSlashStatus(address nodeAddr, bool status) internal {
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
-        DataTypes.Node storage node = nodes[nodeAddr];
+        DataTypes.Node storage node = StorageLib.nodes()[nodeAddr];
         node.slashStatus = status;
     }
 

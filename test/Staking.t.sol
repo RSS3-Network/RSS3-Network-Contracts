@@ -7,6 +7,7 @@ import {TestEvents} from "test/helpers/TestEvents.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
 import {Events} from "../src/libraries/Events.sol";
+import {Const} from "../src/libraries/Const.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
 import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
 import {LibString} from "solady/utils/LibString.sol";
@@ -108,6 +109,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(nodeAddr, address(0));
         assertEq(tokens, 0);
         assertEq(shares, 0);
+
+        // check constants
+        assertLt(
+            RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
+                RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS,
+            Const.DENOMINATOR
+        );
+        assertLt(_staking.NODE_SLASH_RATE_BASIS_POINTS(), Const.DENOMINATOR);
+        assertLt(_staking.USER_SLASH_RATE_BASIS_POINTS(), Const.DENOMINATOR);
+        assertLt(_staking.MIN_TAX_RATE_BASIS_POINTS(), Const.DENOMINATOR);
     }
 
     function testPause() public {
