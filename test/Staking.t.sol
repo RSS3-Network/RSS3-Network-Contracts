@@ -1279,7 +1279,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         address[] memory nodeAddrs = array(alice, bob);
         uint256[] memory epochIds = array(123, 123);
 
-        address[] memory reporters = array(address(0xabc), address(0xdef));
+        address[] memory reporters = array(address(0xabc), address(0x0));
 
         DataTypes.Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
 
@@ -1305,7 +1305,11 @@ contract StakingTest is CommonTest, IERC721Errors {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             uint256 value = ((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
                 RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / _denominator();
-            assertEq(reporters[i].balance, value);
+            if (reporters[i] == address(0x0)) {
+                assertEq(paymentProcessor.balance, value);
+            } else {
+                assertEq(reporters[i].balance, value);
+            }
         }
 
         // 3.2 Treasury amount correct
