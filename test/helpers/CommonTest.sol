@@ -39,8 +39,8 @@ contract CommonTest is Utils {
     uint256 public constant stakeRatio = 25;
     uint256 public constant minDeposit = 10000 ether;
     uint256 public constant minTaxRateBasisPoints = 500;
-    uint256 public constant slashReporterBonusRateBasisPoints = 200;
     address public constant treasury = address(0xaaa);
+    address public constant paymentProcessor = address(0xbbb);
 
     string public constant chipsName = "Open Chips";
     string public constant chipsSymbol = "Chips";
@@ -68,7 +68,7 @@ contract CommonTest is Utils {
             userSlashRateBasisPoints,
             minDeposit,
             minTaxRateBasisPoints,
-            slashReporterBonusRateBasisPoints
+            paymentProcessor
         );
         // deploy chips token
         Chips chipsImpl = new Chips();

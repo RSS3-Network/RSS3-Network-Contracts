@@ -28,7 +28,7 @@ contract StakingForkTest is CommonTest {
             100,
             10000000000000000000000,
             500,
-            200
+            address(0xbbb)
         );
 
         Proxy proxy = Proxy(payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578));

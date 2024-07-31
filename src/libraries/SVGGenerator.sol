@@ -77,8 +77,8 @@ library SVGGenerator {
         (string memory corner, string memory cornerTrait) = nodeTraits.pg
             ? (Corners.pgSVG, "Public Good Node")
             : nodeTraits.alpha
-            ? (Corners.alphaSVG, "Alpha Node")
-            : Corners.getCorner(nodeTraits.chipCornerId);
+                ? (Corners.alphaSVG, "Alpha Node")
+                : Corners.getCorner(nodeTraits.chipCornerId);
         (string memory frameSVGs, string memory frameTrait) = Frame.getFrame(nodeTraits.frameId);
         (string memory chipSVGs, string memory chipTrait) = ChipDetail.getChipDetail(nodeTraits.chipDetailId);
 
@@ -87,7 +87,7 @@ library SVGGenerator {
         string memory attributes1 = string.concat(
             '{"trait_type": "Frame", "value": "',
             frameTrait,
-            '"}, {"trait_type": "Chip Detail", "value": "',
+            '"}, {"trait_type": "Frame Color", "value": "',
             getColor(nodeTraits.frameColor),
             '"}, {"trait_type": "Chip Detail", "value": "',
             chipTrait,

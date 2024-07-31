@@ -53,6 +53,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
     address public immutable TREASURY;
 
+    /// @dev the payment processor receives slashing tax
+    address public immutable PAYMENT_PROCESSOR;
+
     /// @dev slash rate
     uint256 public immutable NODE_SLASH_RATE_BASIS_POINTS;
     uint256 public immutable USER_SLASH_RATE_BASIS_POINTS;
@@ -118,8 +121,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 
-    uint256 public immutable SLASH_REPORTER_BONUS_RATE_BASIS_POINTS;
-
     uint256 internal _totalSlashingPoolTokens;
 
     /// @dev (nodeAddr, epochId) => slash record
@@ -150,7 +151,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
      * @param stakeRatio The stake ratio of the node operator.
      * @param minDeposit The deposit base line of the node operator.
      * @param minTaxRateBasisPoints The minimal tax rate basis points.
-     * @param slashReporterBonusRateBasisPoints The bonus rate basis points for the reporter of slash.
      */
     constructor(
         address treasury,
@@ -162,7 +162,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         uint256 userSlashRateBasisPoints,
         uint256 minDeposit,
         uint256 minTaxRateBasisPoints,
-        uint256 slashReporterBonusRateBasisPoints
+        address paymentProcessor
     ) {
         TREASURY = treasury;
 
@@ -177,7 +177,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         MIN_DEPOSIT = minDeposit;
         MIN_TAX_RATE_BASIS_POINTS = minTaxRateBasisPoints;
 
-        SLASH_REPORTER_BONUS_RATE_BASIS_POINTS = slashReporterBonusRateBasisPoints;
+        PAYMENT_PROCESSOR = paymentProcessor;
     }
 
     /// @inheritdoc IStaking
@@ -388,7 +388,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         for (uint256 i = 0; i < slashings.length; i++) {
             (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
 
-            RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, SLASH_REPORTER_BONUS_RATE_BASIS_POINTS);
+            RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, PAYMENT_PROCESSOR);
         }
     }
 
@@ -571,7 +571,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         if (nodeAddr == address(0)) revert NodeNotExists();
     }
 
-    function _validateNodeStatus(address nodeAddr) internal {
+    function _validateNodeStatus(address nodeAddr) internal view {
         DataTypes.NodeExitStatus status = _getNodeExitStatus(nodeAddr);
         if (DataTypes.NodeExitStatus.None != status) revert NodeInExitStatus();
     }

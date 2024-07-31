@@ -15,5 +15,6 @@
   "chipsSymbol": "Chips",
   "settlementStartTime": "1710208800",
   "operationRewardsPercent": 0,
+  "slashReporterBonusRateBasisPoints": "200",
   "networkParamsManager": "0xDfCE83dc6030e111425f787395250FF24E9109C6"
 }

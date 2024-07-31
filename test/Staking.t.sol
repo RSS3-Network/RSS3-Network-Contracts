@@ -7,6 +7,7 @@ import {TestEvents} from "test/helpers/TestEvents.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
 import {Events} from "../src/libraries/Events.sol";
+import {Const} from "../src/libraries/Const.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
 import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
 import {LibString} from "solady/utils/LibString.sol";
@@ -113,6 +114,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(nodeAddr, address(0));
         assertEq(tokens, 0);
         assertEq(shares, 0);
+
+        // check constants
+        assertLt(
+            RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
+                RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS,
+            Const.DENOMINATOR
+        );
+        assertLt(_staking.NODE_SLASH_RATE_BASIS_POINTS(), Const.DENOMINATOR);
+        assertLt(_staking.USER_SLASH_RATE_BASIS_POINTS(), Const.DENOMINATOR);
+        assertLt(_staking.MIN_TAX_RATE_BASIS_POINTS(), Const.DENOMINATOR);
     }
 
     function testPause() public {
@@ -293,10 +304,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         string memory decodedImageURI = string(
             Base64.decode(LibString.slice(base64Image, bytes(base64Imageprefix).length))
         );
-        uint256 found1 = LibString.indexOf(decodedImageURI, "b{fill:#DEE5D9;}"); // head color white
+        uint256 found1 = LibString.indexOf(decodedImageURI, "d{fill:#DEE5D9;}"); // head color white
         assertEq(found1 != LibString.NOT_FOUND, true);
 
-        uint256 found2 = LibString.indexOf(decodedImageURI, "h{fill:#DEE5D9;}"); // head detail color white
+        uint256 found2 = LibString.indexOf(decodedImageURI, "e{fill:#DEE5D9;}"); // head detail color white
         assertEq(found2 != LibString.NOT_FOUND, true);
     }
 
@@ -1428,7 +1439,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         address[] memory nodeAddrs = array(alice, bob);
         uint256[] memory epochIds = array(123, 123);
 
-        address[] memory reporters = array(address(0xabc), address(0xdef));
+        address[] memory reporters = array(address(0xabc), address(0x0));
 
         DataTypes.Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
 
@@ -1453,16 +1464,22 @@ contract StakingTest is CommonTest, IERC721Errors {
         // 3.1 reporters balance correct
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             uint256 value = ((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                slashReporterBonusRateBasisPoints) / _denominator();
-            assertEq(reporters[i].balance, value);
+                RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / _denominator();
+            if (reporters[i] == address(0x0)) {
+                assertEq(paymentProcessor.balance, value);
+            } else {
+                assertEq(reporters[i].balance, value);
+            }
         }
+
         // 3.2 Treasury amount correct
         uint256 treasuryAmountAfterSlashing = _getTreasuryAmount();
         uint256 expectedTreasuryAmount = 2 *
             (expectedSlashedTokensOnOperationPool +
                 expectedSlashedTokensOnStakingPool -
                 (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (slashReporterBonusRateBasisPoints)) / _denominator()));
+                    (RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
+                        RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS)) / _denominator()));
 
         assertEq(treasuryAmountAfterSlashing, expectedTreasuryAmount);
         // 3.3 Node pool tokens correct
@@ -1593,7 +1610,8 @@ contract StakingTest is CommonTest, IERC721Errors {
             (expectedSlashedTokensOnOperationPool +
                 expectedSlashedTokensOnStakingPool -
                 (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (slashReporterBonusRateBasisPoints)) / _denominator()));
+                    (RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
+                        RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS)) / _denominator()));
         assertEq(treasuryAmount, expectedTreasuryAmount);
 
         // 6. record slashing alice twice will reverted
