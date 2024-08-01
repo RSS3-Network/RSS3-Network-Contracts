@@ -13,7 +13,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # Ignore the specified directories
-          ignore_directories: "src/interfaces, src/base, src/libraries/SVGs, src/libraries/Events.sol, TransparentUpgradeableProxy.sol, SVGGeneratorV2.sol, SVGGenerator.sol, test"
+          ignore_directories: "src/interfaces, src/base, src/libraries/SVGs, src/libraries/Events.sol, src/upgradeability, src/libraries/SVGGenerator.sol, test"
           file_extensions: "sol"
           # Only report similarities above 30%
           ignore_below: 30
