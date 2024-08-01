@@ -17,7 +17,7 @@ contract ChipsTest is CommonTest {
         _setUp();
     }
 
-    function testCheckSetupStatus() public {
+    function testCheckSetupStatus() public view {
         assertEq(_chips.name(), chipsName);
         assertEq(_chips.symbol(), chipsSymbol);
         assertEq(_chips.stakingContract(), address(_staking));
@@ -108,7 +108,7 @@ contract ChipsTest is CommonTest {
         );
     }
 
-    function testCorner() public {
+    function testCorner() public pure {
         (, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
             DataTypes.NodeTraits(1, 2, 3, 4, 5, true, true),
             DataTypes.ChipTraits(0, 0, 0, 0, 0, 0)

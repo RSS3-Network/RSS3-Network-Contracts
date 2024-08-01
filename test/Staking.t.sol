@@ -278,7 +278,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.createNode("Alice", "Alice's node", 1, true);
     }
 
-    function testNodeAvatar() public {
+    function testNodeAvatar() public view {
         string memory nodeAvatarURI = _staking.getNodeAvatar(bob);
         string memory base64prefix = "data:application/json;base64,";
 
@@ -1651,7 +1651,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
     }
 
-    function testCalcTax1(uint256 operationPool) public {
+    function testCalcTax1(uint256 operationPool) public pure {
         // case 1: receives no tax rewards
         vm.assume(operationPool < 10000 ether);
 
@@ -1670,7 +1670,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(partialTax1, 0);
     }
 
-    function testCalcTax2() public {
+    function testCalcTax2() public pure {
         // case 2: receives full tax rewards
         uint256 operationPool = Const.MIN_DEPOSIT;
         uint256 stakeRatio;
@@ -1812,7 +1812,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 stakedAmount,
         uint256 unstakedAmount,
         bool isPublicGood
-    ) internal {
+    ) internal view {
         // check status
         DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
         assertEq(req.owner, bob);
@@ -1873,7 +1873,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.recordSlashing(slashings, reporters, reasons);
     }
 
-    function _checkNodeProfile(address nodeAddr, string memory name, string memory description) internal {
+    function _checkNodeProfile(address nodeAddr, string memory name, string memory description) internal view {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.name, name);
         assertEq(node.description, description);
@@ -1888,7 +1888,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 operationPoolTokens,
         bool publicGood,
         bool alpha
-    ) internal {
+    ) internal view {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
         _checkNodeProfile(nodeAddr, name, description);
         assertEq(node.nodeId, nodeId);

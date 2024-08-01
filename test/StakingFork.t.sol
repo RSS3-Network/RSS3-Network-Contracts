@@ -119,7 +119,7 @@ contract StakingForkTest is CommonTest {
     }
 
     // solhint-disable-next-line function-max-lines
-    function testStakingStorageLayout() public {
+    function testStakingStorageLayout() public view {
         assertEq(staking.chipsContract(), 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE);
         assertEq(staking.isSettlementPhase(), false);
         assertEq(staking.isAlphaPhase(), true);
@@ -205,7 +205,7 @@ contract StakingForkTest is CommonTest {
         bool publicGood,
         bool alpha,
         bool slashStatus
-    ) internal {
+    ) internal view {
         DataTypes.Node memory node = staking.getNode(nodeAddr);
         assertEq(node.name, name);
         assertEq(node.description, description);

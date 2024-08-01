@@ -104,7 +104,7 @@ contract NetworkParamsTest is CommonTest {
         _params.setParams(100, "hello world");
     }
 
-    function testEmptyParams() public {
+    function testEmptyParams() public view {
         assertEq(_params.getParams(100), "");
     }
 }

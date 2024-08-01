@@ -119,7 +119,7 @@ contract CommonTest is Utils {
         uint256[] memory taxAmounts,
         uint256[] memory operationRewards,
         uint256[] memory stakingRewards
-    ) internal {
+    ) internal view {
         // status check
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node memory node = _staking.getNode(nodeAddrs[i]);

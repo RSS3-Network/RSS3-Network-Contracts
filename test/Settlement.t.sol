@@ -32,7 +32,7 @@ contract SettlementTest is CommonTest {
         vm.deal(oracleAccount, 30000000 ether);
     }
 
-    function invariantTreasuryBalance() public {
+    function invariantTreasuryBalance() public view {
         (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = _staking
             .getPoolInfo();
         assertTrue(
@@ -40,7 +40,7 @@ contract SettlementTest is CommonTest {
         );
     }
 
-    function testCheckSetupStatus() public {
+    function testCheckSetupStatus() public view {
         assertEq(_settlement.stakingContract(), address(_staking));
         assertEq(_settlement.currentEpoch(), 0);
         assertEq(_settlement.EPOCH_DURATION(), 18 hours);

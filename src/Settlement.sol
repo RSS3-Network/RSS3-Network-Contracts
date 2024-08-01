@@ -153,6 +153,19 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc ISettlement
+    function setNodesStatus(
+        address[] calldata nodeAddrs,
+        DataTypes.NodeStatus[] calldata status
+    ) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).setNodesStatus(nodeAddrs, status);
+    }
+
+    /// @inheritdoc ISettlement
+    function demoteNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).demoteNodes(_currentEpoch, nodeAddrs);
+    }
+
+    /// @inheritdoc ISettlement
     function stakingContract() external view override returns (address) {
         return _staking;
     }

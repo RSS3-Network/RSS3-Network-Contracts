@@ -70,6 +70,20 @@ interface ISettlement {
     function commitSlashing(DataTypes.Slashing[] calldata epochIds) external;
 
     /**
+     * @notice Sets node status.
+     * @param nodeAddrs Addresses of node operator to set.
+     * @param status Status to set.
+     */
+    function setNodesStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external;
+
+    /**
+     * @notice Demotes nodes.
+     * @dev The caller must have the `ORACLE_ROLE`.
+     * @param nodeAddrs Addresses of node operator to demote.
+     */
+    function demoteNodes(address[] calldata nodeAddrs) external;
+
+    /**
      * @notice  Returns the address of the Staking contract.
      * @return Address of the Staking contract.
      */

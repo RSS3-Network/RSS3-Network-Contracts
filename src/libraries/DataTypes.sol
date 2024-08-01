@@ -69,6 +69,7 @@ library DataTypes {
     enum NodeStatus {
         None,
         Registered,
+        Initializing,
         Online,
         Offline,
         Slashed,
