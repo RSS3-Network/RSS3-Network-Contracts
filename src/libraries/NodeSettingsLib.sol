@@ -19,18 +19,18 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 library NodeSettingsLib {
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints, address from) external {
+    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints, address nodeAddr) external {
         _validateTaxRateBasisPoints(taxRateBasisPoints);
 
-        DataTypes.Node storage node = StorageLib.nodes()[from];
+        DataTypes.Node storage node = StorageLib.nodes()[nodeAddr];
 
-        if (address(0) == node.account) revert NodeNotExists();
+        _validateNodeAddress(node.account);
 
         if (node.publicGood) revert NodeIsPublicGood();
 
         node.taxRateBasisPoints = taxRateBasisPoints;
 
-        emit Events.NodeTaxRateBasisPointsSet(from, taxRateBasisPoints);
+        emit Events.NodeTaxRateBasisPointsSet(nodeAddr, taxRateBasisPoints);
     }
 
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external {
@@ -43,16 +43,14 @@ library NodeSettingsLib {
         emit Events.PublicPoolTaxRateBasisPointsSet(taxRateBasisPoints);
     }
 
-    function updateNode(address from, string calldata name, string calldata description) external {
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
-
-        DataTypes.Node storage node = nodes[from];
-        if (node.account == address(0)) revert NodeNotExists();
+    function updateNode(address nodeAddr, string calldata name, string calldata description) external {
+        DataTypes.Node storage node = StorageLib.nodes()[nodeAddr];
+        _validateNodeAddress(node.account);
 
         node.name = name;
         node.description = description;
 
-        emit Events.NodeUpdated(from, name, description);
+        emit Events.NodeUpdated(nodeAddr, name, description);
     }
 
     /// @dev create a node
@@ -72,12 +70,9 @@ library NodeSettingsLib {
         }
 
         uint256 nodeId = StorageLib.nextNodeId();
-
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
-
         bool isAlphaPhase = StorageLib.getIsAlphaPhase();
 
-        DataTypes.Node storage node = nodes[nodeAddr];
+        DataTypes.Node storage node = StorageLib.nodes()[nodeAddr];
         if (node.nodeId > 0) revert NodeExists();
         node.nodeId = nodeId;
         node.account = nodeAddr;
@@ -96,5 +91,9 @@ library NodeSettingsLib {
     function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
         if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
         if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
+    }
+
+    function _validateNodeAddress(address nodeAddr) internal pure {
+        if (nodeAddr == address(0)) revert NodeNotExists();
     }
 }

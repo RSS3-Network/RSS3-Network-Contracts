@@ -460,11 +460,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.deposit{value: 1}();
     }
 
-    function testDepositFailWithStakeAmountTooSmall() public {
-        vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
-        _staking.deposit{value: 0}();
-    }
-
     function testDepositFailWithPublicGoodNodeDeposited() public {
         _staking.createNode("Alice", "Alice's node", uint64(0), true);
 

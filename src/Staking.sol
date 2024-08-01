@@ -190,10 +190,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function deposit() external payable override whenNotPaused {
-        address nodeAddr = msg.sender;
-
-        if (msg.value == 0) revert InsufficientValue();
-        StakingLib.deposit(nodeAddr, msg.value);
+        if (msg.value > 0) {
+            StakingLib.deposit(msg.sender, msg.value);
+        }
     }
 
     /// @inheritdoc IStaking
