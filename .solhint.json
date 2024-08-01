@@ -28,7 +28,7 @@
     "gas-struct-packing": "warn",
     "imports-on-top": "error",
     "max-line-length": ["error", 120],
-    "max-states-count": ["warn",20],
+    "max-states-count": ["warn",30],
     "modifier-name-mixedcase": "error",
     "no-complex-fallback": "warn",
     "no-console": "error",
