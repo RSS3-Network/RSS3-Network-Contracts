@@ -128,7 +128,7 @@ library RewardsAndSlashingLib {
     }
 
     /// @dev
-    function _recordSlashingAmount(address nodeAddr, DataTypes.SlashRecord memory record) internal {
+    function _recordSlashingAmount(address nodeAddr, DataTypes.SlashRecord storage record) internal {
         mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
         DataTypes.Node storage node = nodes[nodeAddr];
 
@@ -138,7 +138,7 @@ library RewardsAndSlashingLib {
     }
 
     /// @dev commit slashing amount, distributes the amount to reporter and treasury
-    function _commitSlashingAmount(DataTypes.SlashRecord memory record, address paymentProcessor) internal {
+    function _commitSlashingAmount(DataTypes.SlashRecord storage record, address paymentProcessor) internal {
         StakingCommonLib.decreaseSlashingPoolByRecord(record);
 
         uint256 amount = record.amountForOperationPool + record.amountForStakingPool;
@@ -160,7 +160,7 @@ library RewardsAndSlashingLib {
     }
 
     /// @dev return slashing amount
-    function _revokeSlashingAmount(address nodeAddr, DataTypes.SlashRecord memory record) internal {
+    function _revokeSlashingAmount(address nodeAddr, DataTypes.SlashRecord storage record) internal {
         mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
 
         DataTypes.Node storage node = nodes[nodeAddr];

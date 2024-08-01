@@ -11,11 +11,10 @@ import {ChipCorners} from "./SVGsV2/ChipCorners.sol";
 import {ChipFrames} from "./SVGsV2/ChipFrames.sol";
 import {HeadShapes} from "./SVGsV2/HeadShapes.sol";
 import {NftCards} from "./SVGsV2/NftCards.sol";
-import {LibZip} from "@solady/utils/LibZip.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Fonts1} from "./Fonts/Fonts1.sol";
 import {Fonts2} from "./Fonts/Fonts2.sol";
 import {LibString} from "solady/utils/LibString.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 library SVGGeneratorV2 {
     using Strings for uint256;

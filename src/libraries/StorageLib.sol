@@ -42,19 +42,19 @@ library StorageLib {
 
     uint256 public constant NODES_STATUS_SLOT = 30;
 
-    function setTotalOperationPoolTokens(uint256 totalOperatingPoolTokens) external {
+    function setTotalOperationPoolTokens(uint256 totalOperatingPoolTokens) internal {
         assembly {
             sstore(TOTAL_OPERATION_POOL_TOKENS_SLOT, totalOperatingPoolTokens)
         }
     }
 
-    function setTotalStakingPoolTokens(uint256 totalStakingPoolTokens) external {
+    function setTotalStakingPoolTokens(uint256 totalStakingPoolTokens) internal {
         assembly {
             sstore(TOTAL_STAKING_POOL_TOKENS_SLOT, totalStakingPoolTokens)
         }
     }
 
-    function setChipIssuerByTokenId(uint256 tokenId, address nodeAddr) external {
+    function setChipIssuerByTokenId(uint256 tokenId, address nodeAddr) internal {
         assembly {
             mstore(0x00, tokenId)
             mstore(0x20, CHIP_ISSUERS_MAPPING_SLOT)
@@ -64,7 +64,7 @@ library StorageLib {
         }
     }
 
-    function setChipsToSharesByTokenId(uint256 tokenId, uint256 shares) external {
+    function setChipsToSharesByTokenId(uint256 tokenId, uint256 shares) internal {
         assembly {
             mstore(0x00, tokenId)
             mstore(0x20, CHIP_TO_SHARES_MAPPING_SLOT)
@@ -74,13 +74,13 @@ library StorageLib {
         }
     }
 
-    function setTotalSlashingPoolTokens(uint256 totalSlashingPoolTokens) external {
+    function setTotalSlashingPoolTokens(uint256 totalSlashingPoolTokens) internal {
         assembly {
             sstore(TOTAL_SLASHING_POOL_TOKENS_SLOT, totalSlashingPoolTokens)
         }
     }
 
-    function setNodeStatus(address nodeAddr, DataTypes.NodeStatus status) external {
+    function setNodeStatus(address nodeAddr, DataTypes.NodeStatus status) internal {
         assembly {
             mstore(0x00, nodeAddr)
             mstore(0x20, NODES_STATUS_SLOT)
@@ -90,7 +90,7 @@ library StorageLib {
         }
     }
 
-    function nextNodeId() external returns (uint256 newCounter) {
+    function nextNodeId() internal returns (uint256 newCounter) {
         assembly {
             let currentCounter := sload(NODE_ID_COUNTER_SLOT)
             newCounter := add(currentCounter, 1)
@@ -98,7 +98,7 @@ library StorageLib {
         }
     }
 
-    function nextPendingUnstakeId() external returns (uint256 newCounter) {
+    function nextPendingUnstakeId() internal returns (uint256 newCounter) {
         assembly {
             let currentCounter := sload(PENDING_UNSTAKE_COUNTER_SLOT)
             newCounter := add(currentCounter, 1)
@@ -106,120 +106,11 @@ library StorageLib {
         }
     }
 
-    function nextPendingWithdrawalId() external returns (uint256 newCounter) {
+    function nextPendingWithdrawalId() internal returns (uint256 newCounter) {
         assembly {
             let currentCounter := sload(PENDING_WITHDRAWAL_COUNTER_SLOT)
             newCounter := add(currentCounter, 1)
             sstore(PENDING_WITHDRAWAL_COUNTER_SLOT, newCounter)
-        }
-    }
-
-    function getChipsContract() external view returns (address chips) {
-        assembly {
-            chips := sload(CHIPS_CONTRACT_ADDRESS_SLOT)
-        }
-    }
-
-    function getTotalOperatingPoolTokens() external view returns (uint256 totalOperatingPoolTokens) {
-        assembly {
-            totalOperatingPoolTokens := sload(TOTAL_OPERATION_POOL_TOKENS_SLOT)
-        }
-    }
-
-    function getTotalStakingPoolTokens() external view returns (uint256 totalStakingPoolTokens) {
-        assembly {
-            totalStakingPoolTokens := sload(TOTAL_STAKING_POOL_TOKENS_SLOT)
-        }
-    }
-
-    function getTotalSlashingPoolTokens() external view returns (uint256 totalSlashingPoolTokens) {
-        assembly {
-            totalSlashingPoolTokens := sload(TOTAL_SLASHING_POOL_TOKENS_SLOT)
-        }
-    }
-
-    function getIsAlphaPhase() external view returns (bool isAlphaPhase) {
-        assembly {
-            let slotValue := sload(IS_ALPHA_PHASE_SLOT)
-            isAlphaPhase := and(shr(mul(IS_ALPHA_PHASE_OFFSET, 8), slotValue), 1)
-        }
-    }
-
-    function getIssuerFromFamilies(uint256 tokenId) external view returns (address issuer) {
-        Checkpoints.Trace160 storage families;
-        assembly {
-            families.slot := FAMILIES_SLOT
-        }
-        issuer = address(families.lowerLookup(tokenId.toUint96()));
-    }
-
-    function getIssuerFromChipIssuers(uint256 tokenId) external view returns (address issuer) {
-        assembly {
-            mstore(0x00, tokenId)
-            mstore(0x20, CHIP_ISSUERS_MAPPING_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            issuer := sload(slot)
-        }
-    }
-
-    function getChipsToSharesByTokenId(uint256 tokenId) external view returns (uint256 shares) {
-        assembly {
-            mstore(0x00, tokenId)
-            mstore(0x20, CHIP_TO_SHARES_MAPPING_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            shares := sload(slot)
-        }
-    }
-
-    function getSlashRecord(address nodeAddr, uint256 epochId) external view returns (DataTypes.SlashRecord storage) {
-        mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord))
-            storage slashRecords = _slashRecords();
-        return slashRecords[nodeAddr][epochId];
-    }
-
-    function getPendingUnstake()
-        external
-        pure
-        returns (mapping(uint256 => DataTypes.UnstakeRequest) storage _pendingUnstake)
-    {
-        assembly {
-            _pendingUnstake.slot := PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT
-        }
-    }
-
-    function getPendingWithdrawal()
-        external
-        pure
-        returns (mapping(uint256 => DataTypes.WithdrawalRequest) storage _pendingWithdrawals)
-    {
-        assembly {
-            _pendingWithdrawals.slot := PENDING_WITHDRAWAL_MAPPING_BY_REQUEST_ID_SLOT
-        }
-    }
-
-    function nodeAddrs() external pure returns (EnumerableSet.AddressSet storage _nodeAddrs) {
-        assembly {
-            _nodeAddrs.slot := NODES_ADDRESS_SET_SLOT
-        }
-    }
-
-    function nodesStatus() external pure returns (mapping(address => DataTypes.NodeStatus) storage _nodesStatus) {
-        assembly {
-            _nodesStatus.slot := NODES_STATUS_SLOT
-        }
-    }
-
-    function nodes() external pure returns (mapping(address => DataTypes.Node) storage _nodes) {
-        assembly {
-            _nodes.slot := NODES_MAPPING_BY_NODE_ADDRESS_SLOT
-        }
-    }
-
-    function publicPool() external pure returns (DataTypes.Node storage _publicPool) {
-        assembly {
-            _publicPool.slot := PUBLIC_POOL_SLOT
         }
     }
 
@@ -233,6 +124,71 @@ library StorageLib {
         }
     }
 
+    function getChipsContract() internal view returns (address chips) {
+        assembly {
+            chips := sload(CHIPS_CONTRACT_ADDRESS_SLOT)
+        }
+    }
+
+    function getTotalOperatingPoolTokens() internal view returns (uint256 totalOperatingPoolTokens) {
+        assembly {
+            totalOperatingPoolTokens := sload(TOTAL_OPERATION_POOL_TOKENS_SLOT)
+        }
+    }
+
+    function getTotalStakingPoolTokens() internal view returns (uint256 totalStakingPoolTokens) {
+        assembly {
+            totalStakingPoolTokens := sload(TOTAL_STAKING_POOL_TOKENS_SLOT)
+        }
+    }
+
+    function getTotalSlashingPoolTokens() internal view returns (uint256 totalSlashingPoolTokens) {
+        assembly {
+            totalSlashingPoolTokens := sload(TOTAL_SLASHING_POOL_TOKENS_SLOT)
+        }
+    }
+
+    function getIsAlphaPhase() internal view returns (bool isAlphaPhase) {
+        assembly {
+            let slotValue := sload(IS_ALPHA_PHASE_SLOT)
+            isAlphaPhase := and(shr(mul(IS_ALPHA_PHASE_OFFSET, 8), slotValue), 1)
+        }
+    }
+
+    function getIssuerFromFamilies(uint256 tokenId) internal view returns (address issuer) {
+        Checkpoints.Trace160 storage families;
+        assembly {
+            families.slot := FAMILIES_SLOT
+        }
+        issuer = address(families.lowerLookup(tokenId.toUint96()));
+    }
+
+    function getIssuerFromChipIssuers(uint256 tokenId) internal view returns (address issuer) {
+        assembly {
+            mstore(0x00, tokenId)
+            mstore(0x20, CHIP_ISSUERS_MAPPING_SLOT)
+            let slot := keccak256(0x00, 0x40)
+
+            issuer := sload(slot)
+        }
+    }
+
+    function getChipsToSharesByTokenId(uint256 tokenId) internal view returns (uint256 shares) {
+        assembly {
+            mstore(0x00, tokenId)
+            mstore(0x20, CHIP_TO_SHARES_MAPPING_SLOT)
+            let slot := keccak256(0x00, 0x40)
+
+            shares := sload(slot)
+        }
+    }
+
+    function getSlashRecord(address nodeAddr, uint256 epochId) internal view returns (DataTypes.SlashRecord storage) {
+        mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord))
+            storage slashRecords = _slashRecords();
+        return slashRecords[nodeAddr][epochId];
+    }
+
     function getNodeExitTime(address nodeAddr) internal view returns (uint256 time) {
         assembly {
             mstore(0x00, nodeAddr)
@@ -240,6 +196,50 @@ library StorageLib {
             let slot := keccak256(0x00, 0x40)
 
             time := sload(slot)
+        }
+    }
+
+    function getPendingUnstake()
+        internal
+        pure
+        returns (mapping(uint256 => DataTypes.UnstakeRequest) storage _pendingUnstake)
+    {
+        assembly {
+            _pendingUnstake.slot := PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT
+        }
+    }
+
+    function getPendingWithdrawal()
+        internal
+        pure
+        returns (mapping(uint256 => DataTypes.WithdrawalRequest) storage _pendingWithdrawals)
+    {
+        assembly {
+            _pendingWithdrawals.slot := PENDING_WITHDRAWAL_MAPPING_BY_REQUEST_ID_SLOT
+        }
+    }
+
+    function nodeAddrs() internal pure returns (EnumerableSet.AddressSet storage _nodeAddrs) {
+        assembly {
+            _nodeAddrs.slot := NODES_ADDRESS_SET_SLOT
+        }
+    }
+
+    function nodesStatus() internal pure returns (mapping(address => DataTypes.NodeStatus) storage _nodesStatus) {
+        assembly {
+            _nodesStatus.slot := NODES_STATUS_SLOT
+        }
+    }
+
+    function nodes() internal pure returns (mapping(address => DataTypes.Node) storage _nodes) {
+        assembly {
+            _nodes.slot := NODES_MAPPING_BY_NODE_ADDRESS_SLOT
+        }
+    }
+
+    function publicPool() internal pure returns (DataTypes.Node storage _publicPool) {
+        assembly {
+            _publicPool.slot := PUBLIC_POOL_SLOT
         }
     }
 
