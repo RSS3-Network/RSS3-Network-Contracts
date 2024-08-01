@@ -176,6 +176,14 @@ library Events {
     event NodeReentryRequested(address indexed nodeAddr);
 
     /**
+     * @dev Emitted on demoteNodes()
+     * @param epoch The epoch number.
+     * @param nodeAddr The address of node.
+     * @param demotionCount The count of demotion.
+     */
+    event NodeDemoted(uint256 indexed epoch, address indexed nodeAddr, uint256 indexed demotionCount);
+
+    /**
      * @dev Emitted on recordSlashing()
      * @param nodeAddr The address of node to slash.
      * @param epoch The epoch number.

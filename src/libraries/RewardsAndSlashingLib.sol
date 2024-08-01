@@ -17,19 +17,7 @@ import {
 } from "./Errors.sol";
 
 library RewardsAndSlashingLib {
-    /// @dev the bonus rate basis points for the reporter and burn of slash amount,
-    //  the remaining part will be for treasury
-    uint256 public constant SLASH_REPORTER_BONUS_RATE_BASIS_POINTS = 2000;
-    uint256 public constant SLASH_BURN_RATE_BASIS_POINTS = 3000;
-
-    function recordSlashing(
-        address nodeAddr,
-        uint256 epoch,
-        address reporter,
-        string calldata reason,
-        uint256 NODE_SLASH_RATE_BASIS_POINTS,
-        uint256 USER_SLASH_RATE_BASIS_POINTS
-    ) external {
+    function recordSlashing(address nodeAddr, uint256 epoch, address reporter, string calldata reason) external {
         mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
 
         DataTypes.Node storage node = nodes[nodeAddr];
@@ -41,10 +29,11 @@ library RewardsAndSlashingLib {
         _setSlashStatus(nodeAddr, true);
 
         // slash operation pool tokens
-        uint256 slashedOperationPool = (node.operationPoolTokens * NODE_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 slashedOperationPool = (node.operationPoolTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+            Const.DENOMINATOR;
 
         // slash staking pool tokens
-        uint256 slashedStakingPool = (node.stakingPoolTokens * USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 slashedStakingPool = (node.stakingPoolTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         DataTypes.SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
 
@@ -55,6 +44,9 @@ library RewardsAndSlashingLib {
         record.slashReason = reason;
 
         _recordSlashingAmount(nodeAddr, record);
+
+        // set node status
+        StorageLib.setNodeStatus(nodeAddr, DataTypes.NodeStatus.Slashed);
 
         emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
     }
@@ -95,16 +87,14 @@ library RewardsAndSlashingLib {
     function distributeNodesRewards(
         address[] calldata nodeAddrs,
         uint256[] calldata operationRewards,
-        uint256[] calldata stakingRewards,
-        uint256 MIN_DEPOSIT,
-        uint256 STAKE_RATIO
+        uint256[] calldata stakingRewards
     ) external returns (uint256[] memory taxCollected) {
         taxCollected = new uint256[](nodeAddrs.length);
         mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             DataTypes.Node storage node = nodes[nodeAddrs[i]];
-            if (node.account == address(0) || node.publicGood || node.operationPoolTokens < MIN_DEPOSIT) {
+            if (node.account == address(0) || node.publicGood || node.operationPoolTokens < Const.MIN_DEPOSIT) {
                 continue;
             }
 
@@ -114,9 +104,7 @@ library RewardsAndSlashingLib {
                 rewards,
                 node.taxRateBasisPoints,
                 node.operationPoolTokens,
-                node.stakingPoolTokens,
-                MIN_DEPOSIT,
-                STAKE_RATIO
+                node.stakingPoolTokens
             );
 
             taxCollected[i] = receivedTax;
@@ -155,9 +143,9 @@ library RewardsAndSlashingLib {
 
         uint256 amount = record.amountForOperationPool + record.amountForStakingPool;
 
-        uint256 reporterAmount = (amount * SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 reporterAmount = (amount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
-        uint256 burnAmount = (amount * SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 burnAmount = (amount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         if (record.reporter == address(0)) {
             // transfer slashed tokens to payment processor
@@ -208,21 +196,19 @@ library RewardsAndSlashingLib {
         uint256 rewards,
         uint64 taxRateBasisPoints,
         uint256 operationPool,
-        uint256 stakingPool,
-        uint256 MIN_DEPOSIT,
-        uint256 STAKE_RATIO
+        uint256 stakingPool
     ) internal pure returns (uint256, uint256) {
         uint256 fullTax = _getFullTax(rewards, taxRateBasisPoints);
 
-        if (operationPool < MIN_DEPOSIT) {
+        if (operationPool < Const.MIN_DEPOSIT) {
             // node will receive no tax
             return (fullTax, 0);
-        } else if (operationPool >= MIN_DEPOSIT && operationPool * STAKE_RATIO >= stakingPool) {
+        } else if (operationPool >= Const.MIN_DEPOSIT && operationPool * Const.STAKE_RATIO >= stakingPool) {
             // node will receive its full tax
             return (fullTax, fullTax);
         } else {
             // node will receive part of its tax
-            uint256 partialTax = (fullTax * operationPool * STAKE_RATIO) / stakingPool;
+            uint256 partialTax = (fullTax * operationPool * Const.STAKE_RATIO) / stakingPool;
             return (fullTax, partialTax);
         }
     }

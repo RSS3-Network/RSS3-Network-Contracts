@@ -18,12 +18,12 @@ import {StorageLib} from "./libraries/StorageLib.sol";
 import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
 import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
 import {StakingLib} from "./libraries/StakingLib.sol";
+import {Const} from "./libraries/Const.sol";
+
 import {
     AlphaWithdrawNotAllowed,
     InsufficientValue,
-    PublicGoodNodeTaxNotZero,
     NodeNotExists,
-    TaxRateBasisPointsTooSmall,
     ExcessWithdrawalAmount,
     WithdrawalAmountExceedsOperationPoolTokens,
     NodeAlreadyInExitStatus,
@@ -44,25 +44,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     string public constant version = "2.0.0";
 
-    uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
-
-    /// @dev the ratio of total tokens to deposited tokens, 25 by default.
-    /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
-    uint256 public immutable STAKE_RATIO;
-
     /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
     address public immutable TREASURY;
 
     /// @dev the payment processor receives slashing tax
     address public immutable PAYMENT_PROCESSOR;
-
-    /// @dev slash rate
-    uint256 public immutable NODE_SLASH_RATE_BASIS_POINTS;
-    uint256 public immutable USER_SLASH_RATE_BASIS_POINTS;
-
-    /// @dev the minimal tokens for deposit, 10,000 by default.
-    /// node operator can receive tax if it stakes at least 10,000 tokens, otherwise nothing
-    uint256 public immutable MIN_DEPOSIT;
 
     /// @dev the period of time that node operator can't withdraw staked tokens
     uint256 public immutable DEPOSIT_UNBONDING_PERIOD;
@@ -70,9 +56,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     uint256 public immutable STAKE_UNBONDING_PERIOD;
     /// @dev the period of time that node operator can safely exit the network
     uint256 public immutable NODE_EXIT_PERIOD;
-
-    /// @dev the minimum value of tax rate basis points
-    uint256 public immutable MIN_TAX_RATE_BASIS_POINTS;
 
     /// @dev the chips contract
     address internal _chips;
@@ -129,6 +112,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @dev block.timestamp when the node operator requests an exit
     mapping(address nodeAddr => uint256 timestamp) internal _nodeExitTime; // slot 28
 
+    mapping(uint256 epoch => mapping(address nodeAddr => uint256 count)) internal _nodeDemotionCounter; // slot 29
+    mapping(address nodeAddr => DataTypes.NodeStatus) internal _nodesStatus; // slot 30
+
     modifier whenNotAlphaPhase() {
         if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
         _;
@@ -142,40 +128,23 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /**
      * @notice constructor.
      * @param treasury The address of treasury.
-     * @param stakeRatio The stake ratio of the node operator.
      * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
      * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its deposit.
      * @param nodeExitPeriod Time in seconds node operator can safely exit the network.
-     * @param nodeSlashRateBasisPoints Slash rate in basis points for node operator.
-     * @param userSlashRateBasisPoints Slash rate measured in basis points for user.
-     * @param stakeRatio The stake ratio of the node operator.
-     * @param minDeposit The deposit base line of the node operator.
-     * @param minTaxRateBasisPoints The minimal tax rate basis points.
+     * @param paymentProcessor The address of payment processor contract.
      */
     constructor(
         address treasury,
-        uint256 stakeRatio,
         uint256 stakeUnbondingPeriod,
         uint256 depositUnbondingPeriod,
         uint256 nodeExitPeriod,
-        uint256 nodeSlashRateBasisPoints,
-        uint256 userSlashRateBasisPoints,
-        uint256 minDeposit,
-        uint256 minTaxRateBasisPoints,
         address paymentProcessor
     ) {
         TREASURY = treasury;
 
-        STAKE_RATIO = stakeRatio;
         STAKE_UNBONDING_PERIOD = stakeUnbondingPeriod;
         DEPOSIT_UNBONDING_PERIOD = depositUnbondingPeriod;
         NODE_EXIT_PERIOD = nodeExitPeriod;
-
-        NODE_SLASH_RATE_BASIS_POINTS = nodeSlashRateBasisPoints;
-        USER_SLASH_RATE_BASIS_POINTS = userSlashRateBasisPoints;
-
-        MIN_DEPOSIT = minDeposit;
-        MIN_TAX_RATE_BASIS_POINTS = minTaxRateBasisPoints;
 
         PAYMENT_PROCESSOR = paymentProcessor;
     }
@@ -207,12 +176,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         uint64 taxRateBasisPoints,
         bool publicGood
     ) external payable override whenNotPaused {
-        if (publicGood) {
-            if (taxRateBasisPoints > 0) revert PublicGoodNodeTaxNotZero();
-        } else {
-            if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
-        }
-
         NodeSettingsLib.createNode(msg.sender, name, description, taxRateBasisPoints, publicGood);
 
         if (msg.value > 0) {
@@ -244,8 +207,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
 
         // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
-        DataTypes.NodeExitStatus status = _getNodeExitStatus(msg.sender);
-        if (DataTypes.NodeExitStatus.Exited != status && node.operationPoolTokens - amount < MIN_DEPOSIT)
+        DataTypes.NodeStatus status = _getNodeExitStatus(msg.sender);
+        if (DataTypes.NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT)
             revert ExcessWithdrawalAmount();
 
         return StakingLib.requestWithdrawal(node, amount);
@@ -270,7 +233,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         // node should not in exit status
         _validateNodeStatus(nodeAddr);
 
-        tokenId = StakingLib.stakeToNode(node, msg.value, nodeAddr, msg.sender, SHARES_PER_CHIP);
+        tokenId = StakingLib.stakeToNode(node, msg.value, nodeAddr, msg.sender);
     }
 
     /// @inheritdoc IStaking
@@ -284,7 +247,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         // node should not in exit status
         _validateNodeStatus(nodeAddr);
 
-        tokenId = StakingLib.stakeToNode(_publicPool, msg.value, nodeAddr, msg.sender, SHARES_PER_CHIP);
+        tokenId = StakingLib.stakeToNode(_publicPool, msg.value, nodeAddr, msg.sender);
     }
 
     /// @inheritdoc IStaking
@@ -292,7 +255,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         address nodeAddr,
         uint256[] calldata chipIds
     ) external override whenNotPaused whenNotSettlementPhase whenNotAlphaPhase returns (uint256 requestId) {
-        return StakingLib.unstakeFromNode(nodeAddr, chipIds, SHARES_PER_CHIP);
+        return StakingLib.unstakeFromNode(nodeAddr, chipIds);
     }
 
     /// @inheritdoc IStaking
@@ -304,7 +267,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override whenNotPaused {
-        NodeSettingsLib.setTaxRateBasisPoints4Node(taxRateBasisPoints, MIN_TAX_RATE_BASIS_POINTS, msg.sender);
+        NodeSettingsLib.setTaxRateBasisPoints4Node(taxRateBasisPoints, msg.sender);
     }
 
     /// @inheritdoc IStaking
@@ -334,9 +297,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         uint256[] memory taxCollected = RewardsAndSlashingLib.distributeNodesRewards(
             nodeAddrs,
             operationRewards,
-            stakingRewards,
-            MIN_DEPOSIT,
-            STAKE_RATIO
+            stakingRewards
         );
 
         emit Events.RewardDistributed(
@@ -353,7 +314,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function mergeChips(uint256[] calldata chipIds) external override returns (uint256 newTokenId) {
-        return StakingLib.mergeChips(chipIds, SHARES_PER_CHIP);
+        return StakingLib.mergeChips(chipIds);
     }
 
     /// @inheritdoc IStaking
@@ -370,14 +331,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
             address reporter = reporters[i];
             string calldata reason = reasons[i];
 
-            RewardsAndSlashingLib.recordSlashing(
-                nodeAddr,
-                epoch,
-                reporter,
-                reason,
-                NODE_SLASH_RATE_BASIS_POINTS,
-                USER_SLASH_RATE_BASIS_POINTS
-            );
+            RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, reporter, reason);
         }
     }
 
@@ -414,13 +368,34 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
+    function setNodesStatus(
+        address[] calldata nodeAddrs,
+        DataTypes.NodeStatus[] calldata status
+    ) external override onlyRole(PAUSE_ROLE) {
+        if (nodeAddrs.length != status.length) revert InvalidArrayLength();
+    }
+
+    /// @inheritdoc IStaking
+    function demoteNodes(uint256 epoch, address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            address nodeAddr = nodeAddrs[i];
+
+            if (++_nodeDemotionCounter[epoch][nodeAddr] >= Const.DEMOTION_COUNT_THRESHOLD) {
+                RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, address(0), "");
+            }
+
+            emit Events.NodeDemoted(epoch, nodeAddr, _nodeDemotionCounter[epoch][nodeAddr]);
+        }
+    }
+
+    /// @inheritdoc IStaking
     function requestExit() external override whenNotPaused {
         address nodeAddr = msg.sender;
         _validateNodeAddress(_nodes[nodeAddr].account);
 
         // validate node exit status
-        DataTypes.NodeExitStatus status = _getNodeExitStatus(nodeAddr);
-        if (DataTypes.NodeExitStatus.None != status) revert NodeAlreadyInExitStatus();
+        DataTypes.NodeStatus status = _getNodeExitStatus(nodeAddr);
+        if (DataTypes.NodeStatus.None != status) revert NodeAlreadyInExitStatus();
 
         StorageLib.setNodeExitTime(nodeAddr, block.timestamp);
 
@@ -428,18 +403,20 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function requestReentry() external override whenNotPaused {
+    function reRegister() external override whenNotPaused {
         address nodeAddr = msg.sender;
         _validateNodeAddress(_nodes[nodeAddr].account);
 
-        DataTypes.NodeExitStatus status = _getNodeExitStatus(nodeAddr);
-        if (DataTypes.NodeExitStatus.None == status) revert NodeNotInExitStatus();
+        DataTypes.NodeStatus status = _getNodeExitStatus(nodeAddr);
+        if (DataTypes.NodeStatus.None == status) revert NodeNotInExitStatus();
 
         uint256 opPoolTokens = StorageLib.nodes()[nodeAddr].operationPoolTokens;
-        if (opPoolTokens < MIN_DEPOSIT) revert NodeDepositBelowMinimum();
+        if (opPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
 
         // reset node exit status
         StorageLib.setNodeExitTime(nodeAddr, 0);
+
+        //
 
         emit Events.NodeReentryRequested(nodeAddr);
     }
@@ -452,7 +429,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getNodeExitStatus(address nodeAddr) external view override returns (DataTypes.NodeExitStatus) {
+    function getNodeExitStatus(address nodeAddr) external view override returns (DataTypes.NodeStatus) {
         return _getNodeExitStatus(nodeAddr);
     }
 
@@ -482,7 +459,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     function getChipInfo(
         uint256 tokenId
     ) external view override returns (address nodeAddr, uint256 tokens, uint256 shares) {
-        (nodeAddr, tokens, shares) = StakingLib.getChipInfo(tokenId, SHARES_PER_CHIP);
+        (nodeAddr, tokens, shares) = StakingLib.getChipInfo(tokenId);
     }
 
     function getSlashingRecords(
@@ -556,23 +533,23 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         return StorageLib.publicPool();
     }
 
-    function _getNodeExitStatus(address nodeAddr) internal view returns (DataTypes.NodeExitStatus status) {
+    function _getNodeExitStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus status) {
         uint256 exitTime = StorageLib.getNodeExitTime(nodeAddr);
         if (exitTime == 0) {
-            status = DataTypes.NodeExitStatus.None;
+            status = DataTypes.NodeStatus.None;
         } else if (exitTime + NODE_EXIT_PERIOD <= block.timestamp) {
-            status = DataTypes.NodeExitStatus.Exited;
+            status = DataTypes.NodeStatus.Exited;
         } else {
-            status = DataTypes.NodeExitStatus.Exiting;
+            status = DataTypes.NodeStatus.Exiting;
         }
+    }
+
+    function _validateNodeStatus(address nodeAddr) internal view {
+        DataTypes.NodeStatus status = _getNodeExitStatus(nodeAddr);
+        if (DataTypes.NodeStatus.None != status) revert NodeInExitStatus();
     }
 
     function _validateNodeAddress(address nodeAddr) internal pure {
         if (nodeAddr == address(0)) revert NodeNotExists();
-    }
-
-    function _validateNodeStatus(address nodeAddr) internal view {
-        DataTypes.NodeExitStatus status = _getNodeExitStatus(nodeAddr);
-        if (DataTypes.NodeExitStatus.None != status) revert NodeInExitStatus();
     }
 }

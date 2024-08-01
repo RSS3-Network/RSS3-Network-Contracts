@@ -160,6 +160,33 @@ interface IStaking {
     ) external payable;
 
     /**
+     * @notice Sets node status.
+     * @param nodeAddrs Addresses of node operator to set.
+     * @param status Status to set.
+     */
+    function setNodesStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external;
+
+    /**
+     * @notice Demotes nodes.
+     * @dev The caller must have the `ORACLE_ROLE`.
+     * @param epoch Current epoch number.
+     * @param nodeAddrs Addresses of node operator to demote.
+     */
+    function demoteNodes(uint256 epoch, address[] calldata nodeAddrs) external;
+
+    /**
+     * @notice Requests an exit from network.
+     * @dev The caller must be the owner of node operator.
+     */
+    function requestExit() external;
+
+    /**
+     * @notice A node in exited status can re-register to join the network.
+     * @dev The caller must be the owner of node operator.
+     */
+    function reRegister() external;
+
+    /**
      * @notice Record slashing nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
@@ -205,18 +232,6 @@ interface IStaking {
     function disableAlphaPhase() external;
 
     /**
-     * @notice Requests an exit from network.
-     * @dev The caller must be the owner of node operator.
-     */
-    function requestExit() external;
-
-    /**
-     * @notice Requests an reentry to the network.
-     * @dev The caller must be the owner of node operator.
-     */
-    function requestReentry() external;
-
-    /**
      * @notice Withdraws tokens from staking contract to treasury.
      */
     function withdraw2Treasury() external;
@@ -226,7 +241,7 @@ interface IStaking {
      * @param nodeAddr Node address to query.
      * @return DataTypes.NodeExitStatus Exit status.
      */
-    function getNodeExitStatus(address nodeAddr) external view returns (DataTypes.NodeExitStatus);
+    function getNodeExitStatus(address nodeAddr) external view returns (DataTypes.NodeStatus);
 
     /**
      * @notice Returns whether the current time is in settlement phase.

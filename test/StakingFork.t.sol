@@ -5,6 +5,7 @@ pragma solidity 0.8.20;
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
+import {Const} from "../src/libraries/Const.sol";
 import {TransparentUpgradeableProxy as Proxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {ITransparentUpgradeableProxy as IProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -18,18 +19,7 @@ contract StakingForkTest is CommonTest {
     function setUp() public {
         vm.createSelectFork("https://rpc.rss3.io", 5787906);
 
-        Staking st = new Staking(
-            address(1111),
-            25,
-            1944000,
-            1944000,
-            3 * 18 hours,
-            200,
-            100,
-            10000000000000000000000,
-            500,
-            address(0xbbb)
-        );
+        Staking st = new Staking(address(1111), 1944000, 1944000, 3 * 18 hours, address(0xbbb));
 
         Proxy proxy = Proxy(payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578));
         vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);
@@ -41,7 +31,7 @@ contract StakingForkTest is CommonTest {
     function testMergeChipsFork() public {
         uint256[] memory tokenIds = array(uint256(1690), uint256(1691), uint256(1693), uint256(1695));
         (address nodeAddr, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
-        assertEq(shares, staking.SHARES_PER_CHIP());
+        assertEq(shares, Const.SHARES_PER_CHIP);
         assertEq(nodeAddr, address(0x08d66b34054a174841e2361bd4746Ff9F4905cC2));
 
         vm.prank(diygod);
@@ -80,7 +70,7 @@ contract StakingForkTest is CommonTest {
 
         address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
-        assertEq(shares, staking.SHARES_PER_CHIP());
+        assertEq(shares, Const.SHARES_PER_CHIP);
         assertTrue(tokens > shares);
         DataTypes.Node memory nodeBefore = staking.getNode(nodeAddr);
 

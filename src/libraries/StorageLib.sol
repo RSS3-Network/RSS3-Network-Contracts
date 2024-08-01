@@ -40,6 +40,8 @@ library StorageLib {
 
     uint256 public constant NODE_EXIT_TIME_SLOT = 28;
 
+    uint256 public constant NODES_STATUS_SLOT = 30;
+
     function setTotalOperationPoolTokens(uint256 totalOperatingPoolTokens) external {
         assembly {
             sstore(TOTAL_OPERATION_POOL_TOKENS_SLOT, totalOperatingPoolTokens)
@@ -75,6 +77,16 @@ library StorageLib {
     function setTotalSlashingPoolTokens(uint256 totalSlashingPoolTokens) external {
         assembly {
             sstore(TOTAL_SLASHING_POOL_TOKENS_SLOT, totalSlashingPoolTokens)
+        }
+    }
+
+    function setNodeStatus(address nodeAddr, DataTypes.NodeStatus status) external {
+        assembly {
+            mstore(0x00, nodeAddr)
+            mstore(0x20, NODES_STATUS_SLOT)
+            let slot := keccak256(0x00, 0x40)
+
+            sstore(slot, status)
         }
     }
 
@@ -190,6 +202,12 @@ library StorageLib {
     function nodeAddrs() external pure returns (EnumerableSet.AddressSet storage _nodeAddrs) {
         assembly {
             _nodeAddrs.slot := NODES_ADDRESS_SET_SLOT
+        }
+    }
+
+    function nodesStatus() external pure returns (mapping(address => DataTypes.NodeStatus) storage _nodesStatus) {
+        assembly {
+            _nodesStatus.slot := NODES_STATUS_SLOT
         }
     }
 

@@ -19,11 +19,6 @@ contract DeployConfig is Script {
     uint256 public depositUnbondingPeriod;
     uint256 public stakeUnbondingPeriod;
     uint256 public nodeExitPeriod;
-    uint256 public nodeSlashRateBasisPoints;
-    uint256 public userSlashRateBasisPoints;
-    uint256 public stakeRatio;
-    uint256 public depositBaseline;
-    uint256 public taxRateBasisPointsBaseline;
     address public treasury;
     string public chipsName;
     string public chipsSymbol;
@@ -47,11 +42,6 @@ contract DeployConfig is Script {
         depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
         stakeUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
         nodeExitPeriod = stdJson.readUint(_json, "$.nodeExitPeriod");
-        nodeSlashRateBasisPoints = stdJson.readUint(_json, "$.nodeSlashRateBasisPoints");
-        userSlashRateBasisPoints = stdJson.readUint(_json, "$.userSlashRateBasisPoints");
-        stakeRatio = stdJson.readUint(_json, "$.stakeRatio");
-        depositBaseline = stdJson.readUint(_json, "$.depositBaseline");
-        taxRateBasisPointsBaseline = stdJson.readUint(_json, "$.taxRateBasisPointsBaseline");
         treasury = stdJson.readAddress(_json, "$.treasury");
         chipsName = stdJson.readString(_json, "$.chipsName");
         chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");

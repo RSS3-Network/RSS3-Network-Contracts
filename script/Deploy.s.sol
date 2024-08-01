@@ -100,14 +100,9 @@ contract Deploy is Deployer {
     function deployStaking() public broadcast returns (address addr_) {
         Staking staking = new Staking(
             cfg.treasury(),
-            cfg.stakeRatio(),
             cfg.stakeUnbondingPeriod(),
             cfg.depositUnbondingPeriod(),
             cfg.nodeExitPeriod(),
-            cfg.nodeSlashRateBasisPoints(),
-            cfg.userSlashRateBasisPoints(),
-            cfg.depositBaseline(),
-            cfg.taxRateBasisPointsBaseline(),
             cfg.paymentProcessor()
         );
 

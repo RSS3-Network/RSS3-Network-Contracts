@@ -66,8 +66,12 @@ library DataTypes {
         Revoked
     }
 
-    enum NodeExitStatus {
+    enum NodeStatus {
         None,
+        Registered,
+        Online,
+        Offline,
+        Slashed,
         Exiting,
         Exited
     }

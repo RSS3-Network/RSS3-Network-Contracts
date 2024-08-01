@@ -76,18 +76,11 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.paused(), false);
 
         assertEq(_staking.getNodeCount(), 0);
-        assertEq(_staking.MIN_DEPOSIT(), minDeposit);
         assertEq(_staking.chipsContract(), address(_chips));
 
         assertEq(_staking.STAKE_UNBONDING_PERIOD(), stakeUnbondingPeriod);
         assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), depositUnbondingPeriod);
-        assertEq(_staking.NODE_SLASH_RATE_BASIS_POINTS(), nodeSlashRateBasisPoints);
-        assertEq(_staking.USER_SLASH_RATE_BASIS_POINTS(), userSlashRateBasisPoints);
-        assertEq(_staking.STAKE_RATIO(), stakeRatio);
         assertEq(_staking.TREASURY(), treasury);
-        assertEq(_staking.SHARES_PER_CHIP(), 500 ether);
-        assertEq(_staking.MIN_DEPOSIT(), minDeposit);
-        assertEq(_staking.MIN_TAX_RATE_BASIS_POINTS(), minTaxRateBasisPoints);
 
         vm.mockCall(
             address(_staking),
@@ -116,14 +109,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(shares, 0);
 
         // check constants
-        assertLt(
-            RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
-                RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS,
-            Const.DENOMINATOR
-        );
-        assertLt(_staking.NODE_SLASH_RATE_BASIS_POINTS(), Const.DENOMINATOR);
-        assertLt(_staking.USER_SLASH_RATE_BASIS_POINTS(), Const.DENOMINATOR);
-        assertLt(_staking.MIN_TAX_RATE_BASIS_POINTS(), Const.DENOMINATOR);
+        assertLt(Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS, Const.DENOMINATOR);
+        assertLt(Const.NODE_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
+        assertLt(Const.USER_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
+        assertLt(Const.MIN_TAX_RATE_BASIS_POINTS, Const.DENOMINATOR);
     }
 
     function testPause() public {
@@ -245,7 +234,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testCreateNode(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
+        vm.assume(taxRateBasisPoints >= Const.MIN_TAX_RATE_BASIS_POINTS && taxRateBasisPoints <= 10000);
 
         string memory name = "Alice";
         string memory description = "Alice's node";
@@ -312,7 +301,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
-        vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
+        vm.assume(taxRateBasisPoints >= Const.MIN_TAX_RATE_BASIS_POINTS && taxRateBasisPoints <= 10000);
         vm.assume(amount > 1 && amount < _initialAmount);
 
         string memory name = "Alice";
@@ -453,16 +442,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.deposit{value: 2 * amount}();
 
         _staking.requestExit();
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exiting));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         skip(_staking.NODE_EXIT_PERIOD());
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exited));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         _staking.requestWithdrawal(2 * amount);
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exited));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         _staking.deposit{value: amount}();
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exited));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
         vm.stopPrank();
     }
 
@@ -487,7 +476,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _disableAlphaPhase();
 
         uint256 depositAmount = 100000 ether;
-        uint256 withdrawalAmount = depositAmount - minDeposit;
+        uint256 withdrawalAmount = depositAmount - Const.MIN_DEPOSIT;
 
         vm.startPrank(alice);
         _staking.createNode{value: depositAmount}("Alice", "Alice's node", uint64(1000), false);
@@ -531,7 +520,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.amount, amount);
 
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exited));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         // check node info
         DataTypes.Node memory node = _staking.getNode(alice);
@@ -590,24 +579,24 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.startPrank(alice);
         _staking.deposit{value: amount}();
 
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.None));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.None));
 
         // exiting
         _staking.requestExit();
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exiting));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         // exited
         skip(_staking.NODE_EXIT_PERIOD());
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exited));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         // none
-        _staking.requestReentry();
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.None));
+        _staking.reRegister();
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.None));
 
         vm.stopPrank();
     }
 
-    function testRequestReentry() public {
+    function testReRegister() public {
         _createNode(alice);
 
         vm.startPrank(alice);
@@ -617,27 +606,27 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         vm.expectEmit();
         emit Events.NodeReentryRequested(alice);
-        _staking.requestReentry();
+        _staking.reRegister();
         vm.stopPrank();
     }
-    function testRequestReentryFail() public {
+    function testReRegisterFail() public {
         _createNode(alice);
 
         // case 1: node not exists
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.requestReentry();
+        _staking.reRegister();
 
         // case 2: node not in exit status
         vm.expectRevert(abi.encodeWithSelector(NodeNotInExitStatus.selector));
         vm.prank(alice);
-        _staking.requestReentry();
+        _staking.reRegister();
 
         // case 3: node deposit is below minimum
         vm.startPrank(alice);
         _staking.requestExit();
 
         vm.expectRevert(abi.encodeWithSelector(NodeDepositBelowMinimum.selector));
-        _staking.requestReentry();
+        _staking.reRegister();
         vm.stopPrank();
     }
 
@@ -737,7 +726,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testSetTaxRate4Node(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints <= _denominator() && taxRateBasisPoints >= minTaxRateBasisPoints);
+        vm.assume(taxRateBasisPoints <= Const.DENOMINATOR && taxRateBasisPoints >= Const.MIN_TAX_RATE_BASIS_POINTS);
 
         _createNode(alice);
 
@@ -766,7 +755,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testSetTaxRateTooSmallError(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints < minTaxRateBasisPoints);
+        vm.assume(taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS);
 
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooSmall.selector));
         vm.prank(oracleAccount);
@@ -1338,8 +1327,10 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         _setUpNodes(depositedTokens, stakedTokens);
 
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
+        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+            _denominator();
+        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
+            _denominator();
 
         address[] memory nodeAddrs = array(alice, bob);
         address[] memory reporters = array(carol, dave);
@@ -1430,8 +1421,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 depositedTokens = 10000 ether;
         uint256 stakedTokens = 40000 ether;
 
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
+        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+            _denominator();
+        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
+            _denominator();
 
         _setUpNodes(depositedTokens, stakedTokens);
         uint256 treasuryAmount = _getTreasuryAmount();
@@ -1464,7 +1457,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // 3.1 reporters balance correct
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             uint256 value = ((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / _denominator();
+                Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / _denominator();
             if (reporters[i] == address(0x0)) {
                 assertEq(paymentProcessor.balance, value);
             } else {
@@ -1478,8 +1471,8 @@ contract StakingTest is CommonTest, IERC721Errors {
             (expectedSlashedTokensOnOperationPool +
                 expectedSlashedTokensOnStakingPool -
                 (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
-                        RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS)) / _denominator()));
+                    (Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS)) /
+                    _denominator()));
 
         assertEq(treasuryAmountAfterSlashing, expectedTreasuryAmount);
         // 3.3 Node pool tokens correct
@@ -1603,15 +1596,17 @@ contract StakingTest is CommonTest, IERC721Errors {
         // 5. Check: treasury amount correct
         uint256 treasuryAmount = _getTreasuryAmount();
 
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
+        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+            _denominator();
+        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
+            _denominator();
 
         uint256 expectedTreasuryAmount = 2 *
             (expectedSlashedTokensOnOperationPool +
                 expectedSlashedTokensOnStakingPool -
                 (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
-                        RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS)) / _denominator()));
+                    (Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS)) /
+                    _denominator()));
         assertEq(treasuryAmount, expectedTreasuryAmount);
 
         // 6. record slashing alice twice will reverted
@@ -1627,16 +1622,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.startPrank(alice);
         _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
 
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.None));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.None));
 
         expectEmit();
         emit Events.NodeExitRequested(alice);
         _staking.requestExit();
 
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exiting));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         skip(_staking.NODE_EXIT_PERIOD());
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeExitStatus.Exited));
+        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         vm.stopPrank();
     }
@@ -1673,9 +1668,7 @@ contract StakingTest is CommonTest, IERC721Errors {
             rewards,
             taxRateBasisPoints,
             operationPool,
-            stakingPool,
-            _staking.MIN_DEPOSIT(),
-            _staking.STAKE_RATIO()
+            stakingPool
         );
 
         assertEq(tax1, _getFullTax(rewards, taxRateBasisPoints));
@@ -1684,7 +1677,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testCalcTax2() public {
         // case 2: receives full tax rewards
-        uint256 operationPool = minDeposit;
+        uint256 operationPool = Const.MIN_DEPOSIT;
         uint256 stakeRatio;
         vm.assume(stakeRatio < 25);
 
@@ -1697,19 +1690,17 @@ contract StakingTest is CommonTest, IERC721Errors {
             rewards,
             taxRateBasisPoints,
             operationPool,
-            stakingPool,
-            _staking.MIN_DEPOSIT(),
-            _staking.STAKE_RATIO()
+            stakingPool
         );
 
         assertEq(tax, partialTax);
     }
 
-    function testCalcTax3(uint256 stakingPool) public view {
+    function testCalcTax3(uint256 stakingPool) public pure {
         // case 2: receives partial tax rewards
-        uint256 operationPool = minDeposit;
+        uint256 operationPool = Const.MIN_DEPOSIT;
 
-        vm.assume(stakingPool > 25 * operationPool && stakeRatio < 100 * operationPool);
+        vm.assume(stakingPool > 25 * operationPool && Const.STAKE_RATIO < 100 * operationPool);
 
         uint256 rewards = 10000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
@@ -1718,9 +1709,7 @@ contract StakingTest is CommonTest, IERC721Errors {
             rewards,
             taxRateBasisPoints,
             operationPool,
-            stakingPool,
-            _staking.MIN_DEPOSIT(),
-            _staking.STAKE_RATIO()
+            stakingPool
         );
 
         // partialTax has precision 1

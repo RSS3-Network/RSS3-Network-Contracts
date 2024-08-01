@@ -8,7 +8,6 @@ import {DataTypes} from "./DataTypes.sol";
 import {StorageLib} from "./StorageLib.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {IChips} from "../interfaces/IChips.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {
     NodeNotExists,
     DepositForPublicGoodNode,
@@ -22,6 +21,8 @@ import {
     ClaimTimeNotReady,
     ClaimIdNotExists
 } from "./Errors.sol";
+import {Const} from "./Const.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 library StakingLib {
     /// @dev deposit tokens to a node
@@ -33,6 +34,12 @@ library StakingLib {
         if (node.publicGood) revert DepositForPublicGoodNode();
 
         StakingCommonLib.increaseOperationPool(node, amount);
+
+        // set node status
+        if (node.operationPoolTokens >= Const.MIN_DEPOSIT) {
+            StorageLib.setNodeStatus(nodeAddr, DataTypes.NodeStatus.Registered);
+        }
+
         emit Events.Deposited(nodeAddr, amount);
     }
 
@@ -40,11 +47,10 @@ library StakingLib {
         DataTypes.Node storage node,
         uint256 amount,
         address nodeAddr,
-        address from,
-        uint256 SHARES_PER_CHIP
+        address from
     ) external returns (uint256 tokenId) {
-        // staking amount must be greater than 500 tokens
-        if (amount < SHARES_PER_CHIP) revert StakeAmountTooSmall();
+        // staking amount must be greater than MIN_STAKE
+        if (amount < Const.MIN_STAKE) revert StakeAmountTooSmall();
 
         uint256 sharesToMint = _tokensToShares(amount, nodeAddr);
 
@@ -66,11 +72,7 @@ library StakingLib {
     }
 
     /// @dev unstake from a node by burning chips
-    function unstakeFromNode(
-        address nodeAddr,
-        uint256[] calldata chipIds,
-        uint256 SHARES_PER_CHIP
-    ) external returns (uint256 requestId) {
+    function unstakeFromNode(address nodeAddr, uint256[] calldata chipIds) external returns (uint256 requestId) {
         if (chipIds.length == 0) revert EmptyChipIds();
 
         address owner = _checkChipsConditions(nodeAddr, chipIds);
@@ -80,7 +82,7 @@ library StakingLib {
         uint256 unstakeAmount;
         for (uint256 i = 0; i < chipIds.length; i++) {
             uint256 tokenId = chipIds[i];
-            (, uint256 amount, uint256 shares) = _chipInfo(tokenId, SHARES_PER_CHIP);
+            (, uint256 amount, uint256 shares) = _chipInfo(tokenId);
             unstakeAmount += amount;
             sharesToBurn += shares;
 
@@ -154,7 +156,7 @@ library StakingLib {
         emit Events.UnstakeClaimed(requestId, req.nodeAddr, req.owner, req.unstakeAmount);
     }
 
-    function mergeChips(uint256[] calldata chipIds, uint256 SHARES_PER_CHIP) external returns (uint256 newTokenId) {
+    function mergeChips(uint256[] calldata chipIds) external returns (uint256 newTokenId) {
         if (chipIds.length < 2) revert ChipIdsLengthTooShort();
 
         address chips = StorageLib.getChipsContract();
@@ -164,7 +166,7 @@ library StakingLib {
         uint256 totalShares;
         for (uint256 i = 0; i < chipIds.length; i++) {
             uint256 tokenId = chipIds[i];
-            (, , uint256 shares) = _chipInfo(tokenId, SHARES_PER_CHIP);
+            (, , uint256 shares) = _chipInfo(tokenId);
             totalShares += shares;
 
             // burn chips and reset corresponding shares
@@ -184,11 +186,8 @@ library StakingLib {
         emit Events.ChipsMerged(owner, nodeAddr, newTokenId, chipIds);
     }
 
-    function getChipInfo(
-        uint256 tokenId,
-        uint256 SHARES_PER_CHIP
-    ) external view returns (address nodeAddr, uint256 tokens, uint256 shares) {
-        (nodeAddr, tokens, shares) = _chipInfo(tokenId, SHARES_PER_CHIP);
+    function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares) {
+        (nodeAddr, tokens, shares) = _chipInfo(tokenId);
     }
 
     /// @dev increase total shares of a node
@@ -258,10 +257,7 @@ library StakingLib {
         node = nodes[nodeAddr].publicGood ? publicPool : nodes[nodeAddr];
     }
 
-    function _chipInfo(
-        uint256 tokenId,
-        uint256 SHARES_PER_CHIP
-    ) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {
+    function _chipInfo(uint256 tokenId) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {
         nodeAddr = _issuerOf(tokenId);
         if (nodeAddr == address(0)) return (address(0), 0, 0);
 
@@ -269,7 +265,7 @@ library StakingLib {
 
         if (shares == 0) {
             // old chip is always:  1 token = SHARES_PER_CHIP shares
-            shares = SHARES_PER_CHIP;
+            shares = Const.SHARES_PER_CHIP;
         }
 
         tokens = _sharesToTokens(shares, nodeAddr);

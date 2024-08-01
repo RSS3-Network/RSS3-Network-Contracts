@@ -11,6 +11,7 @@ import {
     NodeIsPublicGood,
     NodeNotExists,
     TaxRateBasisPointsTooLarge,
+    PublicGoodNodeTaxNotZero,
     TaxRateBasisPointsTooSmall
 } from "./Errors.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -18,17 +19,10 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 library NodeSettingsLib {
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    function setTaxRateBasisPoints4Node(
-        uint64 taxRateBasisPoints,
-        uint256 MIN_TAX_RATE_BASIS_POINTS,
-        address from
-    ) external {
-        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
-        if (taxRateBasisPoints < MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
+    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints, address from) external {
+        _validateTaxRateBasisPoints(taxRateBasisPoints);
 
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
-
-        DataTypes.Node storage node = nodes[from];
+        DataTypes.Node storage node = StorageLib.nodes()[from];
 
         if (address(0) == node.account) revert NodeNotExists();
 
@@ -70,7 +64,12 @@ library NodeSettingsLib {
         bool publicGood
     ) external {
         if (nodeAddr == address(0)) revert CreateNodeToZeroAddress();
-        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
+        if (publicGood) {
+            if (taxRateBasisPoints > 0) revert PublicGoodNodeTaxNotZero();
+        } else {
+            if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
+            if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
+        }
 
         uint256 nodeId = StorageLib.nextNodeId();
 
@@ -92,5 +91,10 @@ library NodeSettingsLib {
         StorageLib.nodeAddrs().add(nodeAddr);
 
         emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood, isAlphaPhase);
+    }
+
+    function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
+        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
+        if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
     }
 }

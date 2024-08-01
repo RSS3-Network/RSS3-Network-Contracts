@@ -10,6 +10,7 @@ import {Settlement} from "../../src/Settlement.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
 import {TransparentUpgradeableProxy as Proxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {InternalSettlement} from "./InternalSettlement.sol";
+import {Const} from "../../src/libraries/Const.sol";
 
 contract CommonTest is Utils {
     address public constant alice = address(0x111);
@@ -34,11 +35,6 @@ contract CommonTest is Utils {
 
     uint256 internal _initialAmount = 100000000 ether;
 
-    uint256 public constant nodeSlashRateBasisPoints = 100;
-    uint256 public constant userSlashRateBasisPoints = 50;
-    uint256 public constant stakeRatio = 25;
-    uint256 public constant minDeposit = 10000 ether;
-    uint256 public constant minTaxRateBasisPoints = 500;
     address public constant treasury = address(0xaaa);
     address public constant paymentProcessor = address(0xbbb);
 
@@ -60,14 +56,9 @@ contract CommonTest is Utils {
         // deploy Staking contract
         Staking stakingImpl = new Staking(
             treasury,
-            stakeRatio,
             stakeUnbondingPeriod,
             depositUnbondingPeriod,
             nodeExitPeriod,
-            nodeSlashRateBasisPoints,
-            userSlashRateBasisPoints,
-            minDeposit,
-            minTaxRateBasisPoints,
             paymentProcessor
         );
         // deploy chips token
@@ -158,7 +149,7 @@ contract CommonTest is Utils {
     }
 
     function _denominator() internal pure virtual returns (uint96) {
-        return 10000;
+        return Const.DENOMINATOR;
     }
 
     function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
