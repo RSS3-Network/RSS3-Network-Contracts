@@ -164,7 +164,7 @@ interface IStaking {
      * @param nodeAddrs Addresses of node operator to set.
      * @param status Status to set.
      */
-    function setNodesStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external;
+    function setNodeStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external;
 
     /**
      * @notice Demotes nodes.
@@ -242,6 +242,14 @@ interface IStaking {
      * @return results Node status.
      */
     function getNodeStatus(address[] calldata nodeAddrs) external view returns (DataTypes.NodeStatus[] memory results);
+
+    /**
+     * @notice Returns the demotion count of node.
+     * @param epoch The epoch number to query.
+     * @param nodeAddr Node address to query.
+     * @return uint256 The demotion count.
+     */
+    function getDemotionCount(uint256 epoch, address nodeAddr) external view returns (uint256);
 
     /**
      * @notice Returns whether the current time is in settlement phase.

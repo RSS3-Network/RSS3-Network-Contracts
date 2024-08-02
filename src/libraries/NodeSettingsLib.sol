@@ -108,7 +108,7 @@ library NodeSettingsLib {
 
                 StorageLib.getNodeTime(nodeAddr).offlineTime = block.timestamp;
             } else {
-                revert WrongNodeStatus();
+                revert WrongNodeStatus(uint256(s));
             }
         }
 

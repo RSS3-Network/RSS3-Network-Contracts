@@ -1644,13 +1644,45 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testDemoteNodes() public {
-        // TODO
-        vm.prank(alice);
+        _createNode(alice);
+        _createPublicGoodNode(bob);
+        _createNode(carol);
+
+        address[] memory nodeAddrs = array(alice, bob, carol);
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            expectEmit();
+            emit Events.NodeDemoted(1, nodeAddrs[i], 1);
+        }
+        vm.prank(address(_settlement));
+        _staking.demoteNodes(1, nodeAddrs);
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            assertEq(_staking.getDemotionCount(1, nodeAddrs[i]), 1);
+        }
     }
 
     function testSetNodesStatus() public {
-        // TODO
-        vm.prank(alice);
+        _createNode(alice);
+        _createPublicGoodNode(bob);
+        _createNode(carol);
+
+        address[] memory nodeAddrs = array(alice, bob, carol);
+        DataTypes.NodeStatus[] memory status = new DataTypes.NodeStatus[](3);
+        status[0] = DataTypes.NodeStatus.Online;
+        status[1] = DataTypes.NodeStatus.Offline;
+        status[2] = DataTypes.NodeStatus.Initializing;
+
+        expectEmit();
+        emit Events.NodeStatusSet(nodeAddrs, status);
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(nodeAddrs, status);
+
+        // check status
+        DataTypes.NodeStatus[] memory nodeStatus = _staking.getNodeStatus(nodeAddrs);
+        assertEq(uint256(nodeStatus[0]), uint256(DataTypes.NodeStatus.Online));
+        assertEq(uint256(nodeStatus[1]), uint256(DataTypes.NodeStatus.Offline));
+        assertEq(uint256(nodeStatus[2]), uint256(DataTypes.NodeStatus.Initializing));
     }
 
     function testCalcTax1(uint256 operationPool) public pure {

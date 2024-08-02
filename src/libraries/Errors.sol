@@ -29,7 +29,7 @@ error InvalidEpochNumber(uint256 current, uint256 got);
 error SubmissionIntervalNotElapsed();
 
 /// @dev Wrong node status
-error WrongNodeStatus();
+error WrongNodeStatus(uint256 status);
 
 /// @dev Request already claimed.
 error AlreadyClaimed();

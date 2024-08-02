@@ -74,7 +74,7 @@ interface ISettlement {
      * @param nodeAddrs Addresses of node operator to set.
      * @param status Status to set.
      */
-    function setNodesStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external;
+    function setNodeStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external;
 
     /**
      * @notice Demotes nodes.

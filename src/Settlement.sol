@@ -153,11 +153,11 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc ISettlement
-    function setNodesStatus(
+    function setNodeStatus(
         address[] calldata nodeAddrs,
         DataTypes.NodeStatus[] calldata status
     ) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).setNodesStatus(nodeAddrs, status);
+        IStaking(_staking).setNodeStatus(nodeAddrs, status);
     }
 
     /// @inheritdoc ISettlement

@@ -359,7 +359,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function setNodesStatus(
+    function setNodeStatus(
         address[] calldata nodeAddrs,
         DataTypes.NodeStatus[] calldata status
     ) external override onlyRole(ORACLE_ROLE) {
@@ -432,6 +432,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             results[i] = NodeSettingsLib.getNodeStatus(nodeAddrs[i]);
         }
+    }
+
+    /// @inheritdoc IStaking
+    function getDemotionCount(uint256 epoch, address nodeAddr) external view override returns (uint256) {
+        return _nodeDemotionCounter[epoch][nodeAddr];
     }
 
     /// @inheritdoc IStaking
