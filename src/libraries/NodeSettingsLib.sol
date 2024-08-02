@@ -115,6 +115,36 @@ library NodeSettingsLib {
         emit Events.NodeStatusSet(nodeAddrs, status);
     }
 
+    function getNodeStatus(address nodeAddr) external view returns (DataTypes.NodeStatus) {
+        DataTypes.NodeStatus status = StorageLib.getNodesStatus(nodeAddr);
+        DataTypes.NodeTime memory nodeTimes = StorageLib.getNodeTime(nodeAddr);
+
+        // Registered Node transitions to Exited state after 30 Epochs of inactivity.
+        if (status == DataTypes.NodeStatus.Registered) {
+            if (nodeTimes.registerTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
+                status = DataTypes.NodeStatus.Exited;
+                return status;
+            }
+        }
+
+        // An Offline Node transitions to Exited state after 30 Epochs of inactivity.
+        if (status == DataTypes.NodeStatus.Offline) {
+            if (nodeTimes.offlineTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
+                status = DataTypes.NodeStatus.Exited;
+                return status;
+            }
+        }
+
+        // An Exiting Node transitions to Exited state after 1 Epoch.
+        if (status == DataTypes.NodeStatus.Exiting) {
+            if (nodeTimes.exitingTime + Const.NODE_EXIT_PERIOD <= block.timestamp) {
+                status = DataTypes.NodeStatus.Exited;
+                return status;
+            }
+        }
+
+        return status;
+    }
     function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
         if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
         if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();

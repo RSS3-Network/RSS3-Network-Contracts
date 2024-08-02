@@ -102,7 +102,6 @@ contract Deploy is Deployer {
             cfg.treasury(),
             cfg.stakeUnbondingPeriod(),
             cfg.depositUnbondingPeriod(),
-            cfg.nodeExitPeriod(),
             cfg.paymentProcessor()
         );
 

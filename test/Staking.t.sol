@@ -430,7 +430,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.requestExit();
         assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
-        skip(_staking.NODE_EXIT_PERIOD());
+        skip(Const.NODE_EXIT_PERIOD);
         assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         _staking.requestWithdrawal(2 * amount);
@@ -496,7 +496,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.createNode{value: amount}("Alice", "Alice's node", uint64(1000), false);
 
         _staking.requestExit();
-        skip(_staking.NODE_EXIT_PERIOD());
+        skip(Const.NODE_EXIT_PERIOD);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
@@ -524,7 +524,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.deposit{value: amount}();
 
         _staking.requestExit();
-        skip(_staking.NODE_EXIT_PERIOD());
+        skip(Const.NODE_EXIT_PERIOD);
 
         uint256 requestId = _staking.requestWithdrawal(2 * amount);
         vm.stopPrank();
@@ -576,7 +576,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         // exited
-        skip(_staking.NODE_EXIT_PERIOD());
+        skip(Const.NODE_EXIT_PERIOD);
         assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         // registered
@@ -635,7 +635,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.startPrank(alice);
         _staking.deposit{value: amount}();
         _staking.requestExit();
-        skip(_staking.NODE_EXIT_PERIOD());
+        skip(Const.NODE_EXIT_PERIOD);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
@@ -670,7 +670,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(depositAmount % withdrawAmount, 0);
 
         _staking.requestExit();
-        skip(_staking.NODE_EXIT_PERIOD());
+        skip(Const.NODE_EXIT_PERIOD);
 
         uint256[] memory requestIds = new uint256[](depositAmount / withdrawAmount);
         for (uint256 i = 0; i < requestIds.length; i++) {
@@ -1619,7 +1619,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
-        skip(_staking.NODE_EXIT_PERIOD());
+        skip(Const.NODE_EXIT_PERIOD);
         assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         vm.stopPrank();

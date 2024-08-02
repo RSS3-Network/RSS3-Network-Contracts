@@ -18,7 +18,6 @@ contract DeployConfig is Script {
     address public oracleAccount;
     uint256 public depositUnbondingPeriod;
     uint256 public stakeUnbondingPeriod;
-    uint256 public nodeExitPeriod;
     address public treasury;
     string public chipsName;
     string public chipsSymbol;
@@ -41,7 +40,6 @@ contract DeployConfig is Script {
         oracleAccount = stdJson.readAddress(_json, "$.oracleAccount");
         depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
         stakeUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
-        nodeExitPeriod = stdJson.readUint(_json, "$.nodeExitPeriod");
         treasury = stdJson.readAddress(_json, "$.treasury");
         chipsName = stdJson.readString(_json, "$.chipsName");
         chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");

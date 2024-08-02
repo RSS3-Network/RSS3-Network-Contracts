@@ -31,7 +31,6 @@ contract CommonTest is Utils {
 
     uint256 public constant stakeUnbondingPeriod = 22.5 days;
     uint256 public constant depositUnbondingPeriod = 22.5 days;
-    uint256 public constant nodeExitPeriod = 3 * 18 hours;
 
     uint256 internal _initialAmount = 100000000 ether;
 
@@ -54,13 +53,7 @@ contract CommonTest is Utils {
         _rss3 = new RSS3Token(address(this));
 
         // deploy Staking contract
-        Staking stakingImpl = new Staking(
-            treasury,
-            stakeUnbondingPeriod,
-            depositUnbondingPeriod,
-            nodeExitPeriod,
-            paymentProcessor
-        );
+        Staking stakingImpl = new Staking(treasury, stakeUnbondingPeriod, depositUnbondingPeriod, paymentProcessor);
         // deploy chips token
         Chips chipsImpl = new Chips();
         // deploy settlement contract

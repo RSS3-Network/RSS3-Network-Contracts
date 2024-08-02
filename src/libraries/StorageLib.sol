@@ -179,6 +179,16 @@ library StorageLib {
         return slashRecords[nodeAddr][epochId];
     }
 
+    function getNodesStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus status) {
+        assembly {
+            mstore(0x00, nodeAddr)
+            mstore(0x20, NODES_STATUS_SLOT)
+            let slot := keccak256(0x00, 0x40)
+
+            status := sload(slot)
+        }
+    }
+
     function getNodeTime(address nodeAddr) internal pure returns (DataTypes.NodeTime storage nodeTime) {
         assembly {
             mstore(0x00, nodeAddr)
@@ -210,16 +220,6 @@ library StorageLib {
     function nodeAddrs() internal pure returns (EnumerableSet.AddressSet storage _nodeAddrs) {
         assembly {
             _nodeAddrs.slot := NODES_ADDRESS_SET_SLOT
-        }
-    }
-
-    function getNodesStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus status) {
-        assembly {
-            mstore(0x00, nodeAddr)
-            mstore(0x20, NODES_STATUS_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            status := sload(slot)
         }
     }
 
