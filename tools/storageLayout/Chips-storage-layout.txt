@@ -9,3 +9,4 @@
 | _staking           | address                                      | 6    | 0      | 20    | src/Chips.sol:Chips |
 | _counter           | uint256                                      | 7    | 0      | 32    | src/Chips.sol:Chips |
 | _totalSupply       | uint256                                      | 8    | 0      | 32    | src/Chips.sol:Chips |
+| _chipV2StartId     | uint256                                      | 9    | 0      | 32    | src/Chips.sol:Chips |
