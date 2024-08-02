@@ -22,7 +22,6 @@ import {Const} from "./libraries/Const.sol";
 
 import {
     AlphaWithdrawNotAllowed,
-    InsufficientValue,
     NodeNotExists,
     ExcessWithdrawalAmount,
     WithdrawalAmountExceedsOperationPoolTokens,
@@ -32,8 +31,7 @@ import {
     SettlementPhase,
     StakeToPublicGoodNode,
     NodeInExitStatus,
-    NodeNotPublicGood,
-    WrongNodeStatus
+    NodeNotPublicGood
 } from "./libraries/Errors.sol";
 
 contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard {
@@ -370,25 +368,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         address[] calldata nodeAddrs,
         DataTypes.NodeStatus[] calldata status
     ) external override onlyRole(ORACLE_ROLE) {
-        if (nodeAddrs.length != status.length) revert InvalidArrayLength();
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            address nodeAddr = nodeAddrs[i];
-            DataTypes.NodeStatus s = status[i];
-
-            // can only set node status as: Online, Offline and Initializing
-            if (
-                s == DataTypes.NodeStatus.Online ||
-                s == DataTypes.NodeStatus.Offline ||
-                s == DataTypes.NodeStatus.Initializing
-            ) {
-                StorageLib.setNodeStatus(nodeAddr, s);
-            } else {
-                revert WrongNodeStatus();
-            }
-        }
-
-        emit Events.NodeStatusSet(nodeAddrs, status);
+        NodeSettingsLib.setNodesStatus(nodeAddrs, status);
     }
 
     /// @inheritdoc IStaking

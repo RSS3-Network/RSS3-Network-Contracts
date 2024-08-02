@@ -10,6 +10,8 @@ import {
     NodeExists,
     NodeIsPublicGood,
     NodeNotExists,
+    WrongNodeStatus,
+    InvalidArrayLength,
     TaxRateBasisPointsTooLarge,
     PublicGoodNodeTaxNotZero,
     TaxRateBasisPointsTooSmall
@@ -86,6 +88,31 @@ library NodeSettingsLib {
         StorageLib.nodeAddrs().add(nodeAddr);
 
         emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood, isAlphaPhase);
+    }
+
+    function setNodesStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external {
+        if (nodeAddrs.length != status.length) revert InvalidArrayLength();
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            address nodeAddr = nodeAddrs[i];
+            DataTypes.NodeStatus s = status[i];
+
+            // can only set node status as: Online, Offline and Initializing
+            if (s == DataTypes.NodeStatus.Initializing || s == DataTypes.NodeStatus.Online) {
+                StorageLib.setNodeStatus(nodeAddr, s);
+
+                StorageLib.getNodeTime(nodeAddr).registerTime = 0;
+                StorageLib.getNodeTime(nodeAddr).offlineTime = 0;
+            } else if (s == DataTypes.NodeStatus.Offline) {
+                StorageLib.setNodeStatus(nodeAddr, s);
+
+                StorageLib.getNodeTime(nodeAddr).offlineTime = block.timestamp;
+            } else {
+                revert WrongNodeStatus();
+            }
+        }
+
+        emit Events.NodeStatusSet(nodeAddrs, status);
     }
 
     function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {

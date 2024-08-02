@@ -100,9 +100,6 @@ error EmptyNodeList();
 /// @dev Chips id overflow.
 error ChipsIdOverflow();
 
-/// @dev Insufficient value to stake.
-error InsufficientValue();
-
 /// @dev Transfer failed.
 error TransferFailed();
 

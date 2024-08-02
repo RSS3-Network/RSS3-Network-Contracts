@@ -31,7 +31,6 @@ import {
     NodeIsPublicGood,
     CreateNodeToZeroAddress,
     ChipNotValid,
-    InsufficientValue,
     ExcessWithdrawalAmount,
     WithdrawalAmountExceedsOperationPoolTokens,
     NodeDepositBelowMinimum,
