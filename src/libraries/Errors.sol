@@ -76,9 +76,6 @@ error ExcessWithdrawalAmount();
 /// @dev Withdrawal amount exceeds operationPoolTokens
 error WithdrawalAmountExceedsOperationPoolTokens();
 
-/// @dev Node is already in an exit status
-error NodeAlreadyInExitStatus();
-
 /// @dev Node is not in an exit status
 error NodeNotInExitStatus();
 

@@ -38,9 +38,9 @@ library StorageLib {
     uint256 public constant TOTAL_SLASHING_POOL_TOKENS_SLOT = 26;
     uint256 public constant SLASH_RECORDS_SLOT = 27;
 
-    uint256 public constant NODE_EXIT_TIME_SLOT = 28;
+    uint256 public constant NODES_STATUS_SLOT = 29;
 
-    uint256 public constant NODES_STATUS_SLOT = 30;
+    uint256 public constant NODE_TIMES_SLOT = 30;
 
     function setTotalOperationPoolTokens(uint256 totalOperatingPoolTokens) internal {
         assembly {
@@ -114,16 +114,6 @@ library StorageLib {
         }
     }
 
-    function setNodeExitTime(address nodeAddr, uint256 time) internal {
-        assembly {
-            mstore(0x00, nodeAddr)
-            mstore(0x20, NODE_EXIT_TIME_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            sstore(slot, time)
-        }
-    }
-
     function getChipsContract() internal view returns (address chips) {
         assembly {
             chips := sload(CHIPS_CONTRACT_ADDRESS_SLOT)
@@ -189,13 +179,11 @@ library StorageLib {
         return slashRecords[nodeAddr][epochId];
     }
 
-    function getNodeExitTime(address nodeAddr) internal view returns (uint256 time) {
+    function getNodeTime(address nodeAddr) internal pure returns (DataTypes.NodeTime storage nodeTime) {
         assembly {
             mstore(0x00, nodeAddr)
-            mstore(0x20, NODE_EXIT_TIME_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            time := sload(slot)
+            mstore(0x20, NODE_TIMES_SLOT)
+            nodeTime.slot := keccak256(0x00, 0x40)
         }
     }
 
@@ -225,9 +213,13 @@ library StorageLib {
         }
     }
 
-    function nodesStatus() internal pure returns (mapping(address => DataTypes.NodeStatus) storage _nodesStatus) {
+    function getNodesStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus status) {
         assembly {
-            _nodesStatus.slot := NODES_STATUS_SLOT
+            mstore(0x00, nodeAddr)
+            mstore(0x20, NODES_STATUS_SLOT)
+            let slot := keccak256(0x00, 0x40)
+
+            status := sload(slot)
         }
     }
 

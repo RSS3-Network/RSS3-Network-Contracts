@@ -27,6 +27,11 @@ library Const {
     uint256 public constant SLASH_REPORTER_BONUS_RATE_BASIS_POINTS = 2000;
     uint256 public constant SLASH_BURN_RATE_BASIS_POINTS = 3000;
 
+    /// @dev 30 epoch
+    ///  An Offline Node transitions to Exited state after 30 Epochs of inactivity.
+    ///  Registered Node transitions to Exited state after 30 Epochs of inactivity.
+    uint256 public constant NODE_INACTIVITY_PERIOD = 30 * 18 hours;
+
     // denominator
     uint96 public constant DENOMINATOR = 10000;
 }

@@ -90,6 +90,12 @@ library DataTypes {
         uint256 epoch;
     }
 
+    struct NodeTime {
+        uint256 registerTime;
+        uint256 exitingTime;
+        uint256 offlineTime;
+    }
+
     struct NodeTraits {
         uint8 frameColor;
         uint8 frameId;

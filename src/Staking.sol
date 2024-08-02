@@ -26,7 +26,6 @@ import {
     NodeNotExists,
     ExcessWithdrawalAmount,
     WithdrawalAmountExceedsOperationPoolTokens,
-    NodeAlreadyInExitStatus,
     NodeNotInExitStatus,
     NodeDepositBelowMinimum,
     InvalidArrayLength,
@@ -110,11 +109,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @dev (nodeAddr, epochId) => slash record
     mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
 
-    /// @dev block.timestamp when the node operator requests an exit
-    mapping(address nodeAddr => uint256 timestamp) internal _nodeExitTime; // slot 28
+    mapping(uint256 epoch => mapping(address nodeAddr => uint256 count)) internal _nodeDemotionCounter; // slot 28
+    mapping(address nodeAddr => DataTypes.NodeStatus) internal _nodesStatus; // slot 29
 
-    mapping(uint256 epoch => mapping(address nodeAddr => uint256 count)) internal _nodeDemotionCounter; // slot 29
-    mapping(address nodeAddr => DataTypes.NodeStatus) internal _nodesStatus; // slot 30
+    mapping(address nodeAddr => DataTypes.NodeTime) internal _nodeTimes; // slot 30
 
     modifier whenNotAlphaPhase() {
         if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
@@ -207,7 +205,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
 
         // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
-        DataTypes.NodeStatus status = _getNodeExitStatus(msg.sender);
+        DataTypes.NodeStatus status = _getNodeStatus(msg.sender);
         if (DataTypes.NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT)
             revert ExcessWithdrawalAmount();
 
@@ -231,7 +229,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
 
         // node should not in exit status
-        _validateNodeStatus(nodeAddr);
+        _validateNodeNotInExitStatus(nodeAddr);
 
         tokenId = StakingLib.stakeToNode(node, msg.value, nodeAddr, msg.sender);
     }
@@ -245,7 +243,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
 
         // node should not in exit status
-        _validateNodeStatus(nodeAddr);
+        _validateNodeNotInExitStatus(nodeAddr);
 
         tokenId = StakingLib.stakeToNode(_publicPool, msg.value, nodeAddr, msg.sender);
     }
@@ -389,6 +387,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
                 revert WrongNodeStatus();
             }
         }
+
+        emit Events.NodeStatusSet(nodeAddrs, status);
     }
 
     /// @inheritdoc IStaking
@@ -410,10 +410,10 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         _validateNodeAddress(_nodes[nodeAddr].account);
 
         // validate node exit status
-        DataTypes.NodeStatus status = _getNodeExitStatus(nodeAddr);
-        if (DataTypes.NodeStatus.None != status) revert NodeAlreadyInExitStatus();
+        _validateNodeNotInExitStatus(nodeAddr);
 
-        StorageLib.setNodeExitTime(nodeAddr, block.timestamp);
+        StorageLib.getNodeTime(nodeAddr).exitingTime = block.timestamp;
+        StorageLib.setNodeStatus(nodeAddr, DataTypes.NodeStatus.Exiting);
 
         emit Events.NodeExitRequested(nodeAddr);
     }
@@ -423,16 +423,19 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         address nodeAddr = msg.sender;
         _validateNodeAddress(_nodes[nodeAddr].account);
 
-        DataTypes.NodeStatus status = _getNodeExitStatus(nodeAddr);
-        if (DataTypes.NodeStatus.None == status) revert NodeNotInExitStatus();
+        _validateNodeInExitStatus(nodeAddr);
 
         uint256 opPoolTokens = StorageLib.nodes()[nodeAddr].operationPoolTokens;
         if (opPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
 
-        // reset node exit status
-        StorageLib.setNodeExitTime(nodeAddr, 0);
+        // update node time
+        DataTypes.NodeTime storage nodeTime = StorageLib.getNodeTime(nodeAddr);
+        nodeTime.exitingTime = 0;
+        nodeTime.registerTime = block.timestamp;
+        nodeTime.offlineTime = 0;
 
-        //
+        // set node status
+        StorageLib.setNodeStatus(nodeAddr, DataTypes.NodeStatus.Registered);
 
         emit Events.NodeReentryRequested(nodeAddr);
     }
@@ -445,8 +448,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getNodeExitStatus(address nodeAddr) external view override returns (DataTypes.NodeStatus) {
-        return _getNodeExitStatus(nodeAddr);
+    function getNodeStatus(address nodeAddr) external view override returns (DataTypes.NodeStatus) {
+        return _getNodeStatus(nodeAddr);
     }
 
     /// @inheritdoc IStaking
@@ -478,6 +481,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         (nodeAddr, tokens, shares) = StakingLib.getChipInfo(tokenId);
     }
 
+    /// @inheritdoc IStaking
     function getSlashingRecords(
         DataTypes.Slashing[] calldata slashings
     ) external view override returns (DataTypes.SlashRecord[] memory records) {
@@ -511,23 +515,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getNodesWithPagination(
-        uint256 offset,
-        uint256 limit
-    ) external view override returns (DataTypes.Node[] memory nodes) {
-        uint256 totalNodes = StorageLib.nodeAddrs().length();
-        uint256 len = (totalNodes - offset).min(limit);
-        nodes = new DataTypes.Node[](len);
-
-        if (offset >= totalNodes) return nodes;
-
-        for (uint256 i = offset; i < len + offset; i++) {
-            address nodeAddr = StorageLib.nodeAddrs().at(i);
-            nodes[i - offset] = StorageLib.nodes()[nodeAddr];
-        }
-    }
-
-    /// @inheritdoc IStaking
     function getPoolInfo()
         external
         view
@@ -549,20 +536,40 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         return StorageLib.publicPool();
     }
 
-    function _getNodeExitStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus status) {
-        uint256 exitTime = StorageLib.getNodeExitTime(nodeAddr);
-        if (exitTime == 0) {
-            status = DataTypes.NodeStatus.None;
-        } else if (exitTime + NODE_EXIT_PERIOD <= block.timestamp) {
-            status = DataTypes.NodeStatus.Exited;
-        } else {
-            status = DataTypes.NodeStatus.Exiting;
+    function _getNodeStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus) {
+        DataTypes.NodeStatus status = StorageLib.getNodesStatus(nodeAddr);
+        DataTypes.NodeTime memory nodeTimes = StorageLib.getNodeTime(nodeAddr);
+
+        if (status == DataTypes.NodeStatus.Registered) {
+            if (nodeTimes.registerTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
+                status = DataTypes.NodeStatus.Exited;
+            }
         }
+
+        if (status == DataTypes.NodeStatus.Offline) {
+            if (nodeTimes.offlineTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
+                status = DataTypes.NodeStatus.Exited;
+            }
+        }
+
+        if (status == DataTypes.NodeStatus.Exiting) {
+            if (nodeTimes.exitingTime + NODE_EXIT_PERIOD <= block.timestamp) {
+                status = DataTypes.NodeStatus.Exited;
+            }
+        }
+
+        return status;
     }
 
-    function _validateNodeStatus(address nodeAddr) internal view {
-        DataTypes.NodeStatus status = _getNodeExitStatus(nodeAddr);
-        if (DataTypes.NodeStatus.None != status) revert NodeInExitStatus();
+    function _validateNodeNotInExitStatus(address nodeAddr) internal view {
+        DataTypes.NodeStatus status = _getNodeStatus(nodeAddr);
+        if (DataTypes.NodeStatus.Exiting == status || DataTypes.NodeStatus.Exited == status) revert NodeInExitStatus();
+    }
+
+    function _validateNodeInExitStatus(address nodeAddr) internal view {
+        DataTypes.NodeStatus status = _getNodeStatus(nodeAddr);
+        if (DataTypes.NodeStatus.Exiting != status && DataTypes.NodeStatus.Exited != status)
+            revert NodeNotInExitStatus();
     }
 
     function _validateNodeAddress(address nodeAddr) internal pure {

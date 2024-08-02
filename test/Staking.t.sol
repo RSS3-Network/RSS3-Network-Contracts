@@ -34,7 +34,6 @@ import {
     InsufficientValue,
     ExcessWithdrawalAmount,
     WithdrawalAmountExceedsOperationPoolTokens,
-    NodeAlreadyInExitStatus,
     NodeDepositBelowMinimum,
     NodeNotInExitStatus,
     ClaimTimeNotReady,
@@ -343,18 +342,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createPublicGoodNode(carol);
         _createNode(dave);
 
-        // get nodes with pagination
-        DataTypes.Node[] memory nodes = _staking.getNodesWithPagination(0, 4);
-        assertEq(nodes.length, 4);
-        assertEq(nodes[0].account, alice);
-        assertEq(nodes[1].account, bob);
-        assertEq(nodes[2].account, carol);
-        assertEq(nodes[3].account, dave);
-        assertEq(nodes[0].nodeId, 1);
-        assertEq(nodes[1].nodeId, 2);
-        assertEq(nodes[2].nodeId, 3);
-        assertEq(nodes[3].nodeId, 4);
-
         // get nodes by addresses
         DataTypes.Node[] memory nodes2 = _staking.getNodes(array(alice, bob, carol, dave));
         assertEq(nodes2.length, 4);
@@ -442,16 +429,21 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.deposit{value: 2 * amount}();
 
         _staking.requestExit();
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         skip(_staking.NODE_EXIT_PERIOD());
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         _staking.requestWithdrawal(2 * amount);
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
-        _staking.deposit{value: amount}();
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        // op pool < min deposit
+        _staking.deposit{value: amount / 2}();
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+
+        // op pool > min deposit
+        _staking.deposit{value: amount / 2}();
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
         vm.stopPrank();
     }
 
@@ -515,7 +507,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.amount, amount);
 
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         // check node info
         DataTypes.Node memory node = _staking.getNode(alice);
@@ -565,28 +557,32 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
     }
 
-    function testNodeExitStatus() public {
+    function testNodeStatus() public {
         _disableAlphaPhase();
         uint256 amount = 10000 ether;
 
         _createNode(alice);
 
+        // none
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.None));
+
         vm.startPrank(alice);
         _staking.deposit{value: amount}();
 
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.None));
+        // registered
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
 
         // exiting
         _staking.requestExit();
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         // exited
         skip(_staking.NODE_EXIT_PERIOD());
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
-        // none
+        // registered
         _staking.reRegister();
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.None));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
 
         vm.stopPrank();
     }
@@ -605,19 +601,18 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
     }
     function testReRegisterFail() public {
-        _createNode(alice);
-
         // case 1: node not exists
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
         _staking.reRegister();
 
+        _createNode(alice);
+        vm.startPrank(alice);
+
         // case 2: node not in exit status
         vm.expectRevert(abi.encodeWithSelector(NodeNotInExitStatus.selector));
-        vm.prank(alice);
         _staking.reRegister();
 
         // case 3: node deposit is below minimum
-        vm.startPrank(alice);
         _staking.requestExit();
 
         vm.expectRevert(abi.encodeWithSelector(NodeDepositBelowMinimum.selector));
@@ -1613,20 +1608,20 @@ contract StakingTest is CommonTest, IERC721Errors {
         _recordSlashingWithReasons(slashings2, reporters);
     }
 
-    function testRequestExit() public {
+    function testRequestExitSucceeds() public {
         vm.startPrank(alice);
         _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
 
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.None));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
 
         expectEmit();
         emit Events.NodeExitRequested(alice);
         _staking.requestExit();
 
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         skip(_staking.NODE_EXIT_PERIOD());
-        assertEq(uint256(_staking.getNodeExitStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         vm.stopPrank();
     }
@@ -1636,16 +1631,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
         _staking.requestExit();
 
-        // case 2: NodeAlreadyInExitStatus
+        // case 2: NodeInExitStatus
         vm.startPrank(alice);
         _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
         _staking.requestExit();
 
-        vm.expectRevert(abi.encodeWithSelector(NodeAlreadyInExitStatus.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeInExitStatus.selector));
         _staking.requestExit();
 
         skip(3 * 18 hours);
-        vm.expectRevert(abi.encodeWithSelector(NodeAlreadyInExitStatus.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeInExitStatus.selector));
         _staking.requestExit();
 
         vm.stopPrank();

@@ -237,11 +237,11 @@ interface IStaking {
     function withdraw2Treasury() external;
 
     /**
-     * @notice Gets exit status by node address.
+     * @notice Gets node status by node address.
      * @param nodeAddr Node address to query.
-     * @return DataTypes.NodeExitStatus Exit status.
+     * @return DataTypes.NodeStatus Node status.
      */
-    function getNodeExitStatus(address nodeAddr) external view returns (DataTypes.NodeStatus);
+    function getNodeStatus(address nodeAddr) external view returns (DataTypes.NodeStatus);
 
     /**
      * @notice Returns whether the current time is in settlement phase.
@@ -313,13 +313,6 @@ interface IStaking {
      * @return DataTypes.Node[] Nodes info.
      */
     function getNodes(address[] calldata nodeAddrs) external view returns (DataTypes.Node[] memory);
-
-    /**
-     * @notice Gets nodes info by offset and limit.
-     * @param offset The offset of nodes to query.
-     * @param limit The limit of nodes to query.
-     */
-    function getNodesWithPagination(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
 
     /**
      * @notice Gets the pool info.
