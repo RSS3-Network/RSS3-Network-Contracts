@@ -25,7 +25,6 @@ import {
     SlashStatusNotRecorded,
     SlashMoreThanOnce,
     SlashRecordNotExists,
-    SlashPublicGoodNode,
     InvalidArrayLength,
     NodeExists,
     NodeIsPublicGood,
@@ -428,21 +427,21 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.deposit{value: 2 * amount}();
 
         _staking.requestExit();
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         skip(Const.NODE_EXIT_PERIOD);
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         _staking.requestWithdrawal(2 * amount);
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         // op pool < min deposit
         _staking.deposit{value: amount / 2}();
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         // op pool > min deposit
         _staking.deposit{value: amount / 2}();
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
         vm.stopPrank();
     }
 
@@ -506,7 +505,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.amount, amount);
 
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         // check node info
         DataTypes.Node memory node = _staking.getNode(alice);
@@ -563,25 +562,25 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createNode(alice);
 
         // none
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.None));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.None));
 
         vm.startPrank(alice);
         _staking.deposit{value: amount}();
 
         // registered
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
 
         // exiting
         _staking.requestExit();
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         // exited
         skip(Const.NODE_EXIT_PERIOD);
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         // registered
         _staking.reRegister();
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
 
         vm.stopPrank();
     }
@@ -1301,7 +1300,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         slashingPGs[0] = slashCarol;
         address[] memory reporters2 = array(dave);
 
-        vm.expectRevert(abi.encodeWithSelector(SlashPublicGoodNode.selector, carol));
         vm.prank(address(_settlement));
         _recordSlashingWithReasons(slashingPGs, reporters2);
     }
@@ -1611,16 +1609,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.startPrank(alice);
         _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
 
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
 
         expectEmit();
         emit Events.NodeExitRequested(alice);
         _staking.requestExit();
 
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exiting));
 
         skip(Const.NODE_EXIT_PERIOD);
-        assertEq(uint256(_staking.getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
 
         vm.stopPrank();
     }
@@ -1643,6 +1641,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.requestExit();
 
         vm.stopPrank();
+    }
+
+    function testDemoteNodes() public {
+        // TODO
+        vm.prank(alice);
+    }
+
+    function testSetNodesStatus() public {
+        // TODO
+        vm.prank(alice);
     }
 
     function testCalcTax1(uint256 operationPool) public pure {
@@ -1890,6 +1898,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(node.operationPoolTokens, operationPoolTokens);
         assertEq(node.publicGood, publicGood);
         assertEq(node.alpha, alpha);
+    }
+
+    function _getNodeStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus status) {
+        status = _staking.getNodeStatus(array(nodeAddr))[0];
     }
 
     function _createSlashings(

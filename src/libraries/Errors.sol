@@ -130,9 +130,6 @@ error SlashRecordNotExists(address nodeAddr, uint256 epochId);
 /// @dev Slash is not able to be committed or revoked.
 error SlashStatusNotRecorded(address nodeAddr, uint256 epochId);
 
-/// @dev Slash Public Good node.
-error SlashPublicGoodNode(address);
-
 /// @dev Slash more than once in one epoch for nodeAddr
 error SlashMoreThanOnce(address nodeAddr, uint256 epoch);
 

@@ -9,7 +9,6 @@ import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {Const} from "./Const.sol";
 import {
     NodeNotExists,
-    SlashPublicGoodNode,
     SlashMoreThanOnce,
     SlashRecordNotExists,
     SlashStatusNotRecorded,
@@ -23,7 +22,8 @@ library RewardsAndSlashingLib {
         DataTypes.Node storage node = nodes[nodeAddr];
 
         if (nodeAddr == address(0)) revert NodeNotExists();
-        if (node.publicGood) revert SlashPublicGoodNode(nodeAddr);
+        // A public good node can't be slashed.
+        if (node.publicGood) return;
         if (node.slashStatus) revert SlashMoreThanOnce(nodeAddr, epoch);
 
         _setSlashStatus(nodeAddr, true);

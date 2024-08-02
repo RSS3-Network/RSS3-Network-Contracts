@@ -372,6 +372,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
             address nodeAddr = nodeAddrs[i];
 
             if (++_nodeDemotionCounter[epoch][nodeAddr] >= Const.DEMOTION_COUNT_THRESHOLD) {
+                // check node status
+                // slash
                 RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, address(0), "");
             }
 
@@ -423,8 +425,13 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getNodeStatus(address nodeAddr) external view override returns (DataTypes.NodeStatus) {
-        return NodeSettingsLib.getNodeStatus(nodeAddr);
+    function getNodeStatus(
+        address[] calldata nodeAddrs
+    ) external view override returns (DataTypes.NodeStatus[] memory results) {
+        results = new DataTypes.NodeStatus[](nodeAddrs.length);
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            results[i] = NodeSettingsLib.getNodeStatus(nodeAddrs[i]);
+        }
     }
 
     /// @inheritdoc IStaking

@@ -238,10 +238,10 @@ interface IStaking {
 
     /**
      * @notice Gets node status by node address.
-     * @param nodeAddr Node address to query.
-     * @return DataTypes.NodeStatus Node status.
+     * @param nodeAddrs Node addresses to query.
+     * @return results Node status.
      */
-    function getNodeStatus(address nodeAddr) external view returns (DataTypes.NodeStatus);
+    function getNodeStatus(address[] calldata nodeAddrs) external view returns (DataTypes.NodeStatus[] memory results);
 
     /**
      * @notice Returns whether the current time is in settlement phase.
