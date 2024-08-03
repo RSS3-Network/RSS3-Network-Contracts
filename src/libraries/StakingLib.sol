@@ -27,8 +27,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 library StakingLib {
     /// @dev deposit tokens to a node
     function deposit(address nodeAddr, uint256 amount) external {
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
-        DataTypes.Node storage node = nodes[nodeAddr];
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
 
         if (node.account == address(0)) revert NodeNotExists();
         if (node.publicGood) revert DepositForPublicGoodNode();
@@ -250,10 +249,11 @@ library StakingLib {
         return (shares * node.stakingPoolTokens) / node.totalShares;
     }
 
-    function _getStakingNode(address nodeAddr) internal view returns (DataTypes.Node storage node) {
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
+    function _getStakingNode(address nodeAddr) internal view returns (DataTypes.Node storage _node) {
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
         DataTypes.Node storage publicPool = StorageLib.publicPool();
-        node = nodes[nodeAddr].publicGood ? publicPool : nodes[nodeAddr];
+
+        _node = node.publicGood ? publicPool : node;
     }
 
     function _chipInfo(uint256 tokenId) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {

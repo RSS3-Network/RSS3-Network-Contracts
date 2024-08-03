@@ -17,9 +17,7 @@ import {
 
 library RewardsAndSlashingLib {
     function recordSlashing(address nodeAddr, uint256 epoch, address reporter, string calldata reason) external {
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
-
-        DataTypes.Node storage node = nodes[nodeAddr];
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
 
         if (nodeAddr == address(0)) revert NodeNotExists();
         // A public good node can't be slashed.
@@ -90,10 +88,9 @@ library RewardsAndSlashingLib {
         uint256[] calldata stakingRewards
     ) external returns (uint256[] memory taxCollected) {
         taxCollected = new uint256[](nodeAddrs.length);
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            DataTypes.Node storage node = nodes[nodeAddrs[i]];
+            DataTypes.Node storage node = StorageLib.getNode(nodeAddrs[i]);
             if (node.account == address(0) || node.publicGood || node.operationPoolTokens < Const.MIN_DEPOSIT) {
                 continue;
             }
@@ -123,14 +120,12 @@ library RewardsAndSlashingLib {
     }
     /// @dev set the status of a slash record
     function _setSlashStatus(address nodeAddr, bool status) internal {
-        DataTypes.Node storage node = StorageLib.nodes()[nodeAddr];
-        node.slashStatus = status;
+        StorageLib.getNode(nodeAddr).slashStatus = status;
     }
 
     /// @dev
     function _recordSlashingAmount(address nodeAddr, DataTypes.SlashRecord storage record) internal {
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
-        DataTypes.Node storage node = nodes[nodeAddr];
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
 
         StakingCommonLib.decreaseOperationPool(node, record.amountForOperationPool);
         StakingCommonLib.decreaseStakingPool(node, record.amountForStakingPool);
@@ -161,9 +156,7 @@ library RewardsAndSlashingLib {
 
     /// @dev return slashing amount
     function _revokeSlashingAmount(address nodeAddr, DataTypes.SlashRecord storage record) internal {
-        mapping(address => DataTypes.Node) storage nodes = StorageLib.nodes();
-
-        DataTypes.Node storage node = nodes[nodeAddr];
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
 
         StakingCommonLib.decreaseSlashingPoolByRecord(record);
         StakingCommonLib.increaseOperationPool(node, record.amountForOperationPool);

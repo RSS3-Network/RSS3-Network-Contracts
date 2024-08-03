@@ -24,7 +24,7 @@ library NodeSettingsLib {
     function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints, address nodeAddr) external {
         _validateTaxRateBasisPoints(taxRateBasisPoints);
 
-        DataTypes.Node storage node = StorageLib.nodes()[nodeAddr];
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
 
         _validateNodeAddress(node.account);
 
@@ -46,7 +46,7 @@ library NodeSettingsLib {
     }
 
     function updateNode(address nodeAddr, string calldata name, string calldata description) external {
-        DataTypes.Node storage node = StorageLib.nodes()[nodeAddr];
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
         _validateNodeAddress(node.account);
 
         node.name = name;
@@ -74,7 +74,7 @@ library NodeSettingsLib {
         uint256 nodeId = StorageLib.nextNodeId();
         bool isAlphaPhase = StorageLib.getIsAlphaPhase();
 
-        DataTypes.Node storage node = StorageLib.nodes()[nodeAddr];
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
         if (node.nodeId > 0) revert NodeExists();
         node.nodeId = nodeId;
         node.account = nodeAddr;

@@ -25,8 +25,6 @@ library StorageLib {
     uint256 public constant PENDING_UNSTAKE_COUNTER_SLOT = 11;
     uint256 public constant PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT = 12;
 
-    uint256 public constant PUBLIC_POOL_SLOT = 13; // DataTypes.Node _publicPool;
-
     uint256 public constant TOTAL_OPERATION_POOL_TOKENS_SLOT = 21;
     uint256 public constant TOTAL_STAKING_POOL_TOKENS_SLOT = 22;
 
@@ -205,9 +203,11 @@ library StorageLib {
         }
     }
 
-    function nodes() internal pure returns (mapping(address => DataTypes.Node) storage _nodes) {
+    function getNode(address nodeAddr) internal pure returns (DataTypes.Node storage _node) {
         assembly {
-            _nodes.slot := NODES_MAPPING_BY_NODE_ADDRESS_SLOT
+            mstore(0x00, nodeAddr)
+            mstore(0x20, NODES_MAPPING_BY_NODE_ADDRESS_SLOT)
+            _node.slot := keccak256(0x00, 0x40)
         }
     }
 

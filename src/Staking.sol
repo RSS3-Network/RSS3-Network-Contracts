@@ -412,7 +412,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
         _validateNodeInExitStatus(nodeAddr);
 
-        uint256 opPoolTokens = StorageLib.nodes()[nodeAddr].operationPoolTokens;
+        uint256 opPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
         if (opPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
 
         // update node time
@@ -494,21 +494,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
-        return StorageLib.nodes()[nodeAddr];
-    }
-
-    /// @inheritdoc IStaking
     function getNodeAvatar(address nodeAddr) external view override returns (string memory) {
         return IChips(_chips).nodeImageAndAttributesURI(nodeAddr);
-    }
-
-    /// @inheritdoc IStaking
-    function getNodes(address[] calldata nodeAddrs) external view override returns (DataTypes.Node[] memory nodes) {
-        nodes = new DataTypes.Node[](nodeAddrs.length);
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            nodes[i] = StorageLib.nodes()[nodeAddrs[i]];
-        }
     }
 
     /// @inheritdoc IStaking
@@ -526,6 +513,19 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
         return StorageLib.getChipsContract();
+    }
+
+    /// @inheritdoc IStaking
+    function getNode(address nodeAddr) external pure override returns (DataTypes.Node memory) {
+        return StorageLib.getNode(nodeAddr);
+    }
+
+    /// @inheritdoc IStaking
+    function getNodes(address[] calldata nodeAddrs) external pure override returns (DataTypes.Node[] memory nodes) {
+        nodes = new DataTypes.Node[](nodeAddrs.length);
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            nodes[i] = StorageLib.getNode(nodeAddrs[i]);
+        }
     }
 
     /// @inheritdoc IStaking

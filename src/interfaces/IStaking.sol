@@ -302,25 +302,11 @@ interface IStaking {
     function getNodeCount() external view returns (uint256);
 
     /**
-     * @notice Gets node info by node address.
-     * @param nodeAddr Node address to query.
-     * @return DataTypes.Node Node info.
-     */
-    function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
-
-    /**
      * @notice Gets node avatar data by node address.
      * @param nodeAddr Node address to query.
      * @return string Node avatar info in json.
      */
     function getNodeAvatar(address nodeAddr) external view returns (string memory);
-
-    /**
-     * @notice Gets nodes info by node addresses.
-     * @param nodeAddrs Node addresses to query.
-     * @return DataTypes.Node[] Nodes info.
-     */
-    function getNodes(address[] calldata nodeAddrs) external view returns (DataTypes.Node[] memory);
 
     /**
      * @notice Gets the pool info.
@@ -337,6 +323,20 @@ interface IStaking {
      * @return address The address of the chips contract.
      */
     function chipsContract() external view returns (address);
+
+    /**
+     * @notice Gets node info by node address.
+     * @param nodeAddr Node address to query.
+     * @return DataTypes.Node Node info.
+     */
+    function getNode(address nodeAddr) external pure returns (DataTypes.Node memory);
+
+    /**
+     * @notice Gets nodes info by node addresses.
+     * @param nodeAddrs Node addresses to query.
+     * @return DataTypes.Node[] Nodes info.
+     */
+    function getNodes(address[] calldata nodeAddrs) external pure returns (DataTypes.Node[] memory);
 
     /**
      * @notice Gets public pool info.
