@@ -293,7 +293,7 @@ interface IStaking {
      */
     function getSlashingRecords(
         DataTypes.Slashing[] calldata slashings
-    ) external view returns (DataTypes.SlashRecord[] memory records);
+    ) external pure returns (DataTypes.SlashRecord[] memory records);
 
     /**
      * @notice Gets total count of nodes.

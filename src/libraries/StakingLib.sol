@@ -65,8 +65,8 @@ library StakingLib {
         tokenId = IChips(chips).mint(from);
 
         // set chip issuer and shares
-        StorageLib.setChipIssuerByTokenId(tokenId, nodeAddr);
-        StorageLib.setChipsToSharesByTokenId(tokenId, sharesToMint);
+        StorageLib.chipIssuers()[tokenId] = nodeAddr;
+        StorageLib.chipToShares()[tokenId] = sharesToMint;
 
         // set startTokenId and endTokenId to tokenId, for compatibility with the previous version
         emit Events.Staked(from, node.account, amount, tokenId, tokenId);
@@ -92,8 +92,8 @@ library StakingLib {
 
             IChips(chips).burn(tokenId);
 
-            StorageLib.setChipIssuerByTokenId(tokenId, address(0));
-            StorageLib.setChipsToSharesByTokenId(tokenId, 0);
+            delete StorageLib.chipIssuers()[tokenId];
+            delete StorageLib.chipToShares()[tokenId];
         }
         DataTypes.Node storage node = _getStakingNode(nodeAddr);
         StakingCommonLib.decreaseStakingPool(node, unstakeAmount);
@@ -173,16 +173,14 @@ library StakingLib {
             // burn chips and reset corresponding shares
             IChips(chips).burn(tokenId);
 
-            StorageLib.setChipsToSharesByTokenId(tokenId, 0);
-
-            StorageLib.setChipIssuerByTokenId(tokenId, address(0));
+            delete StorageLib.chipToShares()[tokenId];
+            delete StorageLib.chipIssuers()[tokenId];
         }
 
         // mint new chip
         newTokenId = IChips(chips).mint(owner);
-        StorageLib.setChipIssuerByTokenId(newTokenId, nodeAddr);
-
-        StorageLib.setChipsToSharesByTokenId(newTokenId, totalShares);
+        StorageLib.chipIssuers()[newTokenId] = nodeAddr;
+        StorageLib.chipToShares()[newTokenId] = totalShares;
 
         emit Events.ChipsMerged(owner, nodeAddr, newTokenId, chipIds);
     }
@@ -262,7 +260,7 @@ library StakingLib {
         nodeAddr = _issuerOf(tokenId);
         if (nodeAddr == address(0)) return (address(0), 0, 0);
 
-        shares = StorageLib.getChipsToSharesByTokenId(tokenId);
+        shares = StorageLib.chipToShares()[tokenId];
 
         if (shares == 0) {
             // old chip is always:  1 token = SHARES_PER_CHIP shares
@@ -288,6 +286,6 @@ library StakingLib {
         // Note: no need for safe cast, we know that tokenId <= type(uint96).max
 
         address issuer = StorageLib.getIssuerFromFamilies(tokenId);
-        return issuer != address(0) ? issuer : StorageLib.getIssuerFromChipIssuers(tokenId);
+        return issuer != address(0) ? issuer : StorageLib.chipIssuers()[tokenId];
     }
 }

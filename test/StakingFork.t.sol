@@ -26,6 +26,9 @@ contract StakingForkTest is CommonTest {
         IProxy(address(proxy)).upgradeTo(address(st));
 
         staking = Staking(address(proxy));
+
+        // reinitialize
+        staking.initialize(address(0), address(0), address(0));
     }
 
     function testMergeChipsFork() public {

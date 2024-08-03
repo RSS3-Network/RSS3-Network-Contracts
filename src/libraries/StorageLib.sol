@@ -42,6 +42,10 @@ library StorageLib {
 
     uint256 public constant NODE_TIMES_SLOT = 30;
 
+    // keccak256(abi.encode(uint256(keccak256("staking.storage.public.pool")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 public constant PUBLIC_POOL_SLOT_LOCATION =
+        0x8f8113410d98c63dc5c1c4f1ac9eaef4d76f695bf1ef91dca2f23702b51d9400;
+
     function setTotalOperationPoolTokens(uint256 totalOperatingPoolTokens) internal {
         assembly {
             sstore(TOTAL_OPERATION_POOL_TOKENS_SLOT, totalOperatingPoolTokens)
@@ -54,23 +58,15 @@ library StorageLib {
         }
     }
 
-    function setChipIssuerByTokenId(uint256 tokenId, address nodeAddr) internal {
+    function chipIssuers() internal pure returns (mapping(uint256 => address) storage _chipIssuers) {
         assembly {
-            mstore(0x00, tokenId)
-            mstore(0x20, CHIP_ISSUERS_MAPPING_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            sstore(slot, nodeAddr)
+            _chipIssuers.slot := CHIP_ISSUERS_MAPPING_SLOT
         }
     }
 
-    function setChipsToSharesByTokenId(uint256 tokenId, uint256 shares) internal {
+    function chipToShares() internal pure returns (mapping(uint256 => uint256) storage _chipToShares) {
         assembly {
-            mstore(0x00, tokenId)
-            mstore(0x20, CHIP_TO_SHARES_MAPPING_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            sstore(slot, shares)
+            _chipToShares.slot := CHIP_TO_SHARES_MAPPING_SLOT
         }
     }
 
@@ -153,32 +149,6 @@ library StorageLib {
         issuer = address(families.lowerLookup(tokenId.toUint96()));
     }
 
-    function getIssuerFromChipIssuers(uint256 tokenId) internal view returns (address issuer) {
-        assembly {
-            mstore(0x00, tokenId)
-            mstore(0x20, CHIP_ISSUERS_MAPPING_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            issuer := sload(slot)
-        }
-    }
-
-    function getChipsToSharesByTokenId(uint256 tokenId) internal view returns (uint256 shares) {
-        assembly {
-            mstore(0x00, tokenId)
-            mstore(0x20, CHIP_TO_SHARES_MAPPING_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            shares := sload(slot)
-        }
-    }
-
-    function getSlashRecord(address nodeAddr, uint256 epochId) internal view returns (DataTypes.SlashRecord storage) {
-        mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord))
-            storage slashRecords = _slashRecords();
-        return slashRecords[nodeAddr][epochId];
-    }
-
     function getNodesStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus status) {
         assembly {
             mstore(0x00, nodeAddr)
@@ -186,6 +156,18 @@ library StorageLib {
             let slot := keccak256(0x00, 0x40)
 
             status := sload(slot)
+        }
+    }
+    function getSlashRecord(
+        address nodeAddr,
+        uint256 epochId
+    ) internal pure returns (DataTypes.SlashRecord storage record) {
+        assembly {
+            mstore(0x00, nodeAddr)
+            mstore(0x20, SLASH_RECORDS_SLOT)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, epochId)
+            record.slot := keccak256(0x00, 0x40)
         }
     }
 
@@ -229,19 +211,9 @@ library StorageLib {
         }
     }
 
-    function publicPool() internal pure returns (DataTypes.Node storage _publicPool) {
+    function publicPool() internal pure returns (DataTypes.Node storage $) {
         assembly {
-            _publicPool.slot := PUBLIC_POOL_SLOT
-        }
-    }
-
-    function _slashRecords()
-        internal
-        pure
-        returns (mapping(address => mapping(uint256 => DataTypes.SlashRecord)) storage slashRecords)
-    {
-        assembly {
-            slashRecords.slot := SLASH_RECORDS_SLOT
+            $.slot := PUBLIC_POOL_SLOT_LOCATION
         }
     }
 }

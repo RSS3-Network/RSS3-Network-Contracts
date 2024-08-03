@@ -81,8 +81,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @dev unstake request queue
     mapping(uint256 requestId => DataTypes.UnstakeRequest) internal _pendingUnstake;
 
-    /// @dev public pool
-    DataTypes.Node internal _publicPool;
+    /// @dev old public pool
+    DataTypes.Node internal _oldPublicPool;
 
     /// @dev total operation pool tokens
     uint256 internal _totalOperationPoolTokens;
@@ -142,13 +142,23 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function initialize(address chips, address pauseAccount, address oracleAccount) external override initializer {
-        _chips = chips;
+    function initialize(address chips, address pauseAccount, address oracleAccount) external override reinitializer(2) {
+        if (chips != address(0)) {
+            _chips = chips;
+        }
 
-        _grantRole(PAUSE_ROLE, pauseAccount);
-        _grantRole(ORACLE_ROLE, oracleAccount);
+        if (pauseAccount != address(0)) {
+            _grantRole(PAUSE_ROLE, pauseAccount);
+        }
+
+        if (oracleAccount != address(0)) {
+            _grantRole(ORACLE_ROLE, oracleAccount);
+        }
 
         _isAlphaPhase = true;
+
+        // migrate public pool
+        _migratePublicPool();
     }
 
     /// @inheritdoc IStaking
@@ -238,7 +248,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         // node should not in exit status
         _validateNodeNotInExitStatus(nodeAddr);
 
-        tokenId = StakingLib.stakeToNode(_publicPool, msg.value, nodeAddr, msg.sender);
+        tokenId = StakingLib.stakeToNode(StorageLib.publicPool(), msg.value, nodeAddr, msg.sender);
     }
 
     /// @inheritdoc IStaking
@@ -471,7 +481,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @inheritdoc IStaking
     function getSlashingRecords(
         DataTypes.Slashing[] calldata slashings
-    ) external view override returns (DataTypes.SlashRecord[] memory records) {
+    ) external pure override returns (DataTypes.SlashRecord[] memory records) {
         records = new DataTypes.SlashRecord[](slashings.length);
         for (uint256 i = 0; i < slashings.length; i++) {
             records[i] = StorageLib.getSlashRecord(slashings[i].nodeAddr, slashings[i].epoch);
@@ -521,6 +531,19 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @inheritdoc IStaking
     function getPublicPool() external pure override returns (DataTypes.Node memory) {
         return StorageLib.publicPool();
+    }
+
+    function _migratePublicPool() internal {
+        DataTypes.Node storage pp = StorageLib.publicPool();
+        pp.taxRateBasisPoints = _oldPublicPool.taxRateBasisPoints;
+        pp.operationPoolTokens = _oldPublicPool.operationPoolTokens;
+        pp.stakingPoolTokens = _oldPublicPool.stakingPoolTokens;
+        pp.totalShares = _oldPublicPool.totalShares;
+
+        delete _oldPublicPool.taxRateBasisPoints;
+        delete _oldPublicPool.operationPoolTokens;
+        delete _oldPublicPool.stakingPoolTokens;
+        delete _oldPublicPool.totalShares;
     }
 
     function _validateNodeNotInExitStatus(address nodeAddr) internal view {
