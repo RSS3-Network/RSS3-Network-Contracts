@@ -43,7 +43,8 @@ import {
     StakeAmountTooSmall,
     NodeNotPublicGood,
     StakeToPublicGoodNode,
-    DepositForPublicGoodNode
+    DepositForPublicGoodNode,
+    WrongNodeStatus
 } from "../src/libraries/Errors.sol";
 
 contract StakingTest is CommonTest, IERC721Errors {
@@ -583,6 +584,29 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Registered));
 
         vm.stopPrank();
+    }
+
+    function testNodeExitedStatus() public {
+        // case 1: Registered -> Exited
+        _createNode(alice);
+
+        vm.prank(alice);
+        _staking.deposit{value: 10000 ether}();
+
+        skip(Const.NODE_INACTIVITY_PERIOD);
+        assertEq(uint256(_getNodeStatus(alice)), uint256(DataTypes.NodeStatus.Exited));
+
+        // case 2: Offline -> Exited
+        _createNode(bob);
+
+        vm.prank(bob);
+        _staking.deposit{value: 10000 ether}();
+
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(array(bob), array(DataTypes.NodeStatus.Offline));
+
+        skip(Const.NODE_INACTIVITY_PERIOD);
+        assertEq(uint256(_getNodeStatus(bob)), uint256(DataTypes.NodeStatus.Exited));
     }
 
     function testReRegister() public {
@@ -1685,6 +1709,38 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(uint256(nodeStatus[2]), uint256(DataTypes.NodeStatus.Initializing));
     }
 
+    function testSetNodesStatusFail() public {
+        _createNode(alice);
+        _createPublicGoodNode(bob);
+
+        address[] memory nodeAddrs = array(alice, bob);
+
+        // WrongNodeStatus
+        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 0));
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.None, DataTypes.NodeStatus.Offline));
+
+        // WrongNodeStatus
+        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 1));
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Registered, DataTypes.NodeStatus.Offline));
+
+        // WrongNodeStatus
+        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 5));
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Slashed, DataTypes.NodeStatus.Offline));
+
+        // WrongNodeStatus
+        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 6));
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Exiting, DataTypes.NodeStatus.Offline));
+
+        // WrongNodeStatus
+        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 7));
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Exited, DataTypes.NodeStatus.Offline));
+    }
+
     function testCalcTax1(uint256 operationPool) public pure {
         // case 1: receives no tax rewards
         vm.assume(operationPool < 10000 ether);
@@ -1947,5 +2003,18 @@ contract StakingTest is CommonTest, IERC721Errors {
         }
 
         return slashings;
+    }
+
+    function array(DataTypes.NodeStatus a) public pure returns (DataTypes.NodeStatus[] memory) {
+        DataTypes.NodeStatus[] memory arr = new DataTypes.NodeStatus[](1);
+        arr[0] = a;
+        return arr;
+    }
+
+    function array(DataTypes.NodeStatus a, DataTypes.NodeStatus b) public pure returns (DataTypes.NodeStatus[] memory) {
+        DataTypes.NodeStatus[] memory arr = new DataTypes.NodeStatus[](2);
+        arr[0] = a;
+        arr[1] = b;
+        return arr;
     }
 }

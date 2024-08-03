@@ -14,7 +14,7 @@
 | _pendingWithdrawals       | mapping(uint256 => struct DataTypes.WithdrawalRequest)               | 10   | 0      | 32    | src/Staking.sol:Staking |
 | _pendingUnstakeCounter    | uint256                                                              | 11   | 0      | 32    | src/Staking.sol:Staking |
 | _pendingUnstake           | mapping(uint256 => struct DataTypes.UnstakeRequest)                  | 12   | 0      | 32    | src/Staking.sol:Staking |
-| _publicPool               | struct DataTypes.Node                                                | 13   | 0      | 256   | src/Staking.sol:Staking |
+| _oldPublicPool            | struct DataTypes.Node                                                | 13   | 0      | 256   | src/Staking.sol:Staking |
 | _totalOperationPoolTokens | uint256                                                              | 21   | 0      | 32    | src/Staking.sol:Staking |
 | _totalStakingPoolTokens   | uint256                                                              | 22   | 0      | 32    | src/Staking.sol:Staking |
 | _families                 | struct Checkpoints.Trace160                                          | 23   | 0      | 32    | src/Staking.sol:Staking |
