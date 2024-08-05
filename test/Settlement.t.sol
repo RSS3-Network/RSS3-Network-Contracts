@@ -3,6 +3,7 @@
 pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
+import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
@@ -825,6 +826,143 @@ contract SettlementTest is CommonTest {
         }
 
         assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
+    }
+
+    function testRecordSlashing() public {
+        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
+        slashings[0] = DataTypes.Slashing(alice, 1);
+        slashings[1] = DataTypes.Slashing(bob, 2);
+
+        address[] memory reporters = array(carol, dave);
+
+        string[] memory reasons = new string[](2);
+        reasons[0] = "";
+        reasons[1] = "";
+
+        vm.prank(oracleAccount);
+        _settlement.recordSlashing(slashings, reporters, reasons);
+    }
+
+    function testRecordSlashingFail() public {
+        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
+        slashings[0] = DataTypes.Slashing(alice, 1);
+        slashings[1] = DataTypes.Slashing(bob, 2);
+
+        address[] memory reporters = array(carol, dave);
+
+        string[] memory reasons = new string[](2);
+        reasons[0] = "";
+        reasons[1] = "";
+
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _settlement.recordSlashing(slashings, reporters, reasons);
+    }
+
+    function testRevokeSlashing() public {
+        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
+        slashings[0] = DataTypes.Slashing(alice, 1);
+        slashings[1] = DataTypes.Slashing(bob, 2);
+
+        address[] memory reporters = array(carol, dave);
+
+        string[] memory reasons = new string[](2);
+        reasons[0] = "";
+        reasons[1] = "";
+
+        vm.prank(oracleAccount);
+        _settlement.recordSlashing(slashings, reporters, reasons);
+
+        vm.prank(oracleAccount);
+        _settlement.revokeSlashing(slashings);
+    }
+
+    function testRevokeSlashingFail() public {
+        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
+        slashings[0] = DataTypes.Slashing(alice, 1);
+        slashings[1] = DataTypes.Slashing(bob, 2);
+
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _settlement.revokeSlashing(slashings);
+    }
+
+    function testCommitSlashing() public {
+        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
+        slashings[0] = DataTypes.Slashing(alice, 1);
+        slashings[1] = DataTypes.Slashing(bob, 2);
+
+        address[] memory reporters = array(carol, dave);
+
+        string[] memory reasons = new string[](2);
+        reasons[0] = "";
+        reasons[1] = "";
+
+        vm.prank(oracleAccount);
+        _settlement.recordSlashing(slashings, reporters, reasons);
+
+        vm.prank(oracleAccount);
+        _settlement.commitSlashing(slashings);
+    }
+
+    function testCommitSlashingFail() public {
+        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
+        slashings[0] = DataTypes.Slashing(alice, 1);
+        slashings[1] = DataTypes.Slashing(bob, 2);
+
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _settlement.commitSlashing(slashings);
+    }
+
+    function testSetNodeStatus() public {
+        _createNode(alice);
+        _createPublicGoodNode(bob);
+        _createNode(carol);
+
+        address[] memory nodeAddrs = array(alice, bob, carol);
+        DataTypes.NodeStatus[] memory status = array(
+            DataTypes.NodeStatus.Online,
+            DataTypes.NodeStatus.Offline,
+            DataTypes.NodeStatus.Initializing
+        );
+
+        vm.prank(oracleAccount);
+        _settlement.setNodeStatus(nodeAddrs, status);
+
+        // check status
+        DataTypes.NodeStatus[] memory nodeStatus = _staking.getNodeStatus(nodeAddrs);
+        assertEq(uint256(nodeStatus[0]), uint256(DataTypes.NodeStatus.Online));
+        assertEq(uint256(nodeStatus[1]), uint256(DataTypes.NodeStatus.Offline));
+        assertEq(uint256(nodeStatus[2]), uint256(DataTypes.NodeStatus.Initializing));
+    }
+
+    function testSetNodeStatusFail() public {
+        address[] memory nodeAddrs = array(alice, bob, carol);
+        DataTypes.NodeStatus[] memory status = array(
+            DataTypes.NodeStatus.Online,
+            DataTypes.NodeStatus.Offline,
+            DataTypes.NodeStatus.Initializing
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _settlement.setNodeStatus(nodeAddrs, status);
+    }
+
+    function testDemoteNodes() public {
+        _createNode(alice);
+        _createPublicGoodNode(bob);
+        _createNode(carol);
+
+        address[] memory nodeAddrs = array(alice, bob, carol);
+
+        vm.prank(oracleAccount);
+        _settlement.demoteNodes(nodeAddrs);
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            assertEq(_staking.getDemotionCount(0, nodeAddrs[i]), 1);
+        }
+    }
+    function testDemoteNodesFail() public {
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _settlement.demoteNodes(array(alice, bob));
     }
 
     function invariantTreasuryBalance() public view {

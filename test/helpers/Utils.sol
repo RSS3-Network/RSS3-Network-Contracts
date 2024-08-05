@@ -130,4 +130,16 @@ contract Utils is Test {
         arr[1] = b;
         return arr;
     }
+
+    function array(
+        DataTypes.NodeStatus a,
+        DataTypes.NodeStatus b,
+        DataTypes.NodeStatus c
+    ) public pure returns (DataTypes.NodeStatus[] memory) {
+        DataTypes.NodeStatus[] memory arr = new DataTypes.NodeStatus[](3);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        return arr;
+    }
 }
