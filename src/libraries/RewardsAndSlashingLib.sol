@@ -22,9 +22,7 @@ library RewardsAndSlashingLib {
         if (nodeAddr == address(0)) revert NodeNotExists();
         // A public good node can't be slashed.
         if (node.publicGood) return;
-        if (node.slashStatus) revert SlashMoreThanOnce(nodeAddr, epoch);
-
-        _setSlashStatus(nodeAddr, true);
+        if (node.status == DataTypes.NodeStatus.Slashing) revert SlashMoreThanOnce(nodeAddr, epoch);
 
         // slash operation pool tokens
         uint256 slashedOperationPool = (node.operationPoolTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
@@ -53,7 +51,11 @@ library RewardsAndSlashingLib {
         DataTypes.SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
         _checkRecordedStatus(record, nodeAddr, epoch);
         record.status = DataTypes.SlashStatus.Committed;
-        _setSlashStatus(nodeAddr, false);
+
+        // set node status: slashed
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        node.status = DataTypes.NodeStatus.Slashed;
+        node.slashedTime = block.timestamp;
 
         _commitSlashingAmount(record, paymentProcessor);
         emit Events.SlashCommitted(nodeAddr, epoch);
@@ -66,7 +68,8 @@ library RewardsAndSlashingLib {
 
         record.status = DataTypes.SlashStatus.Revoked;
 
-        _setSlashStatus(nodeAddr, false);
+        // set node status: online
+        StorageLib.getNode(nodeAddr).status = DataTypes.NodeStatus.Online;
 
         _revokeSlashingAmount(nodeAddr, record);
         emit Events.SlashRevoked(nodeAddr, epoch);
@@ -117,10 +120,6 @@ library RewardsAndSlashingLib {
 
     function withdraw2Treasury(address treasury, uint256 amount) external {
         _transfer(treasury, amount);
-    }
-    /// @dev set the status of a slash record
-    function _setSlashStatus(address nodeAddr, bool status) internal {
-        StorageLib.getNode(nodeAddr).slashStatus = status;
     }
 
     /// @dev

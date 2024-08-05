@@ -139,8 +139,7 @@ contract StakingForkTest is CommonTest {
             uint256(188607752333832530148001),
             uint256(148500000000000000000000),
             false,
-            true,
-            false
+            true
         );
         // node 83
         node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
@@ -154,8 +153,7 @@ contract StakingForkTest is CommonTest {
             0,
             0,
             false,
-            true,
-            false
+            true
         );
 
         // check node counter
@@ -207,8 +205,7 @@ contract StakingForkTest is CommonTest {
         uint256 stakingPoolTokens,
         uint256 totalShares,
         bool publicGood,
-        bool alpha,
-        bool slashStatus
+        bool alpha
     ) internal view {
         DataTypes.Node memory node = staking.getNode(nodeAddr);
         assertEq(node.name, name);
@@ -220,6 +217,5 @@ contract StakingForkTest is CommonTest {
         assertEq(node.totalShares, totalShares);
         assertEq(node.publicGood, publicGood);
         assertEq(node.alpha, alpha);
-        assertEq(node.slashStatus, slashStatus);
     }
 }

@@ -24,6 +24,7 @@ import {StorageLib} from "./StorageLib.sol";
 
 library NodeSettingsLib {
     using EnumerableSet for EnumerableSet.AddressSet;
+    using DataTypes for DataTypes.NodeStatus;
 
     function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints, address nodeAddr) external {
         _validateTaxRateBasisPoints(taxRateBasisPoints);
@@ -124,6 +125,7 @@ library NodeSettingsLib {
         node.registerTime = block.timestamp;
         delete node.offlineTime;
         delete node.exitingTime;
+        delete node.slashedTime;
         // set node status
         node.status = DataTypes.NodeStatus.Registered;
 
@@ -145,6 +147,7 @@ library NodeSettingsLib {
 
                 delete node.registerTime;
                 delete node.offlineTime;
+                delete node.slashedTime;
             } else if (s == DataTypes.NodeStatus.Offline) {
                 node.status = s;
                 node.offlineTime = block.timestamp;
@@ -164,27 +167,27 @@ library NodeSettingsLib {
         DataTypes.NodeStatus status = node.status;
 
         // Registered Node transitions to Exited state after 30 Epochs of inactivity.
-        if (status == DataTypes.NodeStatus.Registered) {
-            if (node.registerTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
-                status = DataTypes.NodeStatus.Exited;
-                return status;
-            }
+        if (status == DataTypes.NodeStatus.Registered && _inActive(node.registerTime, Const.NODE_INACTIVITY_PERIOD)) {
+            status = DataTypes.NodeStatus.Exited;
+            return status;
         }
 
         // An Offline Node transitions to Exited state after 30 Epochs of inactivity.
-        if (status == DataTypes.NodeStatus.Offline) {
-            if (node.offlineTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
-                status = DataTypes.NodeStatus.Exited;
-                return status;
-            }
+        if (status == DataTypes.NodeStatus.Offline && _inActive(node.offlineTime, Const.NODE_INACTIVITY_PERIOD)) {
+            status = DataTypes.NodeStatus.Exited;
+            return status;
         }
 
         // An Exiting Node transitions to Exited state after 1 Epoch.
-        if (status == DataTypes.NodeStatus.Exiting) {
-            if (node.exitingTime + Const.NODE_EXIT_PERIOD <= block.timestamp) {
-                status = DataTypes.NodeStatus.Exited;
-                return status;
-            }
+        if (status == DataTypes.NodeStatus.Exiting && _inActive(node.exitingTime, Const.NODE_EXIT_PERIOD)) {
+            status = DataTypes.NodeStatus.Exited;
+            return status;
+        }
+
+        // An Slashed Node transitions to Exited state after 30 Epochs of inactivity.
+        if (status == DataTypes.NodeStatus.Slashed && _inActive(node.slashedTime, Const.NODE_EXIT_PERIOD)) {
+            status = DataTypes.NodeStatus.Exited;
+            return status;
         }
 
         return status;
@@ -195,15 +198,20 @@ library NodeSettingsLib {
         if (DataTypes.NodeStatus.Exiting == status || DataTypes.NodeStatus.Exited == status) revert NodeInExitStatus();
     }
 
-    function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
-        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
-        if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
-    }
-
     function _validateNodeInExitStatus(DataTypes.Node storage node) internal view {
         DataTypes.NodeStatus status = _getNodeStatus(node);
         if (DataTypes.NodeStatus.Exiting != status && DataTypes.NodeStatus.Exited != status)
             revert NodeNotInExitStatus();
+    }
+
+    function _inActive(uint256 time, uint256 duration) internal view returns (bool) {
+        return time + duration <= block.timestamp;
+    }
+
+    function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
+        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
+
+        if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
     }
 
     function _validateNodeAddress(address nodeAddr) internal pure {

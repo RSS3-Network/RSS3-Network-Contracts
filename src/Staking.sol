@@ -150,6 +150,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
         _isAlphaPhase = true;
 
+        /// TODO: should be removed in next version
         // migrate public pool
         _migratePublicPool();
     }

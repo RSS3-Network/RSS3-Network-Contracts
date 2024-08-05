@@ -94,10 +94,10 @@ contract StakingTest is CommonTest, IERC721Errors {
                     operationPoolTokens: 0,
                     stakingPoolTokens: 0,
                     totalShares: 0,
-                    slashStatus: false,
                     registerTime: 0,
                     offlineTime: 0,
                     exitingTime: 0,
+                    slashedTime: 0,
                     status: DataTypes.NodeStatus.None
                 })
             )
@@ -1356,8 +1356,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(bobNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
 
         // 4. slash status updated correctly
-        assertEq(aliceNode.slashStatus, true);
-        assertEq(bobNode.slashStatus, true);
+        assertEq(uint256(aliceNode.status), uint256(DataTypes.NodeStatus.Slashing));
+        assertEq(uint256(bobNode.status), uint256(DataTypes.NodeStatus.Slashing));
     }
 
     // Test errors: SlashRecordNotExists, SlashStatusNotRecorded
@@ -1472,7 +1472,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         for (uint256 i = 0; i < records.length; i++) {
             assertTrue(records[i].status == DataTypes.SlashStatus.Committed);
         }
-        assertEq(aliceNode.slashStatus, false);
+        assertEq(uint256(aliceNode.status), uint256(DataTypes.NodeStatus.Slashed));
     }
 
     // Test Errors: SlashRecordNotExists, SlashStatusNotRecorded
@@ -1553,8 +1553,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(amount, 0);
 
         // 4. slash status updated correctly
-        assertEq(aliceNode.slashStatus, false);
-        assertEq(bobNode.slashStatus, false);
+        assertEq(uint256(aliceNode.status), uint256(DataTypes.NodeStatus.Online));
+        assertEq(uint256(bobNode.status), uint256(DataTypes.NodeStatus.Online));
     }
 
     // Test multiple slashings

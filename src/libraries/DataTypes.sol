@@ -28,17 +28,18 @@ library DataTypes {
         uint256 stakingPoolTokens;
         /// @notice total shares of the pool
         uint256 totalShares;
-        /// @notice slashing status of the node
-        bool slashStatus;
         /// @notice node register time
         uint256 registerTime;
         /// @notice latest offline time
         uint256 offlineTime;
         /// @notice latest exiting time
         uint256 exitingTime;
+        /// @notice latest slashed time
+        uint256 slashedTime;
         NodeStatus status;
     }
 
+    /// TODO: should be removed in next version
     struct NodeObsoleted {
         uint256 nodeId;
         address account;
