@@ -287,15 +287,6 @@ interface IStaking {
     function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares);
 
     /**
-     * @notice Gets slashing records info by `slashings`.
-     * @param slashings IDs of slashing records
-     * @return records DataTypes.SlashRecord[] slashing records info
-     */
-    function getSlashingRecords(
-        DataTypes.Slashing[] calldata slashings
-    ) external pure returns (DataTypes.SlashRecord[] memory records);
-
-    /**
      * @notice Gets total count of nodes.
      * @return uint256 Total count of nodes.
      */
@@ -323,6 +314,15 @@ interface IStaking {
      * @return address The address of the chips contract.
      */
     function chipsContract() external view returns (address);
+
+    /**
+     * @notice Gets slashing records info by `slashings`.
+     * @param slashings IDs of slashing records
+     * @return records DataTypes.SlashRecord[] slashing records info
+     */
+    function getSlashingRecords(
+        DataTypes.Slashing[] calldata slashings
+    ) external pure returns (DataTypes.SlashRecord[] memory records);
 
     /**
      * @notice Gets node info by node address.

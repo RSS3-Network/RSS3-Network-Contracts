@@ -221,6 +221,10 @@ contract Chips is IChips, Initializable, ERC721 {
         return _getOtherTraitsBySeed(seed, version);
     }
 
+    function _getChipVersion(uint256 tokenId) internal view returns (DataTypes.ChipVersion) {
+        return _chipV2StartId < tokenId ? DataTypes.ChipVersion.V2 : DataTypes.ChipVersion.V1;
+    }
+
     function _getOtherTraitsBySeed(
         uint256 seed,
         DataTypes.ChipVersion version
@@ -318,9 +322,5 @@ contract Chips is IChips, Initializable, ERC721 {
 
     function _calTraitId(uint256 traitId, uint8 traitCount, uint256 divisionFactor) internal pure returns (uint8) {
         return uint8((traitId / divisionFactor) % traitCount);
-    }
-
-    function _getChipVersion(uint256 tokenId) internal view returns (DataTypes.ChipVersion) {
-        return _chipV2StartId < tokenId ? DataTypes.ChipVersion.V2 : DataTypes.ChipVersion.V1;
     }
 }

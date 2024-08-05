@@ -105,6 +105,22 @@ contract CommonTest is Utils {
         _staking.createNode("Name", "Description", 0, true);
     }
 
+    function _deposit(address account, uint256 depositAmount) internal {
+        vm.deal(account, depositAmount);
+
+        vm.prank(account);
+        _staking.deposit{value: depositAmount}();
+    }
+
+    function _getTreasuryAmount() internal returns (uint256) {
+        address treasury_ = _staking.TREASURY();
+
+        uint256 balanceBefore = address(treasury_).balance;
+        _staking.withdraw2Treasury();
+        uint256 balanceAfter = address(treasury_).balance;
+
+        return balanceAfter - balanceBefore;
+    }
     function _checkDistribution(
         uint256[] memory depositAmounts,
         uint256[] memory stakeAmounts,
@@ -122,23 +138,6 @@ contract CommonTest is Utils {
             uint256 newStakingPool = stakeAmounts[i] + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
             assertEq(node.stakingPoolTokens, newStakingPool, "check staking pool failed");
         }
-    }
-
-    function _deposit(address account, uint256 depositAmount) internal {
-        vm.deal(account, depositAmount);
-
-        vm.prank(account);
-        _staking.deposit{value: depositAmount}();
-    }
-
-    function _getTreasuryAmount() internal returns (uint256) {
-        address treasury_ = _staking.TREASURY();
-
-        uint256 balanceBefore = address(treasury_).balance;
-        _staking.withdraw2Treasury();
-        uint256 balanceAfter = address(treasury_).balance;
-
-        return balanceAfter - balanceBefore;
     }
 
     function _denominator() internal pure virtual returns (uint96) {

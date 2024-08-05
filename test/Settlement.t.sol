@@ -32,21 +32,6 @@ contract SettlementTest is CommonTest {
         vm.deal(oracleAccount, 30000000 ether);
     }
 
-    function invariantTreasuryBalance() public view {
-        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = _staking
-            .getPoolInfo();
-        assertTrue(
-            address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens - totalSlashingPoolTokens >= 0
-        );
-    }
-
-    function testCheckSetupStatus() public view {
-        assertEq(_settlement.stakingContract(), address(_staking));
-        assertEq(_settlement.currentEpoch(), 0);
-        assertEq(_settlement.EPOCH_DURATION(), 18 hours);
-        assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
-    }
-
     function testInitialize() public {
         Settlement s = new Settlement();
         s.initialize(address(0x1), address(0), 0, 0);
@@ -840,5 +825,20 @@ contract SettlementTest is CommonTest {
         }
 
         assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
+    }
+
+    function invariantTreasuryBalance() public view {
+        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = _staking
+            .getPoolInfo();
+        assertTrue(
+            address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens - totalSlashingPoolTokens >= 0
+        );
+    }
+
+    function testCheckSetupStatus() public view {
+        assertEq(_settlement.stakingContract(), address(_staking));
+        assertEq(_settlement.currentEpoch(), 0);
+        assertEq(_settlement.EPOCH_DURATION(), 18 hours);
+        assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
     }
 }

@@ -25,6 +25,7 @@ bindings :
 foundry-test :; forge clean && forge test --optimize --optimizer-runs 200 -v
 
 # Run solhint
+# npm install -g solhint
 solhint :; solhint -f table "{src,test,script}/**/*.sol"
 
 # slither

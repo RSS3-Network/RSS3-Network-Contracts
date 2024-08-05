@@ -17,12 +17,6 @@ contract ChipsTest is CommonTest {
         _setUp();
     }
 
-    function testCheckSetupStatus() public view {
-        assertEq(_chips.name(), chipsName);
-        assertEq(_chips.symbol(), chipsSymbol);
-        assertEq(_chips.stakingContract(), address(_staking));
-    }
-
     function testMint() public {
         vm.prank(address(_staking));
         uint256 tokenId = _chips.mint(alice);
@@ -106,6 +100,12 @@ contract ChipsTest is CommonTest {
                 "they symbolize the excitement and importance of being unique in a connected digital world."
             )
         );
+    }
+
+    function testCheckSetupStatus() public view {
+        assertEq(_chips.name(), chipsName);
+        assertEq(_chips.symbol(), chipsSymbol);
+        assertEq(_chips.stakingContract(), address(_staking));
     }
 
     function testCorner() public pure {

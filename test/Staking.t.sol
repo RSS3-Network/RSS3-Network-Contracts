@@ -276,28 +276,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.createNode("Alice", "Alice's node", 1, true);
     }
 
-    function testNodeAvatar() public view {
-        string memory nodeAvatarURI = _staking.getNodeAvatar(bob);
-        string memory base64prefix = "data:application/json;base64,";
-
-        string memory decodedTokenURI = string(
-            Base64.decode(LibString.slice(nodeAvatarURI, bytes(base64prefix).length))
-        );
-        assertEq(decodedTokenURI.readString(".name"), "Node Avatar");
-        string memory base64Image = decodedTokenURI.readString(".image");
-
-        string memory base64Imageprefix = "data:image/svg+xml;base64,";
-
-        string memory decodedImageURI = string(
-            Base64.decode(LibString.slice(base64Image, bytes(base64Imageprefix).length))
-        );
-        uint256 found1 = LibString.indexOf(decodedImageURI, "d{fill:#DEE5D9;}"); // head color white
-        assertEq(found1 != LibString.NOT_FOUND, true);
-
-        uint256 found2 = LibString.indexOf(decodedImageURI, "e{fill:#DEE5D9;}"); // head detail color white
-        assertEq(found2 != LibString.NOT_FOUND, true);
-    }
-
     function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
         vm.assume(taxRateBasisPoints >= Const.MIN_TAX_RATE_BASIS_POINTS && taxRateBasisPoints <= 10000);
         vm.assume(amount > 1 && amount < _initialAmount);
@@ -1428,6 +1406,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     // 1. Events emitted as expected
     // 2. Slashed tokens distributed as expected
     // 3. Slashing info updated as expected
+    // solhint-disable-next-line function-max-lines
     function testCommitSlashing() public {
         uint256 depositedTokens = 10000 ether;
         uint256 stakedTokens = 40000 ether;
@@ -1741,6 +1720,28 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Exited, DataTypes.NodeStatus.Offline));
     }
 
+    function testNodeAvatar() public view {
+        string memory nodeAvatarURI = _staking.getNodeAvatar(bob);
+        string memory base64prefix = "data:application/json;base64,";
+
+        string memory decodedTokenURI = string(
+            Base64.decode(LibString.slice(nodeAvatarURI, bytes(base64prefix).length))
+        );
+        assertEq(decodedTokenURI.readString(".name"), "Node Avatar");
+        string memory base64Image = decodedTokenURI.readString(".image");
+
+        string memory base64Imageprefix = "data:image/svg+xml;base64,";
+
+        string memory decodedImageURI = string(
+            Base64.decode(LibString.slice(base64Image, bytes(base64Imageprefix).length))
+        );
+        uint256 found1 = LibString.indexOf(decodedImageURI, "d{fill:#DEE5D9;}"); // head color white
+        assertEq(found1 != LibString.NOT_FOUND, true);
+
+        uint256 found2 = LibString.indexOf(decodedImageURI, "e{fill:#DEE5D9;}"); // head detail color white
+        assertEq(found2 != LibString.NOT_FOUND, true);
+    }
+
     function testCalcTax1(uint256 operationPool) public pure {
         // case 1: receives no tax rewards
         vm.assume(operationPool < 10000 ether);
@@ -1896,25 +1897,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _checkUnstakeOneChip(nodeAddr, requestId, amount, amount, isPublicGood);
     }
 
-    function _checkUnstakeOneChip(
-        address nodeAddr,
-        uint256 requestId,
-        uint256 stakedAmount,
-        uint256 unstakedAmount,
-        bool isPublicGood
-    ) internal view {
-        // check status
-        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
-        assertEq(req.owner, bob);
-        assertEq(req.timestamp, block.timestamp);
-        assertEq(req.unstakeAmount, unstakedAmount);
-
-        // check node info
-        DataTypes.Node memory node = isPublicGood ? _staking.getPublicPool() : _staking.getNode(nodeAddr);
-
-        assertEq(node.stakingPoolTokens, stakedAmount - unstakedAmount);
-    }
-
     function _unstakeAndCheckAmount(
         address sender,
         uint256 amount,
@@ -1963,6 +1945,25 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.recordSlashing(slashings, reporters, reasons);
     }
 
+    function _checkUnstakeOneChip(
+        address nodeAddr,
+        uint256 requestId,
+        uint256 stakedAmount,
+        uint256 unstakedAmount,
+        bool isPublicGood
+    ) internal view {
+        // check status
+        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        assertEq(req.owner, bob);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.unstakeAmount, unstakedAmount);
+
+        // check node info
+        DataTypes.Node memory node = isPublicGood ? _staking.getPublicPool() : _staking.getNode(nodeAddr);
+
+        assertEq(node.stakingPoolTokens, stakedAmount - unstakedAmount);
+    }
+
     function _checkNodeProfile(address nodeAddr, string memory name, string memory description) internal view {
         DataTypes.Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.name, name);
@@ -2003,18 +2004,5 @@ contract StakingTest is CommonTest, IERC721Errors {
         }
 
         return slashings;
-    }
-
-    function array(DataTypes.NodeStatus a) public pure returns (DataTypes.NodeStatus[] memory) {
-        DataTypes.NodeStatus[] memory arr = new DataTypes.NodeStatus[](1);
-        arr[0] = a;
-        return arr;
-    }
-
-    function array(DataTypes.NodeStatus a, DataTypes.NodeStatus b) public pure returns (DataTypes.NodeStatus[] memory) {
-        DataTypes.NodeStatus[] memory arr = new DataTypes.NodeStatus[](2);
-        arr[0] = a;
-        arr[1] = b;
-        return arr;
     }
 }

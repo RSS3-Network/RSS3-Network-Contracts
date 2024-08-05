@@ -56,18 +56,6 @@ library StorageLib {
         }
     }
 
-    function chipIssuers() internal pure returns (mapping(uint256 => address) storage _chipIssuers) {
-        assembly {
-            _chipIssuers.slot := CHIP_ISSUERS_MAPPING_SLOT
-        }
-    }
-
-    function chipToShares() internal pure returns (mapping(uint256 => uint256) storage _chipToShares) {
-        assembly {
-            _chipToShares.slot := CHIP_TO_SHARES_MAPPING_SLOT
-        }
-    }
-
     function setTotalSlashingPoolTokens(uint256 totalSlashingPoolTokens) internal {
         assembly {
             sstore(TOTAL_SLASHING_POOL_TOKENS_SLOT, totalSlashingPoolTokens)
@@ -156,6 +144,19 @@ library StorageLib {
             status := sload(slot)
         }
     }
+
+    function chipIssuers() internal pure returns (mapping(uint256 => address) storage _chipIssuers) {
+        assembly {
+            _chipIssuers.slot := CHIP_ISSUERS_MAPPING_SLOT
+        }
+    }
+
+    function chipToShares() internal pure returns (mapping(uint256 => uint256) storage _chipToShares) {
+        assembly {
+            _chipToShares.slot := CHIP_TO_SHARES_MAPPING_SLOT
+        }
+    }
+
     function getSlashRecord(
         address nodeAddr,
         uint256 epochId

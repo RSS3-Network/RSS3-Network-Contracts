@@ -332,9 +332,9 @@ library SVGGeneratorV2 {
         return (LibString.slice(addrHex, 0, 25), LibString.slice(addrHex, 26, 42));
     }
 
-    function _getSlice(uint256 begin, uint256 end, string memory text) public pure returns (string memory) {
+    function _getSlice(uint256 begin, uint256 end, string memory text) internal pure returns (string memory) {
         bytes memory a = new bytes(end - begin);
-        for (uint i = 0; i < end - begin; i++) {
+        for (uint256 i = 0; i < end - begin; i++) {
             a[i] = bytes(text)[i + begin];
         }
         return string(a);

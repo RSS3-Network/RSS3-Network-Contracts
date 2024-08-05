@@ -479,16 +479,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getSlashingRecords(
-        DataTypes.Slashing[] calldata slashings
-    ) external pure override returns (DataTypes.SlashRecord[] memory records) {
-        records = new DataTypes.SlashRecord[](slashings.length);
-        for (uint256 i = 0; i < slashings.length; i++) {
-            records[i] = StorageLib.getSlashRecord(slashings[i].nodeAddr, slashings[i].epoch);
-        }
-    }
-
-    /// @inheritdoc IStaking
     function getNodeCount() external view override returns (uint256) {
         return StorageLib.nodeAddrs().length();
     }
@@ -513,6 +503,16 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
         return StorageLib.getChipsContract();
+    }
+
+    /// @inheritdoc IStaking
+    function getSlashingRecords(
+        DataTypes.Slashing[] calldata slashings
+    ) external pure override returns (DataTypes.SlashRecord[] memory records) {
+        records = new DataTypes.SlashRecord[](slashings.length);
+        for (uint256 i = 0; i < slashings.length; i++) {
+            records[i] = StorageLib.getSlashRecord(slashings[i].nodeAddr, slashings[i].epoch);
+        }
     }
 
     /// @inheritdoc IStaking
