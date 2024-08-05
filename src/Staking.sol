@@ -375,8 +375,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
             if (++_nodeDemotionCounter[epoch][nodeAddr] >= Const.DEMOTION_COUNT_THRESHOLD) {
                 // check node status
-                // slash
-                RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, address(0), "");
+                DataTypes.NodeStatus status = NodeSettingsLib.getNodeStatus(StorageLib.getNode(nodeAddr));
+                if (status != DataTypes.NodeStatus.Slashing) {
+                    // slash
+                    RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, address(0), Const.DEFAULT_SLASH_REASON);
+                }
             }
 
             emit Events.NodeDemoted(epoch, nodeAddr, _nodeDemotionCounter[epoch][nodeAddr]);
