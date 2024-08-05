@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable private-vars-leading-underscore,var-name-mixedcase
 pragma solidity 0.8.20;
-import {DataTypes} from "./DataTypes.sol";
-import {Events} from "./Events.sol";
-import {StorageLib} from "./StorageLib.sol";
+
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
+import {DataTypes} from "./DataTypes.sol";
 import {
     CreateNodeToZeroAddress,
     NodeExists,
@@ -16,7 +16,8 @@ import {
     PublicGoodNodeTaxNotZero,
     TaxRateBasisPointsTooSmall
 } from "./Errors.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {Events} from "./Events.sol";
+import {StorageLib} from "./StorageLib.sol";
 
 library NodeSettingsLib {
     using EnumerableSet for EnumerableSet.AddressSet;

@@ -2,11 +2,11 @@
 // solhint-disable private-vars-leading-underscore,no-console,no-empty-blocks,ordering,quotes
 pragma solidity 0.8.20;
 
-import {Executables} from "./lib/Executables.sol";
-import {Chains} from "./lib/Chains.sol";
+import {console2 as console} from "forge-std/console2.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {console2 as console} from "forge-std/console2.sol";
+import {Chains} from "./lib/Chains.sol";
+import {Executables} from "./lib/Executables.sol";
 
 /// @notice store the new deployment to be saved
 struct Deployment {
@@ -39,7 +39,7 @@ struct Artifact {
 ///         hardhat deploy style artifacts. Forked from `forge-deploy`.
 abstract contract Deployer is Script {
     /// @notice The set of deployments that have been done during execution.
-    mapping(string => Deployment) internal _namedDeployments;
+    mapping(string name => Deployment deployment) internal _namedDeployments;
     /// @notice The same as `_namedDeployments` but as an array.
     Deployment[] internal _newDeployments;
     /// @notice The namespace for the deployment. Can be set with the env var DEPLOYMENT_CONTEXT.

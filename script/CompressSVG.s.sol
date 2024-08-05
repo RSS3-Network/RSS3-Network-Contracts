@@ -2,8 +2,9 @@
 // solhint-disable comprehensive-interface,no-console,max-line-length,quotes,code-complexity
 pragma solidity 0.8.20;
 
-import "forge-std/Script.sol";
 import {LibZip} from "@solady/utils/LibZip.sol";
+import {console2 as console} from "forge-std/console2.sol";
+import {Script} from "forge-std/Script.sol";
 
 contract CompressSVG is Script {
     // solhint-disable-next-line function-max-lines

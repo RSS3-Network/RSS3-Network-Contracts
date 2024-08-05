@@ -3,11 +3,10 @@
 
 pragma solidity 0.8.20;
 
-import {Events} from "./Events.sol";
-import {DataTypes} from "./DataTypes.sol";
-import {StorageLib} from "./StorageLib.sol";
-import {StakingCommonLib} from "./StakingCommonLib.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IChips} from "../interfaces/IChips.sol";
+import {Const} from "./Const.sol";
+import {DataTypes} from "./DataTypes.sol";
 import {
     NodeNotExists,
     DepositForPublicGoodNode,
@@ -21,8 +20,9 @@ import {
     ClaimTimeNotReady,
     ClaimIdNotExists
 } from "./Errors.sol";
-import {Const} from "./Const.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {Events} from "./Events.sol";
+import {StakingCommonLib} from "./StakingCommonLib.sol";
+import {StorageLib} from "./StorageLib.sol";
 
 library StakingLib {
     /// @dev deposit tokens to a node

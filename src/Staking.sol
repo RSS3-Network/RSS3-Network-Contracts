@@ -2,24 +2,18 @@
 // solhint-disable private-vars-leading-underscore
 pragma solidity 0.8.20;
 
-import {IStaking} from "./interfaces/IStaking.sol";
-import {IChips} from "./interfaces/IChips.sol";
-import {DataTypes} from "./libraries/DataTypes.sol";
-import {Events} from "./libraries/Events.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {StorageLib} from "./libraries/StorageLib.sol";
-import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
-import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
-import {StakingLib} from "./libraries/StakingLib.sol";
+import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {IChips} from "./interfaces/IChips.sol";
+import {IStaking} from "./interfaces/IStaking.sol";
 import {Const} from "./libraries/Const.sol";
-
+import {DataTypes} from "./libraries/DataTypes.sol";
 import {
     AlphaWithdrawNotAllowed,
     NodeNotExists,
@@ -33,6 +27,11 @@ import {
     NodeInExitStatus,
     NodeNotPublicGood
 } from "./libraries/Errors.sol";
+import {Events} from "./libraries/Events.sol";
+import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
+import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
+import {StakingLib} from "./libraries/StakingLib.sol";
+import {StorageLib} from "./libraries/StorageLib.sol";
 
 contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard {
     using Math for uint256;
@@ -67,19 +66,19 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @dev all node addresses
     EnumerableSet.AddressSet internal _nodeAddrs;
     /// @dev all node info
-    mapping(address nodeAddr => DataTypes.Node) internal _nodes;
+    mapping(address nodeAddr => DataTypes.Node node) internal _nodes;
     /// @dev counter of node id
     uint256 internal _nodeIdCounter;
 
     /// @dev pending withdrawal request counter
     uint256 internal _pendingWithdrawalCounter;
     /// @dev pending withdrawal request
-    mapping(uint256 requestId => DataTypes.WithdrawalRequest) internal _pendingWithdrawals;
+    mapping(uint256 requestId => DataTypes.WithdrawalRequest request) internal _pendingWithdrawals;
 
     /// @dev unstake request queue counter
     uint256 internal _pendingUnstakeCounter;
     /// @dev unstake request queue
-    mapping(uint256 requestId => DataTypes.UnstakeRequest) internal _pendingUnstake;
+    mapping(uint256 requestId => DataTypes.UnstakeRequest request) internal _pendingUnstake;
 
     /// @dev old public pool
     DataTypes.Node internal _oldPublicPool;
@@ -106,9 +105,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
 
     mapping(uint256 epoch => mapping(address nodeAddr => uint256 count)) internal _nodeDemotionCounter; // slot 28
-    mapping(address nodeAddr => DataTypes.NodeStatus) internal _nodesStatus; // slot 29
+    mapping(address nodeAddr => DataTypes.NodeStatus nodeStatus) internal _nodesStatus; // slot 29
 
-    mapping(address nodeAddr => DataTypes.NodeTime) internal _nodeTimes; // slot 30
+    mapping(address nodeAddr => DataTypes.NodeTime nodeTime) internal _nodeTimes; // slot 30
 
     modifier whenNotAlphaPhase() {
         if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();

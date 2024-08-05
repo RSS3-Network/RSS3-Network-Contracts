@@ -2,20 +2,14 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
+import {stdJson} from "forge-std/StdJson.sol";
+import {Base64} from "solady/utils/Base64.sol";
+import {LibString} from "solady/utils/LibString.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {TestEvents} from "test/helpers/TestEvents.sol";
-import {DataTypes} from "../src/libraries/DataTypes.sol";
-import {Staking} from "../src/Staking.sol";
-import {Events} from "../src/libraries/Events.sol";
-import {Const} from "../src/libraries/Const.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
-import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
-import {LibString} from "solady/utils/LibString.sol";
-import {Base64} from "solady/utils/Base64.sol";
-import {stdJson} from "forge-std/StdJson.sol";
-
-//import {console2 as console} from "forge-std/console2.sol";
-
+import {Const} from "../src/libraries/Const.sol";
+import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {
     NodeNotExists,
     NodeInExitStatus,
@@ -46,6 +40,11 @@ import {
     DepositForPublicGoodNode,
     WrongNodeStatus
 } from "../src/libraries/Errors.sol";
+import {Events} from "../src/libraries/Events.sol";
+import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
+import {Staking} from "../src/Staking.sol";
+
+//import {console2 as console} from "forge-std/console2.sol";
 
 contract StakingTest is CommonTest, IERC721Errors {
     using stdJson for string;

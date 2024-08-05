@@ -2,15 +2,15 @@
 // solhint-disable comprehensive-interface
 pragma solidity 0.8.20;
 
-import {Utils} from "./Utils.sol";
-import {DataTypes} from "../../src/libraries/DataTypes.sol";
-import {Staking} from "../../src/Staking.sol";
 import {Chips} from "../../src/Chips.sol";
-import {Settlement} from "../../src/Settlement.sol";
+import {Const} from "../../src/libraries/Const.sol";
+import {DataTypes} from "../../src/libraries/DataTypes.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
+import {Settlement} from "../../src/Settlement.sol";
+import {Staking} from "../../src/Staking.sol";
 import {TransparentUpgradeableProxy as Proxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {InternalSettlement} from "./InternalSettlement.sol";
-import {Const} from "../../src/libraries/Const.sol";
+import {Utils} from "./Utils.sol";
 
 contract CommonTest is Utils {
     address public constant alice = address(0x111);

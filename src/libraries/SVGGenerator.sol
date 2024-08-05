@@ -3,12 +3,12 @@
 pragma solidity 0.8.20;
 
 import {DataTypes} from "./DataTypes.sol";
-import {Eyes} from "./SVGs/Eyes.sol";
 import {ChipDetail} from "./SVGs/ChipDetail.sol";
+import {Corners} from "./SVGs/Corners.sol";
+import {Eyes} from "./SVGs/Eyes.sol";
+import {Frame} from "./SVGs/Frame.sol";
 import {Head} from "./SVGs/Head.sol";
 import {Mouths} from "./SVGs/Mouths.sol";
-import {Corners} from "./SVGs/Corners.sol";
-import {Frame} from "./SVGs/Frame.sol";
 
 library SVGGenerator {
     string public constant baseSVGHead =

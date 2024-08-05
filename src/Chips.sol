@@ -2,16 +2,16 @@
 // solhint-disable quotes
 pragma solidity 0.8.20;
 
-import {IChips} from "./interfaces/IChips.sol";
-import {IStaking} from "./interfaces/IStaking.sol";
-import {CallerNotStaking, BatchSizeZero} from "./libraries/Errors.sol";
-import {DataTypes} from "./libraries/DataTypes.sol";
-import {SVGGenerator} from "./libraries/SVGGenerator.sol";
-import {SVGGeneratorV2} from "./libraries/SVGGeneratorV2.sol";
-import {ERC721} from "./base/ERC721.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {ERC721} from "./base/ERC721.sol";
+import {IChips} from "./interfaces/IChips.sol";
+import {IStaking} from "./interfaces/IStaking.sol";
+import {DataTypes} from "./libraries/DataTypes.sol";
+import {CallerNotStaking, BatchSizeZero} from "./libraries/Errors.sol";
+import {SVGGenerator} from "./libraries/SVGGenerator.sol";
+import {SVGGeneratorV2} from "./libraries/SVGGeneratorV2.sol";
 
 contract Chips is IChips, Initializable, ERC721 {
     using Strings for uint256;

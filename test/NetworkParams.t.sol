@@ -2,8 +2,8 @@
 // solhint-disable comprehensive-interface
 pragma solidity 0.8.20;
 
-import {NetworkParams} from "../src/NetworkParams.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
+import {NetworkParams} from "../src/NetworkParams.sol";
 
 contract NetworkParamsTest is CommonTest {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");

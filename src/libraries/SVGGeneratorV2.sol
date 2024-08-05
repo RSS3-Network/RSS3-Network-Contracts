@@ -2,19 +2,19 @@
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
 
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {LibString} from "solady/utils/LibString.sol";
 import {DataTypes} from "./DataTypes.sol";
-import {Eyes} from "./SVGsV2/Eyes.sol";
-import {ChipDetails} from "./SVGsV2/ChipDetails.sol";
-import {HeadDetails} from "./SVGsV2/HeadDetails.sol";
-import {Mouths} from "./SVGsV2/Mouths.sol";
-import {ChipCorners} from "./SVGsV2/ChipCorners.sol";
-import {ChipFrames} from "./SVGsV2/ChipFrames.sol";
-import {HeadShapes} from "./SVGsV2/HeadShapes.sol";
-import {NftCards} from "./SVGsV2/NftCards.sol";
 import {Fonts1} from "./Fonts/Fonts1.sol";
 import {Fonts2} from "./Fonts/Fonts2.sol";
-import {LibString} from "solady/utils/LibString.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {ChipCorners} from "./SVGsV2/ChipCorners.sol";
+import {ChipDetails} from "./SVGsV2/ChipDetails.sol";
+import {ChipFrames} from "./SVGsV2/ChipFrames.sol";
+import {Eyes} from "./SVGsV2/Eyes.sol";
+import {HeadDetails} from "./SVGsV2/HeadDetails.sol";
+import {HeadShapes} from "./SVGsV2/HeadShapes.sol";
+import {Mouths} from "./SVGsV2/Mouths.sol";
+import {NftCards} from "./SVGsV2/NftCards.sol";
 
 library SVGGeneratorV2 {
     using Strings for uint256;

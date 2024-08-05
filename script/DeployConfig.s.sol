@@ -2,8 +2,8 @@
 // solhint-disable private-vars-leading-underscore,no-console
 pragma solidity 0.8.20;
 
-import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
+import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 
 /// @title DeployConfig

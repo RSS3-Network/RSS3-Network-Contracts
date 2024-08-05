@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable var-name-mixedcase
-
 pragma solidity 0.8.20;
-import {DataTypes} from "./DataTypes.sol";
-import {Events} from "./Events.sol";
-import {StorageLib} from "./StorageLib.sol";
-import {StakingCommonLib} from "./StakingCommonLib.sol";
+
 import {Const} from "./Const.sol";
+import {DataTypes} from "./DataTypes.sol";
 import {
     NodeNotExists,
     SlashMoreThanOnce,
@@ -14,6 +11,9 @@ import {
     SlashStatusNotRecorded,
     TransferFailed
 } from "./Errors.sol";
+import {Events} from "./Events.sol";
+import {StakingCommonLib} from "./StakingCommonLib.sol";
+import {StorageLib} from "./StorageLib.sol";
 
 library RewardsAndSlashingLib {
     function recordSlashing(address nodeAddr, uint256 epoch, address reporter, string calldata reason) external {

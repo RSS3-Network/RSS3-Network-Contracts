@@ -2,10 +2,10 @@
 // solhint-disable no-inline-assembly
 pragma solidity 0.8.20;
 
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {DataTypes} from "../libraries/DataTypes.sol";
-import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 library StorageLib {
     using Checkpoints for Checkpoints.Trace160;

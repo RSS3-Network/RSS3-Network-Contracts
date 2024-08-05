@@ -2,8 +2,7 @@
 // solhint-disable comprehensive-interface
 pragma solidity 0.8.20;
 
-import "forge-std/Vm.sol";
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {DataTypes} from "../../src/libraries/DataTypes.sol";
 
 contract Utils is Test {
