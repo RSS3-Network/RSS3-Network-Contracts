@@ -93,6 +93,7 @@ library DataTypes {
         Initializing,
         Online,
         Offline,
+        Slashing,
         Slashed,
         Exiting,
         Exited

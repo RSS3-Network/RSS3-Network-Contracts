@@ -10,11 +10,14 @@ import {
     NodeExists,
     NodeIsPublicGood,
     NodeNotExists,
+    NodeInExitStatus,
+    NodeNotInExitStatus,
     WrongNodeStatus,
     InvalidArrayLength,
     TaxRateBasisPointsTooLarge,
     PublicGoodNodeTaxNotZero,
-    TaxRateBasisPointsTooSmall
+    TaxRateBasisPointsTooSmall,
+    NodeDepositBelowMinimum
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {StorageLib} from "./StorageLib.sol";
@@ -91,6 +94,42 @@ library NodeSettingsLib {
         emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood, isAlphaPhase);
     }
 
+    function requestExit(address nodeAddr) external {
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+
+        _validateNodeAddress(node.account);
+
+        // validate node exit status
+        _validateNodeNotInExitStatus(node);
+
+        // update node time
+        node.exitingTime = block.timestamp;
+        // set node status
+        node.status = DataTypes.NodeStatus.Exiting;
+
+        emit Events.NodeExitRequested(nodeAddr);
+    }
+
+    function reRegister(address nodeAddr) external {
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+
+        _validateNodeAddress(node.account);
+
+        _validateNodeInExitStatus(node);
+
+        uint256 opPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
+        if (opPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
+
+        // update node time
+        node.registerTime = block.timestamp;
+        delete node.offlineTime;
+        delete node.exitingTime;
+        // set node status
+        node.status = DataTypes.NodeStatus.Registered;
+
+        emit Events.NodeReentryRequested(nodeAddr);
+    }
+
     function setNodesStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external {
         if (nodeAddrs.length != status.length) revert InvalidArrayLength();
 
@@ -118,6 +157,10 @@ library NodeSettingsLib {
     }
 
     function getNodeStatus(DataTypes.Node calldata node) external view returns (DataTypes.NodeStatus) {
+        return _getNodeStatus(node);
+    }
+
+    function _getNodeStatus(DataTypes.Node memory node) internal view returns (DataTypes.NodeStatus) {
         DataTypes.NodeStatus status = node.status;
 
         // Registered Node transitions to Exited state after 30 Epochs of inactivity.
@@ -146,9 +189,21 @@ library NodeSettingsLib {
 
         return status;
     }
+
+    function _validateNodeNotInExitStatus(DataTypes.Node storage node) internal view {
+        DataTypes.NodeStatus status = _getNodeStatus(node);
+        if (DataTypes.NodeStatus.Exiting == status || DataTypes.NodeStatus.Exited == status) revert NodeInExitStatus();
+    }
+
     function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
         if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
         if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
+    }
+
+    function _validateNodeInExitStatus(DataTypes.Node storage node) internal view {
+        DataTypes.NodeStatus status = _getNodeStatus(node);
+        if (DataTypes.NodeStatus.Exiting != status && DataTypes.NodeStatus.Exited != status)
+            revert NodeNotInExitStatus();
     }
 
     function _validateNodeAddress(address nodeAddr) internal pure {

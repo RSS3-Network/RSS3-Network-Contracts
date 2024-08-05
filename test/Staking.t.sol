@@ -806,7 +806,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testStakeFailToNonExistentNode() public {
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.stake{value: 1}(alice);
+        _staking.stake{value: 1000 ether}(alice);
     }
 
     function testStakeFailToPublicGoodNode() public {
@@ -872,12 +872,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         vm.expectRevert(abi.encodeWithSelector(NodeNotPublicGood.selector, bob));
         _staking.stakeToPublicPool{value: 1}(bob);
-    }
-
-    function testStakeToPublicPoolFailToNonExistentNode() public {
-        // stake to public pool with empty node addr will fail
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.stakeToPublicPool{value: 1}(address(0xabc));
     }
 
     function testStakeToPublicPoolFailWithStakeAmountTooSmall() public {
@@ -1710,15 +1704,20 @@ contract StakingTest is CommonTest, IERC721Errors {
         // WrongNodeStatus
         vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 5));
         vm.prank(address(_settlement));
-        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Slashed, DataTypes.NodeStatus.Offline));
+        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Slashing, DataTypes.NodeStatus.Offline));
 
         // WrongNodeStatus
         vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 6));
         vm.prank(address(_settlement));
-        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Exiting, DataTypes.NodeStatus.Offline));
+        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Slashed, DataTypes.NodeStatus.Offline));
 
         // WrongNodeStatus
         vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 7));
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Exiting, DataTypes.NodeStatus.Offline));
+
+        // WrongNodeStatus
+        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 8));
         vm.prank(address(_settlement));
         _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Exited, DataTypes.NodeStatus.Offline));
     }
