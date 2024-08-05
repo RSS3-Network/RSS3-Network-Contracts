@@ -237,13 +237,6 @@ interface IStaking {
     function withdraw2Treasury() external;
 
     /**
-     * @notice Gets node status by node address.
-     * @param nodeAddrs Node addresses to query.
-     * @return results Node status.
-     */
-    function getNodeStatus(address[] calldata nodeAddrs) external view returns (DataTypes.NodeStatus[] memory results);
-
-    /**
      * @notice Returns the demotion count of node.
      * @param epoch The epoch number to query.
      * @param nodeAddr Node address to query.
@@ -310,6 +303,20 @@ interface IStaking {
         returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens);
 
     /**
+     * @notice Gets node info by node address.
+     * @param nodeAddr Node address to query.
+     * @return DataTypes.Node Node info.
+     */
+    function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
+
+    /**
+     * @notice Gets nodes info by node addresses.
+     * @param nodeAddrs Node addresses to query.
+     * @return DataTypes.Node[] Nodes info.
+     */
+    function getNodes(address[] calldata nodeAddrs) external view returns (DataTypes.Node[] memory);
+
+    /**
      * @notice Returns the address of the chips contract.
      * @return address The address of the chips contract.
      */
@@ -323,20 +330,6 @@ interface IStaking {
     function getSlashingRecords(
         DataTypes.Slashing[] calldata slashings
     ) external pure returns (DataTypes.SlashRecord[] memory records);
-
-    /**
-     * @notice Gets node info by node address.
-     * @param nodeAddr Node address to query.
-     * @return DataTypes.Node Node info.
-     */
-    function getNode(address nodeAddr) external pure returns (DataTypes.Node memory);
-
-    /**
-     * @notice Gets nodes info by node addresses.
-     * @param nodeAddrs Node addresses to query.
-     * @return DataTypes.Node[] Nodes info.
-     */
-    function getNodes(address[] calldata nodeAddrs) external pure returns (DataTypes.Node[] memory);
 
     /**
      * @notice Gets public pool info.

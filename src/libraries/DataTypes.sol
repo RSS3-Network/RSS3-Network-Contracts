@@ -30,6 +30,27 @@ library DataTypes {
         uint256 totalShares;
         /// @notice slashing status of the node
         bool slashStatus;
+        /// @notice node register time
+        uint256 registerTime;
+        /// @notice latest offline time
+        uint256 offlineTime;
+        /// @notice latest exiting time
+        uint256 exitingTime;
+        NodeStatus status;
+    }
+
+    struct NodeObsoleted {
+        uint256 nodeId;
+        address account;
+        uint64 taxRateBasisPoints;
+        bool publicGood;
+        bool alpha;
+        string name;
+        string description;
+        uint256 operationPoolTokens;
+        uint256 stakingPoolTokens;
+        uint256 totalShares;
+        bool slashStatus;
     }
 
     struct WithdrawalRequest {
@@ -88,12 +109,6 @@ library DataTypes {
     struct Slashing {
         address nodeAddr;
         uint256 epoch;
-    }
-
-    struct NodeTime {
-        uint256 registerTime;
-        uint256 exitingTime;
-        uint256 offlineTime;
     }
 
     struct NodeTraits {

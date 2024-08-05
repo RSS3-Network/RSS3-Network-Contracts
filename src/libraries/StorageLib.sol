@@ -36,10 +36,6 @@ library StorageLib {
     uint256 public constant TOTAL_SLASHING_POOL_TOKENS_SLOT = 26;
     uint256 public constant SLASH_RECORDS_SLOT = 27;
 
-    uint256 public constant NODES_STATUS_SLOT = 29;
-
-    uint256 public constant NODE_TIMES_SLOT = 30;
-
     // keccak256(abi.encode(uint256(keccak256("staking.storage.public.pool")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 public constant PUBLIC_POOL_SLOT_LOCATION =
         0x8f8113410d98c63dc5c1c4f1ac9eaef4d76f695bf1ef91dca2f23702b51d9400;
@@ -59,16 +55,6 @@ library StorageLib {
     function setTotalSlashingPoolTokens(uint256 totalSlashingPoolTokens) internal {
         assembly {
             sstore(TOTAL_SLASHING_POOL_TOKENS_SLOT, totalSlashingPoolTokens)
-        }
-    }
-
-    function setNodeStatus(address nodeAddr, DataTypes.NodeStatus status) internal {
-        assembly {
-            mstore(0x00, nodeAddr)
-            mstore(0x20, NODES_STATUS_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            sstore(slot, status)
         }
     }
 
@@ -135,16 +121,6 @@ library StorageLib {
         issuer = address(families.lowerLookup(tokenId.toUint96()));
     }
 
-    function getNodesStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus status) {
-        assembly {
-            mstore(0x00, nodeAddr)
-            mstore(0x20, NODES_STATUS_SLOT)
-            let slot := keccak256(0x00, 0x40)
-
-            status := sload(slot)
-        }
-    }
-
     function chipIssuers() internal pure returns (mapping(uint256 => address) storage _chipIssuers) {
         assembly {
             _chipIssuers.slot := CHIP_ISSUERS_MAPPING_SLOT
@@ -167,14 +143,6 @@ library StorageLib {
             mstore(0x20, keccak256(0x00, 0x40))
             mstore(0x00, epochId)
             record.slot := keccak256(0x00, 0x40)
-        }
-    }
-
-    function getNodeTime(address nodeAddr) internal pure returns (DataTypes.NodeTime storage nodeTime) {
-        assembly {
-            mstore(0x00, nodeAddr)
-            mstore(0x20, NODE_TIMES_SLOT)
-            nodeTime.slot := keccak256(0x00, 0x40)
         }
     }
 

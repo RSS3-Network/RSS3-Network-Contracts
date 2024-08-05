@@ -94,7 +94,11 @@ contract StakingTest is CommonTest, IERC721Errors {
                     operationPoolTokens: 0,
                     stakingPoolTokens: 0,
                     totalShares: 0,
-                    slashStatus: false
+                    slashStatus: false,
+                    registerTime: 0,
+                    offlineTime: 0,
+                    exitingTime: 0,
+                    status: DataTypes.NodeStatus.None
                 })
             )
         );
@@ -1681,10 +1685,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.setNodeStatus(nodeAddrs, status);
 
         // check status
-        DataTypes.NodeStatus[] memory nodeStatus = _staking.getNodeStatus(nodeAddrs);
-        assertEq(uint256(nodeStatus[0]), uint256(DataTypes.NodeStatus.Online));
-        assertEq(uint256(nodeStatus[1]), uint256(DataTypes.NodeStatus.Offline));
-        assertEq(uint256(nodeStatus[2]), uint256(DataTypes.NodeStatus.Initializing));
+        DataTypes.Node[] memory nodes = _staking.getNodes(nodeAddrs);
+        assertEq(uint256(nodes[0].status), uint256(DataTypes.NodeStatus.Online));
+        assertEq(uint256(nodes[1].status), uint256(DataTypes.NodeStatus.Offline));
+        assertEq(uint256(nodes[2].status), uint256(DataTypes.NodeStatus.Initializing));
     }
 
     function testSetNodesStatusFail() public {
@@ -1989,7 +1993,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function _getNodeStatus(address nodeAddr) internal view returns (DataTypes.NodeStatus status) {
-        status = _staking.getNodeStatus(array(nodeAddr))[0];
+        status = _staking.getNode(nodeAddr).status;
     }
 
     function _createSlashings(

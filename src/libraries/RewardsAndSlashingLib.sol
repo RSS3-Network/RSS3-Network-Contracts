@@ -43,8 +43,8 @@ library RewardsAndSlashingLib {
 
         _recordSlashingAmount(nodeAddr, record);
 
-        // set node status
-        StorageLib.setNodeStatus(nodeAddr, DataTypes.NodeStatus.Slashed);
+        // set node status: slashing
+        node.status = DataTypes.NodeStatus.Slashed;
 
         emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
     }

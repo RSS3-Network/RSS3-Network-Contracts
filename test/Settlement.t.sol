@@ -928,10 +928,10 @@ contract SettlementTest is CommonTest {
         _settlement.setNodeStatus(nodeAddrs, status);
 
         // check status
-        DataTypes.NodeStatus[] memory nodeStatus = _staking.getNodeStatus(nodeAddrs);
-        assertEq(uint256(nodeStatus[0]), uint256(DataTypes.NodeStatus.Online));
-        assertEq(uint256(nodeStatus[1]), uint256(DataTypes.NodeStatus.Offline));
-        assertEq(uint256(nodeStatus[2]), uint256(DataTypes.NodeStatus.Initializing));
+        DataTypes.Node[] memory nodes = _staking.getNodes(nodeAddrs);
+        assertEq(uint256(nodes[0].status), uint256(DataTypes.NodeStatus.Online));
+        assertEq(uint256(nodes[1].status), uint256(DataTypes.NodeStatus.Offline));
+        assertEq(uint256(nodes[2].status), uint256(DataTypes.NodeStatus.Initializing));
     }
 
     function testSetNodeStatusFail() public {

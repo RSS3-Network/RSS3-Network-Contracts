@@ -171,10 +171,11 @@ contract StakingForkTest is CommonTest {
         node = staking.getPublicPool();
         assertEq(node.nodeId, 0);
         assertEq(node.taxRateBasisPoints, uint64(1168));
+        assertEq(node.name, "Public Good Pool");
         assertEq(node.operationPoolTokens, uint256(0));
         assertEq(node.stakingPoolTokens, uint256(102726750648321495462628));
         assertEq(node.totalShares, uint256(100000000000000000000000));
-        assertEq(node.publicGood, false);
+        assertEq(node.publicGood, true);
         assertEq(node.alpha, false);
 
         // check pool info

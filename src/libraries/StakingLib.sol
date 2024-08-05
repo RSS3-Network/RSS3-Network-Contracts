@@ -36,8 +36,8 @@ library StakingLib {
 
         // set node status
         if (node.operationPoolTokens >= Const.MIN_DEPOSIT) {
-            StorageLib.setNodeStatus(nodeAddr, DataTypes.NodeStatus.Registered);
-            StorageLib.getNodeTime(nodeAddr).registerTime = block.timestamp;
+            node.registerTime = block.timestamp;
+            node.status = DataTypes.NodeStatus.Registered;
         }
 
         emit Events.Deposited(nodeAddr, amount);

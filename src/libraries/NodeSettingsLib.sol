@@ -98,16 +98,17 @@ library NodeSettingsLib {
             address nodeAddr = nodeAddrs[i];
             DataTypes.NodeStatus s = status[i];
 
+            DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+
             // can only set node status as: Online, Offline and Initializing
             if (s == DataTypes.NodeStatus.Initializing || s == DataTypes.NodeStatus.Online) {
-                StorageLib.setNodeStatus(nodeAddr, s);
+                node.status = s;
 
-                StorageLib.getNodeTime(nodeAddr).registerTime = 0;
-                StorageLib.getNodeTime(nodeAddr).offlineTime = 0;
+                delete node.registerTime;
+                delete node.offlineTime;
             } else if (s == DataTypes.NodeStatus.Offline) {
-                StorageLib.setNodeStatus(nodeAddr, s);
-
-                StorageLib.getNodeTime(nodeAddr).offlineTime = block.timestamp;
+                node.status = s;
+                node.offlineTime = block.timestamp;
             } else {
                 revert WrongNodeStatus(uint256(s));
             }
@@ -116,13 +117,12 @@ library NodeSettingsLib {
         emit Events.NodeStatusSet(nodeAddrs, status);
     }
 
-    function getNodeStatus(address nodeAddr) external view returns (DataTypes.NodeStatus) {
-        DataTypes.NodeStatus status = StorageLib.getNodesStatus(nodeAddr);
-        DataTypes.NodeTime memory nodeTimes = StorageLib.getNodeTime(nodeAddr);
+    function getNodeStatus(DataTypes.Node calldata node) external view returns (DataTypes.NodeStatus) {
+        DataTypes.NodeStatus status = node.status;
 
         // Registered Node transitions to Exited state after 30 Epochs of inactivity.
         if (status == DataTypes.NodeStatus.Registered) {
-            if (nodeTimes.registerTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
+            if (node.registerTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
                 status = DataTypes.NodeStatus.Exited;
                 return status;
             }
@@ -130,7 +130,7 @@ library NodeSettingsLib {
 
         // An Offline Node transitions to Exited state after 30 Epochs of inactivity.
         if (status == DataTypes.NodeStatus.Offline) {
-            if (nodeTimes.offlineTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
+            if (node.offlineTime + Const.NODE_INACTIVITY_PERIOD <= block.timestamp) {
                 status = DataTypes.NodeStatus.Exited;
                 return status;
             }
@@ -138,7 +138,7 @@ library NodeSettingsLib {
 
         // An Exiting Node transitions to Exited state after 1 Epoch.
         if (status == DataTypes.NodeStatus.Exiting) {
-            if (nodeTimes.exitingTime + Const.NODE_EXIT_PERIOD <= block.timestamp) {
+            if (node.exitingTime + Const.NODE_EXIT_PERIOD <= block.timestamp) {
                 status = DataTypes.NodeStatus.Exited;
                 return status;
             }
