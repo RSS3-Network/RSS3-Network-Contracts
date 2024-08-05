@@ -734,7 +734,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testSetTaxRate4PublicPool(uint64 expectedTaxRateBasisPoints) public {
-        vm.assume(expectedTaxRateBasisPoints <= _denominator());
+        vm.assume(expectedTaxRateBasisPoints <= Const.DENOMINATOR);
 
         vm.startPrank(address(_settlement));
         expectEmit();
@@ -756,7 +756,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testSetTaxRateTooLargeError(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints > _denominator());
+        vm.assume(taxRateBasisPoints > Const.DENOMINATOR);
 
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
         vm.prank(alice);
@@ -1314,9 +1314,9 @@ contract StakingTest is CommonTest, IERC721Errors {
         _setUpNodes(depositedTokens, stakedTokens);
 
         uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            _denominator();
+            Const.DENOMINATOR;
         uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-            _denominator();
+            Const.DENOMINATOR;
 
         address[] memory nodeAddrs = array(alice, bob);
         address[] memory reporters = array(carol, dave);
@@ -1409,9 +1409,9 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 stakedTokens = 40000 ether;
 
         uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            _denominator();
+            Const.DENOMINATOR;
         uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-            _denominator();
+            Const.DENOMINATOR;
 
         _setUpNodes(depositedTokens, stakedTokens);
         uint256 treasuryAmount = _getTreasuryAmount();
@@ -1444,7 +1444,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // 3.1 reporters balance correct
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             uint256 value = ((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / _denominator();
+                Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
             if (reporters[i] == address(0x0)) {
                 assertEq(paymentProcessor.balance, value);
             } else {
@@ -1459,7 +1459,7 @@ contract StakingTest is CommonTest, IERC721Errors {
                 expectedSlashedTokensOnStakingPool -
                 (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
                     (Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS)) /
-                    _denominator()));
+                    Const.DENOMINATOR));
 
         assertEq(treasuryAmountAfterSlashing, expectedTreasuryAmount);
         // 3.3 Node pool tokens correct
@@ -1584,16 +1584,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 treasuryAmount = _getTreasuryAmount();
 
         uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            _denominator();
+            Const.DENOMINATOR;
         uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-            _denominator();
+            Const.DENOMINATOR;
 
         uint256 expectedTreasuryAmount = 2 *
             (expectedSlashedTokensOnOperationPool +
                 expectedSlashedTokensOnStakingPool -
                 (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
                     (Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS)) /
-                    _denominator()));
+                    Const.DENOMINATOR));
         assertEq(treasuryAmount, expectedTreasuryAmount);
 
         // 6. record slashing alice twice will reverted

@@ -35,7 +35,7 @@ library Const {
     uint256 public constant NODE_EXIT_PERIOD = 18 hours;
 
     // denominator
-    uint96 public constant DENOMINATOR = 10000;
+    uint256 public constant DENOMINATOR = 10000;
 
     string public constant DEFAULT_SLASH_REASON = "Demotion count reaches threshold";
 }

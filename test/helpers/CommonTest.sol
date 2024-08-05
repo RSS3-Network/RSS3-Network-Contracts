@@ -140,11 +140,7 @@ contract CommonTest is Utils {
         }
     }
 
-    function _denominator() internal pure virtual returns (uint96) {
-        return Const.DENOMINATOR;
-    }
-
     function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
-        return (rewards * taxRateBasisPoints) / _denominator();
+        return (rewards * taxRateBasisPoints) / Const.DENOMINATOR;
     }
 }
