@@ -6,7 +6,7 @@ pragma solidity 0.8.20;
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IChips} from "../interfaces/IChips.sol";
 import {Const} from "./Const.sol";
-import {DataTypes} from "./DataTypes.sol";
+import {Node, NodeStatus, UnstakeRequest, WithdrawalRequest} from "./DataTypes.sol";
 import {
     NodeNotExists,
     DepositForPublicGoodNode,
@@ -27,7 +27,7 @@ import {StorageLib} from "./StorageLib.sol";
 library StakingLib {
     /// @dev deposit tokens to a node
     function deposit(address nodeAddr, uint256 amount) external {
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage node = StorageLib.getNode(nodeAddr);
 
         if (node.account == address(0)) revert NodeNotExists();
         if (node.publicGood) revert DepositForPublicGoodNode();
@@ -37,14 +37,14 @@ library StakingLib {
         // set node status
         if (node.operationPoolTokens >= Const.MIN_DEPOSIT) {
             node.registerTime = block.timestamp;
-            node.status = DataTypes.NodeStatus.Registered;
+            node.status = NodeStatus.Registered;
         }
 
         emit Events.Deposited(nodeAddr, amount);
     }
 
     function stakeToNode(
-        DataTypes.Node storage node,
+        Node storage node,
         uint256 amount,
         address nodeAddr,
         address from
@@ -94,14 +94,14 @@ library StakingLib {
             delete StorageLib.chipIssuers()[tokenId];
             delete StorageLib.chipToShares()[tokenId];
         }
-        DataTypes.Node storage node = _getStakingNode(nodeAddr);
+        Node storage node = _getStakingNode(nodeAddr);
         StakingCommonLib.decreaseStakingPool(node, unstakeAmount);
         _decreaseTotalShares(node, sharesToBurn);
 
         requestId = StorageLib.nextPendingUnstakeId();
 
         // add to request queue
-        DataTypes.UnstakeRequest storage req = StorageLib.getPendingUnstake()[requestId];
+        UnstakeRequest storage req = StorageLib.getPendingUnstake()[requestId];
         req.owner = owner;
         req.nodeAddr = nodeAddr;
         req.timestamp = block.timestamp;
@@ -110,12 +110,12 @@ library StakingLib {
         emit Events.UnstakeRequested(owner, nodeAddr, requestId, unstakeAmount, chipIds);
     }
 
-    function requestWithdrawal(DataTypes.Node storage node, uint256 amount) external returns (uint256 requestId) {
+    function requestWithdrawal(Node storage node, uint256 amount) external returns (uint256 requestId) {
         StakingCommonLib.decreaseOperationPool(node, amount);
 
         requestId = StorageLib.nextPendingWithdrawalId();
 
-        DataTypes.WithdrawalRequest storage req = StorageLib.getPendingWithdrawal()[requestId];
+        WithdrawalRequest storage req = StorageLib.getPendingWithdrawal()[requestId];
         req.timestamp = uint40(block.timestamp);
         req.owner = node.account;
         req.amount = amount;
@@ -127,7 +127,7 @@ library StakingLib {
 
     /// @dev claim withdrawal request
     function claimWithdrawal(uint256 requestId, uint256 DEPOSIT_UNBONDING_PERIOD) external {
-        DataTypes.WithdrawalRequest memory req = StorageLib.getPendingWithdrawal()[requestId];
+        WithdrawalRequest memory req = StorageLib.getPendingWithdrawal()[requestId];
 
         if (req.owner == address(0)) revert ClaimIdNotExists(requestId);
         if (block.timestamp < req.timestamp + DEPOSIT_UNBONDING_PERIOD) revert ClaimTimeNotReady();
@@ -142,7 +142,7 @@ library StakingLib {
 
     /// @dev claim unstake request
     function claimUnstake(uint256 requestId, uint256 STAKE_UNBONDING_PERIOD) external {
-        DataTypes.UnstakeRequest memory req = StorageLib.getPendingUnstake()[requestId];
+        UnstakeRequest memory req = StorageLib.getPendingUnstake()[requestId];
 
         if (req.owner == address(0)) revert ClaimIdNotExists(requestId);
 
@@ -189,12 +189,12 @@ library StakingLib {
     }
 
     /// @dev increase total shares of a node
-    function _increaseTotalShares(DataTypes.Node storage node, uint256 amount) internal {
+    function _increaseTotalShares(Node storage node, uint256 amount) internal {
         node.totalShares += amount;
     }
 
     /// @dev decrease total shares of a node
-    function _decreaseTotalShares(DataTypes.Node storage node, uint256 amount) internal {
+    function _decreaseTotalShares(Node storage node, uint256 amount) internal {
         node.totalShares -= amount;
     }
 
@@ -232,7 +232,7 @@ library StakingLib {
 
     /// @dev convert tokens to equivalent shares
     function _tokensToShares(uint256 tokens, address nodeAddr) internal view returns (uint256) {
-        DataTypes.Node storage node = _getStakingNode(nodeAddr);
+        Node storage node = _getStakingNode(nodeAddr);
         if (node.stakingPoolTokens == 0) {
             return tokens;
         }
@@ -241,7 +241,7 @@ library StakingLib {
     }
 
     function _sharesToTokens(uint256 shares, address nodeAddr) internal view returns (uint256) {
-        DataTypes.Node storage node = _getStakingNode(nodeAddr);
+        Node storage node = _getStakingNode(nodeAddr);
         if (node.totalShares == 0) {
             return 0;
         }
@@ -249,9 +249,9 @@ library StakingLib {
         return (shares * node.stakingPoolTokens) / node.totalShares;
     }
 
-    function _getStakingNode(address nodeAddr) internal view returns (DataTypes.Node storage _node) {
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
-        DataTypes.Node storage publicPool = StorageLib.publicPool();
+    function _getStakingNode(address nodeAddr) internal view returns (Node storage _node) {
+        Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage publicPool = StorageLib.publicPool();
 
         _node = node.publicGood ? publicPool : node;
     }

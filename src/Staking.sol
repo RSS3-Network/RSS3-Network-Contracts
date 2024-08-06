@@ -13,7 +13,15 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {Const} from "./libraries/Const.sol";
-import {DataTypes} from "./libraries/DataTypes.sol";
+import {
+    Node,
+    NodeObsoleted,
+    NodeStatus,
+    Slashing,
+    SlashRecord,
+    WithdrawalRequest,
+    UnstakeRequest
+} from "./libraries/DataTypes.sol";
 import {
     AlphaWithdrawNotAllowed,
     NodeNotExists,
@@ -63,22 +71,22 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @dev all node addresses
     EnumerableSet.AddressSet internal _nodeAddrs;
     /// @dev all node info
-    mapping(address nodeAddr => DataTypes.Node node) internal _nodes;
+    mapping(address nodeAddr => Node node) internal _nodes;
     /// @dev counter of node id
     uint256 internal _nodeIdCounter;
 
     /// @dev pending withdrawal request counter
     uint256 internal _pendingWithdrawalCounter;
     /// @dev pending withdrawal request
-    mapping(uint256 requestId => DataTypes.WithdrawalRequest request) internal _pendingWithdrawals;
+    mapping(uint256 requestId => WithdrawalRequest request) internal _pendingWithdrawals;
 
     /// @dev unstake request queue counter
     uint256 internal _pendingUnstakeCounter;
     /// @dev unstake request queue
-    mapping(uint256 requestId => DataTypes.UnstakeRequest request) internal _pendingUnstake;
+    mapping(uint256 requestId => UnstakeRequest request) internal _pendingUnstake;
 
     /// @dev old public pool
-    DataTypes.NodeObsoleted internal _oldPublicPool;
+    NodeObsoleted internal _oldPublicPool;
 
     /// @dev total operation pool tokens
     uint256 internal _totalOperationPoolTokens;
@@ -99,7 +107,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     uint256 internal _totalSlashingPoolTokens;
 
     /// @dev (nodeAddr, epochId) => slash record
-    mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
+    mapping(address nodeAddr => mapping(uint256 epochId => SlashRecord)) internal _slashRecords;
 
     mapping(uint256 epoch => mapping(address nodeAddr => uint256 count)) internal _nodeDemotionCounter; // slot 28
 
@@ -195,15 +203,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     function requestWithdrawal(
         uint256 amount
     ) external override whenNotPaused whenNotAlphaPhase returns (uint256 requestId) {
-        DataTypes.Node storage node = _nodes[msg.sender];
+        Node storage node = _nodes[msg.sender];
         _validateNodeAddress(node.account);
 
         //  withdrawal amount should not exceed the operation pool tokens
         if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
 
         // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
-        DataTypes.NodeStatus status = NodeSettingsLib.getNodeStatus(node);
-        if (DataTypes.NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT)
+        NodeStatus status = NodeSettingsLib.getNodeStatus(node);
+        if (NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT)
             revert ExcessWithdrawalAmount();
 
         return StakingLib.requestWithdrawal(node, amount);
@@ -220,7 +228,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     function stake(
         address nodeAddr
     ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage node = StorageLib.getNode(nodeAddr);
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
         if (node.account == address(0)) revert NodeNotExists();
 
@@ -234,7 +242,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     function stakeToPublicPool(
         address nodeAddr
     ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage node = StorageLib.getNode(nodeAddr);
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
 
         // node should not in exit status
@@ -312,7 +320,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function recordSlashing(
-        DataTypes.Slashing[] calldata slashings,
+        Slashing[] calldata slashings,
         address[] calldata reporters,
         string[] calldata reasons
     ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
@@ -329,9 +337,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function commitSlashing(
-        DataTypes.Slashing[] calldata slashings
-    ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+    function commitSlashing(Slashing[] calldata slashings) external override whenNotPaused onlyRole(ORACLE_ROLE) {
         for (uint256 i = 0; i < slashings.length; i++) {
             (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
 
@@ -340,9 +346,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function revokeSlashing(
-        DataTypes.Slashing[] calldata slashings
-    ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+    function revokeSlashing(Slashing[] calldata slashings) external override whenNotPaused onlyRole(ORACLE_ROLE) {
         for (uint256 i = 0; i < slashings.length; i++) {
             (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
 
@@ -363,7 +367,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @inheritdoc IStaking
     function setNodeStatus(
         address[] calldata nodeAddrs,
-        DataTypes.NodeStatus[] calldata status
+        NodeStatus[] calldata status
     ) external override onlyRole(ORACLE_ROLE) {
         NodeSettingsLib.setNodesStatus(nodeAddrs, status);
     }
@@ -375,8 +379,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
             if (++_nodeDemotionCounter[epoch][nodeAddr] >= Const.DEMOTION_COUNT_THRESHOLD) {
                 // check node status
-                DataTypes.NodeStatus status = NodeSettingsLib.getNodeStatus(StorageLib.getNode(nodeAddr));
-                if (status != DataTypes.NodeStatus.Slashing) {
+                NodeStatus status = NodeSettingsLib.getNodeStatus(StorageLib.getNode(nodeAddr));
+                if (status != NodeStatus.Slashing) {
                     // slash
                     RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, address(0), Const.DEFAULT_SLASH_REASON);
                 }
@@ -419,14 +423,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getPendingWithdrawal(
-        uint256 requestId
-    ) external view override returns (DataTypes.WithdrawalRequest memory) {
+    function getPendingWithdrawal(uint256 requestId) external view override returns (WithdrawalRequest memory) {
         return _pendingWithdrawals[requestId];
     }
 
     /// @inheritdoc IStaking
-    function getPendingUnstake(uint256 requestId) external view override returns (DataTypes.UnstakeRequest memory) {
+    function getPendingUnstake(uint256 requestId) external view override returns (UnstakeRequest memory) {
         return _pendingUnstake[requestId];
     }
 
@@ -460,15 +462,15 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getNode(address nodeAddr) external view override returns (DataTypes.Node memory) {
-        DataTypes.Node memory node = StorageLib.getNode(nodeAddr);
+    function getNode(address nodeAddr) external view override returns (Node memory) {
+        Node memory node = StorageLib.getNode(nodeAddr);
         node.status = NodeSettingsLib.getNodeStatus(node);
         return node;
     }
 
     /// @inheritdoc IStaking
-    function getNodes(address[] calldata nodeAddrs) external view override returns (DataTypes.Node[] memory nodes) {
-        nodes = new DataTypes.Node[](nodeAddrs.length);
+    function getNodes(address[] calldata nodeAddrs) external view override returns (Node[] memory nodes) {
+        nodes = new Node[](nodeAddrs.length);
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             address nodeAddr = nodeAddrs[i];
 
@@ -484,21 +486,21 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function getSlashingRecords(
-        DataTypes.Slashing[] calldata slashings
-    ) external pure override returns (DataTypes.SlashRecord[] memory records) {
-        records = new DataTypes.SlashRecord[](slashings.length);
+        Slashing[] calldata slashings
+    ) external pure override returns (SlashRecord[] memory records) {
+        records = new SlashRecord[](slashings.length);
         for (uint256 i = 0; i < slashings.length; i++) {
             records[i] = StorageLib.getSlashRecord(slashings[i].nodeAddr, slashings[i].epoch);
         }
     }
 
     /// @inheritdoc IStaking
-    function getPublicPool() external pure override returns (DataTypes.Node memory) {
+    function getPublicPool() external pure override returns (Node memory) {
         return StorageLib.publicPool();
     }
 
     function _migratePublicPool() internal {
-        DataTypes.Node storage pp = StorageLib.publicPool();
+        Node storage pp = StorageLib.publicPool();
         pp.taxRateBasisPoints = _oldPublicPool.taxRateBasisPoints;
         pp.publicGood = true;
         pp.name = "Public Good Pool";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {DataTypes} from "./DataTypes.sol";
+import {NodeStatus} from "./DataTypes.sol";
 
 library Events {
     /**
@@ -116,7 +116,7 @@ library Events {
      * @param nodeAddrs Addresses of node operator.
      * @param status The status of node operators to set.
      */
-    event NodeStatusSet(address[] nodeAddrs, DataTypes.NodeStatus[] status);
+    event NodeStatusSet(address[] nodeAddrs, NodeStatus[] status);
 
     /**
      * @dev Emitted on claimWithdrawal()

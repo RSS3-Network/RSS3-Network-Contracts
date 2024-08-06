@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {DataTypes} from "../libraries/DataTypes.sol";
+import {Node, NodeStatus, Slashing, SlashRecord, WithdrawalRequest, UnstakeRequest} from "../libraries/DataTypes.sol";
 
 interface IStaking {
     /**
@@ -164,7 +164,7 @@ interface IStaking {
      * @param nodeAddrs Addresses of node operator to set.
      * @param status Status to set.
      */
-    function setNodeStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external;
+    function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
 
     /**
      * @notice Demotes nodes.
@@ -195,7 +195,7 @@ interface IStaking {
      * @param reasons The reasons of slashing.
      */
     function recordSlashing(
-        DataTypes.Slashing[] calldata slashings,
+        Slashing[] calldata slashings,
         address[] calldata reporters,
         string[] calldata reasons
     ) external;
@@ -206,7 +206,7 @@ interface IStaking {
      * - The caller must have the `ORACLE_ROLE`.
      * @param slashings The ids of slashes to commit.
      */
-    function commitSlashing(DataTypes.Slashing[] calldata slashings) external;
+    function commitSlashing(Slashing[] calldata slashings) external;
 
     /**
      * @notice Revoke slashing nodes.
@@ -214,7 +214,7 @@ interface IStaking {
      * - The caller must have the `ORACLE_ROLE`.
      * @param slashings The addresses of nodes to revoke.
      */
-    function revokeSlashing(DataTypes.Slashing[] calldata slashings) external;
+    function revokeSlashing(Slashing[] calldata slashings) external;
 
     /**
      * @notice Sets the settlement phase.
@@ -259,16 +259,16 @@ interface IStaking {
     /**
      * @notice Returns the pending withdrawal request by `requestId`.
      * @param requestId The id of withdrawal request.
-     * @return DataTypes.WithdrawalRequest The pending withdrawal request.
+     * @return WithdrawalRequest The pending withdrawal request.
      */
-    function getPendingWithdrawal(uint256 requestId) external view returns (DataTypes.WithdrawalRequest memory);
+    function getPendingWithdrawal(uint256 requestId) external view returns (WithdrawalRequest memory);
 
     /**
      * @notice Returns the pending unstake request by `requestId`.
      * @param requestId The id of unstake request.
-     * @return DataTypes.UnstakeRequest The pending unstake request.
+     * @return UnstakeRequest The pending unstake request.
      */
-    function getPendingUnstake(uint256 requestId) external view returns (DataTypes.UnstakeRequest memory);
+    function getPendingUnstake(uint256 requestId) external view returns (UnstakeRequest memory);
 
     /**
      * @notice Gets chip info by `tokenId`.
@@ -305,16 +305,16 @@ interface IStaking {
     /**
      * @notice Gets node info by node address.
      * @param nodeAddr Node address to query.
-     * @return DataTypes.Node Node info.
+     * @return Node Node info.
      */
-    function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
+    function getNode(address nodeAddr) external view returns (Node memory);
 
     /**
      * @notice Gets nodes info by node addresses.
      * @param nodeAddrs Node addresses to query.
-     * @return DataTypes.Node[] Nodes info.
+     * @return Node[] Nodes info.
      */
-    function getNodes(address[] calldata nodeAddrs) external view returns (DataTypes.Node[] memory);
+    function getNodes(address[] calldata nodeAddrs) external view returns (Node[] memory);
 
     /**
      * @notice Returns the address of the chips contract.
@@ -325,15 +325,13 @@ interface IStaking {
     /**
      * @notice Gets slashing records info by `slashings`.
      * @param slashings IDs of slashing records
-     * @return records DataTypes.SlashRecord[] slashing records info
+     * @return records SlashRecord[] slashing records info
      */
-    function getSlashingRecords(
-        DataTypes.Slashing[] calldata slashings
-    ) external pure returns (DataTypes.SlashRecord[] memory records);
+    function getSlashingRecords(Slashing[] calldata slashings) external pure returns (SlashRecord[] memory records);
 
     /**
      * @notice Gets public pool info.
-     * @return DataTypes.Node public pool info.
+     * @return Node public pool info.
      */
-    function getPublicPool() external pure returns (DataTypes.Node memory);
+    function getPublicPool() external pure returns (Node memory);
 }

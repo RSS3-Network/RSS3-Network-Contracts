@@ -7,7 +7,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
-import {DataTypes} from "./libraries/DataTypes.sol";
+import {NodeStatus, Slashing, RewardsData} from "./libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
@@ -99,7 +99,7 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
         _checkRewards(epoch, nodeAddrs, operationRewards);
 
         /// @dev we use a temp struct here to avoid `stack too deep`
-        DataTypes.RewardsData memory data;
+        RewardsData memory data;
         if (epoch == _currentEpoch + 1) {
             _updateEpochInfo(epoch);
 
@@ -135,7 +135,7 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
 
     /// @inheritdoc ISettlement
     function recordSlashing(
-        DataTypes.Slashing[] calldata slashings,
+        Slashing[] calldata slashings,
         address[] calldata reporters,
         string[] calldata reasons
     ) external override onlyRole(ORACLE_ROLE) {
@@ -143,19 +143,19 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc ISettlement
-    function revokeSlashing(DataTypes.Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
+    function revokeSlashing(Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
         IStaking(_staking).revokeSlashing(epochIds);
     }
 
     /// @inheritdoc ISettlement
-    function commitSlashing(DataTypes.Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
+    function commitSlashing(Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
         IStaking(_staking).commitSlashing(epochIds);
     }
 
     /// @inheritdoc ISettlement
     function setNodeStatus(
         address[] calldata nodeAddrs,
-        DataTypes.NodeStatus[] calldata status
+        NodeStatus[] calldata status
     ) external override onlyRole(ORACLE_ROLE) {
         IStaking(_staking).setNodeStatus(nodeAddrs, status);
     }

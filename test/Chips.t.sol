@@ -6,7 +6,7 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {Base64} from "solady/utils/Base64.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
-import {DataTypes} from "../src/libraries/DataTypes.sol";
+import {NodeTraits, NodeTraits, ChipTraits} from "../src/libraries/DataTypes.sol";
 import {BatchSizeZero} from "../src/libraries/Errors.sol";
 import {SVGGenerator} from "../src/libraries/SVGGenerator.sol";
 
@@ -110,8 +110,8 @@ contract ChipsTest is CommonTest {
 
     function testCorner() public pure {
         (, string memory attributes) = SVGGenerator.generateSVGAndAttributes(
-            DataTypes.NodeTraits(1, 2, 3, 4, 5, true, true),
-            DataTypes.ChipTraits(0, 0, 0, 0, 0, 0)
+            NodeTraits(1, 2, 3, 4, 5, true, true),
+            ChipTraits(0, 0, 0, 0, 0, 0)
         );
 
         uint256 found1 = LibString.indexOf(attributes, "Public Good Node"); // head detail color white
@@ -119,8 +119,8 @@ contract ChipsTest is CommonTest {
         assertNotEq(found1, LibString.NOT_FOUND);
 
         (, string memory attributes2) = SVGGenerator.generateSVGAndAttributes(
-            DataTypes.NodeTraits(1, 2, 3, 4, 5, true, false),
-            DataTypes.ChipTraits(0, 0, 0, 0, 0, 0)
+            NodeTraits(1, 2, 3, 4, 5, true, false),
+            ChipTraits(0, 0, 0, 0, 0, 0)
         );
 
         uint256 found2 = LibString.indexOf(attributes2, "Public Good Node"); // head detail color white
@@ -128,8 +128,8 @@ contract ChipsTest is CommonTest {
         assertNotEq(found2, LibString.NOT_FOUND);
 
         (, string memory attributes3) = SVGGenerator.generateSVGAndAttributes(
-            DataTypes.NodeTraits(1, 2, 3, 4, 5, false, false),
-            DataTypes.ChipTraits(0, 0, 0, 0, 0, 0)
+            NodeTraits(1, 2, 3, 4, 5, false, false),
+            ChipTraits(0, 0, 0, 0, 0, 0)
         );
 
         uint256 found3 = LibString.indexOf(attributes3, "Corner "); // head detail color white
@@ -137,8 +137,8 @@ contract ChipsTest is CommonTest {
         assertNotEq(found3, LibString.NOT_FOUND);
 
         (, string memory attributes4) = SVGGenerator.generateSVGAndAttributes(
-            DataTypes.NodeTraits(1, 2, 3, 4, 5, false, true),
-            DataTypes.ChipTraits(0, 0, 0, 0, 0, 0)
+            NodeTraits(1, 2, 3, 4, 5, false, true),
+            ChipTraits(0, 0, 0, 0, 0, 0)
         );
 
         uint256 found4 = LibString.indexOf(attributes4, "Alpha Node"); // head detail color white

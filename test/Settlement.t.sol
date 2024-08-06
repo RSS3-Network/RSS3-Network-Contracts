@@ -3,7 +3,7 @@
 pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
-import {DataTypes} from "../src/libraries/DataTypes.sol";
+import {Node, NodeStatus, Slashing} from "../src/libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
@@ -829,9 +829,9 @@ contract SettlementTest is CommonTest {
     }
 
     function testRecordSlashing() public {
-        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
-        slashings[0] = DataTypes.Slashing(alice, 1);
-        slashings[1] = DataTypes.Slashing(bob, 2);
+        Slashing[] memory slashings = new Slashing[](2);
+        slashings[0] = Slashing(alice, 1);
+        slashings[1] = Slashing(bob, 2);
 
         address[] memory reporters = array(carol, dave);
 
@@ -844,9 +844,9 @@ contract SettlementTest is CommonTest {
     }
 
     function testRecordSlashingFail() public {
-        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
-        slashings[0] = DataTypes.Slashing(alice, 1);
-        slashings[1] = DataTypes.Slashing(bob, 2);
+        Slashing[] memory slashings = new Slashing[](2);
+        slashings[0] = Slashing(alice, 1);
+        slashings[1] = Slashing(bob, 2);
 
         address[] memory reporters = array(carol, dave);
 
@@ -859,9 +859,9 @@ contract SettlementTest is CommonTest {
     }
 
     function testRevokeSlashing() public {
-        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
-        slashings[0] = DataTypes.Slashing(alice, 1);
-        slashings[1] = DataTypes.Slashing(bob, 2);
+        Slashing[] memory slashings = new Slashing[](2);
+        slashings[0] = Slashing(alice, 1);
+        slashings[1] = Slashing(bob, 2);
 
         address[] memory reporters = array(carol, dave);
 
@@ -877,18 +877,18 @@ contract SettlementTest is CommonTest {
     }
 
     function testRevokeSlashingFail() public {
-        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
-        slashings[0] = DataTypes.Slashing(alice, 1);
-        slashings[1] = DataTypes.Slashing(bob, 2);
+        Slashing[] memory slashings = new Slashing[](2);
+        slashings[0] = Slashing(alice, 1);
+        slashings[1] = Slashing(bob, 2);
 
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
         _settlement.revokeSlashing(slashings);
     }
 
     function testCommitSlashing() public {
-        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
-        slashings[0] = DataTypes.Slashing(alice, 1);
-        slashings[1] = DataTypes.Slashing(bob, 2);
+        Slashing[] memory slashings = new Slashing[](2);
+        slashings[0] = Slashing(alice, 1);
+        slashings[1] = Slashing(bob, 2);
 
         address[] memory reporters = array(carol, dave);
 
@@ -904,9 +904,9 @@ contract SettlementTest is CommonTest {
     }
 
     function testCommitSlashingFail() public {
-        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](2);
-        slashings[0] = DataTypes.Slashing(alice, 1);
-        slashings[1] = DataTypes.Slashing(bob, 2);
+        Slashing[] memory slashings = new Slashing[](2);
+        slashings[0] = Slashing(alice, 1);
+        slashings[1] = Slashing(bob, 2);
 
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
         _settlement.commitSlashing(slashings);
@@ -919,26 +919,22 @@ contract SettlementTest is CommonTest {
 
         // Registered -> Initializing
         vm.prank(oracleAccount);
-        _settlement.setNodeStatus(array(alice), array(DataTypes.NodeStatus.Initializing));
+        _settlement.setNodeStatus(array(alice), array(NodeStatus.Initializing));
         // check status
-        DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(uint256(node.status), uint256(DataTypes.NodeStatus.Initializing));
+        Node memory node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(NodeStatus.Initializing));
 
         //  Initializing -> Online
         vm.prank(oracleAccount);
-        _settlement.setNodeStatus(array(alice), array(DataTypes.NodeStatus.Online));
+        _settlement.setNodeStatus(array(alice), array(NodeStatus.Online));
         // check status
         node = _staking.getNode(alice);
-        assertEq(uint256(node.status), uint256(DataTypes.NodeStatus.Online));
+        assertEq(uint256(node.status), uint256(NodeStatus.Online));
     }
 
     function testSetNodeStatusFail() public {
         address[] memory nodeAddrs = array(alice, bob, carol);
-        DataTypes.NodeStatus[] memory status = array(
-            DataTypes.NodeStatus.Online,
-            DataTypes.NodeStatus.Offline,
-            DataTypes.NodeStatus.Initializing
-        );
+        NodeStatus[] memory status = array(NodeStatus.Online, NodeStatus.Offline, NodeStatus.Initializing);
 
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
         _settlement.setNodeStatus(nodeAddrs, status);

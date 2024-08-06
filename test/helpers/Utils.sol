@@ -3,7 +3,7 @@
 pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {DataTypes} from "../../src/libraries/DataTypes.sol";
+import {NodeStatus} from "../../src/libraries/DataTypes.sol";
 
 contract Utils is Test {
     uint8 public constant CheckTopic1 = 0x1;
@@ -118,25 +118,21 @@ contract Utils is Test {
         return arr;
     }
 
-    function array(DataTypes.NodeStatus a) public pure returns (DataTypes.NodeStatus[] memory) {
-        DataTypes.NodeStatus[] memory arr = new DataTypes.NodeStatus[](1);
+    function array(NodeStatus a) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](1);
         arr[0] = a;
         return arr;
     }
 
-    function array(DataTypes.NodeStatus a, DataTypes.NodeStatus b) public pure returns (DataTypes.NodeStatus[] memory) {
-        DataTypes.NodeStatus[] memory arr = new DataTypes.NodeStatus[](2);
+    function array(NodeStatus a, NodeStatus b) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](2);
         arr[0] = a;
         arr[1] = b;
         return arr;
     }
 
-    function array(
-        DataTypes.NodeStatus a,
-        DataTypes.NodeStatus b,
-        DataTypes.NodeStatus c
-    ) public pure returns (DataTypes.NodeStatus[] memory) {
-        DataTypes.NodeStatus[] memory arr = new DataTypes.NodeStatus[](3);
+    function array(NodeStatus a, NodeStatus b, NodeStatus c) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](3);
         arr[0] = a;
         arr[1] = b;
         arr[2] = c;

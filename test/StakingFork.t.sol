@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
-import {DataTypes} from "../src/libraries/DataTypes.sol";
+import {Node, UnstakeRequest} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
 import {TransparentUpgradeableProxy as Proxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {ITransparentUpgradeableProxy as IProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
@@ -75,20 +75,20 @@ contract StakingForkTest is CommonTest {
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
         assertEq(shares, Const.SHARES_PER_CHIP);
         assertTrue(tokens > shares);
-        DataTypes.Node memory nodeBefore = staking.getNode(nodeAddr);
+        Node memory nodeBefore = staking.getNode(nodeAddr);
 
         vm.prank(diygod);
         uint256 requestId = staking.requestUnstake(nodeAddr, array(uint256(1690), uint256(1691)));
 
         // check status
-        DataTypes.UnstakeRequest memory req = staking.getPendingUnstake(requestId);
+        UnstakeRequest memory req = staking.getPendingUnstake(requestId);
         assertEq(req.owner, diygod);
         assertEq(req.nodeAddr, nodeAddr);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.unstakeAmount, tokens * 2);
 
         // check node
-        DataTypes.Node memory nodeAfter = staking.getNode(nodeAddr);
+        Node memory nodeAfter = staking.getNode(nodeAddr);
         assertEq(nodeAfter.totalShares, nodeBefore.totalShares - shares * 2);
         assertEq(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 2);
     }
@@ -99,7 +99,7 @@ contract StakingForkTest is CommonTest {
 
         address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
-        DataTypes.Node memory nodeBefore = staking.getNode(nodeAddr);
+        Node memory nodeBefore = staking.getNode(nodeAddr);
 
         uint256[] memory tokenIds = array(uint256(1690), uint256(1691), uint256(1693), uint256(1695));
         vm.prank(diygod);
@@ -109,14 +109,14 @@ contract StakingForkTest is CommonTest {
         uint256 requestId = staking.requestUnstake(nodeAddr, array(tokenId));
 
         // check status
-        DataTypes.UnstakeRequest memory req = staking.getPendingUnstake(requestId);
+        UnstakeRequest memory req = staking.getPendingUnstake(requestId);
         assertEq(req.owner, diygod);
         assertEq(req.nodeAddr, nodeAddr);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.unstakeAmount, tokens * 4);
 
         // check node
-        DataTypes.Node memory nodeAfter = staking.getNode(nodeAddr);
+        Node memory nodeAfter = staking.getNode(nodeAddr);
         assertEq(nodeAfter.totalShares, nodeBefore.totalShares - shares * 4);
         assertEq(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 4);
     }
@@ -128,7 +128,7 @@ contract StakingForkTest is CommonTest {
         assertEq(staking.isAlphaPhase(), true);
         // check node info
         // node 1
-        DataTypes.Node memory node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
+        Node memory node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
         _checkNode(
             0x827431510a5D249cE4fdB7F00C83a3353F471848,
             1,
@@ -207,7 +207,7 @@ contract StakingForkTest is CommonTest {
         bool publicGood,
         bool alpha
     ) internal view {
-        DataTypes.Node memory node = staking.getNode(nodeAddr);
+        Node memory node = staking.getNode(nodeAddr);
         assertEq(node.nodeId, nodeId);
         assertEq(node.account, nodeAddr);
         assertEq(node.taxRateBasisPoints, taxRateBasisPoints);

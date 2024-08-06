@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {LibString} from "solady/utils/LibString.sol";
-import {DataTypes} from "./DataTypes.sol";
+import {NodeTraits, ChipTraits, NftCardTraits} from "./DataTypes.sol";
 import {Fonts1} from "./Fonts/Fonts1.sol";
 import {Fonts2} from "./Fonts/Fonts2.sol";
 import {ChipCorners} from "./SVGsV2/ChipCorners.sol";
@@ -48,9 +48,9 @@ library SVGGeneratorV2 {
     }
 
     function generateSVGAndAttributes(
-        DataTypes.NodeTraits calldata nodeTraits,
-        DataTypes.ChipTraits calldata chipTraits,
-        DataTypes.NftCardTraits calldata nftCardTraits
+        NodeTraits calldata nodeTraits,
+        ChipTraits calldata chipTraits,
+        NftCardTraits calldata nftCardTraits
     ) external pure returns (string memory, string memory) {
         string memory styleSVG = getSVGStyle(
             nodeTraits.frameColor,
@@ -86,8 +86,8 @@ library SVGGeneratorV2 {
     }
 
     function generateSVGAndAttributes(
-        DataTypes.NodeTraits calldata nodeTraits,
-        DataTypes.ChipTraits calldata chipTraits
+        NodeTraits calldata nodeTraits,
+        ChipTraits calldata chipTraits
     ) external pure returns (string memory, string memory) {
         string memory styleSVG = getSVGStyle(
             nodeTraits.frameColor,
@@ -109,7 +109,7 @@ library SVGGeneratorV2 {
 
     function getNftCardSvgs(
         string memory nftCard,
-        DataTypes.NftCardTraits calldata nftCardTraits
+        NftCardTraits calldata nftCardTraits
     ) internal pure returns (string memory) {
         (string memory addrPart1, string memory addrPart2) = _splitAddress(nftCardTraits.nodeAddr);
 
@@ -150,7 +150,7 @@ library SVGGeneratorV2 {
 
     // get node traits and nft card trait
     function getNodeTraitsInnerSVGAndAttributes(
-        DataTypes.NodeTraits memory nodeTraits
+        NodeTraits memory nodeTraits
     ) internal pure returns (string memory, string memory) {
         string memory svgParts = "";
         string memory attributes = "";
@@ -177,7 +177,7 @@ library SVGGeneratorV2 {
     }
 
     function getChipTraitsInnerSVGAndAttributes(
-        DataTypes.ChipTraits memory chipTraits
+        ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
         (string memory svgParts, string memory headShapeTrait) = HeadShapes.getHeadShape(chipTraits.headShapeId % 3);
 
@@ -199,7 +199,7 @@ library SVGGeneratorV2 {
     function addEyes(
         string memory svgs,
         string memory attrs,
-        DataTypes.ChipTraits memory chipTraits
+        ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
         (string memory eyesSVG, string memory eyesTrait) = Eyes.getEye(chipTraits.eyesId);
 
@@ -212,7 +212,7 @@ library SVGGeneratorV2 {
     function addMouth(
         string memory svgs,
         string memory attrs,
-        DataTypes.ChipTraits memory chipTraits
+        ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
         (string memory mouthSVG, string memory mouthTrait) = Mouths.getMouth(chipTraits.mouthId);
 
@@ -225,7 +225,7 @@ library SVGGeneratorV2 {
     function addHeadDetail(
         string memory svgs,
         string memory attrs,
-        DataTypes.ChipTraits memory chipTraits
+        ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
         (string memory headSVG, string memory headTraits) = HeadDetails.getHeadDetail(chipTraits.headDetailId);
 
@@ -245,7 +245,7 @@ library SVGGeneratorV2 {
     function getChipFrame(
         string memory svgs,
         string memory attrs,
-        DataTypes.NodeTraits memory nodeTraits
+        NodeTraits memory nodeTraits
     ) internal pure returns (string memory, string memory) {
         (string memory chipSVGs, string memory chipTrait) = ChipFrames.getChipFrame(nodeTraits.frameId);
 
@@ -265,7 +265,7 @@ library SVGGeneratorV2 {
     function addChipDetail(
         string memory svgs,
         string memory attrs,
-        DataTypes.NodeTraits memory nodeTraits
+        NodeTraits memory nodeTraits
     ) internal pure returns (string memory, string memory) {
         (string memory chipSVGs, string memory chipTrait) = ChipDetails.getChipDetail(nodeTraits.chipDetailId);
 

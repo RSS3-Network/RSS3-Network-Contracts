@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 
 import {Chips} from "../../src/Chips.sol";
 import {Const} from "../../src/libraries/Const.sol";
-import {DataTypes} from "../../src/libraries/DataTypes.sol";
+import {Node} from "../../src/libraries/DataTypes.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
 import {Settlement} from "../../src/Settlement.sol";
 import {Staking} from "../../src/Staking.sol";
@@ -131,7 +131,7 @@ contract CommonTest is Utils {
     ) internal view {
         // status check
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            DataTypes.Node memory node = _staking.getNode(nodeAddrs[i]);
+            Node memory node = _staking.getNode(nodeAddrs[i]);
             uint256 newOperationPool = depositAmounts[i] + taxAmounts[i];
             assertEq(node.operationPoolTokens, newOperationPool, "check operation pool failed");
 

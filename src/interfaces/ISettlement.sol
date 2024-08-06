@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
-import {DataTypes} from "../libraries/DataTypes.sol";
+
+import {NodeStatus, Slashing} from "../libraries/DataTypes.sol";
 
 interface ISettlement {
     /**
@@ -52,7 +53,7 @@ interface ISettlement {
      * @param reasons The reasons for slashing.
      */
     function recordSlashing(
-        DataTypes.Slashing[] calldata slashings,
+        Slashing[] calldata slashings,
         address[] calldata reporters,
         string[] calldata reasons
     ) external;
@@ -61,20 +62,20 @@ interface ISettlement {
      * @notice Revokes slashing.
      * @param epochIds The epoch numbers to revoke slashing.
      */
-    function revokeSlashing(DataTypes.Slashing[] calldata epochIds) external;
+    function revokeSlashing(Slashing[] calldata epochIds) external;
 
     /**
      * @notice Commit slashing.
      * @param epochIds The epoch numbers to commit slashing.
      */
-    function commitSlashing(DataTypes.Slashing[] calldata epochIds) external;
+    function commitSlashing(Slashing[] calldata epochIds) external;
 
     /**
      * @notice Sets node status.
      * @param nodeAddrs Addresses of node operator to set.
      * @param status Status to set.
      */
-    function setNodeStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external;
+    function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
 
     /**
      * @notice Demotes nodes.

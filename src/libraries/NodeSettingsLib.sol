@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
-import {DataTypes} from "./DataTypes.sol";
+import {Node, NodeStatus} from "./DataTypes.sol";
 import {
     CreateNodeToZeroAddress,
     NodeExists,
@@ -24,12 +24,11 @@ import {StorageLib} from "./StorageLib.sol";
 
 library NodeSettingsLib {
     using EnumerableSet for EnumerableSet.AddressSet;
-    using DataTypes for DataTypes.NodeStatus;
 
     function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints, address nodeAddr) external {
         _validateTaxRateBasisPoints(taxRateBasisPoints);
 
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage node = StorageLib.getNode(nodeAddr);
 
         _validateNodeAddress(node.account);
 
@@ -43,7 +42,7 @@ library NodeSettingsLib {
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external {
         if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
 
-        DataTypes.Node storage publicPool = StorageLib.publicPool();
+        Node storage publicPool = StorageLib.publicPool();
 
         publicPool.taxRateBasisPoints = taxRateBasisPoints;
 
@@ -51,7 +50,7 @@ library NodeSettingsLib {
     }
 
     function updateNode(address nodeAddr, string calldata name, string calldata description) external {
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage node = StorageLib.getNode(nodeAddr);
         _validateNodeAddress(node.account);
 
         node.name = name;
@@ -79,7 +78,7 @@ library NodeSettingsLib {
         uint256 nodeId = StorageLib.nextNodeId();
         bool isAlphaPhase = StorageLib.getIsAlphaPhase();
 
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage node = StorageLib.getNode(nodeAddr);
         if (node.nodeId > 0) revert NodeExists();
         node.nodeId = nodeId;
         node.account = nodeAddr;
@@ -96,7 +95,7 @@ library NodeSettingsLib {
     }
 
     function requestExit(address nodeAddr) external {
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage node = StorageLib.getNode(nodeAddr);
 
         _validateNodeAddress(node.account);
 
@@ -106,13 +105,13 @@ library NodeSettingsLib {
         // update node time
         node.exitingTime = block.timestamp;
         // set node status
-        node.status = DataTypes.NodeStatus.Exiting;
+        node.status = NodeStatus.Exiting;
 
         emit Events.NodeExitRequested(nodeAddr);
     }
 
     function reRegister(address nodeAddr) external {
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage node = StorageLib.getNode(nodeAddr);
 
         _validateNodeAddress(node.account);
 
@@ -127,12 +126,12 @@ library NodeSettingsLib {
         delete node.exitingTime;
         delete node.slashedTime;
         // set node status
-        node.status = DataTypes.NodeStatus.Registered;
+        node.status = NodeStatus.Registered;
 
         emit Events.NodeReentryRequested(nodeAddr);
     }
 
-    function setNodesStatus(address[] calldata nodeAddrs, DataTypes.NodeStatus[] calldata status) external {
+    function setNodesStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external {
         if (nodeAddrs.length != status.length) revert InvalidArrayLength();
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
@@ -142,35 +141,34 @@ library NodeSettingsLib {
         emit Events.NodeStatusSet(nodeAddrs, status);
     }
 
-    function getNodeStatus(DataTypes.Node calldata node) external view returns (DataTypes.NodeStatus) {
+    function getNodeStatus(Node calldata node) external view returns (NodeStatus) {
         return _getNodeStatus(node);
     }
 
-    function _setNodeStatus(address nodeAddr, DataTypes.NodeStatus newStatus) internal {
-        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
-        DataTypes.NodeStatus curStatus = _getNodeStatus(node);
+    function _setNodeStatus(address nodeAddr, NodeStatus newStatus) internal {
+        Node storage node = StorageLib.getNode(nodeAddr);
+        NodeStatus curStatus = _getNodeStatus(node);
 
         // can only set node status as: Online, Offline and Initializing
-        if (newStatus == DataTypes.NodeStatus.Initializing) {
-            if (curStatus != DataTypes.NodeStatus.Registered)
-                revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
+        if (newStatus == NodeStatus.Initializing) {
+            if (curStatus != NodeStatus.Registered) revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
             node.status = newStatus;
 
             delete node.registerTime;
             delete node.offlineTime;
             delete node.slashedTime;
-        } else if (newStatus == DataTypes.NodeStatus.Online) {
+        } else if (newStatus == NodeStatus.Online) {
             if (
-                curStatus != DataTypes.NodeStatus.Initializing &&
-                curStatus != DataTypes.NodeStatus.Offline &&
-                curStatus != DataTypes.NodeStatus.Slashed
+                curStatus != NodeStatus.Initializing &&
+                curStatus != NodeStatus.Offline &&
+                curStatus != NodeStatus.Slashed
             ) revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
             node.status = newStatus;
 
             delete node.registerTime;
             delete node.offlineTime;
             delete node.slashedTime;
-        } else if (newStatus == DataTypes.NodeStatus.Offline) {
+        } else if (newStatus == NodeStatus.Offline) {
             node.status = newStatus;
             node.offlineTime = block.timestamp;
         } else {
@@ -178,48 +176,47 @@ library NodeSettingsLib {
         }
     }
 
-    function _getNodeStatus(DataTypes.Node memory node) internal view returns (DataTypes.NodeStatus) {
-        DataTypes.NodeStatus status = node.status;
+    function _getNodeStatus(Node memory node) internal view returns (NodeStatus) {
+        NodeStatus status = node.status;
 
         // Registered Node transitions to Exited state after 30 Epochs of inactivity.
-        if (status == DataTypes.NodeStatus.Registered && _inActive(node.registerTime, Const.NODE_INACTIVITY_PERIOD)) {
-            status = DataTypes.NodeStatus.Exited;
+        if (status == NodeStatus.Registered && _inactive(node.registerTime, Const.NODE_INACTIVITY_PERIOD)) {
+            status = NodeStatus.Exited;
             return status;
         }
 
         // An Offline Node transitions to Exited state after 30 Epochs of inactivity.
-        if (status == DataTypes.NodeStatus.Offline && _inActive(node.offlineTime, Const.NODE_INACTIVITY_PERIOD)) {
-            status = DataTypes.NodeStatus.Exited;
+        if (status == NodeStatus.Offline && _inactive(node.offlineTime, Const.NODE_INACTIVITY_PERIOD)) {
+            status = NodeStatus.Exited;
             return status;
         }
 
         // An Exiting Node transitions to Exited state after 1 Epoch.
-        if (status == DataTypes.NodeStatus.Exiting && _inActive(node.exitingTime, Const.NODE_EXIT_PERIOD)) {
-            status = DataTypes.NodeStatus.Exited;
+        if (status == NodeStatus.Exiting && _inactive(node.exitingTime, Const.NODE_EXIT_PERIOD)) {
+            status = NodeStatus.Exited;
             return status;
         }
 
         // An Slashed Node transitions to Offline state after 30 Epochs of inactivity.
-        if (status == DataTypes.NodeStatus.Slashed && _inActive(node.slashedTime, Const.NODE_OFFLINE_PERIOD)) {
-            status = DataTypes.NodeStatus.Offline;
+        if (status == NodeStatus.Slashed && _inactive(node.slashedTime, Const.NODE_OFFLINE_PERIOD)) {
+            status = NodeStatus.Offline;
             return status;
         }
 
         return status;
     }
 
-    function _validateNodeNotInExitStatus(DataTypes.Node storage node) internal view {
-        DataTypes.NodeStatus status = _getNodeStatus(node);
-        if (DataTypes.NodeStatus.Exiting == status || DataTypes.NodeStatus.Exited == status) revert NodeInExitStatus();
+    function _validateNodeNotInExitStatus(Node storage node) internal view {
+        NodeStatus status = _getNodeStatus(node);
+        if (NodeStatus.Exiting == status || NodeStatus.Exited == status) revert NodeInExitStatus();
     }
 
-    function _validateNodeInExitStatus(DataTypes.Node storage node) internal view {
-        DataTypes.NodeStatus status = _getNodeStatus(node);
-        if (DataTypes.NodeStatus.Exiting != status && DataTypes.NodeStatus.Exited != status)
-            revert NodeNotInExitStatus();
+    function _validateNodeInExitStatus(Node storage node) internal view {
+        NodeStatus status = _getNodeStatus(node);
+        if (NodeStatus.Exiting != status && NodeStatus.Exited != status) revert NodeNotInExitStatus();
     }
 
-    function _inActive(uint256 time, uint256 duration) internal view returns (bool) {
+    function _inactive(uint256 time, uint256 duration) internal view returns (bool) {
         return time + duration <= block.timestamp;
     }
 
