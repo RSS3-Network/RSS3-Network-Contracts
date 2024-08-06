@@ -113,10 +113,11 @@ library Events {
 
     /**
      * @dev Emitted on setNodesStatus()
-     * @param nodeAddrs Addresses of node operator.
-     * @param status The status of node operators to set.
+     * @param nodeAddr Address of node operator.
+     * @param curStatus The current status of node operator.
+     * @param newStatus The new status of node operator to set.
      */
-    event NodeStatusSet(address[] nodeAddrs, NodeStatus[] status);
+    event NodeStatusSet(address indexed nodeAddr, NodeStatus indexed curStatus, NodeStatus indexed newStatus);
 
     /**
      * @dev Emitted on claimWithdrawal()

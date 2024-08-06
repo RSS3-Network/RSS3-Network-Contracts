@@ -137,8 +137,6 @@ library NodeSettingsLib {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             _setNodeStatus(nodeAddrs[i], status[i]);
         }
-
-        emit Events.NodeStatusSet(nodeAddrs, status);
     }
 
     function getNodeStatus(Node calldata node) external view returns (NodeStatus) {
@@ -174,6 +172,8 @@ library NodeSettingsLib {
         } else {
             revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
         }
+
+        emit Events.NodeStatusSet(nodeAddr, curStatus, newStatus);
     }
 
     function _getNodeStatus(Node memory node) internal view returns (NodeStatus) {
