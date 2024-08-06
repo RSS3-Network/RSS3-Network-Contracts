@@ -1664,60 +1664,109 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testSetNodesStatus() public {
         _createNode(alice);
-        _createPublicGoodNode(bob);
-        _createNode(carol);
+        vm.prank(alice);
+        _staking.deposit{value: 10000 ether}();
 
-        address[] memory nodeAddrs = array(alice, bob, carol);
-        DataTypes.NodeStatus[] memory status = new DataTypes.NodeStatus[](3);
-        status[0] = DataTypes.NodeStatus.Online;
-        status[1] = DataTypes.NodeStatus.Offline;
-        status[2] = DataTypes.NodeStatus.Initializing;
-
-        expectEmit();
-        emit Events.NodeStatusSet(nodeAddrs, status);
+        // Registered -> Initializing
         vm.prank(address(_settlement));
-        _staking.setNodeStatus(nodeAddrs, status);
-
+        _staking.setNodeStatus(array(alice), array(DataTypes.NodeStatus.Initializing));
         // check status
-        DataTypes.Node[] memory nodes = _staking.getNodes(nodeAddrs);
-        assertEq(uint256(nodes[0].status), uint256(DataTypes.NodeStatus.Online));
-        assertEq(uint256(nodes[1].status), uint256(DataTypes.NodeStatus.Offline));
-        assertEq(uint256(nodes[2].status), uint256(DataTypes.NodeStatus.Initializing));
+        DataTypes.Node memory node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(DataTypes.NodeStatus.Initializing));
+
+        //  Initializing -> Online
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(array(alice), array(DataTypes.NodeStatus.Online));
+        // check status
+        node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(DataTypes.NodeStatus.Online));
+
+        // Online -> Offline
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(array(alice), array(DataTypes.NodeStatus.Offline));
+        // check status
+        node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(DataTypes.NodeStatus.Offline));
+
+        // Offline -> Online
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(array(alice), array(DataTypes.NodeStatus.Online));
+        // check status
+        node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(DataTypes.NodeStatus.Online));
     }
 
+    // TODO: more test cases
+    // solhint-disable-next-line function-max-lines
     function testSetNodesStatusFail() public {
         _createNode(alice);
         _createPublicGoodNode(bob);
 
         address[] memory nodeAddrs = array(alice, bob);
 
-        // WrongNodeStatus
-        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 0));
+        // WrongNodeStatus: None -> None
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WrongNodeStatus.selector,
+                uint256(DataTypes.NodeStatus.None),
+                uint256(DataTypes.NodeStatus.None)
+            )
+        );
         vm.prank(address(_settlement));
         _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.None, DataTypes.NodeStatus.Offline));
 
-        // WrongNodeStatus
-        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 1));
+        // WrongNodeStatus: None -> Registered
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WrongNodeStatus.selector,
+                uint256(DataTypes.NodeStatus.None),
+                uint256(DataTypes.NodeStatus.Registered)
+            )
+        );
         vm.prank(address(_settlement));
         _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Registered, DataTypes.NodeStatus.Offline));
 
-        // WrongNodeStatus
-        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 5));
+        // WrongNodeStatus: None -> Slashing
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WrongNodeStatus.selector,
+                uint256(DataTypes.NodeStatus.None),
+                uint256(DataTypes.NodeStatus.Slashing)
+            )
+        );
         vm.prank(address(_settlement));
         _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Slashing, DataTypes.NodeStatus.Offline));
 
-        // WrongNodeStatus
-        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 6));
+        // WrongNodeStatus: None -> Slashed
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WrongNodeStatus.selector,
+                uint256(DataTypes.NodeStatus.None),
+                uint256(DataTypes.NodeStatus.Slashed)
+            )
+        );
         vm.prank(address(_settlement));
         _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Slashed, DataTypes.NodeStatus.Offline));
 
-        // WrongNodeStatus
-        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 7));
+        // WrongNodeStatus: None -> Exiting
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WrongNodeStatus.selector,
+                uint256(DataTypes.NodeStatus.None),
+                uint256(DataTypes.NodeStatus.Exiting)
+            )
+        );
         vm.prank(address(_settlement));
         _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Exiting, DataTypes.NodeStatus.Offline));
 
-        // WrongNodeStatus
-        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, 8));
+        // WrongNodeStatus: None -> Exiting
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                WrongNodeStatus.selector,
+                uint256(DataTypes.NodeStatus.None),
+                uint256(DataTypes.NodeStatus.Exited)
+            )
+        );
         vm.prank(address(_settlement));
         _staking.setNodeStatus(nodeAddrs, array(DataTypes.NodeStatus.Exited, DataTypes.NodeStatus.Offline));
     }

@@ -33,6 +33,8 @@ library Const {
     uint256 public constant NODE_INACTIVITY_PERIOD = 30 * 18 hours;
     /// @dev the period of time that node operator can safely exit the network
     uint256 public constant NODE_EXIT_PERIOD = 18 hours;
+    /// @dev the period of time that a Slashed Node transitions to Offline state
+    uint256 public constant NODE_OFFLINE_PERIOD = 18 hours;
 
     // denominator
     uint256 public constant DENOMINATOR = 10000;

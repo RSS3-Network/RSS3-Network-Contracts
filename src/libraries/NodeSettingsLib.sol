@@ -136,24 +136,7 @@ library NodeSettingsLib {
         if (nodeAddrs.length != status.length) revert InvalidArrayLength();
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            address nodeAddr = nodeAddrs[i];
-            DataTypes.NodeStatus s = status[i];
-
-            DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
-
-            // can only set node status as: Online, Offline and Initializing
-            if (s == DataTypes.NodeStatus.Initializing || s == DataTypes.NodeStatus.Online) {
-                node.status = s;
-
-                delete node.registerTime;
-                delete node.offlineTime;
-                delete node.slashedTime;
-            } else if (s == DataTypes.NodeStatus.Offline) {
-                node.status = s;
-                node.offlineTime = block.timestamp;
-            } else {
-                revert WrongNodeStatus(uint256(s));
-            }
+            _setNodeStatus(nodeAddrs[i], status[i]);
         }
 
         emit Events.NodeStatusSet(nodeAddrs, status);
@@ -161,6 +144,38 @@ library NodeSettingsLib {
 
     function getNodeStatus(DataTypes.Node calldata node) external view returns (DataTypes.NodeStatus) {
         return _getNodeStatus(node);
+    }
+
+    function _setNodeStatus(address nodeAddr, DataTypes.NodeStatus newStatus) internal {
+        DataTypes.Node storage node = StorageLib.getNode(nodeAddr);
+        DataTypes.NodeStatus curStatus = _getNodeStatus(node);
+
+        // can only set node status as: Online, Offline and Initializing
+        if (newStatus == DataTypes.NodeStatus.Initializing) {
+            if (curStatus != DataTypes.NodeStatus.Registered)
+                revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
+            node.status = newStatus;
+
+            delete node.registerTime;
+            delete node.offlineTime;
+            delete node.slashedTime;
+        } else if (newStatus == DataTypes.NodeStatus.Online) {
+            if (
+                curStatus != DataTypes.NodeStatus.Initializing &&
+                curStatus != DataTypes.NodeStatus.Offline &&
+                curStatus != DataTypes.NodeStatus.Slashed
+            ) revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
+            node.status = newStatus;
+
+            delete node.registerTime;
+            delete node.offlineTime;
+            delete node.slashedTime;
+        } else if (newStatus == DataTypes.NodeStatus.Offline) {
+            node.status = newStatus;
+            node.offlineTime = block.timestamp;
+        } else {
+            revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
+        }
     }
 
     function _getNodeStatus(DataTypes.Node memory node) internal view returns (DataTypes.NodeStatus) {
@@ -184,9 +199,9 @@ library NodeSettingsLib {
             return status;
         }
 
-        // An Slashed Node transitions to Exited state after 30 Epochs of inactivity.
-        if (status == DataTypes.NodeStatus.Slashed && _inActive(node.slashedTime, Const.NODE_EXIT_PERIOD)) {
-            status = DataTypes.NodeStatus.Exited;
+        // An Slashed Node transitions to Offline state after 30 Epochs of inactivity.
+        if (status == DataTypes.NodeStatus.Slashed && _inActive(node.slashedTime, Const.NODE_OFFLINE_PERIOD)) {
+            status = DataTypes.NodeStatus.Offline;
             return status;
         }
 

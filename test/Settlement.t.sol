@@ -912,26 +912,24 @@ contract SettlementTest is CommonTest {
         _settlement.commitSlashing(slashings);
     }
 
-    function testSetNodeStatus() public {
+    function testSetNodeStatusSucceeds() public {
         _createNode(alice);
-        _createPublicGoodNode(bob);
-        _createNode(carol);
+        vm.prank(alice);
+        _staking.deposit{value: 10000 ether}();
 
-        address[] memory nodeAddrs = array(alice, bob, carol);
-        DataTypes.NodeStatus[] memory status = array(
-            DataTypes.NodeStatus.Online,
-            DataTypes.NodeStatus.Offline,
-            DataTypes.NodeStatus.Initializing
-        );
-
+        // Registered -> Initializing
         vm.prank(oracleAccount);
-        _settlement.setNodeStatus(nodeAddrs, status);
-
+        _settlement.setNodeStatus(array(alice), array(DataTypes.NodeStatus.Initializing));
         // check status
-        DataTypes.Node[] memory nodes = _staking.getNodes(nodeAddrs);
-        assertEq(uint256(nodes[0].status), uint256(DataTypes.NodeStatus.Online));
-        assertEq(uint256(nodes[1].status), uint256(DataTypes.NodeStatus.Offline));
-        assertEq(uint256(nodes[2].status), uint256(DataTypes.NodeStatus.Initializing));
+        DataTypes.Node memory node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(DataTypes.NodeStatus.Initializing));
+
+        //  Initializing -> Online
+        vm.prank(oracleAccount);
+        _settlement.setNodeStatus(array(alice), array(DataTypes.NodeStatus.Online));
+        // check status
+        node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(DataTypes.NodeStatus.Online));
     }
 
     function testSetNodeStatusFail() public {

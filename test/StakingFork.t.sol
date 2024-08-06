@@ -208,14 +208,19 @@ contract StakingForkTest is CommonTest {
         bool alpha
     ) internal view {
         DataTypes.Node memory node = staking.getNode(nodeAddr);
+        assertEq(node.nodeId, nodeId);
+        assertEq(node.account, nodeAddr);
+        assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
+        assertEq(node.publicGood, publicGood);
+        assertEq(node.alpha, alpha);
         assertEq(node.name, name);
         assertEq(node.description, description);
-        assertEq(node.nodeId, nodeId);
-        assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
         assertEq(node.operationPoolTokens, operationPoolTokens);
         assertEq(node.stakingPoolTokens, stakingPoolTokens);
         assertEq(node.totalShares, totalShares);
-        assertEq(node.publicGood, publicGood);
-        assertEq(node.alpha, alpha);
+        assertEq(node.registerTime, 0);
+        assertEq(node.offlineTime, 0);
+        assertEq(node.slashedTime, 0);
+        assertEq(uint256(node.status), 0);
     }
 }
