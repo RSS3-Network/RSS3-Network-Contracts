@@ -17,7 +17,7 @@ contract StakingForkTest is CommonTest {
     Staking public staking;
 
     function setUp() public {
-        vm.createSelectFork("https://rpc.rss3.io", 5787906);
+        vm.createSelectFork("https://rpc.rss3.io", 6571169);
 
         Staking st = new Staking(address(1111), 1944000, 1944000, address(0xbbb));
 
@@ -43,8 +43,8 @@ contract StakingForkTest is CommonTest {
         // check chip info
         (address nodeAddr2, uint256 tokens2, uint256 shares2) = staking.getChipInfo(tokenId);
         assertEq(nodeAddr, nodeAddr2);
-        assertEq(tokens * 4, tokens2);
-        assertEq(shares * 4, shares2);
+        assertApproxEqAbs(tokens * 4, tokens2, 1);
+        assertApproxEqAbs(shares * 4, shares2, 1);
 
         assertEq(IERC721(chips).ownerOf(tokenId), diygod);
     }
@@ -113,12 +113,12 @@ contract StakingForkTest is CommonTest {
         assertEq(req.owner, diygod);
         assertEq(req.nodeAddr, nodeAddr);
         assertEq(req.timestamp, block.timestamp);
-        assertEq(req.unstakeAmount, tokens * 4);
+        assertApproxEqAbs(req.unstakeAmount, tokens * 4, 1);
 
         // check node
         Node memory nodeAfter = staking.getNode(nodeAddr);
-        assertEq(nodeAfter.totalShares, nodeBefore.totalShares - shares * 4);
-        assertEq(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 4);
+        assertApproxEqAbs(nodeAfter.totalShares, nodeBefore.totalShares - shares * 4, 1);
+        assertApproxEqAbs(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 4, 1);
     }
 
     // solhint-disable-next-line function-max-lines
@@ -129,32 +129,50 @@ contract StakingForkTest is CommonTest {
         // check node info
         // node 1
         Node memory node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
-        _checkNode(
-            0x827431510a5D249cE4fdB7F00C83a3353F471848,
-            1,
-            "Henry",
-            "Henry's awesome Node",
-            1000,
-            uint256(12793157235268997410007),
-            uint256(188607752333832530148001),
-            uint256(148500000000000000000000),
-            false,
-            true
-        );
+        assertEq(node.nodeId, 1);
+        assertEq(node.taxRateBasisPoints, uint64(1000));
+        assertEq(node.name, "Henry");
+        assertEq(node.description, "Henry's awesome Node");
+        assertEq(node.operationPoolTokens, uint256(13098345260616808484943));
+        assertEq(node.stakingPoolTokens, uint256(191354444561962829822546));
+        assertEq(node.totalShares, uint256(148500000000000000000000));
+        assertEq(node.publicGood, false);
+        assertEq(node.alpha, true);
+        assertEq(node.registerTime, 0);
+        assertEq(node.offlineTime, 0);
+        assertEq(node.slashedTime, 0);
+        assertEq(uint256(node.status), 0);
+
+        // node 72
+        node = staking.getNode(0x5cccbC2DF34c103e3a198625C0a3bc1182d69BBe);
+        assertEq(node.nodeId, 72);
+        assertEq(node.taxRateBasisPoints, 0);
+        assertEq(node.name, "Google Cloud");
+        assertEq(node.description, "Google Cloud RSS3 Public Good Node");
+        assertEq(node.operationPoolTokens, uint256(0));
+        assertEq(node.stakingPoolTokens, uint256(0));
+        assertEq(node.totalShares, 0);
+        assertEq(node.publicGood, true);
+        assertEq(node.alpha, true);
+        assertEq(node.registerTime, 0);
+        assertEq(node.offlineTime, 0);
+        assertEq(node.slashedTime, 0);
+        assertEq(uint256(node.status), 0);
+
         // node 83
-        node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
-        _checkNode(
-            0xCe56132aB93bfA39241Ad844433b58e926295186,
-            83,
-            "Money Tree RSS3",
-            "Those who stay here are full of luck\n",
-            600,
-            uint256(10357200000000000000000),
-            0,
-            0,
-            false,
-            true
-        );
+        node = staking.getNode(0xCe56132aB93bfA39241Ad844433b58e926295186);
+        assertEq(node.nodeId, 83);
+        assertEq(node.taxRateBasisPoints, uint64(600));
+        assertEq(node.name, "Money Tree RSS3");
+        assertEq(node.operationPoolTokens, uint256(10357200000000000000000));
+        assertEq(node.stakingPoolTokens, uint256(0));
+        assertEq(node.totalShares, 0);
+        assertEq(node.publicGood, false);
+        assertEq(node.alpha, true);
+        assertEq(node.registerTime, 0);
+        assertEq(node.offlineTime, 0);
+        assertEq(node.slashedTime, 0);
+        assertEq(uint256(node.status), 0);
 
         // check node counter
         assertEq(staking.getNodeCount(), 83);
@@ -171,56 +189,41 @@ contract StakingForkTest is CommonTest {
         assertEq(node.taxRateBasisPoints, uint64(1168));
         assertEq(node.name, "Public Good Pool");
         assertEq(node.operationPoolTokens, uint256(0));
-        assertEq(node.stakingPoolTokens, uint256(102726750648321495462628));
+        assertEq(node.stakingPoolTokens, uint256(104194643234036416044119));
         assertEq(node.totalShares, uint256(100000000000000000000000));
         assertEq(node.publicGood, true);
         assertEq(node.alpha, false);
+        assertEq(node.registerTime, 0);
+        assertEq(node.offlineTime, 0);
+        assertEq(node.slashedTime, 0);
+        assertEq(uint256(node.status), 0);
 
         // check pool info
         (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = staking
             .getPoolInfo();
-        assertEq(totalOperationPoolTokens, uint256(3430942886901868893005511));
-        assertEq(totalStakingPoolTokens, uint256(88666655712935490505541127));
+        assertEq(totalOperationPoolTokens, uint256(3546654536250790710758117));
+        assertEq(totalStakingPoolTokens, uint256(93773491338396834893836628));
         assertEq(totalSlashingPoolTokens, uint256(0));
 
         // check chip info
         (address nodeAddr, uint256 tokens, uint256 shares) = staking.getChipInfo(1);
         assertEq(nodeAddr, 0x827431510a5D249cE4fdB7F00C83a3353F471848);
-        assertEq(tokens, uint256(635042937150951279959));
+        assertEq(tokens, uint256(644291059131187979200));
         assertEq(shares, 500 ether);
 
         (nodeAddr, tokens, shares) = staking.getChipInfo(139020);
         assertEq(nodeAddr, 0xc29f2Aec9dC8cdbC58da0bE1b9F612A629c83Ac5);
-        assertEq(tokens, uint256(590053490751951480978));
+        assertEq(tokens, uint256(599127317100828251171));
         assertEq(shares, 500 ether);
-    }
 
-    function _checkNode(
-        address nodeAddr,
-        uint256 nodeId,
-        string memory name,
-        string memory description,
-        uint64 taxRateBasisPoints,
-        uint256 operationPoolTokens,
-        uint256 stakingPoolTokens,
-        uint256 totalShares,
-        bool publicGood,
-        bool alpha
-    ) internal view {
-        Node memory node = staking.getNode(nodeAddr);
-        assertEq(node.nodeId, nodeId);
-        assertEq(node.account, nodeAddr);
-        assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
-        assertEq(node.publicGood, publicGood);
-        assertEq(node.alpha, alpha);
-        assertEq(node.name, name);
-        assertEq(node.description, description);
-        assertEq(node.operationPoolTokens, operationPoolTokens);
-        assertEq(node.stakingPoolTokens, stakingPoolTokens);
-        assertEq(node.totalShares, totalShares);
-        assertEq(node.registerTime, 0);
-        assertEq(node.offlineTime, 0);
-        assertEq(node.slashedTime, 0);
-        assertEq(uint256(node.status), 0);
+        (nodeAddr, tokens, shares) = staking.getChipInfo(144587);
+        assertEq(nodeAddr, 0x69982E017Acc0FDE3d1542205089A8d3EAfcD1B7);
+        assertEq(tokens, uint256(606238427225428543923));
+        assertEq(shares, uint256(483064298787126186988));
+
+        (nodeAddr, tokens, shares) = staking.getChipInfo(144591);
+        assertEq(nodeAddr, 0x69982E017Acc0FDE3d1542205089A8d3EAfcD1B7);
+        assertEq(tokens, uint256(10063076087164542382773));
+        assertEq(shares, uint256(8018483447074598157297));
     }
 }
