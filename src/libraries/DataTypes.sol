@@ -49,6 +49,12 @@ struct NodeObsoleted {
     bool slashStatus;
 }
 
+struct PoolStatData {
+    uint256 totalOperationPoolTokens;
+    uint256 totalStakingPoolTokens;
+    uint256 totalSlashingPoolTokens;
+}
+
 struct SlashRecord {
     address reporter;
     uint256 amountForOperationPool;

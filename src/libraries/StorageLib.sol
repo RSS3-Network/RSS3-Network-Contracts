@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Node, SlashRecord, UnstakeRequest, WithdrawalRequest} from "../libraries/DataTypes.sol";
+import {Node, PoolStatData, SlashRecord, UnstakeRequest, WithdrawalRequest} from "../libraries/DataTypes.sol";
 
 library StorageLib {
     using Checkpoints for Checkpoints.Trace160;
@@ -25,38 +25,20 @@ library StorageLib {
     uint256 public constant PENDING_UNSTAKE_COUNTER_SLOT = 11;
     uint256 public constant PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT = 12;
 
-    uint256 public constant TOTAL_OPERATION_POOL_TOKENS_SLOT = 21;
-    uint256 public constant TOTAL_STAKING_POOL_TOKENS_SLOT = 22;
-
     uint256 public constant FAMILIES_SLOT = 23;
 
     uint256 public constant CHIP_ISSUERS_MAPPING_SLOT = 24;
     uint256 public constant CHIP_TO_SHARES_MAPPING_SLOT = 25;
 
-    uint256 public constant TOTAL_SLASHING_POOL_TOKENS_SLOT = 26;
     uint256 public constant SLASH_RECORDS_SLOT = 27;
 
     // keccak256(abi.encode(uint256(keccak256("staking.storage.public.pool")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 public constant PUBLIC_POOL_SLOT_LOCATION =
         0x8f8113410d98c63dc5c1c4f1ac9eaef4d76f695bf1ef91dca2f23702b51d9400;
 
-    function setTotalOperationPoolTokens(uint256 totalOperatingPoolTokens) internal {
-        assembly {
-            sstore(TOTAL_OPERATION_POOL_TOKENS_SLOT, totalOperatingPoolTokens)
-        }
-    }
-
-    function setTotalStakingPoolTokens(uint256 totalStakingPoolTokens) internal {
-        assembly {
-            sstore(TOTAL_STAKING_POOL_TOKENS_SLOT, totalStakingPoolTokens)
-        }
-    }
-
-    function setTotalSlashingPoolTokens(uint256 totalSlashingPoolTokens) internal {
-        assembly {
-            sstore(TOTAL_SLASHING_POOL_TOKENS_SLOT, totalSlashingPoolTokens)
-        }
-    }
+    // keccak256(abi.encode(uint256(keccak256("staking.storage.pool.stat")) - 1)) & ~bytes32(uint256(0xff))
+    bytes32 public constant POOL_STAT_INFO_SLOT_LOCATION =
+        0xfcb6ad95c34c6d7d192743b3169b67a70694ba6d050a056cf57adc19b560c500;
 
     function nextNodeId() internal returns (uint256 newCounter) {
         assembly {
@@ -85,24 +67,6 @@ library StorageLib {
     function getChipsContract() internal view returns (address chips) {
         assembly {
             chips := sload(CHIPS_CONTRACT_ADDRESS_SLOT)
-        }
-    }
-
-    function getTotalOperatingPoolTokens() internal view returns (uint256 totalOperatingPoolTokens) {
-        assembly {
-            totalOperatingPoolTokens := sload(TOTAL_OPERATION_POOL_TOKENS_SLOT)
-        }
-    }
-
-    function getTotalStakingPoolTokens() internal view returns (uint256 totalStakingPoolTokens) {
-        assembly {
-            totalStakingPoolTokens := sload(TOTAL_STAKING_POOL_TOKENS_SLOT)
-        }
-    }
-
-    function getTotalSlashingPoolTokens() internal view returns (uint256 totalSlashingPoolTokens) {
-        assembly {
-            totalSlashingPoolTokens := sload(TOTAL_SLASHING_POOL_TOKENS_SLOT)
         }
     }
 
@@ -176,6 +140,12 @@ library StorageLib {
     function publicPool() internal pure returns (Node storage $) {
         assembly {
             $.slot := PUBLIC_POOL_SLOT_LOCATION
+        }
+    }
+
+    function poolStatStorage() internal pure returns (PoolStatData storage $) {
+        assembly {
+            $.slot := POOL_STAT_INFO_SLOT_LOCATION
         }
     }
 }

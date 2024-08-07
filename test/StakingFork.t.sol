@@ -13,6 +13,7 @@ import {ITransparentUpgradeableProxy as IProxy} from "../src/upgradeability/Tran
 contract StakingForkTest is CommonTest {
     address public constant diygod = 0xC8b960D09C0078c18Dcbe7eB9AB9d816BcCa8944;
     address public constant chips = 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE;
+    address public constant settlement = 0x0cE3159BF19F3C55B648D04E8f0Ae1Ae118D2A0B;
 
     Staking public staking;
 
@@ -197,6 +198,13 @@ contract StakingForkTest is CommonTest {
         assertEq(node.offlineTime, 0);
         assertEq(node.slashedTime, 0);
         assertEq(uint256(node.status), 0);
+
+        // check PAUSE_ROLE
+        assertEq(staking.getRoleMemberCount(keccak256("PAUSE_ROLE")), 1);
+        assertEq(staking.hasRole(keccak256("PAUSE_ROLE"), 0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E), true);
+        // check ORACLE_ROLE
+        assertEq(staking.getRoleMemberCount(keccak256("ORACLE_ROLE")), 1);
+        assertEq(staking.hasRole(keccak256("ORACLE_ROLE"), settlement), true);
 
         // check pool info
         (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = staking

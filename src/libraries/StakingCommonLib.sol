@@ -3,48 +3,52 @@
 
 pragma solidity 0.8.20;
 
-import {Node, SlashRecord} from "./DataTypes.sol";
+import {Node, SlashRecord, PoolStatData} from "./DataTypes.sol";
 import {StorageLib} from "./StorageLib.sol";
 
 library StakingCommonLib {
     /// @dev increase staking pool tokens of a node, and total staking pool tokens
     function increaseStakingPool(Node storage node, uint256 amount) internal {
         node.stakingPoolTokens += amount;
-        uint256 newTotalStakingPoolTokens = StorageLib.getTotalStakingPoolTokens() + amount;
-        StorageLib.setTotalStakingPoolTokens(newTotalStakingPoolTokens);
+
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+        pool.totalStakingPoolTokens += amount;
     }
 
     /// @dev decrease staking pool tokens of a node, and total staking pool tokens
     function decreaseStakingPool(Node storage node, uint256 amount) internal {
         node.stakingPoolTokens -= amount;
-        uint256 newTotalStakingPoolTokens = StorageLib.getTotalStakingPoolTokens() - amount;
-        StorageLib.setTotalStakingPoolTokens(newTotalStakingPoolTokens);
+
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+        pool.totalStakingPoolTokens -= amount;
     }
 
     /// @dev increase operation pool tokens of a node, and total operation pool tokens
     function increaseOperationPool(Node storage node, uint256 amount) internal {
         node.operationPoolTokens += amount;
-        uint256 newOperationPoolTokens = StorageLib.getTotalOperatingPoolTokens() + amount;
-        StorageLib.setTotalOperationPoolTokens(newOperationPoolTokens);
+
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+        pool.totalOperationPoolTokens += amount;
     }
 
     /// @dev decrease operation pool tokens of a node, and total operation pool tokens
     function decreaseOperationPool(Node storage node, uint256 amount) internal {
         node.operationPoolTokens -= amount;
-        uint256 newTotalOperationPoolTokens = StorageLib.getTotalOperatingPoolTokens() - amount;
-        StorageLib.setTotalOperationPoolTokens(newTotalOperationPoolTokens);
+
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+        pool.totalOperationPoolTokens -= amount;
     }
 
     /// @dev increase slashing pool tokens
     function increaseSlashingPoolByRecord(SlashRecord storage record) internal {
-        uint256 newSlashingPoolTokens = StorageLib.getTotalSlashingPoolTokens() + _totalSlashedAmount(record);
-        StorageLib.setTotalSlashingPoolTokens(newSlashingPoolTokens);
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+        pool.totalSlashingPoolTokens += _totalSlashedAmount(record);
     }
 
     /// @dev decrease slashing pool tokens
     function decreaseSlashingPoolByRecord(SlashRecord storage record) internal {
-        uint256 newSlashingPoolTokens = StorageLib.getTotalSlashingPoolTokens() - _totalSlashedAmount(record);
-        StorageLib.setTotalSlashingPoolTokens(newSlashingPoolTokens);
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+        pool.totalSlashingPoolTokens -= _totalSlashedAmount(record);
     }
 
     function _totalSlashedAmount(SlashRecord storage record) internal view returns (uint256) {

@@ -20,7 +20,8 @@ import {
     Slashing,
     SlashRecord,
     WithdrawalRequest,
-    UnstakeRequest
+    UnstakeRequest,
+    PoolStatData
 } from "./libraries/DataTypes.sol";
 import {
     AlphaWithdrawNotAllowed,
@@ -161,6 +162,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         /// TODO: should be removed in next version
         // migrate public pool
         _migratePublicPool();
+        // migrate pool stat info
+        _migratePoolStatInfo();
     }
 
     /// @inheritdoc IStaking
@@ -402,8 +405,12 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
 
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
-        uint256 balance = address(this).balance;
-        uint256 amount = balance - _totalOperationPoolTokens - _totalStakingPoolTokens - _totalSlashingPoolTokens;
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+
+        uint256 amount = address(this).balance -
+            pool.totalOperationPoolTokens -
+            pool.totalStakingPoolTokens -
+            pool.totalSlashingPoolTokens;
         RewardsAndSlashingLib.withdraw2Treasury(TREASURY, amount);
     }
 
@@ -456,9 +463,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         override
         returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens)
     {
-        totalOperationPoolTokens = _totalOperationPoolTokens;
-        totalStakingPoolTokens = _totalStakingPoolTokens;
-        totalSlashingPoolTokens = _totalSlashingPoolTokens;
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+
+        totalOperationPoolTokens = pool.totalOperationPoolTokens;
+        totalStakingPoolTokens = pool.totalStakingPoolTokens;
+        totalSlashingPoolTokens = pool.totalSlashingPoolTokens;
     }
 
     /// @inheritdoc IStaking
@@ -512,6 +521,17 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         delete _oldPublicPool.operationPoolTokens;
         delete _oldPublicPool.stakingPoolTokens;
         delete _oldPublicPool.totalShares;
+    }
+
+    function _migratePoolStatInfo() internal {
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+        pool.totalOperationPoolTokens = _totalOperationPoolTokens;
+        pool.totalStakingPoolTokens = _totalStakingPoolTokens;
+        pool.totalSlashingPoolTokens = _totalSlashingPoolTokens;
+
+        delete _totalOperationPoolTokens;
+        delete _totalStakingPoolTokens;
+        delete _totalSlashingPoolTokens;
     }
 
     function _validateNodeAddress(address nodeAddr) internal pure {
