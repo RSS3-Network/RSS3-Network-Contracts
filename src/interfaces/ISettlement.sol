@@ -81,8 +81,9 @@ interface ISettlement {
      * @notice Demotes nodes.
      * @dev The caller must have the `ORACLE_ROLE`.
      * @param nodeAddrs Addresses of node operator to demote.
+     * @param reasons The reasons of demotion.
      */
-    function demoteNodes(address[] calldata nodeAddrs) external;
+    function demoteNodes(address[] calldata nodeAddrs, string[] calldata reasons) external;
 
     /**
      * @notice  Returns the address of the Staking contract.

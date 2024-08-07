@@ -190,8 +190,9 @@ library Events {
      * @param epoch The epoch number.
      * @param nodeAddr The address of node.
      * @param demotionCount The count of demotion.
+     * @param reason The reason of demotion.
      */
-    event NodeDemoted(uint256 indexed epoch, address indexed nodeAddr, uint256 indexed demotionCount);
+    event NodeDemoted(uint256 indexed epoch, address indexed nodeAddr, uint256 indexed demotionCount, string reason);
 
     /**
      * @dev Emitted on recordSlashing()

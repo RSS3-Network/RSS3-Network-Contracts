@@ -171,8 +171,9 @@ interface IStaking {
      * @dev The caller must have the `ORACLE_ROLE`.
      * @param epoch Current epoch number.
      * @param nodeAddrs Addresses of node operator to demote.
+     * @param reasons The reasons of demotion.
      */
-    function demoteNodes(uint256 epoch, address[] calldata nodeAddrs) external;
+    function demoteNodes(uint256 epoch, address[] calldata nodeAddrs, string[] calldata reasons) external;
 
     /**
      * @notice Requests an exit from network.

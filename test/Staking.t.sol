@@ -1657,13 +1657,17 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createNode(carol);
 
         address[] memory nodeAddrs = array(alice, bob, carol);
+        string[] memory reasons = new string[](3);
+        reasons[0] = "";
+        reasons[1] = "";
+        reasons[2] = "";
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             expectEmit();
-            emit Events.NodeDemoted(1, nodeAddrs[i], 1);
+            emit Events.NodeDemoted(1, nodeAddrs[i], 1, "");
         }
         vm.prank(address(_settlement));
-        _staking.demoteNodes(1, nodeAddrs);
+        _staking.demoteNodes(1, nodeAddrs, reasons);
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             assertEq(_staking.getDemotionCount(1, nodeAddrs[i]), 1);

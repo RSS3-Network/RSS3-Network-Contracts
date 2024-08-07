@@ -946,17 +946,26 @@ contract SettlementTest is CommonTest {
         _createNode(carol);
 
         address[] memory nodeAddrs = array(alice, bob, carol);
+        string[] memory reasons = new string[](3);
+        reasons[0] = "";
+        reasons[1] = "";
+        reasons[2] = "";
 
         vm.prank(oracleAccount);
-        _settlement.demoteNodes(nodeAddrs);
+        _settlement.demoteNodes(nodeAddrs, reasons);
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             assertEq(_staking.getDemotionCount(0, nodeAddrs[i]), 1);
         }
     }
     function testDemoteNodesFail() public {
+        string[] memory reasons = new string[](3);
+        reasons[0] = "";
+        reasons[1] = "";
+        reasons[2] = "";
+
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
-        _settlement.demoteNodes(array(alice, bob));
+        _settlement.demoteNodes(array(alice, bob), reasons);
     }
 
     function invariantTreasuryBalance() public view {

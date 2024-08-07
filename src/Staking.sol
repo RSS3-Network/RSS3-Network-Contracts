@@ -376,7 +376,13 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function demoteNodes(uint256 epoch, address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
+    function demoteNodes(
+        uint256 epoch,
+        address[] calldata nodeAddrs,
+        string[] calldata reasons
+    ) external override onlyRole(ORACLE_ROLE) {
+        if (nodeAddrs.length != reasons.length) revert InvalidArrayLength();
+
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             address nodeAddr = nodeAddrs[i];
 
@@ -389,7 +395,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
                 }
             }
 
-            emit Events.NodeDemoted(epoch, nodeAddr, _nodeDemotionCounter[epoch][nodeAddr]);
+            emit Events.NodeDemoted(epoch, nodeAddr, _nodeDemotionCounter[epoch][nodeAddr], reasons[i]);
         }
     }
 

@@ -161,8 +161,11 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc ISettlement
-    function demoteNodes(address[] calldata nodeAddrs) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).demoteNodes(_currentEpoch, nodeAddrs);
+    function demoteNodes(
+        address[] calldata nodeAddrs,
+        string[] calldata reasons
+    ) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).demoteNodes(_currentEpoch, nodeAddrs, reasons);
     }
 
     /// @inheritdoc ISettlement
