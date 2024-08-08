@@ -36,7 +36,6 @@ library StakingLib {
 
         // set node status
         if (node.operationPoolTokens >= Const.MIN_DEPOSIT) {
-            node.registerTime = block.timestamp;
             node.status = NodeStatus.Registered;
         }
 

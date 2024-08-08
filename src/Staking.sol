@@ -90,9 +90,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     NodeObsoleted internal _oldPublicPool;
 
     /// @dev total operation pool tokens
-    uint256 internal _totalOperationPoolTokens;
+    uint256 internal _totalOperationPoolTokens; // deprecated in next version
     /// @dev total staking pool tokens
-    uint256 internal _totalStakingPoolTokens;
+    uint256 internal _totalStakingPoolTokens; // deprecated in next version
 
     /// @dev the issuers of chips
     Checkpoints.Trace160 internal _families; // for compatibility with the previous version
@@ -105,7 +105,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 
-    uint256 internal _totalSlashingPoolTokens;
+    uint256 internal _totalSlashingPoolTokens; // deprecated in next version
 
     /// @dev (nodeAddr, epochId) => slash record
     mapping(address nodeAddr => mapping(uint256 epochId => SlashRecord)) internal _slashRecords;

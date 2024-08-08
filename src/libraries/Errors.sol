@@ -31,6 +31,9 @@ error SubmissionIntervalNotElapsed();
 /// @dev Wrong node status
 error WrongNodeStatus(uint256 curStatus, uint256 newStatus);
 
+/// @dev Can't request exit in current state
+error CurStateCantExit(uint256 curStatus);
+
 /// @dev Request already claimed.
 error AlreadyClaimed();
 

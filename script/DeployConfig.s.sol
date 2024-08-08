@@ -38,7 +38,7 @@ contract DeployConfig is Script {
         proxyAdminOwner = stdJson.readAddress(_json, "$.proxyAdminOwner");
         pauseAccount = stdJson.readAddress(_json, "$.pauseAccount");
         oracleAccount = stdJson.readAddress(_json, "$.oracleAccount");
-        depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
+        depositUnbondingPeriod = stdJson.readUint(_json, "$.depositUnbondingPeriod");
         stakeUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
         treasury = stdJson.readAddress(_json, "$.treasury");
         chipsName = stdJson.readString(_json, "$.chipsName");

@@ -11,6 +11,7 @@ import {
     NodeIsPublicGood,
     NodeNotExists,
     NodeInExitStatus,
+    CurStateCantExit,
     NodeNotInExitStatus,
     WrongNodeStatus,
     InvalidArrayLength,
@@ -96,16 +97,18 @@ library NodeSettingsLib {
 
     function requestExit(address nodeAddr) external {
         Node storage node = StorageLib.getNode(nodeAddr);
-
         _validateNodeAddress(node.account);
 
         // validate node exit status
-        _validateNodeNotInExitStatus(node);
-
-        // update node time
-        node.exitingTime = block.timestamp;
-        // set node status
-        node.status = NodeStatus.Exiting;
+        NodeStatus status = _getNodeStatus(node);
+        if (status == NodeStatus.Registered || status == NodeStatus.Initializing || status == NodeStatus.Slashed) {
+            node.status = NodeStatus.Exited;
+        } else if (status == NodeStatus.Online) {
+            node.status = NodeStatus.Exiting;
+            node.exitTime = block.timestamp + Const.NODE_EXIT_PERIOD;
+        } else {
+            revert CurStateCantExit(uint256(status));
+        }
 
         emit Events.NodeExitRequested(nodeAddr);
     }
@@ -120,11 +123,6 @@ library NodeSettingsLib {
         uint256 opPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
         if (opPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
 
-        // update node time
-        node.registerTime = block.timestamp;
-        delete node.offlineTime;
-        delete node.exitingTime;
-        delete node.slashedTime;
         // set node status
         node.status = NodeStatus.Registered;
 
@@ -150,57 +148,29 @@ library NodeSettingsLib {
         // can only set node status as: Online, Offline and Initializing
         if (newStatus == NodeStatus.Initializing) {
             if (curStatus != NodeStatus.Registered) revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
-            node.status = newStatus;
-
-            delete node.registerTime;
-            delete node.offlineTime;
-            delete node.slashedTime;
         } else if (newStatus == NodeStatus.Online) {
             if (
                 curStatus != NodeStatus.Initializing &&
                 curStatus != NodeStatus.Offline &&
                 curStatus != NodeStatus.Slashed
             ) revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
-            node.status = newStatus;
-
-            delete node.registerTime;
-            delete node.offlineTime;
-            delete node.slashedTime;
         } else if (newStatus == NodeStatus.Offline) {
-            node.status = newStatus;
-            node.offlineTime = block.timestamp;
+            if (curStatus != NodeStatus.Online && curStatus != NodeStatus.Exiting)
+                revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
         } else {
             revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
         }
 
+        node.status = newStatus;
         emit Events.NodeStatusSet(nodeAddr, curStatus, newStatus);
     }
 
     function _getNodeStatus(Node memory node) internal view returns (NodeStatus) {
         NodeStatus status = node.status;
 
-        // Registered Node transitions to Exited state after 30 Epochs of inactivity.
-        if (status == NodeStatus.Registered && _inactive(node.registerTime, Const.NODE_INACTIVITY_PERIOD)) {
-            status = NodeStatus.Exited;
-            return status;
-        }
-
-        // An Offline Node transitions to Exited state after 30 Epochs of inactivity.
-        if (status == NodeStatus.Offline && _inactive(node.offlineTime, Const.NODE_INACTIVITY_PERIOD)) {
-            status = NodeStatus.Exited;
-            return status;
-        }
-
         // An Exiting Node transitions to Exited state after 1 Epoch.
-        if (status == NodeStatus.Exiting && _inactive(node.exitingTime, Const.NODE_EXIT_PERIOD)) {
+        if (status == NodeStatus.Exiting && node.exitTime <= block.timestamp) {
             status = NodeStatus.Exited;
-            return status;
-        }
-
-        // An Slashed Node transitions to Offline state after 30 Epochs of inactivity.
-        if (status == NodeStatus.Slashed && _inactive(node.slashedTime, Const.NODE_OFFLINE_PERIOD)) {
-            status = NodeStatus.Offline;
-            return status;
         }
 
         return status;
@@ -214,10 +184,6 @@ library NodeSettingsLib {
     function _validateNodeInExitStatus(Node storage node) internal view {
         NodeStatus status = _getNodeStatus(node);
         if (NodeStatus.Exiting != status && NodeStatus.Exited != status) revert NodeNotInExitStatus();
-    }
-
-    function _inactive(uint256 time, uint256 duration) internal view returns (bool) {
-        return time + duration <= block.timestamp;
     }
 
     function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {

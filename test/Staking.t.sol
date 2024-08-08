@@ -46,10 +46,12 @@ import {
     NodeNotPublicGood,
     StakeToPublicGoodNode,
     DepositForPublicGoodNode,
-    WrongNodeStatus
+    WrongNodeStatus,
+    CurStateCantExit
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
+import {StorageLib} from "../src/libraries/StorageLib.sol";
 import {Staking} from "../src/Staking.sol";
 
 //import {console2 as console} from "forge-std/console2.sol";
@@ -102,10 +104,7 @@ contract StakingTest is CommonTest, IERC721Errors {
                     operationPoolTokens: 0,
                     stakingPoolTokens: 0,
                     totalShares: 0,
-                    registerTime: 0,
-                    offlineTime: 0,
-                    exitingTime: 0,
-                    slashedTime: 0,
+                    exitTime: 0,
                     status: NodeStatus.None
                 })
             )
@@ -417,13 +416,9 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.deposit{value: 2 * amount}();
 
         _staking.requestExit();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
-
-        skip(Const.NODE_EXIT_PERIOD);
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
 
         _staking.requestWithdrawal(2 * amount);
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
 
         // op pool < min deposit
         _staking.deposit{value: amount / 2}();
@@ -539,6 +534,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.requestWithdrawal(amount + 1);
 
         // case 2: ExcessWithdrawalAmount
+        _setNodeStatus(alice, NodeStatus.Online);
         _staking.requestExit();
         vm.expectRevert(abi.encodeWithSelector(ExcessWithdrawalAmount.selector));
         _staking.requestWithdrawal(amount);
@@ -560,6 +556,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         // registered
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
+        _setNodeStatus(alice, NodeStatus.Online);
+
         // exiting
         _staking.requestExit();
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
@@ -579,23 +577,21 @@ contract StakingTest is CommonTest, IERC721Errors {
         // case 1: Registered -> Exited
         _createNode(alice);
 
-        vm.prank(alice);
+        vm.startPrank(alice);
         _staking.deposit{value: 10000 ether}();
-
-        skip(Const.NODE_INACTIVITY_PERIOD);
+        _staking.requestExit();
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
 
-        // case 2: Offline -> Exited
-        _createNode(bob);
+        // case 2: Online -> Exiting -> Exited
+        _setNodeStatus(alice, NodeStatus.Online);
+        _staking.requestExit();
 
-        vm.prank(bob);
-        _staking.deposit{value: 10000 ether}();
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
 
-        vm.prank(address(_settlement));
-        _staking.setNodeStatus(array(bob), array(NodeStatus.Offline));
+        skip(Const.NODE_EXIT_PERIOD);
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
 
-        skip(Const.NODE_INACTIVITY_PERIOD);
-        assertEq(uint256(_getNodeStatus(bob)), uint256(NodeStatus.Exited));
+        vm.stopPrank();
     }
 
     function testReRegister() public {
@@ -624,8 +620,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.reRegister();
 
         // case 3: node deposit is below minimum
-        _staking.requestExit();
-
+        _setNodeStatus(alice, NodeStatus.Exiting);
         vm.expectRevert(abi.encodeWithSelector(NodeDepositBelowMinimum.selector));
         _staking.reRegister();
         vm.stopPrank();
@@ -849,8 +844,10 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testStakeFailWithNodeInExitStatus() public {
         _createNode(alice);
 
-        vm.prank(alice);
+        vm.startPrank(alice);
+        _staking.deposit{value: 10000 ether}();
         _staking.requestExit();
+        vm.stopPrank();
 
         vm.expectRevert(abi.encodeWithSelector(NodeInExitStatus.selector));
         _staking.stake{value: 10000 ether}(alice);
@@ -1614,21 +1611,17 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestExitSucceeds() public {
-        vm.startPrank(alice);
+        vm.prank(alice);
         _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
 
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
         expectEmit();
         emit Events.NodeExitRequested(alice);
+        vm.prank(alice);
         _staking.requestExit();
 
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
-
-        skip(Const.NODE_EXIT_PERIOD);
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
-
-        vm.stopPrank();
     }
 
     function testRequestExitFail() public {
@@ -1636,16 +1629,23 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
         _staking.requestExit();
 
-        // case 2: NodeInExitStatus
+        // case 2: CurStateCantExit
         vm.startPrank(alice);
         _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
+
+        // case 3: Slashing -> Exiting
+        _setNodeStatus(alice, NodeStatus.Slashing);
+        vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.Slashing)));
         _staking.requestExit();
 
-        vm.expectRevert(abi.encodeWithSelector(NodeInExitStatus.selector));
+        // case 4: None -> Exiting
+        _setNodeStatus(alice, NodeStatus.None);
+        vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.None)));
         _staking.requestExit();
 
-        skip(3 * 18 hours);
-        vm.expectRevert(abi.encodeWithSelector(NodeInExitStatus.selector));
+        // case 5: Offline -> Exiting
+        _setNodeStatus(alice, NodeStatus.Offline);
+        vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.Offline)));
         _staking.requestExit();
 
         vm.stopPrank();
@@ -1982,6 +1982,12 @@ contract StakingTest is CommonTest, IERC721Errors {
         }
 
         _staking.recordSlashing(slashings, reporters, reasons);
+    }
+
+    function _setNodeStatus(address nodeAddr, NodeStatus status) internal {
+        bytes32 slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
+        slot = bytes32(uint256(slot) + 8);
+        vm.store(address(_staking), slot, bytes32(uint256(status)));
     }
 
     function _checkUnstakeOneChip(

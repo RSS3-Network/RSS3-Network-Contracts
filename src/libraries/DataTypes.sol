@@ -23,14 +23,8 @@ struct Node {
     uint256 stakingPoolTokens;
     /// @notice total shares of the pool
     uint256 totalShares;
-    /// @notice node register time
-    uint256 registerTime;
-    /// @notice latest offline time
-    uint256 offlineTime;
-    /// @notice latest exiting time
-    uint256 exitingTime;
-    /// @notice latest slashed time
-    uint256 slashedTime;
+    /// @notice the time node can safely exit
+    uint256 exitTime;
     NodeStatus status;
 }
 

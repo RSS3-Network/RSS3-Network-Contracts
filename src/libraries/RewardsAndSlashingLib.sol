@@ -55,7 +55,6 @@ library RewardsAndSlashingLib {
         // set node status: slashed
         Node storage node = StorageLib.getNode(nodeAddr);
         node.status = NodeStatus.Slashed;
-        node.slashedTime = block.timestamp;
 
         _commitSlashingAmount(record, paymentProcessor);
         emit Events.SlashCommitted(nodeAddr, epoch);

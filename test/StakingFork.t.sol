@@ -139,9 +139,6 @@ contract StakingForkTest is CommonTest {
         assertEq(node.totalShares, uint256(148500000000000000000000));
         assertEq(node.publicGood, false);
         assertEq(node.alpha, true);
-        assertEq(node.registerTime, 0);
-        assertEq(node.offlineTime, 0);
-        assertEq(node.slashedTime, 0);
         assertEq(uint256(node.status), 0);
 
         // node 72
@@ -155,9 +152,6 @@ contract StakingForkTest is CommonTest {
         assertEq(node.totalShares, 0);
         assertEq(node.publicGood, true);
         assertEq(node.alpha, true);
-        assertEq(node.registerTime, 0);
-        assertEq(node.offlineTime, 0);
-        assertEq(node.slashedTime, 0);
         assertEq(uint256(node.status), 0);
 
         // node 83
@@ -170,9 +164,6 @@ contract StakingForkTest is CommonTest {
         assertEq(node.totalShares, 0);
         assertEq(node.publicGood, false);
         assertEq(node.alpha, true);
-        assertEq(node.registerTime, 0);
-        assertEq(node.offlineTime, 0);
-        assertEq(node.slashedTime, 0);
         assertEq(uint256(node.status), 0);
 
         // check node counter
@@ -194,9 +185,6 @@ contract StakingForkTest is CommonTest {
         assertEq(node.totalShares, uint256(100000000000000000000000));
         assertEq(node.publicGood, true);
         assertEq(node.alpha, false);
-        assertEq(node.registerTime, 0);
-        assertEq(node.offlineTime, 0);
-        assertEq(node.slashedTime, 0);
         assertEq(uint256(node.status), 0);
 
         // check PAUSE_ROLE
