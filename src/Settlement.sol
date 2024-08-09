@@ -7,7 +7,7 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
-import {NodeStatus, Slashing, RewardsData} from "./libraries/DataTypes.sol";
+import {NodeStatus, RewardsData} from "./libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
@@ -134,22 +134,20 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc ISettlement
-    function recordSlashing(
-        Slashing[] calldata slashings,
-        address[] calldata reporters,
-        string[] calldata reasons
+    function revokeDemotions(
+        address nodeAddr,
+        uint256 epoch,
+        uint256[] calldata demotionIds
     ) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).recordSlashing(slashings, reporters, reasons);
+        IStaking(_staking).revokeDemotions(nodeAddr, epoch, demotionIds);
     }
 
     /// @inheritdoc ISettlement
-    function revokeSlashing(Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).revokeSlashing(epochIds);
-    }
-
-    /// @inheritdoc ISettlement
-    function commitSlashing(Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).commitSlashing(epochIds);
+    function commitSlashing(
+        address[] calldata nodeAddrs,
+        uint256[] calldata epochs
+    ) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).commitSlashing(nodeAddrs, epochs);
     }
 
     /// @inheritdoc ISettlement
@@ -161,11 +159,11 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc ISettlement
-    function demoteNodes(
+    function submitDemotions(
         address[] calldata nodeAddrs,
         string[] calldata reasons
     ) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).demoteNodes(_currentEpoch, nodeAddrs, reasons);
+        IStaking(_staking).submitDemotions(_currentEpoch, nodeAddrs, reasons);
     }
 
     /// @inheritdoc ISettlement

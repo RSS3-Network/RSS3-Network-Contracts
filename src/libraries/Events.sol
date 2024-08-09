@@ -186,13 +186,19 @@ library Events {
     event NodeReentryRequested(address indexed nodeAddr);
 
     /**
-     * @dev Emitted on demoteNodes()
+     * @dev Emitted on submitDemotions()
      * @param epoch The epoch number.
      * @param nodeAddr The address of node.
-     * @param demotionCount The count of demotion.
+     * @param demotionId The new id of demotion.
      * @param reason The reason of demotion.
      */
-    event NodeDemoted(uint256 indexed epoch, address indexed nodeAddr, uint256 indexed demotionCount, string reason);
+    event DemotionSubmitted(uint256 indexed epoch, address indexed nodeAddr, uint256 indexed demotionId, string reason);
+
+    /**
+     * @dev Emitted on revokeDemotions()
+     * @param demotionId The id of demotion revoked.
+     */
+    event DemotionRevoked(uint256 indexed demotionId);
 
     /**
      * @dev Emitted on recordSlashing()

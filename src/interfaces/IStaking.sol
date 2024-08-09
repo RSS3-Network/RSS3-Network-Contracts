@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {Node, NodeStatus, Slashing, SlashRecord, WithdrawalRequest, UnstakeRequest} from "../libraries/DataTypes.sol";
+import {Node, NodeStatus, SlashRecord, WithdrawalRequest, UnstakeRequest} from "../libraries/DataTypes.sol";
 
 interface IStaking {
     /**
@@ -167,13 +167,13 @@ interface IStaking {
     function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
 
     /**
-     * @notice Demotes nodes.
+     * @notice Submits demotions for nodes.
      * @dev The caller must have the `ORACLE_ROLE`.
      * @param epoch Current epoch number.
      * @param nodeAddrs Addresses of node operator to demote.
      * @param reasons The reasons of demotion.
      */
-    function demoteNodes(uint256 epoch, address[] calldata nodeAddrs, string[] calldata reasons) external;
+    function submitDemotions(uint256 epoch, address[] calldata nodeAddrs, string[] calldata reasons) external;
 
     /**
      * @notice Requests an exit from network.
@@ -188,34 +188,23 @@ interface IStaking {
     function reRegister() external;
 
     /**
-     * @notice Record slashing nodes.
-     * Requirements:
-     * - The caller must have the `ORACLE_ROLE`.
-     * @param slashings The addresses of nodes and epochIds to slash.
-     * @param reporters The addresses of reporters.
-     * @param reasons The reasons of slashing.
-     */
-    function recordSlashing(
-        Slashing[] calldata slashings,
-        address[] calldata reporters,
-        string[] calldata reasons
-    ) external;
-
-    /**
      * @notice Commit slashing nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param slashings The ids of slashes to commit.
+     * @param nodeAddrs The addresses of nodes to commit.
+     * @param epochs The epoch number.
      */
-    function commitSlashing(Slashing[] calldata slashings) external;
+    function commitSlashing(address[] calldata nodeAddrs, uint256[] calldata epochs) external;
 
     /**
-     * @notice Revoke slashing nodes.
+     * @notice Revoke demotions.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param slashings The addresses of nodes to revoke.
+     * @param nodeAddr The address of node to revoke.
+     * @param epoch The epoch number.
+     * @param demotionIds The ids of demotions to revoke.
      */
-    function revokeSlashing(Slashing[] calldata slashings) external;
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds) external;
 
     /**
      * @notice Sets the settlement phase.
@@ -239,11 +228,15 @@ interface IStaking {
 
     /**
      * @notice Returns the demotion count of node.
-     * @param epoch The epoch number to query.
      * @param nodeAddr Node address to query.
-     * @return uint256 The demotion count.
+     * @param epoch The epoch number to query.
+     * @return demotionIds The demotion ids.
+     * @return reasons The demotion reasons.
      */
-    function getDemotionCount(uint256 epoch, address nodeAddr) external view returns (uint256);
+    function getDemotions(
+        address nodeAddr,
+        uint256 epoch
+    ) external view returns (uint256[] memory demotionIds, string[] memory reasons);
 
     /**
      * @notice Returns whether the current time is in settlement phase.
@@ -324,11 +317,12 @@ interface IStaking {
     function chipsContract() external view returns (address);
 
     /**
-     * @notice Gets slashing records info by `slashings`.
-     * @param slashings IDs of slashing records
-     * @return records SlashRecord[] slashing records info
+     * @notice Gets slashing records info.
+     * @param nodeAddr Node address to query.
+     * @param epoch The epoch number to query.
+     * @return record SlashRecord slashing record info
      */
-    function getSlashingRecords(Slashing[] calldata slashings) external pure returns (SlashRecord[] memory records);
+    function getSlashingRecord(address nodeAddr, uint256 epoch) external pure returns (SlashRecord memory record);
 
     /**
      * @notice Gets public pool info.

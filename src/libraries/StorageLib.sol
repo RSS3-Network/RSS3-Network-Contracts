@@ -30,7 +30,7 @@ library StorageLib {
     uint256 public constant CHIP_ISSUERS_MAPPING_SLOT = 24;
     uint256 public constant CHIP_TO_SHARES_MAPPING_SLOT = 25;
 
-    uint256 public constant SLASH_RECORDS_SLOT = 27;
+    uint256 public constant SLASH_RECORDS_SLOT = 29;
 
     // keccak256(abi.encode(uint256(keccak256("staking.storage.public.pool")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 public constant PUBLIC_POOL_SLOT_LOCATION =

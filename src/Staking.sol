@@ -17,7 +17,7 @@ import {
     Node,
     NodeObsoleted,
     NodeStatus,
-    Slashing,
+    SlashStatus,
     SlashRecord,
     WithdrawalRequest,
     UnstakeRequest,
@@ -43,6 +43,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     using Math for uint256;
     using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.UintSet;
     using Checkpoints for Checkpoints.Trace160;
 
     string public constant version = "2.0.0";
@@ -99,18 +100,19 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     mapping(uint256 chipId => address nodeAddr) internal _chipIssuers;
 
     /// @dev shares corresponding to each chip
-    mapping(uint256 chipId => uint256 shares) internal _chipToShares;
+    mapping(uint256 chipId => uint256 shares) internal _chipToShares; // slot 25
 
     /// ACL
     bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 
-    uint256 internal _totalSlashingPoolTokens; // deprecated in next version
+    /// @dev demotion
+    uint256 internal _demotionIdCounter; // slot 26
+    mapping(address nodeAddr => mapping(uint256 epochId => EnumerableSet.UintSet demotionIds)) internal _demotionIds;
+    mapping(uint256 demotionId => string reason) internal _demotionReasons; // slot 28
 
     /// @dev (nodeAddr, epochId) => slash record
-    mapping(address nodeAddr => mapping(uint256 epochId => SlashRecord)) internal _slashRecords;
-
-    mapping(uint256 epoch => mapping(address nodeAddr => uint256 count)) internal _nodeDemotionCounter; // slot 28
+    mapping(address nodeAddr => mapping(uint256 epochId => SlashRecord)) internal _slashRecords; // slot 29
 
     modifier whenNotAlphaPhase() {
         if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
@@ -322,38 +324,28 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function recordSlashing(
-        Slashing[] calldata slashings,
-        address[] calldata reporters,
-        string[] calldata reasons
+    function commitSlashing(
+        address[] calldata nodeAddrs,
+        uint256[] calldata epochs
     ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
-        if (slashings.length != reporters.length) revert InvalidArrayLength();
-        if (slashings.length != reasons.length) revert InvalidArrayLength();
+        if (nodeAddrs.length != epochs.length) revert InvalidArrayLength();
 
-        for (uint256 i = 0; i < slashings.length; i++) {
-            (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
-            address reporter = reporters[i];
-            string calldata reason = reasons[i];
-
-            RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, reporter, reason);
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            RewardsAndSlashingLib.commitSlashing(nodeAddrs[i], epochs[i], PAYMENT_PROCESSOR);
         }
     }
 
     /// @inheritdoc IStaking
-    function commitSlashing(Slashing[] calldata slashings) external override whenNotPaused onlyRole(ORACLE_ROLE) {
-        for (uint256 i = 0; i < slashings.length; i++) {
-            (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
+    function revokeDemotions(
+        address nodeAddr,
+        uint256 epoch,
+        uint256[] calldata demotionIds
+    ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        for (uint256 i = 0; i < demotionIds.length; i++) {
+            _demotionIds[nodeAddr][epoch].remove(demotionIds[i]);
+            delete _demotionReasons[demotionIds[i]];
 
-            RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, PAYMENT_PROCESSOR);
-        }
-    }
-
-    /// @inheritdoc IStaking
-    function revokeSlashing(Slashing[] calldata slashings) external override whenNotPaused onlyRole(ORACLE_ROLE) {
-        for (uint256 i = 0; i < slashings.length; i++) {
-            (address nodeAddr, uint256 epoch) = (slashings[i].nodeAddr, slashings[i].epoch);
-
-            RewardsAndSlashingLib.revokeSlashing(nodeAddr, epoch);
+            emit Events.DemotionRevoked(demotionIds[i]);
         }
     }
 
@@ -376,7 +368,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function demoteNodes(
+    function submitDemotions(
         uint256 epoch,
         address[] calldata nodeAddrs,
         string[] calldata reasons
@@ -386,16 +378,20 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             address nodeAddr = nodeAddrs[i];
 
-            if (++_nodeDemotionCounter[epoch][nodeAddr] >= Const.DEMOTION_COUNT_THRESHOLD) {
-                // check node status
-                NodeStatus status = NodeSettingsLib.getNodeStatus(StorageLib.getNode(nodeAddr));
-                if (status != NodeStatus.Slashing) {
-                    // slash
-                    RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, address(0), Const.DEFAULT_SLASH_REASON);
-                }
+            SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
+            uint256 demotionId = ++_demotionIdCounter;
+            _demotionIds[nodeAddr][epoch].add(demotionId);
+            _demotionReasons[demotionId] = reasons[i];
+
+            if (
+                record.status != SlashStatus.Recorded &&
+                _demotionIds[nodeAddr][epoch].length() > Const.DEMOTION_COUNT_THRESHOLD
+            ) {
+                // slash
+                RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, address(0));
             }
 
-            emit Events.NodeDemoted(epoch, nodeAddr, _nodeDemotionCounter[epoch][nodeAddr], reasons[i]);
+            emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reasons[i]);
         }
     }
 
@@ -421,8 +417,18 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getDemotionCount(uint256 epoch, address nodeAddr) external view override returns (uint256) {
-        return _nodeDemotionCounter[epoch][nodeAddr];
+    function getDemotions(
+        address nodeAddr,
+        uint256 epoch
+    ) external view override returns (uint256[] memory demotionIds_, string[] memory reasons_) {
+        EnumerableSet.UintSet storage demotionIds = _demotionIds[nodeAddr][epoch];
+        demotionIds_ = new uint256[](demotionIds.length());
+        reasons_ = new string[](demotionIds.length());
+
+        for (uint256 i = 0; i < demotionIds.length(); i++) {
+            demotionIds_[i] = demotionIds.at(i);
+            reasons_[i] = _demotionReasons[demotionIds_[i]];
+        }
     }
 
     /// @inheritdoc IStaking
@@ -500,13 +506,11 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function getSlashingRecords(
-        Slashing[] calldata slashings
-    ) external pure override returns (SlashRecord[] memory records) {
-        records = new SlashRecord[](slashings.length);
-        for (uint256 i = 0; i < slashings.length; i++) {
-            records[i] = StorageLib.getSlashRecord(slashings[i].nodeAddr, slashings[i].epoch);
-        }
+    function getSlashingRecord(
+        address nodeAddr,
+        uint256 epoch
+    ) external pure override returns (SlashRecord memory record) {
+        record = StorageLib.getSlashRecord(nodeAddr, epoch);
     }
 
     /// @inheritdoc IStaking
@@ -533,11 +537,9 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         PoolStatData storage pool = StorageLib.poolStatStorage();
         pool.totalOperationPoolTokens = _totalOperationPoolTokens;
         pool.totalStakingPoolTokens = _totalStakingPoolTokens;
-        pool.totalSlashingPoolTokens = _totalSlashingPoolTokens;
 
         delete _totalOperationPoolTokens;
         delete _totalStakingPoolTokens;
-        delete _totalSlashingPoolTokens;
     }
 
     function _validateNodeAddress(address nodeAddr) internal pure {

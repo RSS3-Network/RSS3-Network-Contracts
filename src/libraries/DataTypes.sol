@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
+using EnumerableSet for EnumerableSet.UintSet;
+
 // solhint-disable-next-line gas-struct-packing
 struct Node {
     /// @notice unique identifier of the node
@@ -54,12 +58,6 @@ struct SlashRecord {
     uint256 amountForOperationPool;
     uint256 amountForStakingPool;
     SlashStatus status; // 0: recorded, 1: committed, 2: revoked
-    string slashReason;
-}
-
-struct Slashing {
-    address nodeAddr;
-    uint256 epoch;
 }
 
 enum NodeStatus {

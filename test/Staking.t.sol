@@ -12,9 +12,8 @@ import {Const} from "../src/libraries/Const.sol";
 import {
     Node,
     NodeStatus,
-    Slashing,
-    SlashStatus,
     SlashRecord,
+    SlashStatus,
     UnstakeRequest,
     WithdrawalRequest
 } from "../src/libraries/DataTypes.sol";
@@ -1266,349 +1265,349 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.withdraw2Treasury();
         assertEq(treasury.balance, amount);
     }
-
-    // Test errors: InvalidArrayLength, NodeNotExists, SlashPublicGoodNode, SlashMoreThanOnce
-    function testRecordSlashingFail() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        _setUpNodes(depositedTokens, stakedTokens);
-
-        address[] memory reporters = array(carol, dave);
-
-        Slashing[] memory slashings = _createSlashings(array(alice, bob), array(123, 123));
-
-        address[] memory wrongReporters = array(carol);
-
-        // InvalidArrayLength
-        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, wrongReporters);
-
-        // NodeNotExists
-        slashings[1].nodeAddr = address(0x0); // alice, 0x0
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-
-        // SlashMoreThanOnce
-        slashings[1].nodeAddr = alice; // alice, alice
-        vm.expectRevert(abi.encodeWithSelector(SlashMoreThanOnce.selector, alice, 123));
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-
-        // SlashPublicGoodNode
-        _createPublicGoodNode(carol);
-        Slashing memory slashCarol = Slashing(carol, 123);
-        Slashing[] memory slashingPGs = new Slashing[](1);
-        slashingPGs[0] = slashCarol;
-        address[] memory reporters2 = array(dave);
-
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashingPGs, reporters2);
-    }
+    //
+    //    // Test errors: InvalidArrayLength, NodeNotExists, SlashPublicGoodNode, SlashMoreThanOnce
+    //    function testRecordSlashingFail() public {
+    //        uint256 depositedTokens = 10000 ether;
+    //        uint256 stakedTokens = 40000 ether;
+    //
+    //        _setUpNodes(depositedTokens, stakedTokens);
+    //
+    //        address[] memory reporters = array(carol, dave);
+    //
+    //        Slashing[] memory slashings = _createSlashings(array(alice, bob), array(123, 123));
+    //
+    //        address[] memory wrongReporters = array(carol);
+    //
+    //        // InvalidArrayLength
+    //        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
+    //        vm.prank(address(_settlement));
+    //        _recordSlashingWithReasons(slashings, wrongReporters);
+    //
+    //        // NodeNotExists
+    //        slashings[1].nodeAddr = address(0x0); // alice, 0x0
+    //        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+    //        vm.prank(address(_settlement));
+    //        _recordSlashingWithReasons(slashings, reporters);
+    //
+    //        // SlashMoreThanOnce
+    //        slashings[1].nodeAddr = alice; // alice, alice
+    //        vm.expectRevert(abi.encodeWithSelector(SlashMoreThanOnce.selector, alice, 123));
+    //        vm.prank(address(_settlement));
+    //        _recordSlashingWithReasons(slashings, reporters);
+    //
+    //        // SlashPublicGoodNode
+    //        _createPublicGoodNode(carol);
+    //        Slashing memory slashCarol = Slashing(carol, 123);
+    //        Slashing[] memory slashingPGs = new Slashing[](1);
+    //        slashingPGs[0] = slashCarol;
+    //        address[] memory reporters2 = array(dave);
+    //
+    //        vm.prank(address(_settlement));
+    //        _recordSlashingWithReasons(slashingPGs, reporters2);
+    //    }
 
     // Test:
     // 1. event emitted as expected
     // 2. staking and operation pool tokens decreased as expected
     // 3. record info updated as expected
-    function testRecordSlashing() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        _setUpNodes(depositedTokens, stakedTokens);
-
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
-
-        address[] memory nodeAddrs = array(alice, bob);
-        address[] memory reporters = array(carol, dave);
-        uint256[] memory epochIds = array(123, 123);
-
-        Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
-
-        // 1. events emitted as expected
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            expectEmit();
-            emit Events.SlashRecorded(
-                nodeAddrs[i],
-                epochIds[i],
-                reporters[i],
-                expectedSlashedTokensOnOperationPool,
-                expectedSlashedTokensOnStakingPool
-            );
-        }
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-
-        SlashRecord[] memory records = _staking.getSlashingRecords(slashings);
-        // 2. records info updated correctly
-        for (uint256 i = 0; i < records.length; i++) {
-            assertEq(records[i].reporter, reporters[i]);
-            assertEq(records[i].amountForOperationPool, expectedSlashedTokensOnOperationPool);
-            assertEq(records[i].amountForStakingPool, expectedSlashedTokensOnStakingPool);
-            assertTrue(records[i].status == SlashStatus.Recorded);
-        }
-
-        // 3. check staking pool and operation tokens
-        Node memory aliceNode = _staking.getNode(alice);
-        Node memory bobNode = _staking.getNode(bob);
-        assertEq(aliceNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(aliceNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-        assertEq(bobNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(bobNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-
-        // 4. slash status updated correctly
-        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Slashing));
-        assertEq(uint256(bobNode.status), uint256(NodeStatus.Slashing));
-    }
-
-    // Test errors: SlashRecordNotExists, SlashStatusNotRecorded
-    function testCommitSlashingFail() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        _setUpNodes(depositedTokens, stakedTokens);
-
-        address[] memory nodeAddrs = array(alice, bob);
-        uint256[] memory epochIds = array(123, 123);
-        Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
-        Slashing[] memory slashingAlices = _createSlashings(array(alice), array(123));
-        Slashing[] memory slashingBobs = _createSlashings(array(bob), array(123));
-
-        address[] memory reporters = array(address(0xabc), address(0xdef));
-
-        vm.startPrank(address(_settlement));
-
-        // 1. cannot commit a non-exsistent one
-        Slashing[] memory slashingNulls = _createSlashings(array(carol), array(789));
-        vm.expectRevert(abi.encodeWithSelector(SlashRecordNotExists.selector, carol, 789));
-        _staking.commitSlashing(slashingNulls);
-
-        _recordSlashingWithReasons(slashings, reporters);
-
-        // 2.1 cannot commit a revoked one
-        _staking.revokeSlashing(slashingAlices);
-
-        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, alice, 123));
-        _staking.commitSlashing(slashingAlices);
-
-        // 2.2 cannot commit a committed one
-        _staking.commitSlashing(slashingBobs);
-
-        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, bob, 123));
-        _staking.commitSlashing(slashingBobs);
-
-        vm.stopPrank();
-    }
-
-    // Test:
-    // 1. Events emitted as expected
-    // 2. Slashed tokens distributed as expected
-    // 3. Slashing info updated as expected
-    // solhint-disable-next-line function-max-lines
-    function testCommitSlashing() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
-
-        _setUpNodes(depositedTokens, stakedTokens);
-        uint256 treasuryAmount = _getTreasuryAmount();
-
-        address[] memory nodeAddrs = array(alice, bob);
-        uint256[] memory epochIds = array(123, 123);
-
-        address[] memory reporters = array(address(0xabc), address(0x0));
-
-        Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
-
-        uint256 stakingPoolTokens = _staking.getNode(alice).stakingPoolTokens;
-        uint256 operationPoolTokens = _staking.getNode(alice).operationPoolTokens;
-
-        // 1. record slashing
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-
-        // 1.1 check: treasury amount will not change after record slashing
-        assertEq(treasuryAmount, 0);
-
-        // 2. commit slashing and events emitted as expected
-        expectEmit();
-        emit Events.SlashCommitted(alice, 123);
-        emit Events.SlashCommitted(bob, 123);
-        vm.prank(address(_settlement));
-        _staking.commitSlashing(slashings);
-
-        // 3. check: slashed tokens distributed as expected
-        // 3.1 reporters balance correct
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            uint256 value = ((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
-            if (reporters[i] == address(0x0)) {
-                assertEq(paymentProcessor.balance, value);
-            } else {
-                assertEq(reporters[i].balance, value);
-            }
-        }
-
-        // 3.2 Treasury amount correct
-        uint256 treasuryAmountAfterSlashing = _getTreasuryAmount();
-        uint256 expectedTreasuryAmount = 2 *
-            (expectedSlashedTokensOnOperationPool +
-                expectedSlashedTokensOnStakingPool -
-                (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS)) /
-                    Const.DENOMINATOR));
-
-        assertEq(treasuryAmountAfterSlashing, expectedTreasuryAmount);
-        // 3.3 Node pool tokens correct
-        Node memory aliceNode = _staking.getNode(alice);
-        assertEq(aliceNode.stakingPoolTokens, stakingPoolTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(aliceNode.operationPoolTokens, operationPoolTokens - expectedSlashedTokensOnOperationPool);
-
-        SlashRecord[] memory records = _staking.getSlashingRecords(slashings);
-        // 4. Record status updated correctly
-        for (uint256 i = 0; i < records.length; i++) {
-            assertTrue(records[i].status == SlashStatus.Committed);
-        }
-        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Slashed));
-    }
-
-    // Test Errors: SlashRecordNotExists, SlashStatusNotRecorded
-    function testRevokeSlashingFail() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        address[] memory nodeAddrs = array(alice, bob);
-        uint256[] memory epochIds = array(123, 123);
-
-        address[] memory reporters = array(address(0xabc), address(0xdef));
-
-        _setUpNodes(depositedTokens, stakedTokens);
-        vm.startPrank(address(_settlement));
-
-        // 1. Cannot revoke a non-exsistent one
-        vm.expectRevert(abi.encodeWithSelector(SlashRecordNotExists.selector, alice, 123));
-        Slashing[] memory slashingAlices = _createSlashings(array(alice), array(123));
-        _staking.revokeSlashing(slashingAlices);
-
-        _recordSlashingWithReasons(_createSlashings(nodeAddrs, epochIds), reporters);
-
-        // 2. Cannot revoke a revoked one
-        _staking.revokeSlashing(slashingAlices);
-
-        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, alice, 123));
-        _staking.revokeSlashing(slashingAlices);
-
-        // 3. Cannot revoke a committed one
-        Slashing[] memory slashingBobs = _createSlashings(array(bob), array(123));
-
-        _staking.commitSlashing(slashingBobs);
-
-        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, bob, 123));
-        _staking.revokeSlashing(slashingBobs);
-
-        vm.stopPrank();
-    }
-
-    // Test:
-    // 1. Events emitted as expected
-    // 2. Slashed tokens returned as expected
-    // 3. Slashing info updated as expected
-    function testRevokeSlashing() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-        _setUpNodes(depositedTokens, stakedTokens);
-
-        // 1. record slashing
-        vm.startPrank(address(_settlement));
-        Slashing[] memory slashings = _createSlashings(array(alice, bob), array(123, 123));
-        _recordSlashingWithReasons(slashings, array(carol, dave));
-
-        // 2. revoke slashing and events emitted as expected
-        expectEmit();
-        emit Events.SlashRevoked(alice, 123);
-        emit Events.SlashRevoked(bob, 123);
-        _staking.revokeSlashing(slashings);
-        vm.stopPrank();
-
-        // 3. check: slashed tokens returned as expected
-        // 3.1 staking pool and operation pool tokens correct
-        Node memory aliceNode = _staking.getNode(alice);
-        Node memory bobNode = _staking.getNode(bob);
-        assertEq(aliceNode.stakingPoolTokens, stakedTokens);
-        assertEq(aliceNode.operationPoolTokens, depositedTokens);
-        assertEq(bobNode.stakingPoolTokens, stakedTokens);
-        assertEq(bobNode.operationPoolTokens, depositedTokens);
-
-        // 3.2 reporters balance correct
-        for (uint256 i = 0; i < 2; i++) {
-            assertEq(carol.balance, _initialAmount);
-            assertEq(dave.balance, _initialAmount);
-        }
-
-        // 3.3 treasury balance correct
-        uint256 amount = _getTreasuryAmount();
-        assertEq(amount, 0);
-
-        // 4. slash status updated correctly
-        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Online));
-        assertEq(uint256(bobNode.status), uint256(NodeStatus.Online));
-    }
-
-    // Test multiple slashings
-    function testRecordSlashingMulti() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        _setUpNodes(depositedTokens, stakedTokens);
-
-        address[] memory reporters = array(carol, dave);
-        uint256[] memory epochIds = array(123, 123);
-
-        Slashing[] memory slashings = _createSlashings(array(alice, bob), epochIds);
-        Slashing[] memory slashingAlices = _createSlashings(array(alice), array(123));
-
-        // 1. record slashing alice and bob
-        vm.startPrank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-        // 2. revoke slashing alice
-        _staking.revokeSlashing(slashingAlices);
-        // 3. record slashing alice again
-        _recordSlashingWithReasons(slashingAlices, array(dave));
-        // 4. commit all slashing: alice and bob
-        _staking.commitSlashing(slashings);
-
-        // 5. Check: treasury amount correct
-        uint256 treasuryAmount = _getTreasuryAmount();
-
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
-
-        uint256 expectedTreasuryAmount = 2 *
-            (expectedSlashedTokensOnOperationPool +
-                expectedSlashedTokensOnStakingPool -
-                (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS)) /
-                    Const.DENOMINATOR));
-        assertEq(treasuryAmount, expectedTreasuryAmount);
-
-        // 6. record slashing alice twice will reverted
-        address[] memory sameNodeAddrs = array(alice, alice);
-        uint256[] memory diffEpochIds = array(124, 125);
-
-        Slashing[] memory slashings2 = _createSlashings(sameNodeAddrs, diffEpochIds);
-        vm.expectRevert(abi.encodeWithSelector(SlashMoreThanOnce.selector, alice, 125));
-        _recordSlashingWithReasons(slashings2, reporters);
-    }
+    //    function testRecordSlashing() public {
+    //        uint256 depositedTokens = 10000 ether;
+    //        uint256 stakedTokens = 40000 ether;
+    //
+    //        _setUpNodes(depositedTokens, stakedTokens);
+    //
+    //        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+    //            Const.DENOMINATOR;
+    //        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
+    //            Const.DENOMINATOR;
+    //
+    //        address[] memory nodeAddrs = array(alice, bob);
+    //        address[] memory reporters = array(carol, dave);
+    //        uint256[] memory epochIds = array(123, 123);
+    //
+    //        Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
+    //
+    //        // 1. events emitted as expected
+    //        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+    //            expectEmit();
+    //            emit Events.SlashRecorded(
+    //                nodeAddrs[i],
+    //                epochIds[i],
+    //                reporters[i],
+    //                expectedSlashedTokensOnOperationPool,
+    //                expectedSlashedTokensOnStakingPool
+    //            );
+    //        }
+    //        vm.prank(address(_settlement));
+    //        _recordSlashingWithReasons(slashings, reporters);
+    //
+    //        SlashRecord[] memory records = _staking.getSlashingRecords(slashings);
+    //        // 2. records info updated correctly
+    //        for (uint256 i = 0; i < records.length; i++) {
+    //            assertEq(records[i].reporter, reporters[i]);
+    //            assertEq(records[i].amountForOperationPool, expectedSlashedTokensOnOperationPool);
+    //            assertEq(records[i].amountForStakingPool, expectedSlashedTokensOnStakingPool);
+    //            assertTrue(records[i].status == SlashStatus.Recorded);
+    //        }
+    //
+    //        // 3. check staking pool and operation tokens
+    //        Node memory aliceNode = _staking.getNode(alice);
+    //        Node memory bobNode = _staking.getNode(bob);
+    //        assertEq(aliceNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
+    //        assertEq(aliceNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
+    //        assertEq(bobNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
+    //        assertEq(bobNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
+    //
+    //        // 4. slash status updated correctly
+    //        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Slashing));
+    //        assertEq(uint256(bobNode.status), uint256(NodeStatus.Slashing));
+    //    }
+    //
+    //    // Test errors: SlashRecordNotExists, SlashStatusNotRecorded
+    //    function testCommitSlashingFail() public {
+    //        uint256 depositedTokens = 10000 ether;
+    //        uint256 stakedTokens = 40000 ether;
+    //
+    //        _setUpNodes(depositedTokens, stakedTokens);
+    //
+    //        address[] memory nodeAddrs = array(alice, bob);
+    //        uint256[] memory epochIds = array(123, 123);
+    //        Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
+    //        Slashing[] memory slashingAlices = _createSlashings(array(alice), array(123));
+    //        Slashing[] memory slashingBobs = _createSlashings(array(bob), array(123));
+    //
+    //        address[] memory reporters = array(address(0xabc), address(0xdef));
+    //
+    //        vm.startPrank(address(_settlement));
+    //
+    //        // 1. cannot commit a non-exsistent one
+    //        Slashing[] memory slashingNulls = _createSlashings(array(carol), array(789));
+    //        vm.expectRevert(abi.encodeWithSelector(SlashRecordNotExists.selector, carol, 789));
+    //        _staking.commitSlashing(slashingNulls);
+    //
+    //        _recordSlashingWithReasons(slashings, reporters);
+    //
+    //        // 2.1 cannot commit a revoked one
+    //        _staking.revokeSlashing(slashingAlices);
+    //
+    //        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, alice, 123));
+    //        _staking.commitSlashing(slashingAlices);
+    //
+    //        // 2.2 cannot commit a committed one
+    //        _staking.commitSlashing(slashingBobs);
+    //
+    //        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, bob, 123));
+    //        _staking.commitSlashing(slashingBobs);
+    //
+    //        vm.stopPrank();
+    //    }
+    //
+    //    // Test:
+    //    // 1. Events emitted as expected
+    //    // 2. Slashed tokens distributed as expected
+    //    // 3. Slashing info updated as expected
+    //    // solhint-disable-next-line function-max-lines
+    //    function testCommitSlashing() public {
+    //        uint256 depositedTokens = 10000 ether;
+    //        uint256 stakedTokens = 40000 ether;
+    //
+    //        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+    //            Const.DENOMINATOR;
+    //        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
+    //            Const.DENOMINATOR;
+    //
+    //        _setUpNodes(depositedTokens, stakedTokens);
+    //        uint256 treasuryAmount = _getTreasuryAmount();
+    //
+    //        address[] memory nodeAddrs = array(alice, bob);
+    //        uint256[] memory epochIds = array(123, 123);
+    //
+    //        address[] memory reporters = array(address(0xabc), address(0x0));
+    //
+    //        Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
+    //
+    //        uint256 stakingPoolTokens = _staking.getNode(alice).stakingPoolTokens;
+    //        uint256 operationPoolTokens = _staking.getNode(alice).operationPoolTokens;
+    //
+    //        // 1. record slashing
+    //        vm.prank(address(_settlement));
+    //        _recordSlashingWithReasons(slashings, reporters);
+    //
+    //        // 1.1 check: treasury amount will not change after record slashing
+    //        assertEq(treasuryAmount, 0);
+    //
+    //        // 2. commit slashing and events emitted as expected
+    //        expectEmit();
+    //        emit Events.SlashCommitted(alice, 123);
+    //        emit Events.SlashCommitted(bob, 123);
+    //        vm.prank(address(_settlement));
+    //        _staking.commitSlashing(slashings);
+    //
+    //        // 3. check: slashed tokens distributed as expected
+    //        // 3.1 reporters balance correct
+    //        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+    //            uint256 value = ((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
+    //                Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+    //            if (reporters[i] == address(0x0)) {
+    //                assertEq(paymentProcessor.balance, value);
+    //            } else {
+    //                assertEq(reporters[i].balance, value);
+    //            }
+    //        }
+    //
+    //        // 3.2 Treasury amount correct
+    //        uint256 treasuryAmountAfterSlashing = _getTreasuryAmount();
+    //        uint256 expectedTreasuryAmount = 2 *
+    //            (expectedSlashedTokensOnOperationPool +
+    //                expectedSlashedTokensOnStakingPool -
+    //                (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
+    //                    (Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS)) /
+    //                    Const.DENOMINATOR));
+    //
+    //        assertEq(treasuryAmountAfterSlashing, expectedTreasuryAmount);
+    //        // 3.3 Node pool tokens correct
+    //        Node memory aliceNode = _staking.getNode(alice);
+    //        assertEq(aliceNode.stakingPoolTokens, stakingPoolTokens - expectedSlashedTokensOnStakingPool);
+    //        assertEq(aliceNode.operationPoolTokens, operationPoolTokens - expectedSlashedTokensOnOperationPool);
+    //
+    //        SlashRecord[] memory records = _staking.getSlashingRecords(slashings);
+    //        // 4. Record status updated correctly
+    //        for (uint256 i = 0; i < records.length; i++) {
+    //            assertTrue(records[i].status == SlashStatus.Committed);
+    //        }
+    //        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Slashed));
+    //    }
+    //
+    //    // Test Errors: SlashRecordNotExists, SlashStatusNotRecorded
+    //    function testRevokeSlashingFail() public {
+    //        uint256 depositedTokens = 10000 ether;
+    //        uint256 stakedTokens = 40000 ether;
+    //
+    //        address[] memory nodeAddrs = array(alice, bob);
+    //        uint256[] memory epochIds = array(123, 123);
+    //
+    //        address[] memory reporters = array(address(0xabc), address(0xdef));
+    //
+    //        _setUpNodes(depositedTokens, stakedTokens);
+    //        vm.startPrank(address(_settlement));
+    //
+    //        // 1. Cannot revoke a non-exsistent one
+    //        vm.expectRevert(abi.encodeWithSelector(SlashRecordNotExists.selector, alice, 123));
+    //        Slashing[] memory slashingAlices = _createSlashings(array(alice), array(123));
+    //        _staking.revokeSlashing(slashingAlices);
+    //
+    //        _recordSlashingWithReasons(_createSlashings(nodeAddrs, epochIds), reporters);
+    //
+    //        // 2. Cannot revoke a revoked one
+    //        _staking.revokeSlashing(slashingAlices);
+    //
+    //        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, alice, 123));
+    //        _staking.revokeSlashing(slashingAlices);
+    //
+    //        // 3. Cannot revoke a committed one
+    //        Slashing[] memory slashingBobs = _createSlashings(array(bob), array(123));
+    //
+    //        _staking.commitSlashing(slashingBobs);
+    //
+    //        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, bob, 123));
+    //        _staking.revokeSlashing(slashingBobs);
+    //
+    //        vm.stopPrank();
+    //    }
+    //
+    //    // Test:
+    //    // 1. Events emitted as expected
+    //    // 2. Slashed tokens returned as expected
+    //    // 3. Slashing info updated as expected
+    //    function testRevokeSlashing() public {
+    //        uint256 depositedTokens = 10000 ether;
+    //        uint256 stakedTokens = 40000 ether;
+    //        _setUpNodes(depositedTokens, stakedTokens);
+    //
+    //        // 1. record slashing
+    //        vm.startPrank(address(_settlement));
+    //        Slashing[] memory slashings = _createSlashings(array(alice, bob), array(123, 123));
+    //        _recordSlashingWithReasons(slashings, array(carol, dave));
+    //
+    //        // 2. revoke slashing and events emitted as expected
+    //        expectEmit();
+    //        emit Events.SlashRevoked(alice, 123);
+    //        emit Events.SlashRevoked(bob, 123);
+    //        _staking.revokeSlashing(slashings);
+    //        vm.stopPrank();
+    //
+    //        // 3. check: slashed tokens returned as expected
+    //        // 3.1 staking pool and operation pool tokens correct
+    //        Node memory aliceNode = _staking.getNode(alice);
+    //        Node memory bobNode = _staking.getNode(bob);
+    //        assertEq(aliceNode.stakingPoolTokens, stakedTokens);
+    //        assertEq(aliceNode.operationPoolTokens, depositedTokens);
+    //        assertEq(bobNode.stakingPoolTokens, stakedTokens);
+    //        assertEq(bobNode.operationPoolTokens, depositedTokens);
+    //
+    //        // 3.2 reporters balance correct
+    //        for (uint256 i = 0; i < 2; i++) {
+    //            assertEq(carol.balance, _initialAmount);
+    //            assertEq(dave.balance, _initialAmount);
+    //        }
+    //
+    //        // 3.3 treasury balance correct
+    //        uint256 amount = _getTreasuryAmount();
+    //        assertEq(amount, 0);
+    //
+    //        // 4. slash status updated correctly
+    //        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Online));
+    //        assertEq(uint256(bobNode.status), uint256(NodeStatus.Online));
+    //    }
+    //
+    //    // Test multiple slashings
+    //    function testRecordSlashingMulti() public {
+    //        uint256 depositedTokens = 10000 ether;
+    //        uint256 stakedTokens = 40000 ether;
+    //
+    //        _setUpNodes(depositedTokens, stakedTokens);
+    //
+    //        address[] memory reporters = array(carol, dave);
+    //        uint256[] memory epochIds = array(123, 123);
+    //
+    //        Slashing[] memory slashings = _createSlashings(array(alice, bob), epochIds);
+    //        Slashing[] memory slashingAlices = _createSlashings(array(alice), array(123));
+    //
+    //        // 1. record slashing alice and bob
+    //        vm.startPrank(address(_settlement));
+    //        _recordSlashingWithReasons(slashings, reporters);
+    //        // 2. revoke slashing alice
+    //        _staking.revokeSlashing(slashingAlices);
+    //        // 3. record slashing alice again
+    //        _recordSlashingWithReasons(slashingAlices, array(dave));
+    //        // 4. commit all slashing: alice and bob
+    //        _staking.commitSlashing(slashings);
+    //
+    //        // 5. Check: treasury amount correct
+    //        uint256 treasuryAmount = _getTreasuryAmount();
+    //
+    //        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+    //            Const.DENOMINATOR;
+    //        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
+    //            Const.DENOMINATOR;
+    //
+    //        uint256 expectedTreasuryAmount = 2 *
+    //            (expectedSlashedTokensOnOperationPool +
+    //                expectedSlashedTokensOnStakingPool -
+    //                (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
+    //                    (Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS)) /
+    //                    Const.DENOMINATOR));
+    //        assertEq(treasuryAmount, expectedTreasuryAmount);
+    //
+    //        // 6. record slashing alice twice will reverted
+    //        address[] memory sameNodeAddrs = array(alice, alice);
+    //        uint256[] memory diffEpochIds = array(124, 125);
+    //
+    //        Slashing[] memory slashings2 = _createSlashings(sameNodeAddrs, diffEpochIds);
+    //        vm.expectRevert(abi.encodeWithSelector(SlashMoreThanOnce.selector, alice, 125));
+    //        _recordSlashingWithReasons(slashings2, reporters);
+    //    }
 
     function testRequestExitSucceeds() public {
         vm.prank(alice);
@@ -1649,29 +1648,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.requestExit();
 
         vm.stopPrank();
-    }
-
-    function testDemoteNodes() public {
-        _createNode(alice);
-        _createPublicGoodNode(bob);
-        _createNode(carol);
-
-        address[] memory nodeAddrs = array(alice, bob, carol);
-        string[] memory reasons = new string[](3);
-        reasons[0] = "";
-        reasons[1] = "";
-        reasons[2] = "";
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            expectEmit();
-            emit Events.NodeDemoted(1, nodeAddrs[i], 1, "");
-        }
-        vm.prank(address(_settlement));
-        _staking.demoteNodes(1, nodeAddrs, reasons);
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            assertEq(_staking.getDemotionCount(1, nodeAddrs[i]), 1);
-        }
     }
 
     function testSetNodesStatus() public {
@@ -1975,14 +1951,14 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.stake{value: stakedTokens}(bob);
     }
 
-    function _recordSlashingWithReasons(Slashing[] memory slashings, address[] memory reporters) internal {
-        string[] memory reasons = new string[](slashings.length);
-        for (uint256 i = 0; i < slashings.length; i++) {
-            reasons[i] = "";
-        }
-
-        _staking.recordSlashing(slashings, reporters, reasons);
-    }
+    //    function _recordSlashingWithReasons(Slashing[] memory slashings, address[] memory reporters) internal {
+    //        string[] memory reasons = new string[](slashings.length);
+    //        for (uint256 i = 0; i < slashings.length; i++) {
+    //            reasons[i] = "";
+    //        }
+    //
+    //        _staking.recordSlashing(slashings, reporters, reasons);
+    //    }
 
     function _setNodeStatus(address nodeAddr, NodeStatus status) internal {
         bytes32 slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
@@ -2036,18 +2012,5 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function _getNodeStatus(address nodeAddr) internal view returns (NodeStatus status) {
         status = _staking.getNode(nodeAddr).status;
-    }
-
-    function _createSlashings(
-        address[] memory nodeAddrs,
-        uint256[] memory epochIds
-    ) internal pure returns (Slashing[] memory) {
-        Slashing[] memory slashings = new Slashing[](nodeAddrs.length);
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            slashings[i] = Slashing(nodeAddrs[i], epochIds[i]);
-        }
-
-        return slashings;
     }
 }

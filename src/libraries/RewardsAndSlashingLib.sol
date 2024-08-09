@@ -2,6 +2,7 @@
 // solhint-disable var-name-mixedcase
 pragma solidity 0.8.20;
 
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
 import {Node, NodeStatus, SlashStatus, SlashRecord} from "./DataTypes.sol";
 import {
@@ -16,7 +17,9 @@ import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
 
 library RewardsAndSlashingLib {
-    function recordSlashing(address nodeAddr, uint256 epoch, address reporter, string calldata reason) external {
+    using EnumerableSet for EnumerableSet.UintSet;
+
+    function recordSlashing(address nodeAddr, uint256 epoch, address reporter) external {
         Node storage node = StorageLib.getNode(nodeAddr);
 
         if (nodeAddr == address(0)) revert NodeNotExists();
@@ -33,11 +36,10 @@ library RewardsAndSlashingLib {
 
         SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
 
+        record.reporter = reporter;
         record.amountForOperationPool = slashedOperationPool;
         record.amountForStakingPool = slashedStakingPool;
-        record.reporter = reporter;
         record.status = SlashStatus.Recorded;
-        record.slashReason = reason;
 
         _recordSlashingAmount(nodeAddr, record);
 

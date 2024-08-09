@@ -36,6 +36,4 @@ library Const {
 
     // denominator
     uint256 public constant DENOMINATOR = 10000;
-
-    string public constant DEFAULT_SLASH_REASON = "Demotion count reaches threshold";
 }

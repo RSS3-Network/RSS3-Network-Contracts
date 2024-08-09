@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {NodeStatus, Slashing} from "../libraries/DataTypes.sol";
+import {NodeStatus} from "../libraries/DataTypes.sol";
 
 interface ISettlement {
     /**
@@ -45,30 +45,19 @@ interface ISettlement {
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 
     /**
-     * @notice Slashes nodes.
-     * Requirements:
-     * - The caller must have the `ORACLE_ROLE`.
-     * @param slashings The addresses of nodes and epoch ids to slash.
-     * @param reporters The addresses of reporters.
-     * @param reasons The reasons for slashing.
-     */
-    function recordSlashing(
-        Slashing[] calldata slashings,
-        address[] calldata reporters,
-        string[] calldata reasons
-    ) external;
-
-    /**
      * @notice Revokes slashing.
-     * @param epochIds The epoch numbers to revoke slashing.
+     * @param epoch The address of node to revoke demotions.
+     * @param epoch The epoch numbers to revoke demotions.
+     * @param demotionIds The ids of demotions to revoke.
      */
-    function revokeSlashing(Slashing[] calldata epochIds) external;
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds) external;
 
     /**
      * @notice Commit slashing.
-     * @param epochIds The epoch numbers to commit slashing.
+     * @param nodeAddrs The addresses of nodes to commit slashing.
+     * @param epochs The epoch numbers to commit slashing.
      */
-    function commitSlashing(Slashing[] calldata epochIds) external;
+    function commitSlashing(address[] calldata nodeAddrs, uint256[] calldata epochs) external;
 
     /**
      * @notice Sets node status.
@@ -78,12 +67,12 @@ interface ISettlement {
     function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
 
     /**
-     * @notice Demotes nodes.
+     * @notice Submits demotions for nodes.
      * @dev The caller must have the `ORACLE_ROLE`.
      * @param nodeAddrs Addresses of node operator to demote.
      * @param reasons The reasons of demotion.
      */
-    function demoteNodes(address[] calldata nodeAddrs, string[] calldata reasons) external;
+    function submitDemotions(address[] calldata nodeAddrs, string[] calldata reasons) external;
 
     /**
      * @notice  Returns the address of the Staking contract.

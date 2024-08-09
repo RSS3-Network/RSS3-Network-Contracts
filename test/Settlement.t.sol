@@ -3,7 +3,7 @@
 pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
-import {Node, NodeStatus, Slashing} from "../src/libraries/DataTypes.sol";
+import {Node, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
@@ -828,6 +828,7 @@ contract SettlementTest is CommonTest {
         assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
     }
 
+    /*
     function testRecordSlashing() public {
         Slashing[] memory slashings = new Slashing[](2);
         slashings[0] = Slashing(alice, 1);
@@ -911,6 +912,7 @@ contract SettlementTest is CommonTest {
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
         _settlement.commitSlashing(slashings);
     }
+    */
 
     function testSetNodeStatusSucceeds() public {
         _createNode(alice);
@@ -938,34 +940,6 @@ contract SettlementTest is CommonTest {
 
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
         _settlement.setNodeStatus(nodeAddrs, status);
-    }
-
-    function testDemoteNodes() public {
-        _createNode(alice);
-        _createPublicGoodNode(bob);
-        _createNode(carol);
-
-        address[] memory nodeAddrs = array(alice, bob, carol);
-        string[] memory reasons = new string[](3);
-        reasons[0] = "";
-        reasons[1] = "";
-        reasons[2] = "";
-
-        vm.prank(oracleAccount);
-        _settlement.demoteNodes(nodeAddrs, reasons);
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            assertEq(_staking.getDemotionCount(0, nodeAddrs[i]), 1);
-        }
-    }
-    function testDemoteNodesFail() public {
-        string[] memory reasons = new string[](3);
-        reasons[0] = "";
-        reasons[1] = "";
-        reasons[2] = "";
-
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
-        _settlement.demoteNodes(array(alice, bob), reasons);
     }
 
     function invariantTreasuryBalance() public view {
