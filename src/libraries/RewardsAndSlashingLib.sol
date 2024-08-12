@@ -43,7 +43,6 @@ library RewardsAndSlashingLib {
     }
 
     function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToDelete) external {
-        SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
         EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
 
         for (uint256 i = 0; i < demotionIdsToDelete.length; i++) {
@@ -53,6 +52,7 @@ library RewardsAndSlashingLib {
             emit Events.DemotionRevoked(demotionIdsToDelete[i]);
         }
 
+        SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
         if (record.status == SlashStatus.Recorded && demotionIds.length() <= Const.DEMOTION_COUNT_THRESHOLD) {
             // slash
             _revokeSlashing(nodeAddr, epoch);

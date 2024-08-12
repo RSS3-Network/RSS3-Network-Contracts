@@ -143,8 +143,17 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc ISettlement
-    function commitSlashing(address nodeAddr, uint256 epoch) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).commitSlashing(nodeAddr, epoch);
+    function commitSlashing(
+        address[] calldata nodeAddrs,
+        uint256[] calldata epochs
+    ) external override onlyRole(ORACLE_ROLE) {
+        if (nodeAddrs.length != epochs.length) {
+            revert InvalidArrayLength();
+        }
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            IStaking(_staking).commitSlashing(nodeAddrs[i], epochs[i]);
+        }
     }
 
     /// @inheritdoc ISettlement

@@ -54,10 +54,10 @@ interface ISettlement {
 
     /**
      * @notice Commit slashing.
-     * @param nodeAddr The address of node to commit slashing.
-     * @param epoch The epoch number to commit slashing.
+     * @param nodeAddrs The addresses of nodes to commit slashing.
+     * @param epochs The epoch number to commit slashing.
      */
-    function commitSlashing(address nodeAddr, uint256 epoch) external;
+    function commitSlashing(address[] calldata nodeAddrs, uint256[] calldata epochs) external;
 
     /**
      * @notice Sets node status.
