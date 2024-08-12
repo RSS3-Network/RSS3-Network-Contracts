@@ -46,7 +46,7 @@ interface ISettlement {
 
     /**
      * @notice Revokes slashing.
-     * @param epoch The address of node to revoke demotions.
+     * @param nodeAddr The address of node to revoke demotions.
      * @param epoch The epoch numbers to revoke demotions.
      * @param demotionIds The ids of demotions to revoke.
      */
@@ -54,10 +54,10 @@ interface ISettlement {
 
     /**
      * @notice Commit slashing.
-     * @param nodeAddrs The addresses of nodes to commit slashing.
-     * @param epochs The epoch numbers to commit slashing.
+     * @param nodeAddr The address of node to commit slashing.
+     * @param epoch The epoch number to commit slashing.
      */
-    function commitSlashing(address[] calldata nodeAddrs, uint256[] calldata epochs) external;
+    function commitSlashing(address nodeAddr, uint256 epoch) external;
 
     /**
      * @notice Sets node status.

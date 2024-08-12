@@ -324,15 +324,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function commitSlashing(
-        address[] calldata nodeAddrs,
-        uint256[] calldata epochs
-    ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
-        if (nodeAddrs.length != epochs.length) revert InvalidArrayLength();
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            RewardsAndSlashingLib.commitSlashing(nodeAddrs[i], epochs[i], PAYMENT_PROCESSOR);
-        }
+    function commitSlashing(address nodeAddr, uint256 epoch) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, PAYMENT_PROCESSOR);
     }
 
     /// @inheritdoc IStaking
@@ -341,12 +334,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         uint256 epoch,
         uint256[] calldata demotionIds
     ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
-        for (uint256 i = 0; i < demotionIds.length; i++) {
-            _demotionIds[nodeAddr][epoch].remove(demotionIds[i]);
-            delete _demotionReasons[demotionIds[i]];
-
-            emit Events.DemotionRevoked(demotionIds[i]);
-        }
+        RewardsAndSlashingLib.revokeDemotions(nodeAddr, epoch, demotionIds);
     }
 
     /// @inheritdoc IStaking
@@ -373,26 +361,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
         address[] calldata nodeAddrs,
         string[] calldata reasons
     ) external override onlyRole(ORACLE_ROLE) {
-        if (nodeAddrs.length != reasons.length) revert InvalidArrayLength();
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            address nodeAddr = nodeAddrs[i];
-
-            SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
-            uint256 demotionId = ++_demotionIdCounter;
-            _demotionIds[nodeAddr][epoch].add(demotionId);
-            _demotionReasons[demotionId] = reasons[i];
-
-            if (
-                record.status != SlashStatus.Recorded &&
-                _demotionIds[nodeAddr][epoch].length() > Const.DEMOTION_COUNT_THRESHOLD
-            ) {
-                // slash
-                RewardsAndSlashingLib.recordSlashing(nodeAddr, epoch, address(0));
-            }
-
-            emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reasons[i]);
-        }
+        RewardsAndSlashingLib.submitDemotions(epoch, nodeAddrs, reasons);
     }
 
     /// @inheritdoc IStaking

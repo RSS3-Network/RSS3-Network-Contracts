@@ -188,13 +188,13 @@ interface IStaking {
     function reRegister() external;
 
     /**
-     * @notice Commit slashing nodes.
+     * @notice Commit slashing node.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param nodeAddrs The addresses of nodes to commit.
-     * @param epochs The epoch number.
+     * @param nodeAddr The address of node to commit.
+     * @param epoch The epoch number.
      */
-    function commitSlashing(address[] calldata nodeAddrs, uint256[] calldata epochs) external;
+    function commitSlashing(address nodeAddr, uint256 epoch) external;
 
     /**
      * @notice Revoke demotions.

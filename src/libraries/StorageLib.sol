@@ -9,6 +9,7 @@ import {Node, PoolStatData, SlashRecord, UnstakeRequest, WithdrawalRequest} from
 
 library StorageLib {
     using Checkpoints for Checkpoints.Trace160;
+    using EnumerableSet for EnumerableSet.UintSet;
     using SafeCast for uint256;
 
     // address chips, bool _isSettlementPhase, bool _isAlphaPhase
@@ -29,6 +30,10 @@ library StorageLib {
 
     uint256 public constant CHIP_ISSUERS_MAPPING_SLOT = 24;
     uint256 public constant CHIP_TO_SHARES_MAPPING_SLOT = 25;
+
+    uint256 public constant DEMOTION_ID_COUNTER_SLOT = 26;
+    uint256 public constant DEMOTION_IDS_SLOT = 27;
+    uint256 public constant DEMOTION_REASONS_SLOT = 28;
 
     uint256 public constant SLASH_RECORDS_SLOT = 29;
 
@@ -64,6 +69,14 @@ library StorageLib {
         }
     }
 
+    function nextDemotionId() internal returns (uint256 newCounter) {
+        assembly {
+            let currentCounter := sload(DEMOTION_ID_COUNTER_SLOT)
+            newCounter := add(currentCounter, 1)
+            sstore(DEMOTION_ID_COUNTER_SLOT, newCounter)
+        }
+    }
+
     function getChipsContract() internal view returns (address chips) {
         assembly {
             chips := sload(CHIPS_CONTRACT_ADDRESS_SLOT)
@@ -94,6 +107,25 @@ library StorageLib {
     function chipToShares() internal pure returns (mapping(uint256 => uint256) storage _chipToShares) {
         assembly {
             _chipToShares.slot := CHIP_TO_SHARES_MAPPING_SLOT
+        }
+    }
+
+    function getDemotionIds(
+        address nodeAddr,
+        uint256 epochId
+    ) internal pure returns (EnumerableSet.UintSet storage demotionIds) {
+        assembly {
+            mstore(0x00, nodeAddr)
+            mstore(0x20, DEMOTION_IDS_SLOT)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, epochId)
+            demotionIds.slot := keccak256(0x00, 0x40)
+        }
+    }
+
+    function getDemotionReasons() internal pure returns (mapping(uint256 => string) storage _demotionReasons) {
+        assembly {
+            _demotionReasons.slot := DEMOTION_REASONS_SLOT
         }
     }
 

@@ -10,7 +10,8 @@ import {
     SlashMoreThanOnce,
     SlashRecordNotExists,
     SlashStatusNotRecorded,
-    TransferFailed
+    TransferFailed,
+    InvalidArrayLength
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
@@ -19,34 +20,43 @@ import {StorageLib} from "./StorageLib.sol";
 library RewardsAndSlashingLib {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    function recordSlashing(address nodeAddr, uint256 epoch, address reporter) external {
-        Node storage node = StorageLib.getNode(nodeAddr);
+    function submitDemotions(uint256 epoch, address[] calldata nodeAddrs, string[] calldata reasons) external {
+        if (nodeAddrs.length != reasons.length) revert InvalidArrayLength();
 
-        if (nodeAddr == address(0)) revert NodeNotExists();
-        // A public good node can't be slashed.
-        if (node.publicGood) return;
-        if (node.status == NodeStatus.Slashing) revert SlashMoreThanOnce(nodeAddr, epoch);
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            address nodeAddr = nodeAddrs[i];
 
-        // slash operation pool tokens
-        uint256 slashedOperationPool = (node.operationPoolTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
+            SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
+            EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
 
-        // slash staking pool tokens
-        uint256 slashedStakingPool = (node.stakingPoolTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+            uint256 demotionId = StorageLib.nextDemotionId();
+            demotionIds.add(demotionId);
+            StorageLib.getDemotionReasons()[demotionId] = reasons[i];
 
+            if (record.status != SlashStatus.Recorded && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD) {
+                // slash
+                _recordSlashing(nodeAddr, epoch, address(0));
+            }
+
+            emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reasons[i]);
+        }
+    }
+
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToDelete) external {
         SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
+        EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
 
-        record.reporter = reporter;
-        record.amountForOperationPool = slashedOperationPool;
-        record.amountForStakingPool = slashedStakingPool;
-        record.status = SlashStatus.Recorded;
+        for (uint256 i = 0; i < demotionIdsToDelete.length; i++) {
+            demotionIds.remove(demotionIdsToDelete[i]);
+            delete StorageLib.getDemotionReasons()[demotionIdsToDelete[i]];
 
-        _recordSlashingAmount(nodeAddr, record);
+            emit Events.DemotionRevoked(demotionIdsToDelete[i]);
+        }
 
-        // set node status: slashing
-        node.status = NodeStatus.Slashing;
-
-        emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
+        if (record.status == SlashStatus.Recorded && demotionIds.length() <= Const.DEMOTION_COUNT_THRESHOLD) {
+            // slash
+            _revokeSlashing(nodeAddr, epoch);
+        }
     }
 
     function commitSlashing(address nodeAddr, uint256 epoch, address paymentProcessor) external {
@@ -60,20 +70,6 @@ library RewardsAndSlashingLib {
 
         _commitSlashingAmount(record, paymentProcessor);
         emit Events.SlashCommitted(nodeAddr, epoch);
-    }
-
-    function revokeSlashing(address nodeAddr, uint256 epoch) external {
-        SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
-
-        _checkRecordedStatus(record, nodeAddr, epoch);
-
-        record.status = SlashStatus.Revoked;
-
-        // set node status: online
-        StorageLib.getNode(nodeAddr).status = NodeStatus.Online;
-
-        _revokeSlashingAmount(nodeAddr, record);
-        emit Events.SlashRevoked(nodeAddr, epoch);
     }
 
     function distributePublicPoolRewards(uint256 publicPoolRewards) external returns (uint256) {
@@ -123,13 +119,53 @@ library RewardsAndSlashingLib {
         _transfer(treasury, amount);
     }
 
-    /// @dev
-    function _recordSlashingAmount(address nodeAddr, SlashRecord storage record) internal {
+    function _recordSlashing(address nodeAddr, uint256 epoch, address reporter) internal {
         Node storage node = StorageLib.getNode(nodeAddr);
 
+        if (nodeAddr == address(0)) revert NodeNotExists();
+        // A public good node can't be slashed.
+        if (node.publicGood) return;
+        if (node.status == NodeStatus.Slashing) revert SlashMoreThanOnce(nodeAddr, epoch);
+
+        // slash operation pool tokens
+        uint256 slashedOperationPool = (node.operationPoolTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+            Const.DENOMINATOR;
+
+        // slash staking pool tokens
+        uint256 slashedStakingPool = (node.stakingPoolTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+
+        // update slash record
+        SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
+        record.reporter = reporter;
+        record.amountForOperationPool = slashedOperationPool;
+        record.amountForStakingPool = slashedStakingPool;
+        record.status = SlashStatus.Recorded;
+
+        // record slashing amount
         StakingCommonLib.decreaseOperationPool(node, record.amountForOperationPool);
         StakingCommonLib.decreaseStakingPool(node, record.amountForStakingPool);
         StakingCommonLib.increaseSlashingPoolByRecord(record);
+        // set node status: slashing
+        node.status = NodeStatus.Slashing;
+
+        emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
+    }
+
+    function _revokeSlashing(address nodeAddr, uint256 epoch) internal {
+        SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
+        Node storage node = StorageLib.getNode(nodeAddr);
+
+        _checkRecordedStatus(record, nodeAddr, epoch);
+        record.status = SlashStatus.Revoked;
+
+        // revoke slashing amount
+        StakingCommonLib.decreaseSlashingPoolByRecord(record);
+        StakingCommonLib.increaseOperationPool(node, record.amountForOperationPool);
+        StakingCommonLib.increaseStakingPool(node, record.amountForStakingPool);
+        // set node status: online
+        node.status = NodeStatus.Online;
+
+        emit Events.SlashRevoked(nodeAddr, epoch);
     }
 
     /// @dev commit slashing amount, distributes the amount to reporter and treasury
@@ -152,15 +188,6 @@ library RewardsAndSlashingLib {
         _transfer(address(0x0), burnAmount);
 
         // remaining amount is in this contract for the treasury
-    }
-
-    /// @dev return slashing amount
-    function _revokeSlashingAmount(address nodeAddr, SlashRecord storage record) internal {
-        Node storage node = StorageLib.getNode(nodeAddr);
-
-        StakingCommonLib.decreaseSlashingPoolByRecord(record);
-        StakingCommonLib.increaseOperationPool(node, record.amountForOperationPool);
-        StakingCommonLib.increaseStakingPool(node, record.amountForStakingPool);
     }
 
     /// @dev transfer native tokens by a low-level call.
