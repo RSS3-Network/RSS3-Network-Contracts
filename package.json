@@ -21,6 +21,7 @@
         "sync": "make install",
         "build": "make build",
         "test": "make foundry-test",
+        "abi": "make abi",
         "snapshot": "make snapshot",
         "lint": "make lint",
         "solhint": "make solhint",

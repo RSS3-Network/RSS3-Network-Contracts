@@ -11,5 +11,9 @@ yarn solhint
 
 # unit test
 echo "Running test"
-#yarn test
+yarn test
+
+# generate abi
+echo "Generating abi"
+yarn abi
 
