@@ -62,6 +62,10 @@ regenerate-storage-layout:
 # Lints
 lint :; npx prettier --plugin=prettier-plugin-solidity  --write "{src,test,script}/**/*.sol"
 
+abi:
+	@echo " > \033[32mGenerating abi...\033[0m"
+	./tools/generateABI.sh
+
 # Generate Gas Snapshots
 snapshot :; forge clean && forge snapshot
 
