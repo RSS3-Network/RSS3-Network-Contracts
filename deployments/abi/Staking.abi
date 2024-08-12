@@ -8,37 +8,12 @@
         "internalType": "address"
       },
       {
-        "name": "stakeRatio",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
         "name": "stakeUnbondingPeriod",
         "type": "uint256",
         "internalType": "uint256"
       },
       {
         "name": "depositUnbondingPeriod",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "nodeSlashRateBasisPoints",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "userSlashRateBasisPoints",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "minDeposit",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "minTaxRateBasisPoints",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -66,45 +41,6 @@
   {
     "type": "function",
     "name": "DEPOSIT_UNBONDING_PERIOD",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MIN_DEPOSIT",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MIN_TAX_RATE_BASIS_POINTS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "NODE_SLASH_RATE_BASIS_POINTS",
     "inputs": [],
     "outputs": [
       {
@@ -156,32 +92,6 @@
   },
   {
     "type": "function",
-    "name": "SHARES_PER_CHIP",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "STAKE_RATIO",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "STAKE_UNBONDING_PERIOD",
     "inputs": [],
     "outputs": [
@@ -202,19 +112,6 @@
         "name": "",
         "type": "address",
         "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "USER_SLASH_RATE_BASIS_POINTS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -263,21 +160,14 @@
     "name": "commitSlashing",
     "inputs": [
       {
-        "name": "slashings",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
+        "name": "nodeAddr",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "epoch",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "outputs": [],
@@ -394,6 +284,35 @@
   },
   {
     "type": "function",
+    "name": "getDemotions",
+    "inputs": [
+      {
+        "name": "nodeAddr",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "epoch",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "demotionIds_",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "reasons_",
+        "type": "string[]",
+        "internalType": "string[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getNode",
     "inputs": [
       {
@@ -406,7 +325,7 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct DataTypes.Node",
+        "internalType": "struct Node",
         "components": [
           {
             "name": "nodeId",
@@ -459,9 +378,14 @@
             "internalType": "uint256"
           },
           {
-            "name": "slashStatus",
-            "type": "bool",
-            "internalType": "bool"
+            "name": "exitTime",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "status",
+            "type": "uint8",
+            "internalType": "enum NodeStatus"
           }
         ]
       }
@@ -514,7 +438,7 @@
       {
         "name": "nodes",
         "type": "tuple[]",
-        "internalType": "struct DataTypes.Node[]",
+        "internalType": "struct Node[]",
         "components": [
           {
             "name": "nodeId",
@@ -567,90 +491,14 @@
             "internalType": "uint256"
           },
           {
-            "name": "slashStatus",
-            "type": "bool",
-            "internalType": "bool"
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getNodesWithPagination",
-    "inputs": [
-      {
-        "name": "offset",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "limit",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "nodes",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Node[]",
-        "components": [
-          {
-            "name": "nodeId",
+            "name": "exitTime",
             "type": "uint256",
             "internalType": "uint256"
           },
           {
-            "name": "account",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "taxRateBasisPoints",
-            "type": "uint64",
-            "internalType": "uint64"
-          },
-          {
-            "name": "publicGood",
-            "type": "bool",
-            "internalType": "bool"
-          },
-          {
-            "name": "alpha",
-            "type": "bool",
-            "internalType": "bool"
-          },
-          {
-            "name": "name",
-            "type": "string",
-            "internalType": "string"
-          },
-          {
-            "name": "description",
-            "type": "string",
-            "internalType": "string"
-          },
-          {
-            "name": "operationPoolTokens",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "stakingPoolTokens",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "totalShares",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "slashStatus",
-            "type": "bool",
-            "internalType": "bool"
+            "name": "status",
+            "type": "uint8",
+            "internalType": "enum NodeStatus"
           }
         ]
       }
@@ -671,7 +519,7 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct DataTypes.UnstakeRequest",
+        "internalType": "struct UnstakeRequest",
         "components": [
           {
             "name": "owner",
@@ -712,7 +560,7 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct DataTypes.WithdrawalRequest",
+        "internalType": "struct WithdrawalRequest",
         "components": [
           {
             "name": "owner",
@@ -765,7 +613,7 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct DataTypes.Node",
+        "internalType": "struct Node",
         "components": [
           {
             "name": "nodeId",
@@ -818,9 +666,14 @@
             "internalType": "uint256"
           },
           {
-            "name": "slashStatus",
-            "type": "bool",
-            "internalType": "bool"
+            "name": "exitTime",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "status",
+            "type": "uint8",
+            "internalType": "enum NodeStatus"
           }
         ]
       }
@@ -891,31 +744,24 @@
   },
   {
     "type": "function",
-    "name": "getSlashingRecords",
+    "name": "getSlashingRecord",
     "inputs": [
       {
-        "name": "slashings",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
+        "name": "nodeAddr",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "epoch",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "outputs": [
       {
-        "name": "records",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.SlashRecord[]",
+        "name": "record",
+        "type": "tuple",
+        "internalType": "struct SlashRecord",
         "components": [
           {
             "name": "reporter",
@@ -935,17 +781,12 @@
           {
             "name": "status",
             "type": "uint8",
-            "internalType": "enum DataTypes.SlashStatus"
-          },
-          {
-            "name": "slashReason",
-            "type": "string",
-            "internalType": "string"
+            "internalType": "enum SlashStatus"
           }
         ]
       }
     ],
-    "stateMutability": "view"
+    "stateMutability": "pure"
   },
   {
     "type": "function",
@@ -1059,6 +900,25 @@
   },
   {
     "type": "function",
+    "name": "multicall",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "results",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "pause",
     "inputs": [],
     "outputs": [],
@@ -1079,36 +939,8 @@
   },
   {
     "type": "function",
-    "name": "recordSlashing",
-    "inputs": [
-      {
-        "name": "slashings",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
-      },
-      {
-        "name": "reporters",
-        "type": "address[]",
-        "internalType": "address[]"
-      },
-      {
-        "name": "reasons",
-        "type": "string[]",
-        "internalType": "string[]"
-      }
-    ],
+    "name": "reRegister",
+    "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -1127,6 +959,13 @@
         "internalType": "address"
       }
     ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "requestExit",
+    "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -1175,6 +1014,29 @@
   },
   {
     "type": "function",
+    "name": "revokeDemotions",
+    "inputs": [
+      {
+        "name": "nodeAddr",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "epoch",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "demotionIds",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "revokeRole",
     "inputs": [
       {
@@ -1193,24 +1055,17 @@
   },
   {
     "type": "function",
-    "name": "revokeSlashing",
+    "name": "setNodeStatus",
     "inputs": [
       {
-        "name": "slashings",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
+        "name": "nodeAddrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "status",
+        "type": "uint8[]",
+        "internalType": "enum NodeStatus[]"
       }
     ],
     "outputs": [],
@@ -1295,6 +1150,29 @@
   },
   {
     "type": "function",
+    "name": "submitDemotions",
+    "inputs": [
+      {
+        "name": "epoch",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "nodeAddrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "reasons",
+        "type": "string[]",
+        "internalType": "string[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "supportsInterface",
     "inputs": [
       {
@@ -1336,6 +1214,19 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "version",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -1573,6 +1464,17 @@
   },
   {
     "type": "error",
+    "name": "AddressEmptyCode",
+    "inputs": [
+      {
+        "name": "target",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "AlphaWithdrawNotAllowed",
     "inputs": []
   },
@@ -1593,7 +1495,7 @@
   },
   {
     "type": "error",
-    "name": "InsufficientValue",
+    "name": "FailedInnerCall",
     "inputs": []
   },
   {
@@ -1604,6 +1506,11 @@
   {
     "type": "error",
     "name": "InvalidInitialization",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NodeInExitStatus",
     "inputs": []
   },
   {
@@ -1629,16 +1536,6 @@
   },
   {
     "type": "error",
-    "name": "PublicGoodNodeNotDeposited",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "PublicGoodNodeTaxNotZero",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "ReentrancyGuardReentrantCall",
     "inputs": []
   },
@@ -1660,7 +1557,7 @@
   },
   {
     "type": "error",
-    "name": "TaxRateBasisPointsTooSmall",
+    "name": "WithdrawalAmountExceedsOperationPoolTokens",
     "inputs": []
   }
 ]

@@ -32,6 +32,50 @@
   },
   {
     "type": "event",
+    "name": "DemotionRevoked",
+    "inputs": [
+      {
+        "name": "demotionId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "DemotionSubmitted",
+    "inputs": [
+      {
+        "name": "epoch",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "nodeAddr",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "demotionId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "Deposited",
     "inputs": [
       {
@@ -94,6 +138,57 @@
         "type": "bool",
         "indexed": false,
         "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "NodeExitRequested",
+    "inputs": [
+      {
+        "name": "nodeAddr",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "NodeReentryRequested",
+    "inputs": [
+      {
+        "name": "nodeAddr",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "NodeStatusSet",
+    "inputs": [
+      {
+        "name": "nodeAddr",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "curStatus",
+        "type": "uint8",
+        "indexed": true,
+        "internalType": "enum NodeStatus"
+      },
+      {
+        "name": "newStatus",
+        "type": "uint8",
+        "indexed": true,
+        "internalType": "enum NodeStatus"
       }
     ],
     "anonymous": false

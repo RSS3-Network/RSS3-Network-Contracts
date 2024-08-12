@@ -1,5 +1,9 @@
 [
   {
+    "type": "receive",
+    "stateMutability": "payable"
+  },
+  {
     "type": "function",
     "name": "DEFAULT_ADMIN_ROLE",
     "inputs": [],
@@ -56,21 +60,14 @@
     "name": "commitSlashing",
     "inputs": [
       {
-        "name": "epochIds",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
+        "name": "nodeAddrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "epochs",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
       }
     ],
     "outputs": [],
@@ -274,41 +271,6 @@
   },
   {
     "type": "function",
-    "name": "recordSlashing",
-    "inputs": [
-      {
-        "name": "slashings",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
-      },
-      {
-        "name": "reporters",
-        "type": "address[]",
-        "internalType": "address[]"
-      },
-      {
-        "name": "reasons",
-        "type": "string[]",
-        "internalType": "string[]"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "renounceRole",
     "inputs": [
       {
@@ -320,6 +282,29 @@
         "name": "callerConfirmation",
         "type": "address",
         "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeDemotions",
+    "inputs": [
+      {
+        "name": "nodeAddr",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "epoch",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "demotionIds",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
       }
     ],
     "outputs": [],
@@ -345,24 +330,17 @@
   },
   {
     "type": "function",
-    "name": "revokeSlashing",
+    "name": "setNodeStatus",
     "inputs": [
       {
-        "name": "epochIds",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
+        "name": "nodeAddrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "status",
+        "type": "uint8[]",
+        "internalType": "enum NodeStatus[]"
       }
     ],
     "outputs": [],
@@ -393,6 +371,24 @@
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "submitDemotions",
+    "inputs": [
+      {
+        "name": "nodeAddrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "reasons",
+        "type": "string[]",
+        "internalType": "string[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
