@@ -6,6 +6,7 @@ import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
@@ -17,7 +18,6 @@ import {
     Node,
     NodeObsoleted,
     NodeStatus,
-    SlashStatus,
     SlashRecord,
     WithdrawalRequest,
     UnstakeRequest,
@@ -39,7 +39,7 @@ import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
 import {StakingLib} from "./libraries/StakingLib.sol";
 import {StorageLib} from "./libraries/StorageLib.sol";
 
-contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard {
+contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard {
     using Math for uint256;
     using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
