@@ -299,12 +299,12 @@
     ],
     "outputs": [
       {
-        "name": "demotionIds_",
+        "name": "demotionIds",
         "type": "uint256[]",
         "internalType": "uint256[]"
       },
       {
-        "name": "reasons_",
+        "name": "reasons",
         "type": "string[]",
         "internalType": "string[]"
       }

@@ -135,6 +135,14 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     }
 
     /// @inheritdoc ISettlement
+    function submitDemotions(
+        address[] calldata nodeAddrs,
+        string[] calldata reasons
+    ) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).submitDemotions(_currentEpoch, nodeAddrs, reasons);
+    }
+
+    /// @inheritdoc ISettlement
     function revokeDemotions(
         address nodeAddr,
         uint256 epoch,
@@ -163,14 +171,6 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         NodeStatus[] calldata status
     ) external override onlyRole(ORACLE_ROLE) {
         IStaking(_staking).setNodeStatus(nodeAddrs, status);
-    }
-
-    /// @inheritdoc ISettlement
-    function submitDemotions(
-        address[] calldata nodeAddrs,
-        string[] calldata reasons
-    ) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).submitDemotions(_currentEpoch, nodeAddrs, reasons);
     }
 
     /// @inheritdoc ISettlement

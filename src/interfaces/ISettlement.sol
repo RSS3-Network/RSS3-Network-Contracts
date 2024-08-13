@@ -45,6 +45,14 @@ interface ISettlement {
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 
     /**
+     * @notice Submits demotions for nodes.
+     * @dev The caller must have the `ORACLE_ROLE`.
+     * @param nodeAddrs Addresses of node operator to demote.
+     * @param reasons The reasons of demotion.
+     */
+    function submitDemotions(address[] calldata nodeAddrs, string[] calldata reasons) external;
+
+    /**
      * @notice Revokes slashing.
      * @param nodeAddr The address of node to revoke demotions.
      * @param epoch The epoch numbers to revoke demotions.
@@ -65,14 +73,6 @@ interface ISettlement {
      * @param status Status to set.
      */
     function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
-
-    /**
-     * @notice Submits demotions for nodes.
-     * @dev The caller must have the `ORACLE_ROLE`.
-     * @param nodeAddrs Addresses of node operator to demote.
-     * @param reasons The reasons of demotion.
-     */
-    function submitDemotions(address[] calldata nodeAddrs, string[] calldata reasons) external;
 
     /**
      * @notice  Returns the address of the Staking contract.
