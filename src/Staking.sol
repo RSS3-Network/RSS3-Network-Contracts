@@ -381,28 +381,15 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
 
     /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
-        PoolStatData storage pool = StorageLib.poolStatStorage();
-
-        uint256 amount = address(this).balance -
-            pool.totalOperationPoolTokens -
-            pool.totalStakingPoolTokens -
-            pool.totalSlashingPoolTokens;
-        RewardsAndSlashingLib.withdraw2Treasury(TREASURY, amount);
+        RewardsAndSlashingLib.withdraw2Treasury(TREASURY);
     }
 
     /// @inheritdoc IStaking
     function getDemotions(
         address nodeAddr,
         uint256 epoch
-    ) external view override returns (uint256[] memory demotionIds_, string[] memory reasons_) {
-        EnumerableSet.UintSet storage demotionIds = _demotionIds[nodeAddr][epoch];
-        demotionIds_ = new uint256[](demotionIds.length());
-        reasons_ = new string[](demotionIds.length());
-
-        for (uint256 i = 0; i < demotionIds.length(); i++) {
-            demotionIds_[i] = demotionIds.at(i);
-            reasons_[i] = _demotionReasons[demotionIds_[i]];
-        }
+    ) external view override returns (uint256[] memory demotionIds, string[] memory reasons) {
+        (demotionIds, reasons) = RewardsAndSlashingLib.getDemotions(nodeAddr, epoch);
     }
 
     /// @inheritdoc IStaking

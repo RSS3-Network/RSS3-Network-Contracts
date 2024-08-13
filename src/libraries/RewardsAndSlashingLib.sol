@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
-import {Node, NodeStatus, SlashStatus, SlashRecord} from "./DataTypes.sol";
+import {Node, NodeStatus, PoolStatData, SlashStatus, SlashRecord} from "./DataTypes.sol";
 import {
     NodeNotExists,
     SlashMoreThanOnce,
@@ -115,8 +115,29 @@ library RewardsAndSlashingLib {
         }
     }
 
-    function withdraw2Treasury(address treasury, uint256 amount) external {
+    function withdraw2Treasury(address treasury) external {
+        PoolStatData storage pool = StorageLib.poolStatStorage();
+        uint256 amount = address(this).balance -
+            pool.totalOperationPoolTokens -
+            pool.totalStakingPoolTokens -
+            pool.totalSlashingPoolTokens;
+
         _transfer(treasury, amount);
+    }
+
+    function getDemotions(
+        address nodeAddr,
+        uint256 epoch
+    ) external view returns (uint256[] memory _demotionIds, string[] memory _reasons) {
+        EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
+
+        _demotionIds = new uint256[](demotionIds.length());
+        _reasons = new string[](demotionIds.length());
+
+        for (uint256 i = 0; i < demotionIds.length(); i++) {
+            _demotionIds[i] = demotionIds.at(i);
+            _reasons[i] = StorageLib.getDemotionReasons()[_demotionIds[i]];
+        }
     }
 
     function _recordSlashing(address nodeAddr, uint256 epoch, address reporter) internal {
