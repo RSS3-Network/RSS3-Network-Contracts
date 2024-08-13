@@ -117,7 +117,7 @@ library Events {
      * @param curStatus The current status of node operator.
      * @param newStatus The new status of node operator to set.
      */
-    event NodeStatusSet(address indexed nodeAddr, NodeStatus indexed curStatus, NodeStatus indexed newStatus);
+    event NodeStatusChanged(address indexed nodeAddr, NodeStatus indexed curStatus, NodeStatus indexed newStatus);
 
     /**
      * @dev Emitted on claimWithdrawal()
@@ -172,18 +172,6 @@ library Events {
         address indexed user,
         uint256 unstakeAmount
     );
-
-    /**
-     * @dev Emitted on requestExit()
-     * @param nodeAddr The address of node to exit.
-     */
-    event NodeExitRequested(address indexed nodeAddr);
-
-    /**
-     * @dev Emitted on requestReentry()
-     * @param nodeAddr The address of node to request.
-     */
-    event NodeReentryRequested(address indexed nodeAddr);
 
     /**
      * @dev Emitted on submitDemotions()

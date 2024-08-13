@@ -100,25 +100,29 @@ library NodeSettingsLib {
         _validateNodeAddress(node.account);
 
         // validate node exit status
-        NodeStatus status = _getNodeStatus(node);
-        if (status == NodeStatus.Registered || status == NodeStatus.Initializing || status == NodeStatus.Slashed) {
+        NodeStatus curStatus = _getNodeStatus(node);
+        if (
+            curStatus == NodeStatus.Registered ||
+            curStatus == NodeStatus.Initializing ||
+            curStatus == NodeStatus.Slashed
+        ) {
             node.status = NodeStatus.Exited;
-        } else if (status == NodeStatus.Online) {
+        } else if (curStatus == NodeStatus.Online) {
             node.status = NodeStatus.Exiting;
             node.exitTime = block.timestamp + Const.NODE_EXIT_PERIOD;
         } else {
-            revert CurStateCantExit(uint256(status));
+            revert CurStateCantExit(uint256(curStatus));
         }
 
-        emit Events.NodeExitRequested(nodeAddr);
+        emit Events.NodeStatusChanged(nodeAddr, curStatus, node.status);
     }
 
-    function reRegister(address nodeAddr) external {
+    function register(address nodeAddr) external {
         Node storage node = StorageLib.getNode(nodeAddr);
-
         _validateNodeAddress(node.account);
 
-        _validateNodeInExitStatus(node);
+        NodeStatus curStatus = _getNodeStatus(node);
+        if (NodeStatus.Exiting != curStatus && NodeStatus.Exited != curStatus) revert NodeNotInExitStatus();
 
         uint256 opPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
         if (opPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
@@ -126,7 +130,21 @@ library NodeSettingsLib {
         // set node status
         node.status = NodeStatus.Registered;
 
-        emit Events.NodeReentryRequested(nodeAddr);
+        emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Registered);
+    }
+
+    function online(address nodeAddr) external {
+        Node storage node = StorageLib.getNode(nodeAddr);
+        _validateNodeAddress(node.account);
+
+        NodeStatus curStatus = _getNodeStatus(node);
+        if (NodeStatus.Offline != curStatus && NodeStatus.Slashed != curStatus)
+            revert WrongNodeStatus(uint256(curStatus), uint256(NodeStatus.Online));
+
+        // set node status
+        node.status = NodeStatus.Online;
+
+        emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Online);
     }
 
     function setNodesStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external {
@@ -162,7 +180,7 @@ library NodeSettingsLib {
         }
 
         node.status = newStatus;
-        emit Events.NodeStatusSet(nodeAddr, curStatus, newStatus);
+        emit Events.NodeStatusChanged(nodeAddr, curStatus, newStatus);
     }
 
     function _getNodeStatus(Node memory node) internal view returns (NodeStatus) {

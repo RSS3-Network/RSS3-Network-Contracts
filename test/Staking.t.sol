@@ -566,7 +566,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
 
         // registered
-        _staking.reRegister();
+        _staking.register();
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
         vm.stopPrank();
@@ -593,7 +593,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
     }
 
-    function testReRegister() public {
+    function testRegisterSucceeds() public {
         _createNode(alice);
 
         vm.startPrank(alice);
@@ -602,26 +602,27 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.requestExit();
 
         vm.expectEmit();
-        emit Events.NodeReentryRequested(alice);
-        _staking.reRegister();
+        emit Events.NodeStatusChanged(alice, NodeStatus.Exited, NodeStatus.Registered);
+        _staking.register();
         vm.stopPrank();
     }
-    function testReRegisterFail() public {
+
+    function testRegisterFail() public {
         // case 1: node not exists
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.reRegister();
+        _staking.register();
 
         _createNode(alice);
         vm.startPrank(alice);
 
         // case 2: node not in exit status
         vm.expectRevert(abi.encodeWithSelector(NodeNotInExitStatus.selector));
-        _staking.reRegister();
+        _staking.register();
 
         // case 3: node deposit is below minimum
         _setNodeStatus(alice, NodeStatus.Exiting);
         vm.expectRevert(abi.encodeWithSelector(NodeDepositBelowMinimum.selector));
-        _staking.reRegister();
+        _staking.register();
         vm.stopPrank();
     }
 
@@ -1616,7 +1617,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
         expectEmit();
-        emit Events.NodeExitRequested(alice);
+        emit Events.NodeStatusChanged(alice, NodeStatus.Registered, NodeStatus.Exited);
         vm.prank(alice);
         _staking.requestExit();
 

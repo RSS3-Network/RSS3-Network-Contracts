@@ -365,13 +365,18 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function requestExit() external override whenNotPaused {
+    function requestExit() external override {
         NodeSettingsLib.requestExit(msg.sender);
     }
 
     /// @inheritdoc IStaking
-    function reRegister() external override whenNotPaused {
-        NodeSettingsLib.reRegister(msg.sender);
+    function register() external override {
+        NodeSettingsLib.register(msg.sender);
+    }
+
+    /// @inheritdoc IStaking
+    function online() external override {
+        NodeSettingsLib.online(msg.sender);
     }
 
     /// @inheritdoc IStaking

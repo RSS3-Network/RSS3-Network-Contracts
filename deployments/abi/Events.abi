@@ -144,33 +144,7 @@
   },
   {
     "type": "event",
-    "name": "NodeExitRequested",
-    "inputs": [
-      {
-        "name": "nodeAddr",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "NodeReentryRequested",
-    "inputs": [
-      {
-        "name": "nodeAddr",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "NodeStatusSet",
+    "name": "NodeStatusChanged",
     "inputs": [
       {
         "name": "nodeAddr",

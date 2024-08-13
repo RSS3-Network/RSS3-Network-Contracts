@@ -919,6 +919,13 @@
   },
   {
     "type": "function",
+    "name": "online",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "pause",
     "inputs": [],
     "outputs": [],
@@ -939,7 +946,7 @@
   },
   {
     "type": "function",
-    "name": "reRegister",
+    "name": "register",
     "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"

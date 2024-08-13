@@ -5,6 +5,7 @@ import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {NodeStatus, RewardsData} from "./libraries/DataTypes.sol";
@@ -16,7 +17,7 @@ import {
     OperationRewardsExceed
 } from "./libraries/Errors.sol";
 
-contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
+contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using SafeCast for uint256;
 

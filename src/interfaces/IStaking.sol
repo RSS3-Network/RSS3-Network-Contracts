@@ -182,10 +182,16 @@ interface IStaking {
     function requestExit() external;
 
     /**
-     * @notice A node in exited status can re-register to join the network.
+     * @notice A node in exited status can register to join the network.
      * @dev The caller must be the owner of node operator.
      */
-    function reRegister() external;
+    function register() external;
+
+    /**
+     * @notice A node in `Offline` or `Slashed` status can set its status as `Online`.
+     * @dev The caller must be the owner of node operator.
+     */
+    function online() external;
 
     /**
      * @notice Commit slashing node.

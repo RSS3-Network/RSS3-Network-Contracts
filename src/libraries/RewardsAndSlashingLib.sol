@@ -145,8 +145,11 @@ library RewardsAndSlashingLib {
         StakingCommonLib.decreaseOperationPool(node, record.amountForOperationPool);
         StakingCommonLib.decreaseStakingPool(node, record.amountForStakingPool);
         StakingCommonLib.increaseSlashingPoolByRecord(record);
+
+        NodeStatus curStatus = node.status;
         // set node status: slashing
         node.status = NodeStatus.Slashing;
+        emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Slashing);
 
         emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
     }
@@ -164,6 +167,7 @@ library RewardsAndSlashingLib {
         StakingCommonLib.increaseStakingPool(node, record.amountForStakingPool);
         // set node status: online
         node.status = NodeStatus.Online;
+        emit Events.NodeStatusChanged(nodeAddr, NodeStatus.Slashing, NodeStatus.Online);
 
         emit Events.SlashRevoked(nodeAddr, epoch);
     }
