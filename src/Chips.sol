@@ -16,6 +16,8 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 contract Chips is IChips, Initializable, ERC721 {
     using Strings for uint256;
 
+    string public constant version = "2.0.0";
+
     /// @dev Staking contract address.
     address internal _staking;
 
