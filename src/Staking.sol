@@ -324,8 +324,12 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function commitSlashing(address nodeAddr, uint256 epoch) external override whenNotPaused onlyRole(ORACLE_ROLE) {
-        RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, PAYMENT_PROCESSOR);
+    function submitDemotions(
+        uint256 epoch,
+        address[] calldata nodeAddrs,
+        string[] calldata reasons
+    ) external override onlyRole(ORACLE_ROLE) {
+        RewardsAndSlashingLib.submitDemotions(epoch, nodeAddrs, reasons);
     }
 
     /// @inheritdoc IStaking
@@ -338,13 +342,8 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function setSettlementPhase(bool enabled) external override whenNotPaused onlyRole(ORACLE_ROLE) {
-        _isSettlementPhase = enabled;
-    }
-
-    /// @inheritdoc IStaking
-    function disableAlphaPhase() external override whenNotPaused onlyRole(PAUSE_ROLE) {
-        _isAlphaPhase = false;
+    function commitSlashing(address nodeAddr, uint256 epoch) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, PAYMENT_PROCESSOR);
     }
 
     /// @inheritdoc IStaking
@@ -353,15 +352,6 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
         NodeStatus[] calldata status
     ) external override onlyRole(ORACLE_ROLE) {
         NodeSettingsLib.setNodesStatus(nodeAddrs, status);
-    }
-
-    /// @inheritdoc IStaking
-    function submitDemotions(
-        uint256 epoch,
-        address[] calldata nodeAddrs,
-        string[] calldata reasons
-    ) external override onlyRole(ORACLE_ROLE) {
-        RewardsAndSlashingLib.submitDemotions(epoch, nodeAddrs, reasons);
     }
 
     /// @inheritdoc IStaking
@@ -377,6 +367,16 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     /// @inheritdoc IStaking
     function online() external override {
         NodeSettingsLib.online(msg.sender);
+    }
+
+    /// @inheritdoc IStaking
+    function setSettlementPhase(bool enabled) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+        _isSettlementPhase = enabled;
+    }
+
+    /// @inheritdoc IStaking
+    function disableAlphaPhase() external override whenNotPaused onlyRole(PAUSE_ROLE) {
+        _isAlphaPhase = false;
     }
 
     /// @inheritdoc IStaking

@@ -128,14 +128,6 @@ interface IStaking {
     function stakeToPublicPool(address nodeAddr) external payable returns (uint256 tokenId);
 
     /**
-     * @notice Merges chips tokens into a new one.
-     * @dev This will burn the chips tokens and mint a new one, and emits the `ChipsMerged` event.
-     * @param chipIds The chips token ids to merge.
-     * @return newTokenId The new minted chips token id.
-     */
-    function mergeChips(uint256[] calldata chipIds) external returns (uint256 newTokenId);
-
-    /**
      * @notice Updates accounting stats and distribute rewards.
      * @dev periodically called.
      * Requirements:
@@ -160,11 +152,12 @@ interface IStaking {
     ) external payable;
 
     /**
-     * @notice Sets node status.
-     * @param nodeAddrs Addresses of node operator to set.
-     * @param status Status to set.
+     * @notice Merges chips tokens into a new one.
+     * @dev This will burn the chips tokens and mint a new one, and emits the `ChipsMerged` event.
+     * @param chipIds The chips token ids to merge.
+     * @return newTokenId The new minted chips token id.
      */
-    function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
+    function mergeChips(uint256[] calldata chipIds) external returns (uint256 newTokenId);
 
     /**
      * @notice Submits demotions for nodes.
@@ -176,10 +169,36 @@ interface IStaking {
     function submitDemotions(uint256 epoch, address[] calldata nodeAddrs, string[] calldata reasons) external;
 
     /**
+     * @notice Revoke demotions.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param nodeAddr The address of node to revoke.
+     * @param epoch The epoch number.
+     * @param demotionIds The ids of demotions to revoke.
+     */
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds) external;
+
+    /**
+     * @notice Commit slashing node.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param nodeAddr The address of node to commit.
+     * @param epoch The epoch number.
+     */
+    function commitSlashing(address nodeAddr, uint256 epoch) external;
+
+    /**
      * @notice Requests an exit from network.
      * @dev The caller must be the owner of node operator.
      */
     function requestExit() external;
+
+    /**
+     * @notice Sets node status.
+     * @param nodeAddrs Addresses of node operator to set.
+     * @param status Status to set.
+     */
+    function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
 
     /**
      * @notice A node in exited status can register to join the network.
@@ -192,25 +211,6 @@ interface IStaking {
      * @dev The caller must be the owner of node operator.
      */
     function online() external;
-
-    /**
-     * @notice Commit slashing node.
-     * Requirements:
-     * - The caller must have the `ORACLE_ROLE`.
-     * @param nodeAddr The address of node to commit.
-     * @param epoch The epoch number.
-     */
-    function commitSlashing(address nodeAddr, uint256 epoch) external;
-
-    /**
-     * @notice Revoke demotions.
-     * Requirements:
-     * - The caller must have the `ORACLE_ROLE`.
-     * @param nodeAddr The address of node to revoke.
-     * @param epoch The epoch number.
-     * @param demotionIds The ids of demotions to revoke.
-     */
-    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds) external;
 
     /**
      * @notice Sets the settlement phase.
@@ -233,7 +233,7 @@ interface IStaking {
     function withdraw2Treasury() external;
 
     /**
-     * @notice Returns the demotion count of node.
+     * @notice Returns the demotion info of node.
      * @param nodeAddr Node address to query.
      * @param epoch The epoch number to query.
      * @return demotionIds The demotion ids.

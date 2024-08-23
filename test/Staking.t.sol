@@ -1310,6 +1310,22 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.withdraw2Treasury();
         assertEq(treasury.balance, amount);
     }
+
+    function testSubmitDemotions() public {
+        _createNode(alice);
+
+        string[] memory reasons = new string[](1);
+        reasons[0] = "demotion reason";
+
+        vm.prank(address(_settlement));
+        _staking.submitDemotions(1, array(alice), reasons);
+
+        (uint256[] memory demotionIds, string[] memory reasons_) = _staking.getDemotions(alice, 1);
+        assertEq(demotionIds.length, 1);
+        assertEq(demotionIds[0], 1);
+        assertEq(reasons_.length, 1);
+        assertEq(reasons_[0], "demotion reason");
+    }
     //
     //    // Test errors: InvalidArrayLength, NodeNotExists, SlashPublicGoodNode, SlashMoreThanOnce
     //    function testRecordSlashingFail() public {
