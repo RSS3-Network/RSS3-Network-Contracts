@@ -124,8 +124,8 @@ library NodeSettingsLib {
         NodeStatus curStatus = _getNodeStatus(node);
         if (NodeStatus.Exiting != curStatus && NodeStatus.Exited != curStatus) revert NodeNotInExitStatus();
 
-        uint256 opPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
-        if (opPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
+        uint256 operationPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
+        if (operationPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
 
         // set node status
         node.status = NodeStatus.Registered;

@@ -69,7 +69,8 @@ enum NodeStatus {
     Slashing,
     Slashed,
     Exiting,
-    Exited
+    Exited,
+    Outdated
 }
 
 enum SlashStatus {
