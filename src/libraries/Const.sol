@@ -27,6 +27,9 @@ library Const {
     uint256 public constant SLASH_REPORTER_BONUS_RATE_BASIS_POINTS = 2000;
     uint256 public constant SLASH_BURN_RATE_BASIS_POINTS = 3000;
 
+    /// @dev the period of epochs that a slashing record can be committed
+    uint256 public constant SLASHING_COMMIT_PERIOD_IN_EPOCH = 3;
+
     /// @dev 30 epoch
     ///  An Offline Node transitions to Exited state after 30 Epochs of inactivity.
     ///  Registered Node transitions to Exited state after 30 Epochs of inactivity.

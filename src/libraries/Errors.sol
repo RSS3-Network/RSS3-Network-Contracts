@@ -144,3 +144,6 @@ error NodeIsPublicGood();
 
 /// @dev Create node to zero address.
 error CreateNodeToZeroAddress();
+
+/// @dev Epoch not elapsed.
+error CommitEpochNotElapsed(uint256 recordedEpoch, uint256 currentEpoch);

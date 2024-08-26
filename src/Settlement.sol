@@ -8,13 +8,15 @@ import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
+import {Const} from "./libraries/Const.sol";
 import {NodeStatus, RewardsData} from "./libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
     SubmissionIntervalNotElapsed,
     RewardsAlreadyDistributed,
-    OperationRewardsExceed
+    OperationRewardsExceed,
+    CommitEpochNotElapsed
 } from "./libraries/Errors.sol";
 
 contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnumerable {
@@ -161,6 +163,9 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         }
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            if (_currentEpoch < epochs[i] + Const.SLASHING_COMMIT_PERIOD_IN_EPOCH)
+                revert CommitEpochNotElapsed(epochs[i], _currentEpoch);
+
             IStaking(_staking).commitSlashing(nodeAddrs[i], epochs[i]);
         }
     }

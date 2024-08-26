@@ -3,6 +3,7 @@
 pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
+import {Const} from "../src/libraries/Const.sol";
 import {Node, NodeStatus, SlashStatus, SlashRecord} from "../src/libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
@@ -10,7 +11,8 @@ import {
     SubmissionIntervalNotElapsed,
     RewardsAlreadyDistributed,
     OperationRewardsExceed,
-    TaxRateBasisPointsTooLarge
+    TaxRateBasisPointsTooLarge,
+    CommitEpochNotElapsed
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {Settlement} from "../src/Settlement.sol";
@@ -865,10 +867,12 @@ contract SettlementTest is CommonTest {
         assertEq(reasons_.length, 0);
     }
 
-    function testCommitSlashing() public {
+    function testCommitSlashingx() public {
         _createNode(alice);
         vm.prank(alice);
         _staking.deposit{value: 10000 ether}();
+
+        _presetCurrentEpoch(uint256(1));
 
         // submit demotion
         for (uint256 i = 0; i < 4; i++) {
@@ -876,15 +880,18 @@ contract SettlementTest is CommonTest {
             _settlement.submitDemotions(array(alice), array(string("reason1")));
         }
 
+        skip(Const.SLASHING_COMMIT_PERIOD_IN_EPOCH * 18 hours);
+        _presetCurrentEpoch(uint256(4));
+
         vm.prank(oracleAccount);
-        _settlement.commitSlashing(array(alice), array(uint256(0)));
+        _settlement.commitSlashing(array(alice), array(uint256(1)));
 
         // check demotions
-        (uint256[] memory demotionIds, ) = _staking.getDemotions(alice, uint256(0));
+        (uint256[] memory demotionIds, ) = _staking.getDemotions(alice, uint256(1));
         assertEq(demotionIds.length, 4);
 
         // check slash record
-        SlashRecord memory record = _staking.getSlashingRecord(alice, uint256(0));
+        SlashRecord memory record = _staking.getSlashingRecord(alice, uint256(1));
         assertEq(record.reporter, address(0x0));
         assertEq(record.amountForOperationPool, 100 ether);
         assertEq(record.amountForStakingPool, 0);
@@ -896,8 +903,15 @@ contract SettlementTest is CommonTest {
     }
 
     function testCommitSlashingFail() public {
+        // case 1: caller has no `ORACLE_ROLE` permission
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
         _settlement.commitSlashing(array(alice), array(uint256(0)));
+
+        // case 2: epoch not reached
+        _presetCurrentEpoch(uint256(3));
+        vm.expectRevert(abi.encodeWithSelector(CommitEpochNotElapsed.selector, uint256(1), uint256(3)));
+        vm.prank(oracleAccount);
+        _settlement.commitSlashing(array(alice), array(uint256(1)));
     }
 
     function testSetNodeStatusSucceeds() public {
@@ -941,5 +955,10 @@ contract SettlementTest is CommonTest {
         assertEq(_settlement.currentEpoch(), 0);
         assertEq(_settlement.EPOCH_DURATION(), 18 hours);
         assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
+    }
+
+    function _presetCurrentEpoch(uint256 epoch) internal {
+        uint256 currentEpochSlot = 5;
+        vm.store(address(_settlement), bytes32(uint256(currentEpochSlot)), bytes32(uint256(epoch)));
     }
 }
