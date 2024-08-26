@@ -255,6 +255,13 @@
   },
   {
     "type": "function",
+    "name": "exit",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "getChipInfo",
     "inputs": [
       {
@@ -966,13 +973,6 @@
         "internalType": "address"
       }
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "requestExit",
-    "inputs": [],
     "outputs": [],
     "stateMutability": "nonpayable"
   },

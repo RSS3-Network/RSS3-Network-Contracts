@@ -414,7 +414,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, false);
         _staking.deposit{value: 2 * amount}();
 
-        _staking.requestExit();
+        _staking.exit();
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
 
         _staking.requestWithdrawal(2 * amount);
@@ -478,7 +478,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.startPrank(alice);
         _staking.createNode{value: amount}("Alice", "Alice's node", uint64(1000), false);
 
-        _staking.requestExit();
+        _staking.exit();
         skip(Const.NODE_EXIT_PERIOD);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
@@ -506,7 +506,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         _staking.deposit{value: amount}();
 
-        _staking.requestExit();
+        _staking.exit();
         skip(Const.NODE_EXIT_PERIOD);
 
         uint256 requestId = _staking.requestWithdrawal(2 * amount);
@@ -534,7 +534,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // case 2: ExcessWithdrawalAmount
         _presetNodeStatus(alice, NodeStatus.Online);
-        _staking.requestExit();
+        _staking.exit();
         vm.expectRevert(abi.encodeWithSelector(ExcessWithdrawalAmount.selector));
         _staking.requestWithdrawal(amount);
         vm.stopPrank();
@@ -558,7 +558,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _presetNodeStatus(alice, NodeStatus.Online);
 
         // exiting
-        _staking.requestExit();
+        _staking.exit();
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
 
         // exited
@@ -578,12 +578,12 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         vm.startPrank(alice);
         _staking.deposit{value: 10000 ether}();
-        _staking.requestExit();
+        _staking.exit();
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
 
         // case 2: Online -> Exiting -> Exited
         _presetNodeStatus(alice, NodeStatus.Online);
-        _staking.requestExit();
+        _staking.exit();
 
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
 
@@ -599,7 +599,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.startPrank(alice);
         _staking.deposit{value: 10000 ether}();
 
-        _staking.requestExit();
+        _staking.exit();
 
         // register
         vm.expectEmit();
@@ -651,22 +651,25 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.online();
 
         _createNode(alice);
+
         vm.startPrank(alice);
-
         // case 2: wrong node status
-        _presetNodeStatus(alice, NodeStatus.Online);
-        vm.expectRevert(
-            abi.encodeWithSelector(WrongNodeStatus.selector, uint256(NodeStatus.Online), uint256(NodeStatus.Online))
+        NodeStatus[] memory status = array(
+            NodeStatus.None,
+            NodeStatus.Registered,
+            NodeStatus.Initializing,
+            NodeStatus.Online,
+            NodeStatus.Slashing,
+            NodeStatus.Exiting,
+            NodeStatus.Exited
         );
-        _staking.online();
-
-        // case 3: wrong node status
-        _presetNodeStatus(alice, NodeStatus.Slashing);
-        vm.expectRevert(
-            abi.encodeWithSelector(WrongNodeStatus.selector, uint256(NodeStatus.Slashing), uint256(NodeStatus.Online))
-        );
-        _staking.online();
-
+        for (uint256 i = 0; i < status.length; i++) {
+            _presetNodeStatus(alice, status[i]);
+            vm.expectRevert(
+                abi.encodeWithSelector(WrongNodeStatus.selector, uint256(status[i]), uint256(NodeStatus.Online))
+            );
+            _staking.online();
+        }
         vm.stopPrank();
     }
 
@@ -685,7 +688,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         vm.startPrank(alice);
         _staking.deposit{value: amount}();
-        _staking.requestExit();
+        _staking.exit();
         skip(Const.NODE_EXIT_PERIOD);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
@@ -720,7 +723,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 withdrawAmount = 10 ether;
         assertEq(depositAmount % withdrawAmount, 0);
 
-        _staking.requestExit();
+        _staking.exit();
         skip(Const.NODE_EXIT_PERIOD);
 
         uint256[] memory requestIds = new uint256[](depositAmount / withdrawAmount);
@@ -890,7 +893,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         vm.startPrank(alice);
         _staking.deposit{value: 10000 ether}();
-        _staking.requestExit();
+        _staking.exit();
         vm.stopPrank();
 
         vm.expectRevert(abi.encodeWithSelector(NodeInExitStatus.selector));
@@ -1670,7 +1673,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     //        _recordSlashingWithReasons(slashings2, reporters);
     //    }
 
-    function testRequestExitSucceeds() public {
+    function testExitSucceeds() public {
         vm.prank(alice);
         _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
 
@@ -1679,15 +1682,15 @@ contract StakingTest is CommonTest, IERC721Errors {
         expectEmit();
         emit Events.NodeStatusChanged(alice, NodeStatus.Registered, NodeStatus.Exited);
         vm.prank(alice);
-        _staking.requestExit();
+        _staking.exit();
 
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
     }
 
-    function testRequestExitFail() public {
+    function testExitFail() public {
         // case 1: NodeNotExists
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.requestExit();
+        _staking.exit();
 
         // case 2: CurStateCantExit
         vm.startPrank(alice);
@@ -1696,53 +1699,48 @@ contract StakingTest is CommonTest, IERC721Errors {
         // case 3: Slashing -> Exiting
         _presetNodeStatus(alice, NodeStatus.Slashing);
         vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.Slashing)));
-        _staking.requestExit();
+        _staking.exit();
 
         // case 4: None -> Exiting
         _presetNodeStatus(alice, NodeStatus.None);
         vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.None)));
-        _staking.requestExit();
+        _staking.exit();
 
         // case 5: Offline -> Exiting
         _presetNodeStatus(alice, NodeStatus.Offline);
         vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.Offline)));
-        _staking.requestExit();
+        _staking.exit();
 
         vm.stopPrank();
     }
 
-    function testSetNodesStatus() public {
+    function testSetNodesStatusSucceeds() public {
         _createNode(alice);
         vm.prank(alice);
         _staking.deposit{value: 10000 ether}();
 
-        vm.startPrank(address(_settlement));
+        // Online -> Offline
+        _setAndCheckNodeStatus(alice, NodeStatus.Online, NodeStatus.Offline);
+        // Exiting -> Offline
+        _setAndCheckNodeStatus(alice, NodeStatus.Exiting, NodeStatus.Offline);
 
         // Registered -> Initializing
-        _staking.setNodeStatus(array(alice), array(NodeStatus.Initializing));
-        // check status
-        Node memory node = _staking.getNode(alice);
-        assertEq(uint256(node.status), uint256(NodeStatus.Initializing));
+        _setAndCheckNodeStatus(alice, NodeStatus.Registered, NodeStatus.Initializing);
 
         //  Initializing -> Online
-        _staking.setNodeStatus(array(alice), array(NodeStatus.Online));
-        // check status
-        node = _staking.getNode(alice);
-        assertEq(uint256(node.status), uint256(NodeStatus.Online));
-
-        // Online -> Offline
-        _staking.setNodeStatus(array(alice), array(NodeStatus.Offline));
-        // check status
-        node = _staking.getNode(alice);
-        assertEq(uint256(node.status), uint256(NodeStatus.Offline));
-
+        _setAndCheckNodeStatus(alice, NodeStatus.Initializing, NodeStatus.Online);
         // Offline -> Online
-        _staking.setNodeStatus(array(alice), array(NodeStatus.Online));
-        // check status
-        node = _staking.getNode(alice);
-        assertEq(uint256(node.status), uint256(NodeStatus.Online));
+        _setAndCheckNodeStatus(alice, NodeStatus.Offline, NodeStatus.Online);
+        // Slashed -> Online
+        _setAndCheckNodeStatus(alice, NodeStatus.Slashed, NodeStatus.Online);
+        // Outdated -> Online
+        _setAndCheckNodeStatus(alice, NodeStatus.Outdated, NodeStatus.Online);
 
-        vm.stopPrank();
+        // Initializing -> Outdated
+        _setAndCheckNodeStatus(alice, NodeStatus.Initializing, NodeStatus.Outdated);
+
+        // Registered -> Initializing
+        _setAndCheckNodeStatus(alice, NodeStatus.Registered, NodeStatus.Initializing);
     }
 
     // solhint-disable-next-line function-max-lines
@@ -1750,6 +1748,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createNode(alice);
 
         // WrongNodeStatus
+        // transitions to these status are not allowed by the `setNodeStatus`
         NodeStatus[] memory status = array(
             NodeStatus.None,
             NodeStatus.Registered,
@@ -1764,6 +1763,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         }
 
         // -> Initializing
+        // these status can't be set to Initializing
         status = array(
             NodeStatus.None,
             NodeStatus.Initializing,
@@ -1780,24 +1780,42 @@ contract StakingTest is CommonTest, IERC721Errors {
         }
 
         // -> Online
+        // these status can't be set to Online
         status = array(
             NodeStatus.None,
             NodeStatus.Registered,
             NodeStatus.Online,
             NodeStatus.Slashing,
             NodeStatus.Exiting,
-            NodeStatus.Exited,
-            NodeStatus.Outdated
+            NodeStatus.Exited
         );
         for (uint256 i = 0; i < status.length; i++) {
             _invalidNodeStatusTransition(alice, status[i], NodeStatus.Online);
         }
 
         // -> Offline
+        // these status can't be set to Offline
         status = array(
             NodeStatus.None,
             NodeStatus.Registered,
             NodeStatus.Initializing,
+            NodeStatus.Outdated,
+            NodeStatus.Offline,
+            NodeStatus.Slashing,
+            NodeStatus.Slashed,
+            NodeStatus.Exited
+        );
+        for (uint256 i = 0; i < status.length; i++) {
+            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Offline);
+        }
+
+        // -> Outdated
+        // these status can't be set to Outdated
+        status = array(
+            NodeStatus.None,
+            NodeStatus.Registered,
+            NodeStatus.Outdated,
+            NodeStatus.Online,
             NodeStatus.Offline,
             NodeStatus.Slashing,
             NodeStatus.Slashed,
@@ -1805,10 +1823,8 @@ contract StakingTest is CommonTest, IERC721Errors {
             NodeStatus.Outdated
         );
         for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Offline);
+            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Outdated);
         }
-
-        // -> Outdated
     }
 
     function testNodeAvatar() public view {
@@ -2054,6 +2070,18 @@ contract StakingTest is CommonTest, IERC721Errors {
             slot = bytes32(uint256(slot) + 7);
             vm.store(address(_staking), slot, bytes32(uint256(block.timestamp + Const.NODE_EXIT_PERIOD)));
         }
+    }
+
+    function _setAndCheckNodeStatus(address nodeAddr, NodeStatus curStatus, NodeStatus newStatus) internal {
+        _presetNodeStatus(nodeAddr, curStatus);
+
+        expectEmit();
+        emit Events.NodeStatusChanged(nodeAddr, curStatus, newStatus);
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(array(nodeAddr), array(newStatus));
+
+        // check status
+        assertEq(uint256(_getNodeStatus(nodeAddr)), uint256(newStatus));
     }
 
     function _checkUnstakeOneChip(

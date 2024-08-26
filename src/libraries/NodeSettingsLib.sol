@@ -95,7 +95,7 @@ library NodeSettingsLib {
         emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood, isAlphaPhase);
     }
 
-    function requestExit(address nodeAddr) external {
+    function exit(address nodeAddr) external {
         Node storage node = StorageLib.getNode(nodeAddr);
         _validateNodeAddress(node.account);
 
@@ -138,7 +138,7 @@ library NodeSettingsLib {
         _validateNodeAddress(node.account);
 
         NodeStatus curStatus = _getNodeStatus(node);
-        if (NodeStatus.Offline != curStatus && NodeStatus.Slashed != curStatus)
+        if (NodeStatus.Offline != curStatus && NodeStatus.Slashed != curStatus && NodeStatus.Outdated != curStatus)
             revert WrongNodeStatus(uint256(curStatus), uint256(NodeStatus.Online));
 
         // set node status
@@ -163,21 +163,7 @@ library NodeSettingsLib {
         Node storage node = StorageLib.getNode(nodeAddr);
         NodeStatus curStatus = _getNodeStatus(node);
 
-        // can only set node status as: Online, Offline and Initializing
-        if (newStatus == NodeStatus.Initializing) {
-            if (curStatus != NodeStatus.Registered) revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
-        } else if (newStatus == NodeStatus.Online) {
-            if (
-                curStatus != NodeStatus.Initializing &&
-                curStatus != NodeStatus.Offline &&
-                curStatus != NodeStatus.Slashed
-            ) revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
-        } else if (newStatus == NodeStatus.Offline) {
-            if (curStatus != NodeStatus.Online && curStatus != NodeStatus.Exiting)
-                revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
-        } else {
-            revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
-        }
+        if (!_isValidTransition(curStatus, newStatus)) revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
 
         node.status = newStatus;
         emit Events.NodeStatusChanged(nodeAddr, curStatus, newStatus);
@@ -192,6 +178,43 @@ library NodeSettingsLib {
         }
 
         return status;
+    }
+
+    function _isValidTransition(NodeStatus curStatus, NodeStatus newStatus) internal view returns (bool) {
+        // validate that the curStatus must in the validCurStatus
+        NodeStatus[] memory validCurStatus = _getValidTransitions(newStatus);
+        for (uint256 i = 0; i < validCurStatus.length; i++) {
+            if (validCurStatus[i] == curStatus) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function _getValidTransitions(NodeStatus newStatus) internal view returns (NodeStatus[] memory) {
+        if (newStatus == NodeStatus.Offline) {
+            NodeStatus[] memory validTransitions = new NodeStatus[](2);
+            validTransitions[0] = NodeStatus.Online;
+            validTransitions[1] = NodeStatus.Exiting;
+            return validTransitions;
+        } else if (newStatus == NodeStatus.Online) {
+            NodeStatus[] memory validTransitions = new NodeStatus[](4);
+            validTransitions[0] = NodeStatus.Initializing;
+            validTransitions[1] = NodeStatus.Offline;
+            validTransitions[2] = NodeStatus.Slashed;
+            validTransitions[3] = NodeStatus.Outdated;
+            return validTransitions;
+        } else if (newStatus == NodeStatus.Outdated) {
+            NodeStatus[] memory validTransitions = new NodeStatus[](1);
+            validTransitions[0] = NodeStatus.Initializing;
+            return validTransitions;
+        } else if (newStatus == NodeStatus.Initializing) {
+            NodeStatus[] memory validTransitions = new NodeStatus[](1);
+            validTransitions[0] = NodeStatus.Registered;
+            return validTransitions;
+        } else {
+            return new NodeStatus[](0);
+        }
     }
 
     function _validateNodeNotInExitStatus(Node storage node) internal view {

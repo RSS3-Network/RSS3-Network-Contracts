@@ -191,7 +191,7 @@ interface IStaking {
      * @notice Requests an exit from network.
      * @dev The caller must be the owner of node operator.
      */
-    function requestExit() external;
+    function exit() external;
 
     /**
      * @notice Sets node status.

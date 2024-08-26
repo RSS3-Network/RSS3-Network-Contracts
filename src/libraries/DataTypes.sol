@@ -61,16 +61,16 @@ struct SlashRecord {
 }
 
 enum NodeStatus {
-    None,
-    Registered,
-    Initializing,
-    Online,
-    Offline,
-    Slashing,
-    Slashed,
-    Exiting,
-    Exited,
-    Outdated
+    None, // 0
+    Registered, // 1
+    Initializing, // 2
+    Outdated, // 3
+    Online, // 4
+    Offline, // 5
+    Slashing, // 6
+    Slashed, // 7
+    Exiting, // 8
+    Exited // 9
 }
 
 enum SlashStatus {
