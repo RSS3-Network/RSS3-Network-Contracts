@@ -218,6 +218,7 @@ library NodeSettingsLib {
         return false;
     }
 
+    /// @dev get the valid transitions which can be transitioned to the given newStatus
     function _getValidTransitions(NodeStatus newStatus) internal pure returns (NodeStatus[] memory) {
         if (newStatus == NodeStatus.Offline) {
             NodeStatus[] memory validTransitions = new NodeStatus[](2);
