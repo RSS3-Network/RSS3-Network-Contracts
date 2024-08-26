@@ -160,6 +160,16 @@ library NodeSettingsLib {
         return _getNodeStatus(node);
     }
 
+    function getNodes(address[] calldata nodeAddrs) external view returns (Node[] memory nodes) {
+        nodes = new Node[](nodeAddrs.length);
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            address nodeAddr = nodeAddrs[i];
+
+            nodes[i] = StorageLib.getNode(nodeAddr);
+            nodes[i].status = _getNodeStatus(nodes[i]);
+        }
+    }
+
     function _setNodeStatus(address nodeAddr, NodeStatus newStatus) internal {
         Node storage node = StorageLib.getNode(nodeAddr);
         NodeStatus curStatus = _getNodeStatus(node);

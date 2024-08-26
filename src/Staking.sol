@@ -452,13 +452,7 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
 
     /// @inheritdoc IStaking
     function getNodes(address[] calldata nodeAddrs) external view override returns (Node[] memory nodes) {
-        nodes = new Node[](nodeAddrs.length);
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            address nodeAddr = nodeAddrs[i];
-
-            nodes[i] = StorageLib.getNode(nodeAddr);
-            nodes[i].status = NodeSettingsLib.getNodeStatus(nodes[i]);
-        }
+        return NodeSettingsLib.getNodes(nodeAddrs);
     }
 
     /// @inheritdoc IStaking
