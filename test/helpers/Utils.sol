@@ -46,6 +46,12 @@ contract Utils is Test {
         return arr;
     }
 
+    function array(string memory a) public pure returns (string[] memory) {
+        string[] memory arr = new string[](1);
+        arr[0] = a;
+        return arr;
+    }
+
     function array(uint256 a, uint256 b) public pure returns (uint256[] memory) {
         uint256[] memory arr = new uint256[](2);
         arr[0] = a;
@@ -62,6 +68,13 @@ contract Utils is Test {
 
     function array(bytes32 a, bytes32 b) public pure returns (bytes32[] memory) {
         bytes32[] memory arr = new bytes32[](2);
+        arr[0] = a;
+        arr[1] = b;
+        return arr;
+    }
+
+    function array(string memory a, string memory b) public pure returns (string[] memory) {
+        string[] memory arr = new string[](2);
         arr[0] = a;
         arr[1] = b;
         return arr;
@@ -85,6 +98,14 @@ contract Utils is Test {
 
     function array(bytes32 a, bytes32 b, bytes32 c) public pure returns (bytes32[] memory) {
         bytes32[] memory arr = new bytes32[](3);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        return arr;
+    }
+
+    function array(string memory a, string memory b, string memory c) public pure returns (string[] memory) {
+        string[] memory arr = new string[](3);
         arr[0] = a;
         arr[1] = b;
         arr[2] = c;

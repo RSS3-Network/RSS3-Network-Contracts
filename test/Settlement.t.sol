@@ -3,7 +3,7 @@
 pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
-import {Node, NodeStatus} from "../src/libraries/DataTypes.sol";
+import {Node, NodeStatus, SlashStatus, SlashRecord} from "../src/libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
@@ -828,91 +828,77 @@ contract SettlementTest is CommonTest {
         assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
     }
 
-    /*
-    function testRecordSlashing() public {
-        Slashing[] memory slashings = new Slashing[](2);
-        slashings[0] = Slashing(alice, 1);
-        slashings[1] = Slashing(bob, 2);
+    function testSubmitDemotions() public {
+        _createNode(alice);
+        _createNode(bob);
 
-        address[] memory reporters = array(carol, dave);
-
-        string[] memory reasons = new string[](2);
-        reasons[0] = "";
-        reasons[1] = "";
-
+        // submit demotion
         vm.prank(oracleAccount);
-        _settlement.recordSlashing(slashings, reporters, reasons);
+        _settlement.submitDemotions(array(alice, bob), array(string("reason1"), string("reason2")));
+
+        // check demotions
+        (uint256[] memory demotionIds, string[] memory reasons_) = _staking.getDemotions(alice, uint256(0));
+        assertEq(demotionIds[0], 1);
+        assertEq(reasons_[0], "reason1");
+
+        (demotionIds, reasons_) = _staking.getDemotions(bob, uint256(0));
+        assertEq(demotionIds[0], 2);
+        assertEq(reasons_[0], "reason2");
     }
 
-    function testRecordSlashingFail() public {
-        Slashing[] memory slashings = new Slashing[](2);
-        slashings[0] = Slashing(alice, 1);
-        slashings[1] = Slashing(bob, 2);
+    function testRevokeDemotions() public {
+        _createNode(alice);
 
-        address[] memory reporters = array(carol, dave);
-
-        string[] memory reasons = new string[](2);
-        reasons[0] = "";
-        reasons[1] = "";
-
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
-        _settlement.recordSlashing(slashings, reporters, reasons);
-    }
-
-    function testRevokeSlashing() public {
-        Slashing[] memory slashings = new Slashing[](2);
-        slashings[0] = Slashing(alice, 1);
-        slashings[1] = Slashing(bob, 2);
-
-        address[] memory reporters = array(carol, dave);
-
-        string[] memory reasons = new string[](2);
-        reasons[0] = "";
-        reasons[1] = "";
-
+        // submit demotion
         vm.prank(oracleAccount);
-        _settlement.recordSlashing(slashings, reporters, reasons);
+        _settlement.submitDemotions(array(alice), array(string("reason1")));
 
+        (uint256[] memory demotionIds, string[] memory reasons_) = _staking.getDemotions(alice, uint256(0));
+        assertEq(demotionIds[0], 1);
+        assertEq(reasons_[0], "reason1");
+
+        // revoke demotion
         vm.prank(oracleAccount);
-        _settlement.revokeSlashing(slashings);
-    }
-
-    function testRevokeSlashingFail() public {
-        Slashing[] memory slashings = new Slashing[](2);
-        slashings[0] = Slashing(alice, 1);
-        slashings[1] = Slashing(bob, 2);
-
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
-        _settlement.revokeSlashing(slashings);
+        _settlement.revokeDemotions(alice, 0, array(uint256(1)));
+        (demotionIds, reasons_) = _staking.getDemotions(alice, 0);
+        assertEq(demotionIds.length, 0);
+        assertEq(reasons_.length, 0);
     }
 
     function testCommitSlashing() public {
-        Slashing[] memory slashings = new Slashing[](2);
-        slashings[0] = Slashing(alice, 1);
-        slashings[1] = Slashing(bob, 2);
+        _createNode(alice);
+        vm.prank(alice);
+        _staking.deposit{value: 10000 ether}();
 
-        address[] memory reporters = array(carol, dave);
-
-        string[] memory reasons = new string[](2);
-        reasons[0] = "";
-        reasons[1] = "";
-
-        vm.prank(oracleAccount);
-        _settlement.recordSlashing(slashings, reporters, reasons);
+        // submit demotion
+        for (uint256 i = 0; i < 4; i++) {
+            vm.prank(oracleAccount);
+            _settlement.submitDemotions(array(alice), array(string("reason1")));
+        }
 
         vm.prank(oracleAccount);
-        _settlement.commitSlashing(slashings);
+        _settlement.commitSlashing(array(alice), array(uint256(0)));
+
+        // check demotions
+        (uint256[] memory demotionIds, ) = _staking.getDemotions(alice, uint256(0));
+        assertEq(demotionIds.length, 4);
+
+        // check slash record
+        SlashRecord memory record = _staking.getSlashingRecord(alice, uint256(0));
+        assertEq(record.reporter, address(0x0));
+        assertEq(record.amountForOperationPool, 100 ether);
+        assertEq(record.amountForStakingPool, 0);
+        assertEq(uint256(record.status), uint256(SlashStatus.Committed));
+
+        // check node status
+        Node memory node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(NodeStatus.Slashed));
     }
 
     function testCommitSlashingFail() public {
-        Slashing[] memory slashings = new Slashing[](2);
-        slashings[0] = Slashing(alice, 1);
-        slashings[1] = Slashing(bob, 2);
-
         vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
-        _settlement.commitSlashing(slashings);
+        _settlement.commitSlashing(array(alice), array(uint256(0)));
     }
-    */
 
     function testSetNodeStatusSucceeds() public {
         _createNode(alice);

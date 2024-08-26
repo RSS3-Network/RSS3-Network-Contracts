@@ -180,7 +180,27 @@ library NodeSettingsLib {
         return status;
     }
 
-    function _isValidTransition(NodeStatus curStatus, NodeStatus newStatus) internal view returns (bool) {
+    function _validateNodeNotInExitStatus(Node storage node) internal view {
+        NodeStatus status = _getNodeStatus(node);
+        if (NodeStatus.Exiting == status || NodeStatus.Exited == status) revert NodeInExitStatus();
+    }
+
+    function _validateNodeInExitStatus(Node storage node) internal view {
+        NodeStatus status = _getNodeStatus(node);
+        if (NodeStatus.Exiting != status && NodeStatus.Exited != status) revert NodeNotInExitStatus();
+    }
+
+    function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
+        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
+
+        if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
+    }
+
+    function _validateNodeAddress(address nodeAddr) internal pure {
+        if (nodeAddr == address(0)) revert NodeNotExists();
+    }
+
+    function _isValidTransition(NodeStatus curStatus, NodeStatus newStatus) internal pure returns (bool) {
         // validate that the curStatus must in the validCurStatus
         NodeStatus[] memory validCurStatus = _getValidTransitions(newStatus);
         for (uint256 i = 0; i < validCurStatus.length; i++) {
@@ -191,7 +211,7 @@ library NodeSettingsLib {
         return false;
     }
 
-    function _getValidTransitions(NodeStatus newStatus) internal view returns (NodeStatus[] memory) {
+    function _getValidTransitions(NodeStatus newStatus) internal pure returns (NodeStatus[] memory) {
         if (newStatus == NodeStatus.Offline) {
             NodeStatus[] memory validTransitions = new NodeStatus[](2);
             validTransitions[0] = NodeStatus.Online;
@@ -215,25 +235,5 @@ library NodeSettingsLib {
         } else {
             return new NodeStatus[](0);
         }
-    }
-
-    function _validateNodeNotInExitStatus(Node storage node) internal view {
-        NodeStatus status = _getNodeStatus(node);
-        if (NodeStatus.Exiting == status || NodeStatus.Exited == status) revert NodeInExitStatus();
-    }
-
-    function _validateNodeInExitStatus(Node storage node) internal view {
-        NodeStatus status = _getNodeStatus(node);
-        if (NodeStatus.Exiting != status && NodeStatus.Exited != status) revert NodeNotInExitStatus();
-    }
-
-    function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
-        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
-
-        if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
-    }
-
-    function _validateNodeAddress(address nodeAddr) internal pure {
-        if (nodeAddr == address(0)) revert NodeNotExists();
     }
 }

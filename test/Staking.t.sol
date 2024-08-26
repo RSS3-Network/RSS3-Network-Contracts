@@ -1317,11 +1317,8 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testSubmitDemotions() public {
         _createNode(alice);
 
-        string[] memory reasons = new string[](1);
-        reasons[0] = "demotion reason";
-
         vm.prank(address(_settlement));
-        _staking.submitDemotions(1, array(alice), reasons);
+        _staking.submitDemotions(1, array(alice), array(string("demotion reason")));
 
         (uint256[] memory demotionIds, string[] memory reasons_) = _staking.getDemotions(alice, 1);
         assertEq(demotionIds.length, 1);
