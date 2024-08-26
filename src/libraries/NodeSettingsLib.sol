@@ -122,6 +122,7 @@ library NodeSettingsLib {
         _validateNodeAddress(node.account);
 
         NodeStatus curStatus = _getNodeStatus(node);
+        // check if the node is in exit status
         if (NodeStatus.Exiting != curStatus && NodeStatus.Exited != curStatus) revert NodeNotInExitStatus();
 
         uint256 operationPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
@@ -185,11 +186,6 @@ library NodeSettingsLib {
         if (NodeStatus.Exiting == status || NodeStatus.Exited == status) revert NodeInExitStatus();
     }
 
-    function _validateNodeInExitStatus(Node storage node) internal view {
-        NodeStatus status = _getNodeStatus(node);
-        if (NodeStatus.Exiting != status && NodeStatus.Exited != status) revert NodeNotInExitStatus();
-    }
-
     function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
         if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
 
@@ -200,6 +196,7 @@ library NodeSettingsLib {
         if (nodeAddr == address(0)) revert NodeNotExists();
     }
 
+    /// @dev check that the status transition from curStatus -> newStatus is valid
     function _isValidTransition(NodeStatus curStatus, NodeStatus newStatus) internal pure returns (bool) {
         // validate that the curStatus must in the validCurStatus
         NodeStatus[] memory validCurStatus = _getValidTransitions(newStatus);

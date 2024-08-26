@@ -1326,105 +1326,82 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(reasons_.length, 1);
         assertEq(reasons_[0], "demotion reason");
     }
-    //
-    //    // Test errors: InvalidArrayLength, NodeNotExists, SlashPublicGoodNode, SlashMoreThanOnce
-    //    function testRecordSlashingFail() public {
-    //        uint256 depositedTokens = 10000 ether;
-    //        uint256 stakedTokens = 40000 ether;
-    //
-    //        _setUpNodes(depositedTokens, stakedTokens);
-    //
-    //        address[] memory reporters = array(carol, dave);
-    //
-    //        Slashing[] memory slashings = _createSlashings(array(alice, bob), array(123, 123));
-    //
-    //        address[] memory wrongReporters = array(carol);
-    //
-    //        // InvalidArrayLength
-    //        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
-    //        vm.prank(address(_settlement));
-    //        _recordSlashingWithReasons(slashings, wrongReporters);
-    //
-    //        // NodeNotExists
-    //        slashings[1].nodeAddr = address(0x0); // alice, 0x0
-    //        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-    //        vm.prank(address(_settlement));
-    //        _recordSlashingWithReasons(slashings, reporters);
-    //
-    //        // SlashMoreThanOnce
-    //        slashings[1].nodeAddr = alice; // alice, alice
-    //        vm.expectRevert(abi.encodeWithSelector(SlashMoreThanOnce.selector, alice, 123));
-    //        vm.prank(address(_settlement));
-    //        _recordSlashingWithReasons(slashings, reporters);
-    //
-    //        // SlashPublicGoodNode
-    //        _createPublicGoodNode(carol);
-    //        Slashing memory slashCarol = Slashing(carol, 123);
-    //        Slashing[] memory slashingPGs = new Slashing[](1);
-    //        slashingPGs[0] = slashCarol;
-    //        address[] memory reporters2 = array(dave);
-    //
-    //        vm.prank(address(_settlement));
-    //        _recordSlashingWithReasons(slashingPGs, reporters2);
-    //    }
 
-    // Test:
-    // 1. event emitted as expected
-    // 2. staking and operation pool tokens decreased as expected
-    // 3. record info updated as expected
-    //    function testRecordSlashing() public {
-    //        uint256 depositedTokens = 10000 ether;
-    //        uint256 stakedTokens = 40000 ether;
-    //
-    //        _setUpNodes(depositedTokens, stakedTokens);
-    //
-    //        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-    //            Const.DENOMINATOR;
-    //        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-    //            Const.DENOMINATOR;
-    //
-    //        address[] memory nodeAddrs = array(alice, bob);
-    //        address[] memory reporters = array(carol, dave);
-    //        uint256[] memory epochIds = array(123, 123);
-    //
-    //        Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
-    //
-    //        // 1. events emitted as expected
-    //        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-    //            expectEmit();
-    //            emit Events.SlashRecorded(
-    //                nodeAddrs[i],
-    //                epochIds[i],
-    //                reporters[i],
-    //                expectedSlashedTokensOnOperationPool,
-    //                expectedSlashedTokensOnStakingPool
-    //            );
-    //        }
-    //        vm.prank(address(_settlement));
-    //        _recordSlashingWithReasons(slashings, reporters);
-    //
-    //        SlashRecord[] memory records = _staking.getSlashingRecords(slashings);
-    //        // 2. records info updated correctly
-    //        for (uint256 i = 0; i < records.length; i++) {
-    //            assertEq(records[i].reporter, reporters[i]);
-    //            assertEq(records[i].amountForOperationPool, expectedSlashedTokensOnOperationPool);
-    //            assertEq(records[i].amountForStakingPool, expectedSlashedTokensOnStakingPool);
-    //            assertTrue(records[i].status == SlashStatus.Recorded);
-    //        }
-    //
-    //        // 3. check staking pool and operation tokens
-    //        Node memory aliceNode = _staking.getNode(alice);
-    //        Node memory bobNode = _staking.getNode(bob);
-    //        assertEq(aliceNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-    //        assertEq(aliceNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-    //        assertEq(bobNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-    //        assertEq(bobNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-    //
-    //        // 4. slash status updated correctly
-    //        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Slashing));
-    //        assertEq(uint256(bobNode.status), uint256(NodeStatus.Slashing));
-    //    }
-    //
+    function testRevokeDemotions() public {
+        _createNode(alice);
+
+        // submit demotion
+        vm.prank(address(_settlement));
+        _staking.submitDemotions(1, array(alice), array(string("reason1")));
+
+        (uint256[] memory demotionIds, string[] memory reasons_) = _staking.getDemotions(alice, uint256(1));
+        assertEq(demotionIds[0], 1);
+        assertEq(reasons_[0], "reason1");
+
+        // revoke demotion
+        vm.prank(address(_settlement));
+        _staking.revokeDemotions(alice, 1, array(uint256(1)));
+        (demotionIds, reasons_) = _staking.getDemotions(alice, 0);
+        assertEq(demotionIds.length, 0);
+        assertEq(reasons_.length, 0);
+    }
+
+    function testRecordSlashing() public {
+        uint256 stakedTokens = 40000 ether;
+        uint256 depositedTokens = 10000 ether;
+
+        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
+            Const.DENOMINATOR;
+        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+            Const.DENOMINATOR;
+
+        _createNode(alice);
+
+        vm.prank(alice);
+        _staking.deposit{value: depositedTokens}();
+
+        vm.prank(bob);
+        _staking.stake{value: stakedTokens}(alice);
+
+        _presetNodeStatus(alice, NodeStatus.Online);
+
+        // submit demotion
+        for (uint256 i = 0; i < 3; i++) {
+            vm.prank(address(_settlement));
+            _staking.submitDemotions(1, array(alice), array(string("reason1")));
+        }
+
+        expectEmit();
+        emit Events.NodeStatusChanged(alice, NodeStatus.Online, NodeStatus.Slashing);
+        expectEmit();
+        emit Events.SlashRecorded(
+            alice,
+            1,
+            address(0),
+            expectedSlashedTokensOnOperationPool,
+            expectedSlashedTokensOnStakingPool
+        );
+        expectEmit();
+        emit Events.DemotionSubmitted(1, alice, uint256(4), string("reason1"));
+        vm.prank(address(_settlement));
+        _staking.submitDemotions(1, array(alice), array(string("reason1")));
+
+        SlashRecord memory record = _staking.getSlashingRecord(alice, 1);
+        // records info updated correctly
+        assertEq(record.reporter, address(0));
+        assertEq(record.amountForOperationPool, expectedSlashedTokensOnOperationPool);
+        assertEq(record.amountForStakingPool, expectedSlashedTokensOnStakingPool);
+        assertEq(uint256(record.status), uint256(SlashStatus.Recorded));
+
+        // check staking pool and operation tokens
+        Node memory aliceNode = _staking.getNode(alice);
+        assertEq(aliceNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
+        assertEq(aliceNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
+
+        // slash status updated correctly
+        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Slashing));
+    }
+
     //    // Test errors: SlashRecordNotExists, SlashStatusNotRecorded
     //    function testCommitSlashingFail() public {
     //        uint256 depositedTokens = 10000 ether;
@@ -1576,52 +1553,61 @@ contract StakingTest is CommonTest, IERC721Errors {
     //
     //        vm.stopPrank();
     //    }
-    //
-    //    // Test:
-    //    // 1. Events emitted as expected
-    //    // 2. Slashed tokens returned as expected
-    //    // 3. Slashing info updated as expected
-    //    function testRevokeSlashing() public {
-    //        uint256 depositedTokens = 10000 ether;
-    //        uint256 stakedTokens = 40000 ether;
-    //        _setUpNodes(depositedTokens, stakedTokens);
-    //
-    //        // 1. record slashing
-    //        vm.startPrank(address(_settlement));
-    //        Slashing[] memory slashings = _createSlashings(array(alice, bob), array(123, 123));
-    //        _recordSlashingWithReasons(slashings, array(carol, dave));
-    //
-    //        // 2. revoke slashing and events emitted as expected
-    //        expectEmit();
-    //        emit Events.SlashRevoked(alice, 123);
-    //        emit Events.SlashRevoked(bob, 123);
-    //        _staking.revokeSlashing(slashings);
-    //        vm.stopPrank();
-    //
-    //        // 3. check: slashed tokens returned as expected
-    //        // 3.1 staking pool and operation pool tokens correct
-    //        Node memory aliceNode = _staking.getNode(alice);
-    //        Node memory bobNode = _staking.getNode(bob);
-    //        assertEq(aliceNode.stakingPoolTokens, stakedTokens);
-    //        assertEq(aliceNode.operationPoolTokens, depositedTokens);
-    //        assertEq(bobNode.stakingPoolTokens, stakedTokens);
-    //        assertEq(bobNode.operationPoolTokens, depositedTokens);
-    //
-    //        // 3.2 reporters balance correct
-    //        for (uint256 i = 0; i < 2; i++) {
-    //            assertEq(carol.balance, _initialAmount);
-    //            assertEq(dave.balance, _initialAmount);
-    //        }
-    //
-    //        // 3.3 treasury balance correct
-    //        uint256 amount = _getTreasuryAmount();
-    //        assertEq(amount, 0);
-    //
-    //        // 4. slash status updated correctly
-    //        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Online));
-    //        assertEq(uint256(bobNode.status), uint256(NodeStatus.Online));
-    //    }
-    //
+
+    // Test:
+    // 1. Events emitted as expected
+    // 2. Slashed tokens returned as expected
+    // 3. Slashing info updated as expected
+    function testRevokeSlashing() public {
+        uint256 stakedTokens = 40000 ether;
+        uint256 depositedTokens = 10000 ether;
+
+        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
+            Const.DENOMINATOR;
+        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+            Const.DENOMINATOR;
+
+        _createNode(alice);
+
+        vm.prank(alice);
+        _staking.deposit{value: depositedTokens}();
+
+        vm.prank(bob);
+        _staking.stake{value: stakedTokens}(alice);
+
+        _presetNodeStatus(alice, NodeStatus.Online);
+
+        // submit demotion
+        for (uint256 i = 0; i < 4; i++) {
+            vm.prank(address(_settlement));
+            _staking.submitDemotions(1, array(alice), array(string("reason1")));
+        }
+
+        expectEmit();
+        emit Events.DemotionRevoked(uint256(3));
+        expectEmit();
+        emit Events.NodeStatusChanged(alice, NodeStatus.Slashing, NodeStatus.Online);
+        expectEmit();
+        emit Events.SlashRevoked(alice, uint256(1));
+        vm.prank(address(_settlement));
+        _staking.revokeDemotions(alice, uint256(1), array(uint256(3)));
+
+        SlashRecord memory record = _staking.getSlashingRecord(alice, 1);
+        // records info updated correctly
+        assertEq(record.reporter, address(0));
+        assertEq(record.amountForOperationPool, expectedSlashedTokensOnOperationPool);
+        assertEq(record.amountForStakingPool, expectedSlashedTokensOnStakingPool);
+        assertEq(uint256(record.status), uint256(SlashStatus.Revoked));
+
+        // check staking pool and operation tokens
+        Node memory aliceNode = _staking.getNode(alice);
+        assertEq(aliceNode.stakingPoolTokens, stakedTokens);
+        assertEq(aliceNode.operationPoolTokens, depositedTokens);
+
+        // slash status updated correctly
+        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Online));
+    }
+
     //    // Test multiple slashings
     //    function testRecordSlashingMulti() public {
     //        uint256 depositedTokens = 10000 ether;
