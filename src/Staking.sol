@@ -19,7 +19,6 @@ import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
 import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
 import {StakingLib} from "./libraries/StakingLib.sol";
 import {
-    AlphaWithdrawNotAllowed,
     InsufficientValue,
     PublicGoodNodeNotDeposited,
     PublicGoodNodeTaxNotZero,
@@ -119,11 +118,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @dev (nodeAddr, epochId) => slash record
     mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
 
-    modifier whenNotAlphaPhase() {
-        if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
-        _;
-    }
-
     modifier whenNotSettlementPhase() {
         if (_isSettlementPhase) revert SettlementPhase();
         _;
@@ -216,9 +210,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function requestWithdrawal(
-        uint256 amount
-    ) external override whenNotPaused whenNotAlphaPhase returns (uint256 requestId) {
+    function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert NodeNotExists();
 
@@ -262,7 +254,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     function requestUnstake(
         address nodeAddr,
         uint256[] calldata chipIds
-    ) external override whenNotPaused whenNotSettlementPhase whenNotAlphaPhase returns (uint256 requestId) {
+    ) external override whenNotPaused whenNotSettlementPhase returns (uint256 requestId) {
         return StakingLib.unstakeFromNode(nodeAddr, chipIds, SHARES_PER_CHIP);
     }
 
