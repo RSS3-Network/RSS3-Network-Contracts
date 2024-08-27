@@ -75,9 +75,6 @@ contract StakingForkTest is CommonTest {
     }
 
     function testRequestUnstakeFork() public {
-        vm.prank(settlement);
-        staking.disableAlphaPhase();
-
         address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
         assertEq(shares, staking.SHARES_PER_CHIP());
@@ -101,9 +98,6 @@ contract StakingForkTest is CommonTest {
     }
 
     function testRequestUnstakeForkWithMerge() public {
-        vm.prank(settlement);
-        staking.disableAlphaPhase();
-
         address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
         DataTypes.Node memory nodeBefore = staking.getNode(nodeAddr);

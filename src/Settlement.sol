@@ -52,8 +52,7 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 operationRewardsPercent,
-        bool disableAlphaPhase
+        uint256 operationRewardsPercent
     ) external override reinitializer(4) {
         if (staking != address(0)) {
             _staking = staking;
@@ -69,10 +68,6 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
         }
 
         _updateRewardsRatio(operationRewardsPercent);
-
-        if (disableAlphaPhase) {
-            IStaking(_staking).disableAlphaPhase();
-        }
     }
 
     /// @inheritdoc ISettlement

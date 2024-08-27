@@ -154,11 +154,12 @@ contract Deploy is Deployer {
         address chipsProxy = mustGetAddress("ChipsProxy");
         address settlementProxy = mustGetAddress("SettlementProxy");
 
-        stakingProxy.initialize(chipsProxy, cfg.pauseAccount(), settlementProxy);
+        stakingProxy.initialize(chipsProxy, cfg.pauseAccount(), settlementProxy, cfg.isAlphaPhase());
         // check states
         require(stakingProxy.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "check pause role error");
         require(stakingProxy.hasRole(ORACLE_ROLE, settlementProxy), "check oracle role error");
         require(stakingProxy.chipsContract() == chipsProxy, "check chips token error");
+        require(stakingProxy.isAlphaPhase() == cfg.isAlphaPhase(), "check alpha phase error");
     }
 
     function initializeChips() public broadcast {
@@ -179,8 +180,7 @@ contract Deploy is Deployer {
             stakingProxy,
             cfg.oracleAccount(),
             cfg.settlementStartTime(),
-            cfg.operationRewardsPercent(),
-            cfg.disableAlphaPhase()
+            cfg.operationRewardsPercent()
         );
 
         // check states
@@ -189,7 +189,6 @@ contract Deploy is Deployer {
         require(settlementProxy.currentEpoch() == 0, "check start epoch error");
         require(settlementProxy.EPOCH_DURATION() == 18 hours, "check start epoch error");
         require(settlementProxy.TOTAL_REWARDS_PER_YEAR() == 30000000 ether, "check start epoch error");
-        require(Staking(stakingProxy).isAlphaPhase() == cfg.disableAlphaPhase(), "check disableAlphaPhase error");
     }
 
     function initializeNetworkParams() public broadcast {

@@ -96,12 +96,12 @@ contract CommonTest is Utils {
         _settlement = Settlement(payable(settlementProxy));
 
         // init
-        _staking.initialize(address(_chips), pauseAccount, address(_settlement));
-        _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20, _cfg.disableAlphaPhase());
+        _staking.initialize(address(_chips), pauseAccount, address(_settlement), _cfg.isAlphaPhase());
+        _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
         _chips.initialize(chipsName, chipsSymbol, address(_staking));
 
         _internalSettlementTest = new InternalSettlement();
-        _internalSettlementTest.initialize(address(_staking), oracleAccount, 0, 0, _cfg.disableAlphaPhase());
+        _internalSettlementTest.initialize(address(_staking), oracleAccount, 0, 0);
 
         // label test accounts
         vm.label(alice, "alice");

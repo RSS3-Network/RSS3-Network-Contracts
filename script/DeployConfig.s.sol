@@ -30,7 +30,7 @@ contract DeployConfig is Script {
     uint256 public operationRewardsPercent;
     address public paymentProcessor;
     address public networkParamsManager;
-    bool public disableAlphaPhase;
+    bool public isAlphaPhase;
 
     constructor(string memory _path) {
         console.log("DeployConfig: reading file %s", _path);
@@ -58,6 +58,6 @@ contract DeployConfig is Script {
         operationRewardsPercent = stdJson.readUint(_json, "$.operationRewardsPercent");
         paymentProcessor = stdJson.readAddress(_json, "$.paymentProcessor");
         networkParamsManager = stdJson.readAddress(_json, "$.networkParamsManager");
-        disableAlphaPhase = stdJson.readBool(_json, "$.disableAlphaPhase");
+        isAlphaPhase = stdJson.readBool(_json, "$.isAlphaPhase");
     }
 }

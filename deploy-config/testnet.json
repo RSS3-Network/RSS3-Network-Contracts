@@ -16,5 +16,5 @@
   "operationRewardsPercent": 20,
   "paymentProcessor": "0x3f1bf4db7059620b06c329f1a6e2fb15a82b4d7e",
   "networkParamsManager": "0xDfCE83dc6030e111425f787395250FF24E9109C6",
-  "disableAlphaPhase": "true"
+  "isAlphaPhase": "false"
 }

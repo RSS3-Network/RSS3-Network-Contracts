@@ -158,13 +158,27 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function initialize(address chips, address pauseAccount, address oracleAccount) external override initializer {
-        _chips = chips;
+    function initialize(
+        address chips,
+        address pauseAccount,
+        address oracleAccount,
+        bool isAlphaPhase_
+    ) external override reinitializer(2) {
+        if (chips != address(0)) {
+            _chips = chips;
+        }
 
-        _grantRole(PAUSE_ROLE, pauseAccount);
-        _grantRole(ORACLE_ROLE, oracleAccount);
+        // grants `PAUSE_ROLE`
+        if (pauseAccount != address(0)) {
+            _grantRole(PAUSE_ROLE, pauseAccount);
+        }
 
-        _isAlphaPhase = true;
+        // grants `ORACLE_ROLE`
+        if (oracleAccount != address(0)) {
+            _grantRole(ORACLE_ROLE, oracleAccount);
+        }
+
+        _isAlphaPhase = isAlphaPhase_;
     }
 
     /// @inheritdoc IStaking
@@ -372,7 +386,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function disableAlphaPhase() external override whenNotPaused onlyRole(ORACLE_ROLE) {
+    function disableAlphaPhase() external override {
         _isAlphaPhase = false;
     }
 
