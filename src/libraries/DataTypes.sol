@@ -62,7 +62,6 @@ struct Demotion {
 }
 
 struct SlashRecord {
-    address reporter;
     uint256 amountForOperationPool;
     uint256 amountForStakingPool;
     SlashStatus status; // 0: recorded, 1: committed, 2: revoked

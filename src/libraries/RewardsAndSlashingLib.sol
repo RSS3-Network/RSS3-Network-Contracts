@@ -58,7 +58,7 @@ library RewardsAndSlashingLib {
                 _recordSlashing(nodeAddr, epoch, address(0));
             }
 
-            emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reasons[i]);
+            emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reasons[i], reporters[i]);
         }
     }
 
@@ -100,7 +100,19 @@ library RewardsAndSlashingLib {
         Node storage node = StorageLib.getNode(nodeAddr);
         node.status = NodeStatus.Slashed;
 
-        _commitSlashingAmount(record, paymentProcessor);
+        // commit slashing amount, distributes the amount to reporter and treasury
+        uint256 slashedAmount = record.amountForOperationPool + record.amountForStakingPool;
+        uint256 reporterAmount = (slashedAmount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 burnAmount = (slashedAmount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+
+        StakingCommonLib.decreaseSlashingPoolByRecord(slashedAmount);
+
+        // transfer slashed tokens to reporters
+        _transferToReporters(reporterAmount, nodeAddr, epoch, paymentProcessor);
+        // burn slashed tokens
+        _transfer(address(0x0), burnAmount);
+        // remaining amount is in this contract for the treasury
+
         emit Events.SlashCommitted(nodeAddr, epoch);
     }
 
@@ -175,12 +187,7 @@ library RewardsAndSlashingLib {
      * @return demotions An array of demotions.
      */
     function getDemotions(address nodeAddr, uint256 epoch) external view returns (Demotion[] memory demotions) {
-        EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
-
-        demotions = new Demotion[](demotionIds.length());
-        for (uint256 i = 0; i < demotionIds.length(); i++) {
-            demotions[i] = StorageLib.getDemotions()[demotionIds.at(i)];
-        }
+        demotions = _getDemotions(nodeAddr, epoch);
     }
 
     /**
@@ -206,7 +213,6 @@ library RewardsAndSlashingLib {
 
         // update slash record
         SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
-        record.reporter = reporter;
         record.amountForOperationPool = slashedOperationPool;
         record.amountForStakingPool = slashedStakingPool;
         record.status = SlashStatus.Recorded;
@@ -214,7 +220,7 @@ library RewardsAndSlashingLib {
         // record slashing amount
         StakingCommonLib.decreaseOperationPool(node, record.amountForOperationPool);
         StakingCommonLib.decreaseStakingPool(node, record.amountForStakingPool);
-        StakingCommonLib.increaseSlashingPoolByRecord(record);
+        StakingCommonLib.increaseSlashingPoolByRecord(record.amountForOperationPool + record.amountForStakingPool);
 
         NodeStatus curStatus = node.status;
         // set node status: slashing
@@ -237,7 +243,7 @@ library RewardsAndSlashingLib {
         record.status = SlashStatus.Revoked;
 
         // revoke slashing amount
-        StakingCommonLib.decreaseSlashingPoolByRecord(record);
+        StakingCommonLib.decreaseSlashingPoolByRecord(record.amountForOperationPool + record.amountForStakingPool);
         StakingCommonLib.increaseOperationPool(node, record.amountForOperationPool);
         StakingCommonLib.increaseStakingPool(node, record.amountForStakingPool);
         // set node status: online
@@ -247,26 +253,20 @@ library RewardsAndSlashingLib {
         emit Events.SlashRevoked(nodeAddr, epoch);
     }
 
-    /// @dev commit slashing amount, distributes the amount to reporter and treasury
-    function _commitSlashingAmount(SlashRecord storage record, address paymentProcessor) internal {
-        StakingCommonLib.decreaseSlashingPoolByRecord(record);
+    function _transferToReporters(uint256 amount, address nodeAddr, uint256 epoch, address paymentProcessor) internal {
+        Demotion[] memory demotions = _getDemotions(nodeAddr, epoch);
+        uint256 averageAmount = amount / demotions.length;
 
-        uint256 amount = record.amountForOperationPool + record.amountForStakingPool;
-
-        uint256 reporterAmount = (amount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
-
-        uint256 burnAmount = (amount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
-
-        if (record.reporter == address(0)) {
-            // transfer slashed tokens to payment processor
-            _transfer(paymentProcessor, reporterAmount);
-        } else {
-            // transfer slashed tokens to reporter
-            _transfer(record.reporter, reporterAmount);
+        for (uint256 i = 0; i < demotions.length; i++) {
+            address reporter = demotions[i].reporter;
+            if (reporter == address(0)) {
+                // transfer slashed tokens to payment processor
+                _transfer(paymentProcessor, averageAmount);
+            } else {
+                // transfer slashed tokens to reporter
+                _transfer(reporter, averageAmount);
+            }
         }
-        _transfer(address(0x0), burnAmount);
-
-        // remaining amount is in this contract for the treasury
     }
 
     /// @dev transfer native tokens by a low-level call.
@@ -276,6 +276,15 @@ library RewardsAndSlashingLib {
         if (amount > 0) {
             (bool success, ) = address(to).call{value: amount}("");
             if (!success) revert TransferFailed();
+        }
+    }
+
+    function _getDemotions(address nodeAddr, uint256 epoch) internal view returns (Demotion[] memory demotions) {
+        EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
+
+        demotions = new Demotion[](demotionIds.length());
+        for (uint256 i = 0; i < demotionIds.length(); i++) {
+            demotions[i] = StorageLib.getDemotions()[demotionIds.at(i)];
         }
     }
 

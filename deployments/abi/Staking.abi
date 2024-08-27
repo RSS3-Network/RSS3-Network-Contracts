@@ -793,11 +793,6 @@
         "internalType": "struct SlashRecord",
         "components": [
           {
-            "name": "reporter",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
             "name": "amountForOperationPool",
             "type": "uint256",
             "internalType": "uint256"

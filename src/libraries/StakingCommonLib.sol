@@ -40,18 +40,14 @@ library StakingCommonLib {
     }
 
     /// @dev increase slashing pool tokens
-    function increaseSlashingPoolByRecord(SlashRecord storage record) internal {
+    function increaseSlashingPoolByRecord(uint256 amount) internal {
         PoolStatData storage pool = StorageLib.poolStatStorage();
-        pool.totalSlashingPoolTokens += _totalSlashedAmount(record);
+        pool.totalSlashingPoolTokens += amount;
     }
 
     /// @dev decrease slashing pool tokens
-    function decreaseSlashingPoolByRecord(SlashRecord storage record) internal {
+    function decreaseSlashingPoolByRecord(uint256 amount) internal {
         PoolStatData storage pool = StorageLib.poolStatStorage();
-        pool.totalSlashingPoolTokens -= _totalSlashedAmount(record);
-    }
-
-    function _totalSlashedAmount(SlashRecord storage record) internal view returns (uint256) {
-        return record.amountForOperationPool + record.amountForStakingPool;
+        pool.totalSlashingPoolTokens -= amount;
     }
 }

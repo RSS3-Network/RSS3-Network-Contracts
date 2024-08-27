@@ -830,9 +830,11 @@ contract SettlementTest is CommonTest {
         assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
     }
 
-    function testSubmitDemotions() public {
+    function testSubmitDemotionsxx() public {
         _createNode(alice);
         _createNode(bob);
+
+        _presetCurrentEpoch(1);
 
         // submit demotion
         vm.prank(oracleAccount);
@@ -843,13 +845,13 @@ contract SettlementTest is CommonTest {
         );
 
         // check demotions
-        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(0));
+        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
         assertEq(demotions.length, 1);
-        _checkDemotion(demotions[0], uint256(1), alice, uint256(0), "reason1", address(0xeeee));
+        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), "reason1", address(0xeeee));
 
-        demotions = _staking.getDemotions(bob, uint256(0));
+        demotions = _staking.getDemotions(bob, uint256(1));
         assertEq(demotions.length, 1);
-        _checkDemotion(demotions[0], uint256(2), bob, uint256(0), "reason2", address(0xffff));
+        _checkDemotion(demotions[0], uint256(2), bob, uint256(1), "reason2", address(0xffff));
     }
 
     function testRevokeDemotions() public {
@@ -896,7 +898,6 @@ contract SettlementTest is CommonTest {
 
         // check slash record
         SlashRecord memory record = _staking.getSlashingRecord(alice, uint256(1));
-        assertEq(record.reporter, address(0x0));
         assertEq(record.amountForOperationPool, 100 ether);
         assertEq(record.amountForStakingPool, 0);
         assertEq(uint256(record.status), uint256(SlashStatus.Committed));

@@ -1390,13 +1390,12 @@ contract StakingTest is CommonTest, IERC721Errors {
             expectedSlashedTokensOnStakingPool
         );
         expectEmit();
-        emit Events.DemotionSubmitted(1, alice, uint256(4), string("reason1"));
+        emit Events.DemotionSubmitted(1, alice, uint256(4), string("reason1"), address(0xeeee));
         vm.prank(address(_settlement));
         _staking.submitDemotions(1, array(alice), array(string("reason1")), array(address(0xeeee)));
 
         SlashRecord memory record = _staking.getSlashingRecord(alice, 1);
         // records info updated correctly
-        assertEq(record.reporter, address(0));
         assertEq(record.amountForOperationPool, expectedSlashedTokensOnOperationPool);
         assertEq(record.amountForStakingPool, expectedSlashedTokensOnStakingPool);
         assertEq(uint256(record.status), uint256(SlashStatus.Recorded));
@@ -1450,7 +1449,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         SlashRecord memory record = _staking.getSlashingRecord(alice, 1);
         // records info updated correctly
-        assertEq(record.reporter, address(0));
         assertEq(record.amountForOperationPool, expectedSlashedTokensOnOperationPool);
         assertEq(record.amountForStakingPool, expectedSlashedTokensOnStakingPool);
         assertEq(uint256(record.status), uint256(SlashStatus.Revoked));
@@ -1486,7 +1484,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // submit demotions
         for (uint256 i = 0; i < 4; i++) {
             vm.prank(address(_settlement));
-            _staking.submitDemotions(1, array(alice), array(string("reason1")), array(address(0xeeee)));
+            _staking.submitDemotions(1, array(alice), array(string("reason1")), array(address(0)));
         }
 
         skip(Const.SLASHING_COMMIT_PERIOD_IN_EPOCH * 18 hours);
@@ -1498,7 +1496,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         SlashRecord memory record = _staking.getSlashingRecord(alice, 1);
         // records info updated correctly
-        assertEq(record.reporter, address(0));
         assertEq(record.amountForOperationPool, expectedSlashedTokensOnOperationPool);
         assertEq(record.amountForStakingPool, expectedSlashedTokensOnStakingPool);
         assertEq(uint256(record.status), uint256(SlashStatus.Committed));

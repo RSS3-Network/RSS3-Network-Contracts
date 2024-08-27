@@ -179,8 +179,15 @@ library Events {
      * @param nodeAddr The address of node.
      * @param demotionId The new id of demotion.
      * @param reason The reason of demotion.
+     * @param reporter The address of the reporter.
      */
-    event DemotionSubmitted(uint256 indexed epoch, address indexed nodeAddr, uint256 indexed demotionId, string reason);
+    event DemotionSubmitted(
+        uint256 indexed epoch,
+        address indexed nodeAddr,
+        uint256 indexed demotionId,
+        string reason,
+        address reporter
+    );
 
     /**
      * @dev Emitted on revokeDemotions()
