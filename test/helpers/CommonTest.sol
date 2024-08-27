@@ -120,7 +120,7 @@ contract CommonTest is Utils {
     }
 
     function _disableAlphaPhase() internal {
-        vm.prank(address(_settlement));
+        vm.prank(pauseAccount);
         _staking.disableAlphaPhase();
     }
 

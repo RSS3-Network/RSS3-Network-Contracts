@@ -386,7 +386,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function disableAlphaPhase() external override {
+    function disableAlphaPhase() external override onlyRole(PAUSE_ROLE) {
         _isAlphaPhase = false;
     }
 
