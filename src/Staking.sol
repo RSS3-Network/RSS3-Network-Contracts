@@ -19,7 +19,6 @@ import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
 import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
 import {StakingLib} from "./libraries/StakingLib.sol";
 import {
-    AlphaWithdrawNotAllowed,
     InsufficientValue,
     PublicGoodNodeNotDeposited,
     PublicGoodNodeTaxNotZero,
@@ -119,11 +118,6 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     /// @dev (nodeAddr, epochId) => slash record
     mapping(address nodeAddr => mapping(uint256 epochId => DataTypes.SlashRecord)) internal _slashRecords;
 
-    modifier whenNotAlphaPhase() {
-        if (_isAlphaPhase) revert AlphaWithdrawNotAllowed();
-        _;
-    }
-
     modifier whenNotSettlementPhase() {
         if (_isSettlementPhase) revert SettlementPhase();
         _;
@@ -164,13 +158,27 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function initialize(address chips, address pauseAccount, address oracleAccount) external override initializer {
-        _chips = chips;
+    function initialize(
+        address chips,
+        address pauseAccount,
+        address oracleAccount,
+        bool isAlphaPhase_
+    ) external override reinitializer(2) {
+        if (chips != address(0)) {
+            _chips = chips;
+        }
 
-        _grantRole(PAUSE_ROLE, pauseAccount);
-        _grantRole(ORACLE_ROLE, oracleAccount);
+        // grants `PAUSE_ROLE`
+        if (pauseAccount != address(0)) {
+            _grantRole(PAUSE_ROLE, pauseAccount);
+        }
 
-        _isAlphaPhase = true;
+        // grants `ORACLE_ROLE`
+        if (oracleAccount != address(0)) {
+            _grantRole(ORACLE_ROLE, oracleAccount);
+        }
+
+        _isAlphaPhase = isAlphaPhase_;
     }
 
     /// @inheritdoc IStaking
@@ -216,9 +224,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function requestWithdrawal(
-        uint256 amount
-    ) external override whenNotPaused whenNotAlphaPhase returns (uint256 requestId) {
+    function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId) {
         DataTypes.Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert NodeNotExists();
 
@@ -262,7 +268,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     function requestUnstake(
         address nodeAddr,
         uint256[] calldata chipIds
-    ) external override whenNotPaused whenNotSettlementPhase whenNotAlphaPhase returns (uint256 requestId) {
+    ) external override whenNotPaused whenNotSettlementPhase returns (uint256 requestId) {
         return StakingLib.unstakeFromNode(nodeAddr, chipIds, SHARES_PER_CHIP);
     }
 
@@ -380,7 +386,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function disableAlphaPhase() external override whenNotPaused onlyRole(PAUSE_ROLE) {
+    function disableAlphaPhase() external override onlyRole(PAUSE_ROLE) {
         _isAlphaPhase = false;
     }
 

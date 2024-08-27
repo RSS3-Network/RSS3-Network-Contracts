@@ -12,6 +12,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 contract StakingForkTest is CommonTest {
     address public constant diygod = 0xC8b960D09C0078c18Dcbe7eB9AB9d816BcCa8944;
     address public constant chips = 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE;
+    address public constant settlement = 0x0cE3159BF19F3C55B648D04E8f0Ae1Ae118D2A0B;
 
     Staking public staking;
 
@@ -74,9 +75,6 @@ contract StakingForkTest is CommonTest {
     }
 
     function testRequestUnstakeFork() public {
-        vm.prank(0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E);
-        staking.disableAlphaPhase();
-
         address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
         assertEq(shares, staking.SHARES_PER_CHIP());
@@ -100,9 +98,6 @@ contract StakingForkTest is CommonTest {
     }
 
     function testRequestUnstakeForkWithMerge() public {
-        vm.prank(0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E);
-        staking.disableAlphaPhase();
-
         address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
         DataTypes.Node memory nodeBefore = staking.getNode(nodeAddr);

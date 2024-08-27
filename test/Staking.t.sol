@@ -78,8 +78,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), depositUnbondingPeriod);
         assertEq(_staking.NODE_SLASH_RATE_BASIS_POINTS(), nodeSlashRateBasisPoints);
         assertEq(_staking.USER_SLASH_RATE_BASIS_POINTS(), userSlashRateBasisPoints);
-        assertEq(_staking.STAKE_RATIO(), stakeRatio);
-        assertEq(_staking.TREASURY(), treasury);
+        assertEq(_staking.STAKE_RATIO(), _cfg.stakeRatio());
+        assertEq(_staking.TREASURY(), _cfg.treasury());
         assertEq(_staking.SHARES_PER_CHIP(), 500 ether);
         assertEq(_staking.MIN_DEPOSIT(), minDeposit);
         assertEq(_staking.MIN_TAX_RATE_BASIS_POINTS(), minTaxRateBasisPoints);
@@ -1134,7 +1134,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.deal(address(_staking), amount);
 
         _staking.withdraw2Treasury();
-        assertEq(treasury.balance, amount);
+        assertEq(_cfg.treasury().balance, amount);
     }
 
     // Test errors: InvalidArrayLength, NodeNotExists, SlashPublicGoodNode, SlashMoreThanOnce
@@ -1522,7 +1522,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // case 2: receives partial tax rewards
         uint256 operationPool = minDeposit;
 
-        vm.assume(stakingPool > 25 * operationPool && stakeRatio < 100 * operationPool);
+        vm.assume(stakingPool > 25 * operationPool && _cfg.stakeRatio() < 100 * operationPool);
 
         uint256 rewards = 10000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;

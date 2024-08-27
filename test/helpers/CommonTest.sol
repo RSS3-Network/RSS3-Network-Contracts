@@ -2,6 +2,7 @@
 // solhint-disable comprehensive-interface
 pragma solidity 0.8.20;
 
+import {DeployConfig} from "../../script/DeployConfig.s.sol";
 import {Utils} from "./Utils.sol";
 import {DataTypes} from "../../src/libraries/DataTypes.sol";
 import {Staking} from "../../src/Staking.sol";
@@ -35,16 +36,16 @@ contract CommonTest is Utils {
 
     uint256 public constant nodeSlashRateBasisPoints = 100;
     uint256 public constant userSlashRateBasisPoints = 50;
-    uint256 public constant stakeRatio = 25;
     uint256 public constant minDeposit = 10000 ether;
     uint256 public constant minTaxRateBasisPoints = 500;
-    address public constant treasury = address(0xaaa);
     address public constant paymentProcessor = address(0xbbb);
 
     string public constant chipsName = "Open Chips";
     string public constant chipsSymbol = "Chips";
 
     uint64 internal constant _defaultTaxRateBasisPoints = uint64(1000);
+
+    DeployConfig internal _cfg;
 
     RSS3Token internal _rss3;
     Staking internal _staking;
@@ -53,13 +54,22 @@ contract CommonTest is Utils {
     InternalSettlement internal _internalSettlementTest;
 
     function _setUp() internal {
+        // read config from local.json
+        string memory path = string.concat(
+            vm.projectRoot(),
+            "/deploy-config/",
+            "local"
+            ".json"
+        );
+        _cfg = new DeployConfig(path);
+
         // deploy rss3 token
         _rss3 = new RSS3Token(address(this));
 
         // deploy Staking contract
         Staking stakingImpl = new Staking(
-            treasury,
-            stakeRatio,
+            _cfg.treasury(),
+            _cfg.stakeRatio(),
             stakeUnbondingPeriod,
             depositUnbondingPeriod,
             nodeSlashRateBasisPoints,
@@ -86,7 +96,7 @@ contract CommonTest is Utils {
         _settlement = Settlement(payable(settlementProxy));
 
         // init
-        _staking.initialize(address(_chips), pauseAccount, address(_settlement));
+        _staking.initialize(address(_chips), pauseAccount, address(_settlement), _cfg.isAlphaPhase());
         _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
         _chips.initialize(chipsName, chipsSymbol, address(_staking));
 
