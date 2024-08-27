@@ -20,6 +20,8 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using SafeCast for uint256;
 
+    string public constant version = "2.0.0";
+
     /// @dev Duration of an epoch.
     uint256 public constant EPOCH_DURATION = 18 hours;
 

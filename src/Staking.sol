@@ -38,6 +38,8 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     using EnumerableSet for EnumerableSet.AddressSet;
     using Checkpoints for Checkpoints.Trace160;
 
+    string public constant version = "2.0.0";
+
     uint256 public constant SHARES_PER_CHIP = 500 * 10 ** 18;
 
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
