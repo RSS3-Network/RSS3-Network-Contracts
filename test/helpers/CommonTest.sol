@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 
 import {Chips} from "../../src/Chips.sol";
 import {Const} from "../../src/libraries/Const.sol";
-import {Node} from "../../src/libraries/DataTypes.sol";
+import {Node, Demotion} from "../../src/libraries/DataTypes.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
 import {Settlement} from "../../src/Settlement.sol";
 import {Staking} from "../../src/Staking.sol";
@@ -138,6 +138,21 @@ contract CommonTest is Utils {
             uint256 newStakingPool = stakeAmounts[i] + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
             assertEq(node.stakingPoolTokens, newStakingPool, "check staking pool failed");
         }
+    }
+
+    function _checkDemotion(
+        Demotion memory demotion,
+        uint256 demotionId,
+        address nodeAddr,
+        uint256 epoch,
+        string memory reason,
+        address reporter
+    ) internal pure {
+        assertEq(demotion.demotionId, demotionId);
+        assertEq(demotion.nodeAddr, nodeAddr);
+        assertEq(demotion.epoch, epoch);
+        assertEq(demotion.reason, reason);
+        assertEq(demotion.reporter, reporter);
     }
 
     function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {

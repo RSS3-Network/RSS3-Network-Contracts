@@ -11,6 +11,7 @@ import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {
     Node,
+    Demotion,
     NodeStatus,
     SlashRecord,
     SlashStatus,
@@ -424,6 +425,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
 
         // op pool > min deposit
+        expectEmit();
+        emit Events.NodeStatusChanged(alice, NodeStatus.Exited, NodeStatus.Registered);
         _staking.deposit{value: amount / 2}();
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
         vm.stopPrank();
@@ -1318,13 +1321,15 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createNode(alice);
 
         vm.prank(address(_settlement));
-        _staking.submitDemotions(1, array(alice), array(string("demotion reason")));
+        _staking.submitDemotions(1, array(alice), array(string("demotion reason")), array(address(0xeeee)));
 
-        (uint256[] memory demotionIds, string[] memory reasons_) = _staking.getDemotions(alice, 1);
-        assertEq(demotionIds.length, 1);
-        assertEq(demotionIds[0], 1);
-        assertEq(reasons_.length, 1);
-        assertEq(reasons_[0], "demotion reason");
+        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
+        assertEq(demotions.length, 1);
+        assertEq(demotions[0].demotionId, uint256(1));
+        assertEq(demotions[0].nodeAddr, alice);
+        assertEq(demotions[0].epoch, 1);
+        assertEq(demotions[0].reason, "demotion reason");
+        assertEq(demotions[0].reporter, address(0xeeee));
     }
 
     function testRevokeDemotions() public {
@@ -1332,18 +1337,21 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // submit demotion
         vm.prank(address(_settlement));
-        _staking.submitDemotions(1, array(alice), array(string("reason1")));
+        _staking.submitDemotions(1, array(alice), array(string("reason1")), array(address(0xeeee)));
 
-        (uint256[] memory demotionIds, string[] memory reasons_) = _staking.getDemotions(alice, uint256(1));
-        assertEq(demotionIds[0], 1);
-        assertEq(reasons_[0], "reason1");
+        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
+        assertEq(demotions.length, 1);
+        assertEq(demotions[0].demotionId, uint256(1));
+        assertEq(demotions[0].nodeAddr, alice);
+        assertEq(demotions[0].epoch, 1);
+        assertEq(demotions[0].reason, "reason1");
+        assertEq(demotions[0].reporter, address(0xeeee));
 
         // revoke demotion
         vm.prank(address(_settlement));
         _staking.revokeDemotions(alice, 1, array(uint256(1)));
-        (demotionIds, reasons_) = _staking.getDemotions(alice, 0);
-        assertEq(demotionIds.length, 0);
-        assertEq(reasons_.length, 0);
+        demotions = _staking.getDemotions(alice, 1);
+        assertEq(demotions.length, 0);
     }
 
     function testRecordSlashing() public {
@@ -1368,7 +1376,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // submit demotion
         for (uint256 i = 0; i < 3; i++) {
             vm.prank(address(_settlement));
-            _staking.submitDemotions(1, array(alice), array(string("reason1")));
+            _staking.submitDemotions(1, array(alice), array(string("reason1")), array(address(0xeeee)));
         }
 
         expectEmit();
@@ -1384,7 +1392,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         expectEmit();
         emit Events.DemotionSubmitted(1, alice, uint256(4), string("reason1"));
         vm.prank(address(_settlement));
-        _staking.submitDemotions(1, array(alice), array(string("reason1")));
+        _staking.submitDemotions(1, array(alice), array(string("reason1")), array(address(0xeeee)));
 
         SlashRecord memory record = _staking.getSlashingRecord(alice, 1);
         // records info updated correctly
@@ -1428,7 +1436,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // submit demotion
         for (uint256 i = 0; i < 4; i++) {
             vm.prank(address(_settlement));
-            _staking.submitDemotions(1, array(alice), array(string("reason1")));
+            _staking.submitDemotions(1, array(alice), array(string("reason1")), array(address(0xeeee)));
         }
 
         expectEmit();
@@ -1478,7 +1486,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // submit demotions
         for (uint256 i = 0; i < 4; i++) {
             vm.prank(address(_settlement));
-            _staking.submitDemotions(1, array(alice), array(string("reason1")));
+            _staking.submitDemotions(1, array(alice), array(string("reason1")), array(address(0xeeee)));
         }
 
         skip(Const.SLASHING_COMMIT_PERIOD_IN_EPOCH * 18 hours);

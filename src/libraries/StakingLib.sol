@@ -21,6 +21,7 @@ import {
     ClaimIdNotExists
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
+import {NodeSettingsLib} from "./NodeSettingsLib.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
 
@@ -36,7 +37,11 @@ library StakingLib {
 
         // set node status
         if (node.operationPoolTokens >= Const.MIN_DEPOSIT) {
-            node.status = NodeStatus.Registered;
+            NodeStatus curStatus = NodeSettingsLib._getNodeStatus(node);
+            if (curStatus == NodeStatus.None || curStatus == NodeStatus.Exited) {
+                node.status = NodeStatus.Registered;
+                emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Registered);
+            }
         }
 
         emit Events.Deposited(nodeAddr, amount);

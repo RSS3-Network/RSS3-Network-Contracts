@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Node, PoolStatData, SlashRecord, UnstakeRequest, WithdrawalRequest} from "../libraries/DataTypes.sol";
+import {Node, Demotion, PoolStatData, SlashRecord, UnstakeRequest, WithdrawalRequest} from "../libraries/DataTypes.sol";
 
 library StorageLib {
     using Checkpoints for Checkpoints.Trace160;
@@ -33,7 +33,7 @@ library StorageLib {
 
     uint256 public constant DEMOTION_ID_COUNTER_SLOT = 26;
     uint256 public constant DEMOTION_IDS_SLOT = 27;
-    uint256 public constant DEMOTION_REASONS_SLOT = 28;
+    uint256 public constant DEMOTIONS_SLOT = 28;
 
     uint256 public constant SLASH_RECORDS_SLOT = 29;
 
@@ -123,9 +123,9 @@ library StorageLib {
         }
     }
 
-    function getDemotionReasons() internal pure returns (mapping(uint256 => string) storage _demotionReasons) {
+    function getDemotions() internal pure returns (mapping(uint256 => Demotion) storage _demotions) {
         assembly {
-            _demotionReasons.slot := DEMOTION_REASONS_SLOT
+            _demotions.slot := SLASH_RECORDS_SLOT
         }
     }
 

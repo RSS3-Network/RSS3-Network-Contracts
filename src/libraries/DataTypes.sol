@@ -53,6 +53,14 @@ struct PoolStatData {
     uint256 totalSlashingPoolTokens;
 }
 
+struct Demotion {
+    uint256 demotionId;
+    address nodeAddr;
+    uint256 epoch;
+    string reason;
+    address reporter;
+}
+
 struct SlashRecord {
     address reporter;
     uint256 amountForOperationPool;

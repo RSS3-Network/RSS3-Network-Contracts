@@ -306,14 +306,36 @@
     ],
     "outputs": [
       {
-        "name": "demotionIds",
-        "type": "uint256[]",
-        "internalType": "uint256[]"
-      },
-      {
-        "name": "reasons",
-        "type": "string[]",
-        "internalType": "string[]"
+        "name": "demotions",
+        "type": "tuple[]",
+        "internalType": "struct Demotion[]",
+        "components": [
+          {
+            "name": "demotionId",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "nodeAddr",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "epoch",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "reason",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "reporter",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
       }
     ],
     "stateMutability": "view"
@@ -1173,6 +1195,11 @@
         "name": "reasons",
         "type": "string[]",
         "internalType": "string[]"
+      },
+      {
+        "name": "reporters",
+        "type": "address[]",
+        "internalType": "address[]"
       }
     ],
     "outputs": [],

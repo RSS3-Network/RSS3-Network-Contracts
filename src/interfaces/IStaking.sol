@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {Node, NodeStatus, SlashRecord, WithdrawalRequest, UnstakeRequest} from "../libraries/DataTypes.sol";
+import {Node, Demotion, NodeStatus, SlashRecord, WithdrawalRequest, UnstakeRequest} from "../libraries/DataTypes.sol";
 
 interface IStaking {
     /**
@@ -166,7 +166,12 @@ interface IStaking {
      * @param nodeAddrs Addresses of node operator to demote.
      * @param reasons The reasons of demotion.
      */
-    function submitDemotions(uint256 epoch, address[] calldata nodeAddrs, string[] calldata reasons) external;
+    function submitDemotions(
+        uint256 epoch,
+        address[] calldata nodeAddrs,
+        string[] calldata reasons,
+        address[] calldata reporters
+    ) external;
 
     /**
      * @notice Revoke demotions.
@@ -188,7 +193,7 @@ interface IStaking {
     function commitSlashing(address nodeAddr, uint256 epoch) external;
 
     /**
-     * @notice Requests an exit from network.
+     * @notice Allows a node to exit from the network.
      * @dev The caller must be the owner of node operator.
      */
     function exit() external;
@@ -201,13 +206,15 @@ interface IStaking {
     function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
 
     /**
-     * @notice A node in exited status can register to join the network.
+     * @notice Registers a node by setting its status to "Registered".
+     * @dev Emits a `NodeStatusChanged` event with the updated status.
      * @dev The caller must be the owner of node operator.
      */
     function register() external;
 
     /**
-     * @notice A node in `Offline` or `Slashed` status can set its status as `Online`.
+     * @notice Transition a node to online status.
+     * @dev Emits a `NodeStatusChanged` event with the updated status.
      * @dev The caller must be the owner of node operator.
      */
     function online() external;
@@ -233,16 +240,12 @@ interface IStaking {
     function withdraw2Treasury() external;
 
     /**
-     * @notice Returns the demotion info of node.
+     * @notice Returns the demotions for a specific node address and epoch.
      * @param nodeAddr Node address to query.
      * @param epoch The epoch number to query.
-     * @return demotionIds The demotion ids.
-     * @return reasons The demotion reasons.
+     * @return demotions An array of demotions.
      */
-    function getDemotions(
-        address nodeAddr,
-        uint256 epoch
-    ) external view returns (uint256[] memory demotionIds, string[] memory reasons);
+    function getDemotions(address nodeAddr, uint256 epoch) external view returns (Demotion[] memory demotions);
 
     /**
      * @notice Returns whether the current time is in settlement phase.

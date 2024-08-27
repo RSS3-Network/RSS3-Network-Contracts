@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
-import {Node, NodeStatus, SlashStatus, SlashRecord} from "../src/libraries/DataTypes.sol";
+import {Node, Demotion, NodeStatus, SlashStatus, SlashRecord} from "../src/libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
@@ -836,38 +836,42 @@ contract SettlementTest is CommonTest {
 
         // submit demotion
         vm.prank(oracleAccount);
-        _settlement.submitDemotions(array(alice, bob), array(string("reason1"), string("reason2")));
+        _settlement.submitDemotions(
+            array(alice, bob),
+            array(string("reason1"), string("reason2")),
+            array(address(0xeeee), address(0xffff))
+        );
 
         // check demotions
-        (uint256[] memory demotionIds, string[] memory reasons_) = _staking.getDemotions(alice, uint256(0));
-        assertEq(demotionIds[0], 1);
-        assertEq(reasons_[0], "reason1");
+        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(0));
+        assertEq(demotions.length, 1);
+        _checkDemotion(demotions[0], uint256(1), alice, uint256(0), "reason1", address(0xeeee));
 
-        (demotionIds, reasons_) = _staking.getDemotions(bob, uint256(0));
-        assertEq(demotionIds[0], 2);
-        assertEq(reasons_[0], "reason2");
+        demotions = _staking.getDemotions(bob, uint256(0));
+        assertEq(demotions.length, 1);
+        _checkDemotion(demotions[0], uint256(2), bob, uint256(0), "reason2", address(0xffff));
     }
 
     function testRevokeDemotions() public {
         _createNode(alice);
+        _presetCurrentEpoch(1);
 
         // submit demotion
         vm.prank(oracleAccount);
-        _settlement.submitDemotions(array(alice), array(string("reason1")));
+        _settlement.submitDemotions(array(alice), array(string("reason1")), array(address(0xeeee)));
 
-        (uint256[] memory demotionIds, string[] memory reasons_) = _staking.getDemotions(alice, uint256(0));
-        assertEq(demotionIds[0], 1);
-        assertEq(reasons_[0], "reason1");
+        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
+        assertEq(demotions.length, 1);
+        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), "reason1", address(0xeeee));
 
         // revoke demotion
         vm.prank(oracleAccount);
         _settlement.revokeDemotions(alice, 0, array(uint256(1)));
-        (demotionIds, reasons_) = _staking.getDemotions(alice, 0);
-        assertEq(demotionIds.length, 0);
-        assertEq(reasons_.length, 0);
+        demotions = _staking.getDemotions(alice, uint256(0));
+        assertEq(demotions.length, 0);
     }
 
-    function testCommitSlashingx() public {
+    function testCommitSlashing() public {
         _createNode(alice);
         vm.prank(alice);
         _staking.deposit{value: 10000 ether}();
@@ -877,7 +881,7 @@ contract SettlementTest is CommonTest {
         // submit demotion
         for (uint256 i = 0; i < 4; i++) {
             vm.prank(oracleAccount);
-            _settlement.submitDemotions(array(alice), array(string("reason1")));
+            _settlement.submitDemotions(array(alice), array(string("reason1")), array(address(0xeeee)));
         }
 
         skip(Const.SLASHING_COMMIT_PERIOD_IN_EPOCH * 18 hours);
@@ -887,8 +891,8 @@ contract SettlementTest is CommonTest {
         _settlement.commitSlashing(array(alice), array(uint256(1)));
 
         // check demotions
-        (uint256[] memory demotionIds, ) = _staking.getDemotions(alice, uint256(1));
-        assertEq(demotionIds.length, 4);
+        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
+        assertEq(demotions.length, 4);
 
         // check slash record
         SlashRecord memory record = _staking.getSlashingRecord(alice, uint256(1));

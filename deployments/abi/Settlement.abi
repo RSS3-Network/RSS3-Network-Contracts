@@ -404,6 +404,11 @@
         "name": "reasons",
         "type": "string[]",
         "internalType": "string[]"
+      },
+      {
+        "name": "reporters",
+        "type": "address[]",
+        "internalType": "address[]"
       }
     ],
     "outputs": [],
@@ -545,6 +550,22 @@
         "name": "target",
         "type": "address",
         "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "CommitEpochNotElapsed",
+    "inputs": [
+      {
+        "name": "recordedEpoch",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "currentEpoch",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ]
   },

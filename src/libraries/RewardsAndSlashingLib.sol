@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
-import {Node, NodeStatus, PoolStatData, SlashStatus, SlashRecord} from "./DataTypes.sol";
+import {Node, Demotion, NodeStatus, PoolStatData, SlashStatus, SlashRecord} from "./DataTypes.sol";
 import {
     NodeNotExists,
     SlashMoreThanOnce,
@@ -20,7 +20,19 @@ import {StorageLib} from "./StorageLib.sol";
 library RewardsAndSlashingLib {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    function submitDemotions(uint256 epoch, address[] calldata nodeAddrs, string[] calldata reasons) external {
+    /**
+     * @dev Submits demotions for a given epoch and node addresses.
+     * @param epoch The epoch for which demotions are being submitted.
+     * @param nodeAddrs An array of node addresses to be demoted.
+     * @param reasons An array of reasons for the demotions.
+     * @param reporters An array of addresses of the reporters of the demotions.
+     */
+    function submitDemotions(
+        uint256 epoch,
+        address[] calldata nodeAddrs,
+        string[] calldata reasons,
+        address[] calldata reporters
+    ) external {
         if (nodeAddrs.length != reasons.length) revert InvalidArrayLength();
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
@@ -30,8 +42,16 @@ library RewardsAndSlashingLib {
             EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
 
             uint256 demotionId = StorageLib.nextDemotionId();
+            // save demotion id
             demotionIds.add(demotionId);
-            StorageLib.getDemotionReasons()[demotionId] = reasons[i];
+            // save demotion
+            StorageLib.getDemotions()[demotionId] = Demotion({
+                demotionId: demotionId,
+                nodeAddr: nodeAddr,
+                epoch: epoch,
+                reason: reasons[i],
+                reporter: reporters[i]
+            });
 
             if (record.status != SlashStatus.Recorded && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD) {
                 // slash
@@ -42,12 +62,18 @@ library RewardsAndSlashingLib {
         }
     }
 
+    /**
+     * @dev Revoke demotions for a specific node in a given epoch.
+     * @param nodeAddr The address of the node.
+     * @param epoch The epoch number.
+     * @param demotionIdsToDelete An array of demotion IDs to delete.
+     */
     function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToDelete) external {
         EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
 
         for (uint256 i = 0; i < demotionIdsToDelete.length; i++) {
             demotionIds.remove(demotionIdsToDelete[i]);
-            delete StorageLib.getDemotionReasons()[demotionIdsToDelete[i]];
+            delete StorageLib.getDemotions()[demotionIdsToDelete[i]];
 
             emit Events.DemotionRevoked(demotionIdsToDelete[i]);
         }
@@ -59,6 +85,12 @@ library RewardsAndSlashingLib {
         }
     }
 
+    /**
+     * @dev Commits slashing for a specific node and epoch.
+     * @param nodeAddr The address of the node being slashed.
+     * @param epoch The epoch in which the slashing is being committed.
+     * @param paymentProcessor The address of the payment processor.
+     */
     function commitSlashing(address nodeAddr, uint256 epoch, address paymentProcessor) external {
         SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
         _checkRecordedStatus(record, nodeAddr, epoch);
@@ -72,6 +104,11 @@ library RewardsAndSlashingLib {
         emit Events.SlashCommitted(nodeAddr, epoch);
     }
 
+    /**
+     * @dev Distributes public pool rewards to the staking pool and calculates the tax amount.
+     * @param publicPoolRewards The amount of public pool rewards to be distributed.
+     * @return The tax amount deducted from the public pool rewards.
+     */
     function distributePublicPoolRewards(uint256 publicPoolRewards) external returns (uint256) {
         Node storage publicPool = StorageLib.publicPool();
         // rewards for public pool
@@ -115,6 +152,12 @@ library RewardsAndSlashingLib {
         }
     }
 
+    /**
+     * @notice Withdraws the remaining balance of the contract to the specified treasury address.
+     * @dev The amount to be withdrawn is calculated by subtracting the total operation pool tokens,
+     * total staking pool tokens, and total slashing pool tokens from the contract's balance.
+     * @param treasury The address of the treasury where the funds will be transferred.
+     */
     function withdraw2Treasury(address treasury) external {
         PoolStatData storage pool = StorageLib.poolStatStorage();
         uint256 amount = address(this).balance -
@@ -125,21 +168,27 @@ library RewardsAndSlashingLib {
         _transfer(treasury, amount);
     }
 
-    function getDemotions(
-        address nodeAddr,
-        uint256 epoch
-    ) external view returns (uint256[] memory _demotionIds, string[] memory _reasons) {
+    /**
+     * @dev Retrieves the demotions for a specific node address and epoch.
+     * @param nodeAddr The address of the node.
+     * @param epoch The epoch number.
+     * @return demotions An array of demotions.
+     */
+    function getDemotions(address nodeAddr, uint256 epoch) external view returns (Demotion[] memory demotions) {
         EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
 
-        _demotionIds = new uint256[](demotionIds.length());
-        _reasons = new string[](demotionIds.length());
-
+        demotions = new Demotion[](demotionIds.length());
         for (uint256 i = 0; i < demotionIds.length(); i++) {
-            _demotionIds[i] = demotionIds.at(i);
-            _reasons[i] = StorageLib.getDemotionReasons()[_demotionIds[i]];
+            demotions[i] = StorageLib.getDemotions()[demotionIds.at(i)];
         }
     }
 
+    /**
+     * @dev Records the slashing of a node.
+     * @param nodeAddr The address of the node being slashed.
+     * @param epoch The epoch in which the slashing occurred.
+     * @param reporter The address of the reporter who initiated the slashing.
+     */
     function _recordSlashing(address nodeAddr, uint256 epoch, address reporter) internal {
         Node storage node = StorageLib.getNode(nodeAddr);
 
@@ -175,6 +224,11 @@ library RewardsAndSlashingLib {
         emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
     }
 
+    /**
+     * @dev Revoke slashing for a specific node and epoch.
+     * @param nodeAddr The address of the node.
+     * @param epoch The epoch for which slashing is being revoked.
+     */
     function _revokeSlashing(address nodeAddr, uint256 epoch) internal {
         SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
         Node storage node = StorageLib.getNode(nodeAddr);

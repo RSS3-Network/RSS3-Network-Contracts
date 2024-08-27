@@ -49,8 +49,13 @@ interface ISettlement {
      * @dev The caller must have the `ORACLE_ROLE`.
      * @param nodeAddrs Addresses of node operator to demote.
      * @param reasons The reasons of demotion.
+     * @param reporters The reporters of demotion.
      */
-    function submitDemotions(address[] calldata nodeAddrs, string[] calldata reasons) external;
+    function submitDemotions(
+        address[] calldata nodeAddrs,
+        string[] calldata reasons,
+        address[] calldata reporters
+    ) external;
 
     /**
      * @notice Revokes slashing.

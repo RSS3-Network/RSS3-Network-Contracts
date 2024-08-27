@@ -21,7 +21,8 @@ import {
     SlashRecord,
     WithdrawalRequest,
     UnstakeRequest,
-    PoolStatData
+    PoolStatData,
+    Demotion
 } from "./libraries/DataTypes.sol";
 import {
     AlphaWithdrawNotAllowed,
@@ -109,7 +110,7 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     /// @dev demotion
     uint256 internal _demotionIdCounter; // slot 26
     mapping(address nodeAddr => mapping(uint256 epochId => EnumerableSet.UintSet demotionIds)) internal _demotionIds;
-    mapping(uint256 demotionId => string reason) internal _demotionReasons; // slot 28
+    mapping(uint256 demotionId => Demotion demotion) internal _demotions; // slot 28
 
     /// @dev (nodeAddr, epochId) => slash record
     mapping(address nodeAddr => mapping(uint256 epochId => SlashRecord)) internal _slashRecords; // slot 29
@@ -327,9 +328,10 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     function submitDemotions(
         uint256 epoch,
         address[] calldata nodeAddrs,
-        string[] calldata reasons
+        string[] calldata reasons,
+        address[] calldata reporters
     ) external override onlyRole(ORACLE_ROLE) {
-        RewardsAndSlashingLib.submitDemotions(epoch, nodeAddrs, reasons);
+        RewardsAndSlashingLib.submitDemotions(epoch, nodeAddrs, reasons, reporters);
     }
 
     /// @inheritdoc IStaking
@@ -388,8 +390,8 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     function getDemotions(
         address nodeAddr,
         uint256 epoch
-    ) external view override returns (uint256[] memory demotionIds, string[] memory reasons) {
-        (demotionIds, reasons) = RewardsAndSlashingLib.getDemotions(nodeAddr, epoch);
+    ) external view override returns (Demotion[] memory demotions) {
+        demotions = RewardsAndSlashingLib.getDemotions(nodeAddr, epoch);
     }
 
     /// @inheritdoc IStaking

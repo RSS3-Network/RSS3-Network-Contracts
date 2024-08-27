@@ -139,9 +139,10 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     /// @inheritdoc ISettlement
     function submitDemotions(
         address[] calldata nodeAddrs,
-        string[] calldata reasons
+        string[] calldata reasons,
+        address[] calldata reporters
     ) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).submitDemotions(_currentEpoch, nodeAddrs, reasons);
+        IStaking(_staking).submitDemotions(_currentEpoch, nodeAddrs, reasons, reporters);
     }
 
     /// @inheritdoc ISettlement

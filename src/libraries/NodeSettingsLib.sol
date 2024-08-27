@@ -95,6 +95,15 @@ library NodeSettingsLib {
         emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood, isAlphaPhase);
     }
 
+    /**
+     * @notice Allows a node to exit from the network.
+     * @dev The node must be in a valid state to exit.
+     * If the node is registered, initializing, or slashed, its status will be set to "Exited".
+     * If the node is online, its status will be set to "Exiting",
+     * and the exit time will be set to the current block timestamp plus the node exit period.
+     * If the node is in any other state, a revert will occur with the corresponding error message.
+     * @param nodeAddr The address of the node to exit.
+     */
     function exit(address nodeAddr) external {
         Node storage node = StorageLib.getNode(nodeAddr);
         _validateNodeAddress(node.account);
@@ -117,14 +126,19 @@ library NodeSettingsLib {
         emit Events.NodeStatusChanged(nodeAddr, curStatus, node.status);
     }
 
+    /**
+     * @dev The node must be in "Exiting" or "Exited" status and have a sufficient deposit amount.
+     * @param nodeAddr The address of the node to be registered.
+     */
     function register(address nodeAddr) external {
         Node storage node = StorageLib.getNode(nodeAddr);
         _validateNodeAddress(node.account);
 
         NodeStatus curStatus = _getNodeStatus(node);
-        // check if the node is in exit status
+        // throws a `NodeNotInExitStatus` error if the node is not in "Exiting" or "Exited" status.
         if (NodeStatus.Exiting != curStatus && NodeStatus.Exited != curStatus) revert NodeNotInExitStatus();
 
+        // check if the node's operation pool tokens are below the minimum deposit amount.
         uint256 operationPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
         if (operationPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
 
@@ -134,10 +148,15 @@ library NodeSettingsLib {
         emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Registered);
     }
 
+    /**
+     * @notice Transition a node to online status.
+     * @param nodeAddr The address of the node to transition.
+     */
     function online(address nodeAddr) external {
         Node storage node = StorageLib.getNode(nodeAddr);
         _validateNodeAddress(node.account);
 
+        // if the current status is not Offline, Slashed, or Outdated, it reverts with an error
         NodeStatus curStatus = _getNodeStatus(node);
         if (NodeStatus.Offline != curStatus && NodeStatus.Slashed != curStatus && NodeStatus.Outdated != curStatus)
             revert WrongNodeStatus(uint256(curStatus), uint256(NodeStatus.Online));
@@ -148,6 +167,11 @@ library NodeSettingsLib {
         emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Online);
     }
 
+    /**
+     * @dev Sets the status of multiple nodes.
+     * @param nodeAddrs The addresses of the nodes.
+     * @param status The corresponding status of the nodes.
+     */
     function setNodesStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external {
         if (nodeAddrs.length != status.length) revert InvalidArrayLength();
 
@@ -156,10 +180,20 @@ library NodeSettingsLib {
         }
     }
 
+    /**
+     * @dev Returns the status of a node.
+     * @param node The node to get the status of.
+     * @return The status of the node.
+     */
     function getNodeStatus(Node calldata node) external view returns (NodeStatus) {
         return _getNodeStatus(node);
     }
 
+    /**
+     * @dev Retrieves the information of multiple nodes.
+     * @param nodeAddrs The addresses of the nodes to retrieve information for.
+     * @return nodes An array of Node structs containing the information of the nodes.
+     */
     function getNodes(address[] calldata nodeAddrs) external view returns (Node[] memory nodes) {
         nodes = new Node[](nodeAddrs.length);
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
@@ -196,6 +230,11 @@ library NodeSettingsLib {
         if (NodeStatus.Exiting == status || NodeStatus.Exited == status) revert NodeInExitStatus();
     }
 
+    /**
+     * @dev Validates the tax rate basis points.
+     * @param taxRateBasisPoints The tax rate basis points to validate.
+     * @dev Throws an exception if the tax rate basis points are too large or too small.
+     */
     function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
         if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
 
@@ -206,7 +245,12 @@ library NodeSettingsLib {
         if (nodeAddr == address(0)) revert NodeNotExists();
     }
 
-    /// @dev check that the status transition from curStatus -> newStatus is valid
+    /**
+     * @dev Checks if a transition from curStatus -> newStatus is valid.
+     * @param curStatus The current node status.
+     * @param newStatus The new node status.
+     * @return A boolean indicating whether the transition is valid or not.
+     */
     function _isValidTransition(NodeStatus curStatus, NodeStatus newStatus) internal pure returns (bool) {
         // validate that the curStatus must in the validCurStatus
         NodeStatus[] memory validCurStatus = _getValidTransitions(newStatus);
@@ -218,7 +262,11 @@ library NodeSettingsLib {
         return false;
     }
 
-    /// @dev get the valid transitions which can be transitioned to the given newStatus
+    /**
+     * @dev Returns an array of valid transitions for a given `newStatus`.
+     * @param newStatus The new status to check valid transitions for.
+     * @return validTransitions An array of valid transitions for the given `newStatus`.
+     */
     function _getValidTransitions(NodeStatus newStatus) internal pure returns (NodeStatus[] memory) {
         if (newStatus == NodeStatus.Offline) {
             NodeStatus[] memory validTransitions = new NodeStatus[](2);
