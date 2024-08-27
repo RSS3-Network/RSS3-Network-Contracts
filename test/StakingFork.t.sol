@@ -5,6 +5,7 @@ pragma solidity 0.8.20;
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {DataTypes} from "../src/libraries/DataTypes.sol";
 import {Staking} from "../src/Staking.sol";
+import {Settlement} from "../src/Settlement.sol";
 import {TransparentUpgradeableProxy as Proxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {ITransparentUpgradeableProxy as IProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -12,13 +13,14 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 contract StakingForkTest is CommonTest {
     address public constant diygod = 0xC8b960D09C0078c18Dcbe7eB9AB9d816BcCa8944;
     address public constant chips = 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE;
-    address public constant settlement = 0x0cE3159BF19F3C55B648D04E8f0Ae1Ae118D2A0B;
 
     Staking public staking;
+    Settlement public settlement;
 
     function setUp() public {
         vm.createSelectFork("https://rpc.rss3.io", 5787906);
 
+        // deploy staking
         Staking st = new Staking(
             address(1111),
             25,
@@ -30,12 +32,30 @@ contract StakingForkTest is CommonTest {
             500,
             address(0xbbb)
         );
-
-        Proxy proxy = Proxy(payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578));
+        Proxy stakingProxy = Proxy(payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578));
         vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);
-        IProxy(address(proxy)).upgradeTo(address(st));
+        IProxy(address(stakingProxy)).upgradeTo(address(st));
+        staking = Staking(address(stakingProxy));
 
-        staking = Staking(address(proxy));
+        // deploy settlement
+        Settlement settlement_ = new Settlement();
+        Proxy settlementProxy = Proxy(payable(0x0cE3159BF19F3C55B648D04E8f0Ae1Ae118D2A0B));
+        vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);
+        IProxy(address(settlementProxy)).upgradeTo(address(settlement_));
+        settlement = Settlement(payable(address(settlementProxy)));
+    }
+
+    function testReinitialize() public {
+        // initialize staking
+        assertEq(staking.isAlphaPhase(), true);
+        staking.initialize(address(0), address(0), address(0), false);
+        assertEq(staking.isAlphaPhase(), false);
+
+        // initialize settlement
+        settlement.initialize(address(0), address(0), 0, 20);
+        (uint256 totalOpRewards, uint256 totalStRewards) = settlement.getBonusInfo();
+        assertEq(totalOpRewards, 12328767123287671232876);
+        assertEq(totalStRewards, 49315068493150684931506);
     }
 
     function testMergeChipsFork() public {
