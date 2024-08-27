@@ -49,6 +49,9 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     // rewarded node addresses
     mapping(uint256 epoch => mapping(address nodeAddr => bool rewarded)) internal _rewardedAddresses;
 
+    // solhint-disable-next-line comprehensive-interface
+    receive() external payable {}
+
     /// @inheritdoc ISettlement
     function initialize(
         address staking,
