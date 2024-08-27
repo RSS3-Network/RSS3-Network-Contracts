@@ -15,7 +15,8 @@ interface ISettlement {
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 operationRewardsPercent
+        uint256 operationRewardsPercent,
+        bool disableAlphaPhase
     ) external;
 
     /**

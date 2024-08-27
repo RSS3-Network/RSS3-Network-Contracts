@@ -380,7 +380,7 @@ contract Staking is IStaking, Pausable, Initializable, AccessControlEnumerable, 
     }
 
     /// @inheritdoc IStaking
-    function disableAlphaPhase() external override whenNotPaused onlyRole(PAUSE_ROLE) {
+    function disableAlphaPhase() external override whenNotPaused onlyRole(ORACLE_ROLE) {
         _isAlphaPhase = false;
     }
 

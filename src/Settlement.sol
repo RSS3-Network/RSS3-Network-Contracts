@@ -52,18 +52,16 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
         address staking,
         address oracleAccount,
         uint256 startTime,
-        uint256 operationRewardsPercent
-    )
-        external
-        override
-        // warn: check the initializer version and if it should be initialized when deploying
-        // current initializer version is:
-        // mainnet: 1
-        // testnet: 2
-        reinitializer(3)
-    {
+        uint256 operationRewardsPercent,
+        bool disableAlphaPhase
+    ) external override reinitializer(4) {
         if (staking != address(0)) {
             _staking = staking;
+        }
+
+        // grants `ORACLE_ROLE`
+        if (oracleAccount != address(0)) {
+            _grantRole(ORACLE_ROLE, oracleAccount);
         }
 
         if (startTime > 0) {
@@ -72,9 +70,8 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
 
         _updateRewardsRatio(operationRewardsPercent);
 
-        // grants `ORACLE_ROLE`
-        if (oracleAccount != address(0)) {
-            _grantRole(ORACLE_ROLE, oracleAccount);
+        if (disableAlphaPhase) {
+            IStaking(_staking).disableAlphaPhase();
         }
     }
 

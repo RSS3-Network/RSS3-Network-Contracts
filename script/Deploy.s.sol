@@ -179,7 +179,8 @@ contract Deploy is Deployer {
             stakingProxy,
             cfg.oracleAccount(),
             cfg.settlementStartTime(),
-            cfg.operationRewardsPercent()
+            cfg.operationRewardsPercent(),
+            cfg.disableAlphaPhase()
         );
 
         // check states
@@ -188,6 +189,7 @@ contract Deploy is Deployer {
         require(settlementProxy.currentEpoch() == 0, "check start epoch error");
         require(settlementProxy.EPOCH_DURATION() == 18 hours, "check start epoch error");
         require(settlementProxy.TOTAL_REWARDS_PER_YEAR() == 30000000 ether, "check start epoch error");
+        require(Staking(stakingProxy).isAlphaPhase() == cfg.disableAlphaPhase(), "check disableAlphaPhase error");
     }
 
     function initializeNetworkParams() public broadcast {
