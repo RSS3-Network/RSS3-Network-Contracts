@@ -199,14 +199,12 @@ library Events {
      * @dev Emitted on recordSlashing()
      * @param nodeAddr The address of node to slash.
      * @param epoch The epoch number.
-     * @param reporter The address of the reporter.
      * @param slashedOperationPool Amount of operation pool tokens slashed.
      * @param slashedStakingPool Amount of staking pool tokens slashed.
      */
     event SlashRecorded(
         address indexed nodeAddr,
         uint256 indexed epoch,
-        address reporter,
         uint256 slashedOperationPool,
         uint256 slashedStakingPool
     );

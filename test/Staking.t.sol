@@ -1382,13 +1382,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         expectEmit();
         emit Events.NodeStatusChanged(alice, NodeStatus.Online, NodeStatus.Slashing);
         expectEmit();
-        emit Events.SlashRecorded(
-            alice,
-            1,
-            address(0),
-            expectedSlashedTokensOnOperationPool,
-            expectedSlashedTokensOnStakingPool
-        );
+        emit Events.SlashRecorded(alice, 1, expectedSlashedTokensOnOperationPool, expectedSlashedTokensOnStakingPool);
         expectEmit();
         emit Events.DemotionSubmitted(1, alice, uint256(4), string("reason1"), address(0xeeee));
         vm.prank(address(_settlement));

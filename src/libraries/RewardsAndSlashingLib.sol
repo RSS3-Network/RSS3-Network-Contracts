@@ -55,7 +55,7 @@ library RewardsAndSlashingLib {
 
             if (record.status != SlashStatus.Recorded && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD) {
                 // slash
-                _recordSlashing(nodeAddr, epoch, address(0));
+                _recordSlashing(nodeAddr, epoch);
             }
 
             emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reasons[i], reporters[i]);
@@ -194,9 +194,8 @@ library RewardsAndSlashingLib {
      * @dev Records the slashing of a node.
      * @param nodeAddr The address of the node being slashed.
      * @param epoch The epoch in which the slashing occurred.
-     * @param reporter The address of the reporter who initiated the slashing.
      */
-    function _recordSlashing(address nodeAddr, uint256 epoch, address reporter) internal {
+    function _recordSlashing(address nodeAddr, uint256 epoch) internal {
         Node storage node = StorageLib.getNode(nodeAddr);
 
         if (nodeAddr == address(0)) revert NodeNotExists();
@@ -227,7 +226,7 @@ library RewardsAndSlashingLib {
         node.status = NodeStatus.Slashing;
         emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Slashing);
 
-        emit Events.SlashRecorded(nodeAddr, epoch, reporter, slashedOperationPool, slashedStakingPool);
+        emit Events.SlashRecorded(nodeAddr, epoch, slashedOperationPool, slashedStakingPool);
     }
 
     /**
