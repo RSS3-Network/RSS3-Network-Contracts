@@ -85,9 +85,11 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.getNodeCount(), 0);
         assertEq(_staking.chipsContract(), address(_chips));
 
-        assertEq(_staking.STAKE_UNBONDING_PERIOD(), stakeUnbondingPeriod);
-        assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), depositUnbondingPeriod);
-        assertEq(_staking.TREASURY(), treasury);
+        assertEq(_staking.version(), "2.0.0");
+        assertEq(_staking.TREASURY(), _cfg.treasury());
+        assertEq(_staking.PAYMENT_PROCESSOR(), _cfg.paymentProcessor());
+        assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), _cfg.depositUnbondingPeriod());
+        assertEq(_staking.STAKE_UNBONDING_PERIOD(), _cfg.stakeUnbondingPeriod());
 
         vm.mockCall(
             address(_staking),
@@ -1314,7 +1316,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.deal(address(_staking), amount);
 
         _staking.withdraw2Treasury();
-        assertEq(treasury.balance, amount);
+        assertEq(_cfg.treasury().balance, amount);
     }
 
     function testSubmitDemotions() public {

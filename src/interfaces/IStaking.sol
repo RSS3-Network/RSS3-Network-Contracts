@@ -9,8 +9,9 @@ interface IStaking {
      * @param chips Address of the chips contract.
      * @param pauseAccount Address who can pause/unpause the Staking contract.
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
+     * @param isAlphaPhase_ Flag indicating if the contract is in alpha phase.
      */
-    function initialize(address chips, address pauseAccount, address oracleAccount) external;
+    function initialize(address chips, address pauseAccount, address oracleAccount, bool isAlphaPhase_) external;
 
     /**
      * @notice Pauses interaction with the Staking contract.
@@ -229,8 +230,6 @@ interface IStaking {
 
     /**
      * @notice Disable the alpha phase.
-     * Requirements:
-     * - The caller must have the `PAUSE_ROLE`.
      */
     function disableAlphaPhase() external;
 

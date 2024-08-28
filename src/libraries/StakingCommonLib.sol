@@ -3,7 +3,7 @@
 
 pragma solidity 0.8.20;
 
-import {Node, SlashRecord, PoolStatData} from "./DataTypes.sol";
+import {Node, PoolStatData} from "./DataTypes.sol";
 import {StorageLib} from "./StorageLib.sol";
 
 library StakingCommonLib {

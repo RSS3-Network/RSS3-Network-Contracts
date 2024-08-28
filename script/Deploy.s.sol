@@ -149,11 +149,12 @@ contract Deploy is Deployer {
         address chipsProxy = mustGetAddress("ChipsProxy");
         address settlementProxy = mustGetAddress("SettlementProxy");
 
-        stakingProxy.initialize(chipsProxy, cfg.pauseAccount(), settlementProxy);
+        stakingProxy.initialize(chipsProxy, cfg.pauseAccount(), settlementProxy, cfg.isAlphaPhase());
         // check states
         require(stakingProxy.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "check pause role error");
         require(stakingProxy.hasRole(ORACLE_ROLE, settlementProxy), "check oracle role error");
         require(stakingProxy.chipsContract() == chipsProxy, "check chips token error");
+        require(stakingProxy.isAlphaPhase() == cfg.isAlphaPhase(), "check alpha phase error");
     }
 
     function initializeChips() public broadcast {

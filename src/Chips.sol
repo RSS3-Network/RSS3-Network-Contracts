@@ -16,6 +16,8 @@ import {SVGGeneratorV2} from "./libraries/SVGGeneratorV2.sol";
 contract Chips is IChips, Initializable, ERC721 {
     using Strings for uint256;
 
+    string public constant version = "2.0.0";
+
     /// @dev Staking contract address.
     address internal _staking;
 
@@ -150,9 +152,9 @@ contract Chips is IChips, Initializable, ERC721 {
     ) internal view returns (NodeTraits memory, ChipTraits memory, NftCardTraits memory) {
         (address nodeAddr, uint256 tokens, ) = IStaking(_staking).getChipInfo(tokenId);
 
-        ChipVersion version = _getChipVersion(tokenId);
+        ChipVersion chipVersion = _getChipVersion(tokenId);
 
-        NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr, version);
+        NodeTraits memory nodeTraits = _getNodeTraits(nodeAddr, chipVersion);
 
         (ChipTraits memory chipTraits, uint8 nftCardId) = _getOtherTraits(nodeAddr, tokenId);
 
@@ -171,10 +173,11 @@ contract Chips is IChips, Initializable, ERC721 {
         return (nodeTraits, chipTraits, nftCardTraits);
     }
 
-    function _getNodeTraits(address nodeAddr, ChipVersion version) internal view returns (NodeTraits memory) {
+    function _getNodeTraits(address nodeAddr, ChipVersion chipVersion) internal view returns (NodeTraits memory) {
         Node memory node = IStaking(_staking).getNode(nodeAddr);
 
-        (uint8 colorCount, uint8 frameCount, uint8 chipCornerCount, uint8 chipDetailCount) = version == ChipVersion.V1
+        (uint8 colorCount, uint8 frameCount, uint8 chipCornerCount, uint8 chipDetailCount) = chipVersion ==
+            ChipVersion.V1
             ? SVGGenerator.getNodeTraitsCount()
             : SVGGeneratorV2.getNodeTraitsCount();
 
@@ -210,8 +213,8 @@ contract Chips is IChips, Initializable, ERC721 {
 
     function _getOtherTraits(address nodeAddr, uint256 tokenId) internal view returns (ChipTraits memory, uint8) {
         uint256 seed = uint256(keccak256(abi.encodePacked(nodeAddr, tokenId)));
-        ChipVersion version = _getChipVersion(tokenId);
-        return _getOtherTraitsBySeed(seed, version);
+        ChipVersion chipVersion = _getChipVersion(tokenId);
+        return _getOtherTraitsBySeed(seed, chipVersion);
     }
 
     function _getChipVersion(uint256 tokenId) internal view returns (ChipVersion) {
@@ -220,7 +223,7 @@ contract Chips is IChips, Initializable, ERC721 {
 
     function _getOtherTraitsBySeed(
         uint256 seed,
-        ChipVersion version
+        ChipVersion chipVersion
     ) internal pure returns (ChipTraits memory, uint8 nftCardId) {
         uint8 eyeCount;
         uint8 mouthCount;
@@ -229,7 +232,7 @@ contract Chips is IChips, Initializable, ERC721 {
         uint8 colorCount;
         uint8 nftCardCount;
 
-        if (version == ChipVersion.V1) {
+        if (chipVersion == ChipVersion.V1) {
             (eyeCount, mouthCount, headShapeCount, headDetailCount) = SVGGenerator.getChipTraitsCount();
             (colorCount, , , ) = SVGGenerator.getNodeTraitsCount();
             nftCardCount = 1; // V1 doesn't have nftCardCount, set to 1

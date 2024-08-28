@@ -121,9 +121,6 @@ error RewardsAlreadyDistributed(address nodeAddr);
 /// @dev Settlement phase, stake/requestUnstakce is not allowed.
 error SettlementPhase();
 
-/// @dev Node is not staked.
-error AlphaWithdrawNotAllowed();
-
 /// @dev Slash is not able to be revoked.
 error UnableToRevoke(uint256 id);
 

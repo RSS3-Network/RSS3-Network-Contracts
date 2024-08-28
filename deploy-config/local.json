@@ -2,8 +2,13 @@
   "proxyAdminOwner": "0x8AC80fa0993D95C9d6B8Cb494E561E6731038941",
   "pauseAccount": "0xD34eCb5656508137D1DfeB3A3E686Eef86086A91",
   "oracleAccount": "0xEB72D842Dc186FB1d1CAb93A56E7308ABD2E9d0E",
-  "depositUnbondingPeriod": "180",
+  "depositUnbondingPeriod": "360",
   "stakeUnbondingPeriod": "180",
+  "nodeSlashRateBasisPoints": "100",
+  "userSlashRateBasisPoints": "50",
+  "stakeRatio": "25",
+  "depositBaseline": "100000000000000000000",
+  "taxRateBasisPointsBaseline": "500",
   "treasury": "0xC4878516C198a919566773797e24af20DfdE6272",
   "chipsName": "Open Chips",
   "chipsSymbol": "Chips",
@@ -11,5 +16,5 @@
   "operationRewardsPercent": 20,
   "paymentProcessor": "0x3f1bf4db7059620b06c329f1a6e2fb15a82b4d7e",
   "networkParamsManager": "0xDfCE83dc6030e111425f787395250FF24E9109C6",
-  "isAlphaPhase": "false"
+  "isAlphaPhase": "true"
 }

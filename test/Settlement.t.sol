@@ -37,11 +37,11 @@ contract SettlementTest is CommonTest {
 
     function testInitialize() public {
         Settlement s = new Settlement();
-        s.initialize(address(0x1), address(0), 0, 0);
-        assertEq(s.stakingContract(), address(0x1));
+        s.initialize(address(_staking), address(0), 0, 0);
+        assertEq(s.stakingContract(), address(_staking));
 
         s = new Settlement();
-        s.initialize(address(0x0), address(0x0), 0, 20);
+        s.initialize(address(_staking), address(0x0), 0, 20);
         (uint256 opRewards, ) = s.getBonusInfo();
         uint256 totalStakingRewardsPerEpoch = (s.TOTAL_REWARDS_PER_YEAR() * s.EPOCH_DURATION() * 20) / (100 * 365 days);
         assertEq(opRewards, totalStakingRewardsPerEpoch);

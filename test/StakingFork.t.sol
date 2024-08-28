@@ -6,6 +6,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, UnstakeRequest} from "../src/libraries/DataTypes.sol";
+import {Settlement} from "../src/Settlement.sol";
 import {Staking} from "../src/Staking.sol";
 import {TransparentUpgradeableProxy as Proxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {ITransparentUpgradeableProxy as IProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
@@ -13,26 +14,66 @@ import {ITransparentUpgradeableProxy as IProxy} from "../src/upgradeability/Tran
 contract StakingForkTest is CommonTest {
     address public constant diygod = 0xC8b960D09C0078c18Dcbe7eB9AB9d816BcCa8944;
     address public constant chips = 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE;
-    address public constant settlement = 0x0cE3159BF19F3C55B648D04E8f0Ae1Ae118D2A0B;
 
     Staking public staking;
+    Settlement public settlement;
 
     function setUp() public {
         vm.createSelectFork("https://rpc.rss3.io", 6571169);
 
         Staking st = new Staking(address(1111), 1944000, 1944000, address(0xbbb));
-
-        Proxy proxy = Proxy(payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578));
+        // staking contract on mainnet
+        Proxy stakingProxy = Proxy(payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578));
         vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);
-        IProxy(address(proxy)).upgradeTo(address(st));
+        IProxy(address(stakingProxy)).upgradeTo(address(st));
+        staking = Staking(address(stakingProxy));
 
-        staking = Staking(address(proxy));
+        // deploy settlement
+        Settlement settlement_ = new Settlement();
+        // settlement contract on mainnet
+        Proxy settlementProxy = Proxy(payable(0x0cE3159BF19F3C55B648D04E8f0Ae1Ae118D2A0B));
+        vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);
+        IProxy(address(settlementProxy)).upgradeTo(address(settlement_));
+        settlement = Settlement(payable(address(settlementProxy)));
+    }
 
-        // reinitialize
-        staking.initialize(address(0), address(0), address(0));
+    function testReinitialize() public {
+        // initialize staking
+        assertEq(staking.isAlphaPhase(), true);
+        staking.initialize(address(0), address(0), address(0), false);
+        assertEq(staking.isAlphaPhase(), false);
+
+        // initialize settlement
+        settlement.initialize(address(0), address(0), 0, 20);
+        (uint256 totalOpRewards, uint256 totalStRewards) = settlement.getBonusInfo();
+        assertEq(totalOpRewards, 12328767123287671232876);
+        assertEq(totalStRewards, 49315068493150684931506);
+    }
+
+    function testCreateNodeFork() public {
+        staking.initialize(address(0), address(0), address(0), false);
+
+        address alice = address(0xaaaaaa);
+        vm.prank(alice);
+        staking.createNode("alice", "alice's node", uint64(1000), false);
+
+        // check node
+        Node memory node = staking.getNode(alice);
+        assertEq(node.nodeId, 84);
+        assertEq(node.taxRateBasisPoints, uint64(1000));
+        assertEq(node.name, "alice");
+        assertEq(node.description, "alice's node");
+        assertEq(node.operationPoolTokens, uint256(0));
+        assertEq(node.stakingPoolTokens, uint256(0));
+        assertEq(node.totalShares, uint256(0));
+        assertEq(node.publicGood, false);
+        assertEq(node.alpha, false);
+        assertEq(uint256(node.status), 0);
     }
 
     function testMergeChipsFork() public {
+        staking.initialize(address(0), address(0), address(0), false);
+
         uint256[] memory tokenIds = array(uint256(1690), uint256(1691), uint256(1693), uint256(1695));
         (address nodeAddr, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
         assertEq(shares, Const.SHARES_PER_CHIP);
@@ -51,6 +92,8 @@ contract StakingForkTest is CommonTest {
     }
 
     function testStakeFork() public {
+        staking.initialize(address(0), address(0), address(0), false);
+
         uint256 amount = 500 ether;
 
         vm.prank(alice);
@@ -69,8 +112,7 @@ contract StakingForkTest is CommonTest {
     }
 
     function testRequestUnstakeFork() public {
-        vm.prank(0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E);
-        staking.disableAlphaPhase();
+        staking.initialize(address(0), address(0), address(0), false);
 
         address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
@@ -95,8 +137,7 @@ contract StakingForkTest is CommonTest {
     }
 
     function testRequestUnstakeForkWithMerge() public {
-        vm.prank(0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E);
-        staking.disableAlphaPhase();
+        staking.initialize(address(0), address(0), address(0), false);
 
         address nodeAddr = 0x08d66b34054a174841e2361bd4746Ff9F4905cC2;
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
@@ -123,10 +164,12 @@ contract StakingForkTest is CommonTest {
     }
 
     // solhint-disable-next-line function-max-lines
-    function testStakingStorageLayout() public view {
+    function testStakingStorageLayout() public {
+        staking.initialize(address(0), address(0), address(0), false);
+
         assertEq(staking.chipsContract(), 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE);
         assertEq(staking.isSettlementPhase(), false);
-        assertEq(staking.isAlphaPhase(), true);
+        assertEq(staking.isAlphaPhase(), false);
         // check node info
         // node 1
         Node memory node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
@@ -192,7 +235,7 @@ contract StakingForkTest is CommonTest {
         assertEq(staking.hasRole(keccak256("PAUSE_ROLE"), 0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E), true);
         // check ORACLE_ROLE
         assertEq(staking.getRoleMemberCount(keccak256("ORACLE_ROLE")), 1);
-        assertEq(staking.hasRole(keccak256("ORACLE_ROLE"), settlement), true);
+        assertEq(staking.hasRole(keccak256("ORACLE_ROLE"), address(settlement)), true);
 
         // check pool info
         (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = staking

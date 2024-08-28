@@ -117,14 +117,14 @@ library SVGGeneratorV2 {
         string memory ops = string.concat(
             '<text font-family="AuxMono" x="21" y="3.5" font-size="3.8" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 158)" fill="url(#a)"> OPS: ',
             opTokens > 1000 ? (opTokens / 1000).toString() : opTokens.toString(),
-            opTokens > 1000 ? "K</text>" : "</text>"
+            opTokens > 1000 ? "K+</text>" : "</text>"
         );
 
         uint256 stTokens = nftCardTraits.stakingPoolTokens / 1 ether;
         string memory sps = string.concat(
             '<text font-family="AuxMono" x="21" y="3.5" font-size="3.8" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(63 158)" fill="url(#a)"> SPS: ',
             stTokens > 1000 ? (stTokens / 1000).toString() : stTokens.toString(),
-            stTokens > 1000 ? "K</text>" : "</text>"
+            stTokens > 1000 ? "K+</text>" : "</text>"
         );
 
         return
@@ -135,7 +135,7 @@ library SVGGeneratorV2 {
                 nftCardTraits.tokenId.toString(),
                 "</text>",
                 '<g fill="#000" font-size="6" font-family="AuxMono"><text text-anchor="end" y="-1em" transform="translate(106 14.53)">',
-                (nftCardTraits.chipTokens / 1 ether).toString(),
+                ((nftCardTraits.chipTokens + 0.5 ether) / 1 ether).toString(),
                 '</text><text text-anchor="end" transform="translate(106 14.53)">$RSS3</text></g>',
                 '<g fill="url(#a)" font-size="5" font-family="AuxMono"><text x="43.5" y="6.1" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 140)">',
                 addrPart1,

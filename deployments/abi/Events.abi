@@ -358,12 +358,6 @@
         "internalType": "uint256"
       },
       {
-        "name": "reporter",
-        "type": "address",
-        "indexed": false,
-        "internalType": "address"
-      },
-      {
         "name": "slashedOperationPool",
         "type": "uint256",
         "indexed": false,

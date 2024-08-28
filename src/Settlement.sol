@@ -23,6 +23,8 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     using Math for uint256;
     using SafeCast for uint256;
 
+    string public constant version = "2.0.0";
+
     /// @dev Duration of an epoch.
     uint256 public constant EPOCH_DURATION = 18 hours;
 
@@ -59,17 +61,14 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
-    )
-        external
-        override
-        // warn: check the initializer version and if it should be initialized when deploying
-        // current initializer version is:
-        // mainnet: 1
-        // testnet: 2
-        reinitializer(3)
-    {
+    ) external override reinitializer(4) {
         if (staking != address(0)) {
             _staking = staking;
+        }
+
+        // grants `ORACLE_ROLE`
+        if (oracleAccount != address(0)) {
+            _grantRole(ORACLE_ROLE, oracleAccount);
         }
 
         if (startTime > 0) {
@@ -77,11 +76,6 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         }
 
         _updateRewardsRatio(operationRewardsPercent);
-
-        // grants `ORACLE_ROLE`
-        if (oracleAccount != address(0)) {
-            _grantRole(ORACLE_ROLE, oracleAccount);
-        }
     }
 
     /// @inheritdoc ISettlement
