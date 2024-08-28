@@ -38,6 +38,10 @@ contract CommonTest is Utils {
     string public constant chipsName = "Open Chips";
     string public constant chipsSymbol = "Chips";
 
+    string public constant REASON1 = "demotion reason1";
+    string public constant REASON2 = "demotion reason2";
+    address public constant REPORTER = address(0xeeeeee);
+
     uint64 internal constant _defaultTaxRateBasisPoints = uint64(1000);
 
     DeployConfig internal _cfg;

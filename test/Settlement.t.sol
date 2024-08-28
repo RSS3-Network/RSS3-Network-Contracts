@@ -838,20 +838,16 @@ contract SettlementTest is CommonTest {
 
         // submit demotion
         vm.prank(oracleAccount);
-        _settlement.submitDemotions(
-            array(alice, bob),
-            array(string("reason1"), string("reason2")),
-            array(address(0xeeee), address(0xffff))
-        );
+        _settlement.submitDemotions(array(alice, bob), array(REASON1, REASON2), array(REPORTER, address(0xffff)));
 
         // check demotions
         Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
         assertEq(demotions.length, 1);
-        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), "reason1", address(0xeeee));
+        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), REASON1, REPORTER);
 
         demotions = _staking.getDemotions(bob, uint256(1));
         assertEq(demotions.length, 1);
-        _checkDemotion(demotions[0], uint256(2), bob, uint256(1), "reason2", address(0xffff));
+        _checkDemotion(demotions[0], uint256(2), bob, uint256(1), REASON2, address(0xffff));
     }
 
     function testRevokeDemotions() public {
@@ -860,11 +856,11 @@ contract SettlementTest is CommonTest {
 
         // submit demotion
         vm.prank(oracleAccount);
-        _settlement.submitDemotions(array(alice), array(string("reason1")), array(address(0xeeee)));
+        _settlement.submitDemotions(array(alice), array(REASON1), array(REPORTER));
 
         Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
         assertEq(demotions.length, 1);
-        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), "reason1", address(0xeeee));
+        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), REASON1, REPORTER);
 
         // revoke demotion
         vm.prank(oracleAccount);
@@ -883,7 +879,7 @@ contract SettlementTest is CommonTest {
         // submit demotion
         for (uint256 i = 0; i < 4; i++) {
             vm.prank(oracleAccount);
-            _settlement.submitDemotions(array(alice), array(string("reason1")), array(address(0xeeee)));
+            _settlement.submitDemotions(array(alice), array(REASON1), array(REPORTER));
         }
 
         skip(Const.SLASHING_COMMIT_PERIOD_IN_EPOCH * 18 hours);
