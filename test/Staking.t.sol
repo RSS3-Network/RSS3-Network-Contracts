@@ -218,28 +218,13 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.stakeToPublicPool{value: 100}(alice);
 
-        // case 8: set settlement phase
-        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
-        _staking.setSettlementPhase(true);
-
-        // case 9: unstake
+        // case 8: unstake
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.requestUnstake(alice, new uint256[](1));
 
-        // case 10: claim unstake
+        // case 9: claim unstake
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.claimUnstake(new uint256[](1));
-
-        // case 11: distribute rewards
-        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
-        _staking.distributeRewards(
-            [uint256(1), uint256(1), uint256(2)],
-            array(alice, bob),
-            array(1, 1),
-            array(1, 1),
-            array(1, 2),
-            1 ether // public pool reward
-        );
     }
 
     function testCreateNode(uint64 taxRateBasisPoints) public {
@@ -1320,11 +1305,28 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
         assertEq(demotions.length, 1);
-        assertEq(demotions[0].demotionId, uint256(1));
-        assertEq(demotions[0].nodeAddr, alice);
-        assertEq(demotions[0].epoch, 1);
-        assertEq(demotions[0].reason, "demotion reason");
-        assertEq(demotions[0].reporter, address(0xeeee));
+        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), "demotion reason", address(0xeeee));
+    }
+
+    function testSubmitDemotionsFail() public {
+        // case 1: caller has no `ORACLE_ROLE` permission
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _staking.submitDemotions(1, array(alice), array(string("demotion reason")), array(address(0xeeee)));
+
+        // case 2: InvalidArrayLength
+        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
+        vm.prank(address(_settlement));
+        _staking.submitDemotions(
+            1,
+            array(alice),
+            array(string("demotion reason")),
+            array(address(0xeeee), address(0xee))
+        );
+
+        // case 3: NodeNotExists
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.prank(address(_settlement));
+        _staking.submitDemotions(1, array(address(0)), array(string("demotion reason")), array(address(0xeeee)));
     }
 
     function testRevokeDemotions() public {
@@ -1336,11 +1338,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
         assertEq(demotions.length, 1);
-        assertEq(demotions[0].demotionId, uint256(1));
-        assertEq(demotions[0].nodeAddr, alice);
-        assertEq(demotions[0].epoch, 1);
-        assertEq(demotions[0].reason, "reason1");
-        assertEq(demotions[0].reporter, address(0xeeee));
+        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), "reason1", address(0xeeee));
 
         // revoke demotion
         vm.prank(address(_settlement));

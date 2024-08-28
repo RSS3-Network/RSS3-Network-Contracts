@@ -125,6 +125,7 @@ library NodeSettingsLib {
     }
 
     /**
+     * @notice Register a node that has exited or is in the process of exiting.
      * @dev The node must be in "Exiting" or "Exited" status and have a sufficient deposit amount.
      * @param nodeAddr The address of the node to be registered.
      */

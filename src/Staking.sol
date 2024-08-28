@@ -289,7 +289,7 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
         uint256[] calldata stakingRewards,
         uint256[] calldata requestCounts,
         uint256 publicPoolRewards
-    ) external payable override whenNotPaused onlyRole(ORACLE_ROLE) {
+    ) external payable override onlyRole(ORACLE_ROLE) {
         if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != stakingRewards.length)
             revert InvalidArrayLength();
 
@@ -338,12 +338,12 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
         address nodeAddr,
         uint256 epoch,
         uint256[] calldata demotionIds
-    ) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+    ) external override onlyRole(ORACLE_ROLE) {
         RewardsAndSlashingLib.revokeDemotions(nodeAddr, epoch, demotionIds);
     }
 
     /// @inheritdoc IStaking
-    function commitSlashing(address nodeAddr, uint256 epoch) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+    function commitSlashing(address nodeAddr, uint256 epoch) external override onlyRole(ORACLE_ROLE) {
         RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, PAYMENT_PROCESSOR);
     }
 
@@ -371,7 +371,7 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function setSettlementPhase(bool enabled) external override whenNotPaused onlyRole(ORACLE_ROLE) {
+    function setSettlementPhase(bool enabled) external override onlyRole(ORACLE_ROLE) {
         _isSettlementPhase = enabled;
     }
 

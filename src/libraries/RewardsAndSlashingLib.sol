@@ -34,10 +34,11 @@ library RewardsAndSlashingLib {
         string[] calldata reasons,
         address[] calldata reporters
     ) external {
-        if (nodeAddrs.length != reasons.length) revert InvalidArrayLength();
+        if (nodeAddrs.length != reasons.length || nodeAddrs.length != reporters.length) revert InvalidArrayLength();
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             address nodeAddr = nodeAddrs[i];
+            if (nodeAddr == address(0)) revert NodeNotExists();
 
             SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
             EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
@@ -199,7 +200,6 @@ library RewardsAndSlashingLib {
     function _recordSlashing(address nodeAddr, uint256 epoch) internal {
         Node storage node = StorageLib.getNode(nodeAddr);
 
-        if (nodeAddr == address(0)) revert NodeNotExists();
         // A public good node can't be slashed.
         if (node.publicGood) return;
         if (node.status == NodeStatus.Slashing) revert SlashMoreThanOnce(nodeAddr, epoch);
