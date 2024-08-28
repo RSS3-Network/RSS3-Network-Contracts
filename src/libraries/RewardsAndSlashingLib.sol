@@ -6,7 +6,7 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
 import {Node, Demotion, NodeStatus, PoolStatData} from "./DataTypes.sol";
-import {NodeNotExists, SlashingNotExist, InvalidArrayLength} from "./Errors.sol";
+import {NodeNotExists, SlashingNotExist, NodeIsPublicGood, InvalidArrayLength} from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
@@ -35,7 +35,7 @@ library RewardsAndSlashingLib {
             Node storage node = StorageLib.getNode(nodeAddr);
             if (node.account == address(0)) revert NodeNotExists();
             // public good node can't be demoted
-            if (node.publicGood) return;
+            if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
 
             uint256 demotionId = StorageLib.nextDemotionId();
 

@@ -125,7 +125,7 @@ error SlashingNotExist(address nodeAddr, uint256 epochId);
 error TaxRateBasisPointsTooLarge();
 
 /// @dev Can't set tax for public good node
-error NodeIsPublicGood();
+error NodeIsPublicGood(address nodeAddr);
 
 /// @dev Epoch not elapsed.
 error CommitEpochNotElapsed(uint256 recordedEpoch, uint256 currentEpoch);

@@ -801,7 +801,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testSetTaxRateFailWithPublicGoodNode() public {
         _createPublicGoodNode(dave);
 
-        vm.expectRevert(abi.encodeWithSelector(NodeIsPublicGood.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeIsPublicGood.selector, dave));
         vm.prank(dave);
         _staking.setTaxRateBasisPoints4Node(1000);
     }
@@ -1314,6 +1314,12 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
         vm.prank(address(_settlement));
         _staking.submitDemotions(1, array(address(0)), array(REASON1), array(REPORTER));
+
+        // case 4: NodeIsPublicGood
+        _createPublicGoodNode(alice);
+        vm.expectRevert(abi.encodeWithSelector(NodeIsPublicGood.selector, alice));
+        vm.prank(address(_settlement));
+        _staking.submitDemotions(1, array(alice), array(REASON1), array(REPORTER));
     }
 
     function testRevokeDemotions() public {

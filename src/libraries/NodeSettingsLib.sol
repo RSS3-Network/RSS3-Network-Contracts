@@ -32,7 +32,7 @@ library NodeSettingsLib {
 
         _validateNodeAddress(node.account);
 
-        if (node.publicGood) revert NodeIsPublicGood();
+        if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
 
         node.taxRateBasisPoints = taxRateBasisPoints;
 
