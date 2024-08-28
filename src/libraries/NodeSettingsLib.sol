@@ -6,7 +6,6 @@ import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet
 import {Const} from "./Const.sol";
 import {Node, NodeStatus} from "./DataTypes.sol";
 import {
-    CreateNodeToZeroAddress,
     NodeExists,
     NodeIsPublicGood,
     NodeNotExists,
@@ -68,7 +67,6 @@ library NodeSettingsLib {
         uint64 taxRateBasisPoints,
         bool publicGood
     ) external {
-        if (nodeAddr == address(0)) revert CreateNodeToZeroAddress();
         if (publicGood) {
             if (taxRateBasisPoints > 0) revert PublicGoodNodeTaxNotZero();
         } else {

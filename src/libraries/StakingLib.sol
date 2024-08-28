@@ -4,6 +4,7 @@
 pragma solidity 0.8.20;
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IChips} from "../interfaces/IChips.sol";
 import {Const} from "./Const.sol";
 import {Node, NodeStatus, UnstakeRequest, WithdrawalRequest} from "./DataTypes.sol";
@@ -16,7 +17,6 @@ import {
     EmptyChipIds,
     ChipsNotSameOwner,
     ChipIdsLengthTooShort,
-    TransferFailed,
     ClaimTimeNotReady,
     ClaimIdNotExists
 } from "./Errors.sol";
@@ -26,6 +26,8 @@ import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
 
 library StakingLib {
+    using Address for address;
+
     /// @dev deposit tokens to a node
     function deposit(address nodeAddr, uint256 amount) external {
         Node storage node = StorageLib.getNode(nodeAddr);
@@ -206,10 +208,7 @@ library StakingLib {
     /// _transfer should always be at the end of the function,
     /// to apply the checks-effects-interactions pattern
     function _transfer(address to, uint256 amount) internal {
-        if (amount > 0) {
-            (bool success, ) = address(to).call{value: amount}("");
-            if (!success) revert TransferFailed();
-        }
+        Address.sendValue(payable(to), amount);
     }
 
     /// @dev checks that:

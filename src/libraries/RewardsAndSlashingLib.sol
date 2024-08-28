@@ -2,6 +2,7 @@
 // solhint-disable var-name-mixedcase
 pragma solidity 0.8.20;
 
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
 import {Node, Demotion, NodeStatus, PoolStatData, SlashStatus, SlashRecord} from "./DataTypes.sol";
@@ -10,7 +11,6 @@ import {
     SlashMoreThanOnce,
     SlashRecordNotExists,
     SlashStatusNotRecorded,
-    TransferFailed,
     InvalidArrayLength
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
@@ -19,6 +19,7 @@ import {StorageLib} from "./StorageLib.sol";
 
 library RewardsAndSlashingLib {
     using EnumerableSet for EnumerableSet.UintSet;
+    using Address for address;
 
     /**
      * @dev Submits demotions for a given epoch and node addresses.
@@ -272,10 +273,7 @@ library RewardsAndSlashingLib {
     /// _transfer should always be at the end of the function,
     /// to apply the checks-effects-interactions pattern
     function _transfer(address to, uint256 amount) internal {
-        if (amount > 0) {
-            (bool success, ) = address(to).call{value: amount}("");
-            if (!success) revert TransferFailed();
-        }
+        Address.sendValue(payable(to), amount);
     }
 
     function _getDemotions(address nodeAddr, uint256 epoch) internal view returns (Demotion[] memory demotions) {

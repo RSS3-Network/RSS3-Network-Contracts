@@ -103,9 +103,6 @@ error EmptyNodeList();
 /// @dev Chips id overflow.
 error ChipsIdOverflow();
 
-/// @dev Transfer failed.
-error TransferFailed();
-
 /// @dev Distributed staking rewards exceed limit.
 error StakingRewardsExceed();
 
@@ -121,9 +118,6 @@ error RewardsAlreadyDistributed(address nodeAddr);
 /// @dev Settlement phase, stake/requestUnstakce is not allowed.
 error SettlementPhase();
 
-/// @dev Slash is not able to be revoked.
-error UnableToRevoke(uint256 id);
-
 /// @dev Slash is non-existent.
 error SlashRecordNotExists(address nodeAddr, uint256 epochId);
 
@@ -138,9 +132,6 @@ error TaxRateBasisPointsTooLarge();
 
 /// @dev Can't set tax for public good node
 error NodeIsPublicGood();
-
-/// @dev Create node to zero address.
-error CreateNodeToZeroAddress();
 
 /// @dev Epoch not elapsed.
 error CommitEpochNotElapsed(uint256 recordedEpoch, uint256 currentEpoch);

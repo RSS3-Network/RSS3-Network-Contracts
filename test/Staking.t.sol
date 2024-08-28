@@ -30,7 +30,6 @@ import {
     InvalidArrayLength,
     NodeExists,
     NodeIsPublicGood,
-    CreateNodeToZeroAddress,
     ChipNotValid,
     ExcessWithdrawalAmount,
     WithdrawalAmountExceedsOperationPoolTokens,
@@ -367,12 +366,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         vm.expectRevert(abi.encodeWithSelector(NodeExists.selector));
         _createNode(alice);
-    }
-
-    function testCreateNodeFailToZeroAddress() public {
-        // create node to address(0) will fail
-        vm.expectRevert(abi.encodeWithSelector(CreateNodeToZeroAddress.selector));
-        _createNode(address(0));
     }
 
     function testCreateNodeFailWithLargeTaxRate(uint64 taxRateBasisPoints) public {
