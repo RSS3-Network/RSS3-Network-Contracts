@@ -109,8 +109,10 @@ library NodeSettingsLib {
         // validate node exit status
         NodeStatus curStatus = _getNodeStatus(node);
         if (
+            curStatus == NodeStatus.None ||
             curStatus == NodeStatus.Registered ||
             curStatus == NodeStatus.Initializing ||
+            curStatus == NodeStatus.Outdated ||
             curStatus == NodeStatus.Slashed
         ) {
             node.status = NodeStatus.Exited;

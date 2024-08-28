@@ -9,24 +9,14 @@ import {CommonTest} from "test/helpers/CommonTest.sol";
 import {TestEvents} from "test/helpers/TestEvents.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
 import {Const} from "../src/libraries/Const.sol";
-import {
-    Node,
-    Demotion,
-    NodeStatus,
-    SlashRecord,
-    SlashStatus,
-    UnstakeRequest,
-    WithdrawalRequest
-} from "../src/libraries/DataTypes.sol";
+import {Node, Demotion, NodeStatus, UnstakeRequest, WithdrawalRequest} from "../src/libraries/DataTypes.sol";
 import {
     NodeNotExists,
     NodeInExitStatus,
     TaxRateBasisPointsTooSmall,
     TaxRateBasisPointsTooLarge,
     PublicGoodNodeTaxNotZero,
-    SlashStatusNotRecorded,
-    SlashMoreThanOnce,
-    SlashRecordNotExists,
+    SlashingNotExist,
     InvalidArrayLength,
     NodeExists,
     NodeIsPublicGood,
@@ -105,6 +95,8 @@ contract StakingTest is CommonTest, IERC721Errors {
                     operationPoolTokens: 0,
                     stakingPoolTokens: 0,
                     totalShares: 0,
+                    slashedStakingPoolTokens: 0,
+                    slashedOperationPoolTokens: 0,
                     exitTime: 0,
                     status: NodeStatus.None
                 })
@@ -1373,27 +1365,25 @@ contract StakingTest is CommonTest, IERC721Errors {
         }
 
         expectEmit();
-        emit Events.NodeStatusChanged(alice, NodeStatus.Online, NodeStatus.Slashing);
-        expectEmit();
         emit Events.SlashRecorded(alice, 1, expectedSlashedTokensOnOperationPool, expectedSlashedTokensOnStakingPool);
+        expectEmit();
+        emit Events.NodeStatusChanged(alice, NodeStatus.Online, NodeStatus.Slashing);
         expectEmit();
         emit Events.DemotionSubmitted(1, alice, uint256(4), string("reason1"), address(0xeeee));
         vm.prank(address(_settlement));
         _staking.submitDemotions(1, array(alice), array(string("reason1")), array(address(0xeeee)));
 
-        SlashRecord memory record = _staking.getSlashingRecord(alice, 1);
-        // records info updated correctly
-        assertEq(record.amountForOperationPool, expectedSlashedTokensOnOperationPool);
-        assertEq(record.amountForStakingPool, expectedSlashedTokensOnStakingPool);
-        assertEq(uint256(record.status), uint256(SlashStatus.Recorded));
-
         // check staking pool and operation tokens
-        Node memory aliceNode = _staking.getNode(alice);
-        assertEq(aliceNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(aliceNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-
+        Node memory node = _staking.getNode(alice);
+        assertEq(node.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
+        assertEq(node.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
+        assertEq(node.slashedOperationPoolTokens, expectedSlashedTokensOnOperationPool);
+        assertEq(node.slashedStakingPoolTokens, expectedSlashedTokensOnStakingPool);
         // slash status updated correctly
-        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Slashing));
+        assertEq(uint256(node.status), uint256(NodeStatus.Slashing));
+        // check slashing pool
+        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        assertEq(totalSlashingPoolTokens, expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool);
     }
 
     // Test:
@@ -1403,11 +1393,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testRevokeSlashing() public {
         uint256 stakedTokens = 40000 ether;
         uint256 depositedTokens = 10000 ether;
-
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
 
         _createNode(alice);
 
@@ -1428,25 +1413,23 @@ contract StakingTest is CommonTest, IERC721Errors {
         expectEmit();
         emit Events.DemotionRevoked(uint256(3));
         expectEmit();
-        emit Events.NodeStatusChanged(alice, NodeStatus.Slashing, NodeStatus.Online);
-        expectEmit();
         emit Events.SlashRevoked(alice, uint256(1));
+        expectEmit();
+        emit Events.NodeStatusChanged(alice, NodeStatus.Slashing, NodeStatus.Online);
         vm.prank(address(_settlement));
         _staking.revokeDemotions(alice, uint256(1), array(uint256(3)));
 
-        SlashRecord memory record = _staking.getSlashingRecord(alice, 1);
-        // records info updated correctly
-        assertEq(record.amountForOperationPool, expectedSlashedTokensOnOperationPool);
-        assertEq(record.amountForStakingPool, expectedSlashedTokensOnStakingPool);
-        assertEq(uint256(record.status), uint256(SlashStatus.Revoked));
-
         // check staking pool and operation tokens
-        Node memory aliceNode = _staking.getNode(alice);
-        assertEq(aliceNode.stakingPoolTokens, stakedTokens);
-        assertEq(aliceNode.operationPoolTokens, depositedTokens);
-
+        Node memory node = _staking.getNode(alice);
+        assertEq(node.stakingPoolTokens, stakedTokens);
+        assertEq(node.operationPoolTokens, depositedTokens);
         // slash status updated correctly
-        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Online));
+        assertEq(uint256(node.status), uint256(NodeStatus.Online));
+        assertEq(node.slashedOperationPoolTokens, 0);
+        assertEq(node.slashedStakingPoolTokens, 0);
+        // check slashing pool
+        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        assertEq(totalSlashingPoolTokens, 0);
     }
 
     function testCommitSlashingSucceeds() public {
@@ -1481,17 +1464,12 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.prank(address(_settlement));
         _staking.commitSlashing(alice, 1);
 
-        SlashRecord memory record = _staking.getSlashingRecord(alice, 1);
-        // records info updated correctly
-        assertEq(record.amountForOperationPool, expectedSlashedTokensOnOperationPool);
-        assertEq(record.amountForStakingPool, expectedSlashedTokensOnStakingPool);
-        assertEq(uint256(record.status), uint256(SlashStatus.Committed));
-
         // check staking pool and operation tokens
         Node memory aliceNode = _staking.getNode(alice);
         assertEq(aliceNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
         assertEq(aliceNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-
+        assertEq(aliceNode.slashedOperationPoolTokens, 0);
+        assertEq(aliceNode.slashedStakingPoolTokens, 0);
         // slash status updated correctly
         assertEq(uint256(aliceNode.status), uint256(NodeStatus.Slashed));
 
@@ -1503,6 +1481,21 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 reporterAmount = (amount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
         address paymentProcessor = _staking.PAYMENT_PROCESSOR();
         assertEq(paymentProcessor.balance, reporterAmount);
+
+        // check slashing pool
+        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        assertEq(totalSlashingPoolTokens, 0);
+    }
+
+    function testCommitSlashingFail() public {
+        // case 1: caller has no `ORACLE_ROLE` permission
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _staking.commitSlashing(alice, uint256(100));
+
+        // case 2: SlashingNotExist
+        vm.expectRevert(abi.encodeWithSelector(SlashingNotExist.selector, alice, 100));
+        vm.prank(address(_settlement));
+        _staking.commitSlashing(alice, uint256(100));
     }
 
     function testExitSucceeds() public {
@@ -1524,21 +1517,16 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
         _staking.exit();
 
-        // case 2: CurStateCantExit
         vm.startPrank(alice);
         _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
 
-        // case 3: Slashing -> Exiting
+        // case 2: CurStateCantExit Slashing -> Exiting
         _presetNodeStatus(alice, NodeStatus.Slashing);
         vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.Slashing)));
         _staking.exit();
 
-        // case 4: None -> Exiting
-        _presetNodeStatus(alice, NodeStatus.None);
-        vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.None)));
-        _staking.exit();
-
-        // case 5: Offline -> Exiting
+        // TODO: Offline -> Exiting is not allowed ???
+        // case 4: CurStateCantExit Offline -> Exiting
         _presetNodeStatus(alice, NodeStatus.Offline);
         vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.Offline)));
         _staking.exit();
@@ -1875,15 +1863,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.stake{value: stakedTokens}(bob);
     }
 
-    //    function _recordSlashingWithReasons(Slashing[] memory slashings, address[] memory reporters) internal {
-    //        string[] memory reasons = new string[](slashings.length);
-    //        for (uint256 i = 0; i < slashings.length; i++) {
-    //            reasons[i] = "";
-    //        }
-    //
-    //        _staking.recordSlashing(slashings, reporters, reasons);
-    //    }
-
     function _invalidNodeStatusTransition(address nodeAddr, NodeStatus curStatus, NodeStatus newStatus) internal {
         _presetNodeStatus(nodeAddr, curStatus);
 
@@ -1894,12 +1873,14 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function _presetNodeStatus(address nodeAddr, NodeStatus status) internal {
         bytes32 slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
-        slot = bytes32(uint256(slot) + 8);
+        // node.status is at offset 10 of struct Node
+        slot = bytes32(uint256(slot) + 10);
         vm.store(address(_staking), slot, bytes32(uint256(status)));
 
         if (status == NodeStatus.Exiting) {
             slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
-            slot = bytes32(uint256(slot) + 7);
+            // node.exitTime is at offset 9 of struct Node
+            slot = bytes32(uint256(slot) + 9);
             vm.store(address(_staking), slot, bytes32(uint256(block.timestamp + Const.NODE_EXIT_PERIOD)));
         }
     }

@@ -407,6 +407,16 @@
             "internalType": "uint256"
           },
           {
+            "name": "slashedOperationPoolTokens",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "slashedStakingPoolTokens",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
             "name": "exitTime",
             "type": "uint256",
             "internalType": "uint256"
@@ -516,6 +526,16 @@
           },
           {
             "name": "totalShares",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "slashedOperationPoolTokens",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "slashedStakingPoolTokens",
             "type": "uint256",
             "internalType": "uint256"
           },
@@ -695,6 +715,16 @@
             "internalType": "uint256"
           },
           {
+            "name": "slashedOperationPoolTokens",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "slashedStakingPoolTokens",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
             "name": "exitTime",
             "type": "uint256",
             "internalType": "uint256"
@@ -770,47 +800,6 @@
       }
     ],
     "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getSlashingRecord",
-    "inputs": [
-      {
-        "name": "nodeAddr",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "epoch",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "record",
-        "type": "tuple",
-        "internalType": "struct SlashRecord",
-        "components": [
-          {
-            "name": "amountForOperationPool",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "amountForStakingPool",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "status",
-            "type": "uint8",
-            "internalType": "enum SlashStatus"
-          }
-        ]
-      }
-    ],
-    "stateMutability": "pure"
   },
   {
     "type": "function",

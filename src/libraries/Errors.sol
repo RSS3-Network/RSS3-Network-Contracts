@@ -118,14 +118,8 @@ error RewardsAlreadyDistributed(address nodeAddr);
 /// @dev Settlement phase, stake/requestUnstakce is not allowed.
 error SettlementPhase();
 
-/// @dev Slash is non-existent.
-error SlashRecordNotExists(address nodeAddr, uint256 epochId);
-
 /// @dev Slash is not able to be committed or revoked.
-error SlashStatusNotRecorded(address nodeAddr, uint256 epochId);
-
-/// @dev Slash more than once in one epoch for nodeAddr
-error SlashMoreThanOnce(address nodeAddr, uint256 epoch);
+error SlashingNotExist(address nodeAddr, uint256 epochId);
 
 /// @dev Basis points of tax rate too large.
 error TaxRateBasisPointsTooLarge();

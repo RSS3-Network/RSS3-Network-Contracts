@@ -18,7 +18,6 @@ import {
     Node,
     NodeObsoleted,
     NodeStatus,
-    SlashRecord,
     WithdrawalRequest,
     UnstakeRequest,
     PoolStatData,
@@ -110,9 +109,6 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     uint256 internal _demotionIdCounter; // slot 26
     mapping(address nodeAddr => mapping(uint256 epochId => EnumerableSet.UintSet demotionIds)) internal _demotionIds;
     mapping(uint256 demotionId => Demotion demotion) internal _demotions; // slot 28
-
-    /// @dev (nodeAddr, epochId) => slash record
-    mapping(address nodeAddr => mapping(uint256 epochId => SlashRecord)) internal _slashRecords; // slot 29
 
     modifier whenNotSettlementPhase() {
         if (_isSettlementPhase) revert SettlementPhase();
@@ -459,14 +455,6 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
         return StorageLib.getChipsContract();
-    }
-
-    /// @inheritdoc IStaking
-    function getSlashingRecord(
-        address nodeAddr,
-        uint256 epoch
-    ) external pure override returns (SlashRecord memory record) {
-        record = StorageLib.getSlashRecord(nodeAddr, epoch);
     }
 
     /// @inheritdoc IStaking

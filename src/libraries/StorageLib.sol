@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Node, Demotion, PoolStatData, SlashRecord, UnstakeRequest, WithdrawalRequest} from "../libraries/DataTypes.sol";
+import {Node, Demotion, PoolStatData, UnstakeRequest, WithdrawalRequest} from "../libraries/DataTypes.sol";
 
 library StorageLib {
     using Checkpoints for Checkpoints.Trace160;
@@ -34,8 +34,6 @@ library StorageLib {
     uint256 public constant DEMOTION_ID_COUNTER_SLOT = 26;
     uint256 public constant DEMOTION_IDS_SLOT = 27;
     uint256 public constant DEMOTIONS_SLOT = 28;
-
-    uint256 public constant SLASH_RECORDS_SLOT = 29;
 
     // keccak256(abi.encode(uint256(keccak256("staking.storage.public.pool")) - 1)) & ~bytes32(uint256(0xff))
     bytes32 public constant PUBLIC_POOL_SLOT_LOCATION =
@@ -125,17 +123,7 @@ library StorageLib {
 
     function getDemotions() internal pure returns (mapping(uint256 => Demotion) storage _demotions) {
         assembly {
-            _demotions.slot := SLASH_RECORDS_SLOT
-        }
-    }
-
-    function getSlashRecord(address nodeAddr, uint256 epochId) internal pure returns (SlashRecord storage record) {
-        assembly {
-            mstore(0x00, nodeAddr)
-            mstore(0x20, SLASH_RECORDS_SLOT)
-            mstore(0x20, keccak256(0x00, 0x40))
-            mstore(0x00, epochId)
-            record.slot := keccak256(0x00, 0x40)
+            _demotions.slot := DEMOTIONS_SLOT
         }
     }
 

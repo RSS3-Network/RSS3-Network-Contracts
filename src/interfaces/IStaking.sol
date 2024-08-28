@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {Node, Demotion, NodeStatus, SlashRecord, WithdrawalRequest, UnstakeRequest} from "../libraries/DataTypes.sol";
+import {Node, Demotion, NodeStatus, WithdrawalRequest, UnstakeRequest} from "../libraries/DataTypes.sol";
 
 interface IStaking {
     /**
@@ -323,14 +323,6 @@ interface IStaking {
      * @return address The address of the chips contract.
      */
     function chipsContract() external view returns (address);
-
-    /**
-     * @notice Gets slashing records info.
-     * @param nodeAddr Node address to query.
-     * @param epoch The epoch number to query.
-     * @return record SlashRecord slashing record info
-     */
-    function getSlashingRecord(address nodeAddr, uint256 epoch) external pure returns (SlashRecord memory record);
 
     /**
      * @notice Gets public pool info.

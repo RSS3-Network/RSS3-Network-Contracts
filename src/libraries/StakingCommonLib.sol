@@ -40,13 +40,13 @@ library StakingCommonLib {
     }
 
     /// @dev increase slashing pool tokens
-    function increaseSlashingPoolByRecord(uint256 amount) internal {
+    function increaseSlashingPool(uint256 amount) internal {
         PoolStatData storage pool = StorageLib.poolStatStorage();
         pool.totalSlashingPoolTokens += amount;
     }
 
     /// @dev decrease slashing pool tokens
-    function decreaseSlashingPoolByRecord(uint256 amount) internal {
+    function decreaseSlashingPool(uint256 amount) internal {
         PoolStatData storage pool = StorageLib.poolStatStorage();
         pool.totalSlashingPoolTokens -= amount;
     }

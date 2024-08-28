@@ -5,14 +5,8 @@ pragma solidity 0.8.20;
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
-import {Node, Demotion, NodeStatus, PoolStatData, SlashStatus, SlashRecord} from "./DataTypes.sol";
-import {
-    NodeNotExists,
-    SlashMoreThanOnce,
-    SlashRecordNotExists,
-    SlashStatusNotRecorded,
-    InvalidArrayLength
-} from "./Errors.sol";
+import {Node, Demotion, NodeStatus, PoolStatData} from "./DataTypes.sol";
+import {NodeNotExists, SlashingNotExist, InvalidArrayLength} from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
@@ -38,12 +32,14 @@ library RewardsAndSlashingLib {
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             address nodeAddr = nodeAddrs[i];
-            if (nodeAddr == address(0)) revert NodeNotExists();
-
-            SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
-            EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
+            Node storage node = StorageLib.getNode(nodeAddr);
+            if (node.account == address(0)) revert NodeNotExists();
+            // public good node can't be demoted
+            if (node.publicGood) return;
 
             uint256 demotionId = StorageLib.nextDemotionId();
+
+            EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
             // save demotion id
             demotionIds.add(demotionId);
             // save demotion
@@ -55,9 +51,14 @@ library RewardsAndSlashingLib {
                 reporter: reporters[i]
             });
 
-            if (record.status != SlashStatus.Recorded && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD) {
-                // slash
-                _recordSlashing(nodeAddr, epoch);
+            if (node.status != NodeStatus.Slashing && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD) {
+                // record slashing
+                _recordSlashing(node, epoch);
+
+                // set node status: slashing
+                NodeStatus curStatus = node.status;
+                node.status = NodeStatus.Slashing;
+                emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Slashing);
             }
 
             emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reasons[i], reporters[i]);
@@ -80,10 +81,14 @@ library RewardsAndSlashingLib {
             emit Events.DemotionRevoked(demotionIdsToDelete[i]);
         }
 
-        SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
-        if (record.status == SlashStatus.Recorded && demotionIds.length() <= Const.DEMOTION_COUNT_THRESHOLD) {
-            // slash
-            _revokeSlashing(nodeAddr, epoch);
+        Node storage node = StorageLib.getNode(nodeAddr);
+        if (node.status == NodeStatus.Slashing && demotionIds.length() <= Const.DEMOTION_COUNT_THRESHOLD) {
+            // revoke slashing
+            _revokeSlashing(node, epoch);
+
+            // set node status: online
+            node.status = NodeStatus.Online;
+            emit Events.NodeStatusChanged(nodeAddr, NodeStatus.Slashing, NodeStatus.Online);
         }
     }
 
@@ -94,28 +99,15 @@ library RewardsAndSlashingLib {
      * @param paymentProcessor The address of the payment processor.
      */
     function commitSlashing(address nodeAddr, uint256 epoch, address paymentProcessor) external {
-        SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
-        _checkRecordedStatus(record, nodeAddr, epoch);
-        record.status = SlashStatus.Committed;
+        Node storage node = StorageLib.getNode(nodeAddr);
+        if (node.status != NodeStatus.Slashing) revert SlashingNotExist(nodeAddr, epoch);
 
         // set node status: slashed
-        Node storage node = StorageLib.getNode(nodeAddr);
         node.status = NodeStatus.Slashed;
+        emit Events.NodeStatusChanged(nodeAddr, NodeStatus.Slashing, NodeStatus.Slashed);
 
-        // commit slashing amount, distributes the amount to reporter and treasury
-        uint256 slashedAmount = record.amountForOperationPool + record.amountForStakingPool;
-        uint256 reporterAmount = (slashedAmount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
-        uint256 burnAmount = (slashedAmount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
-
-        StakingCommonLib.decreaseSlashingPoolByRecord(slashedAmount);
-
-        // transfer slashed tokens to reporters
-        _transferToReporters(reporterAmount, nodeAddr, epoch, paymentProcessor);
-        // burn slashed tokens
-        _transfer(address(0x0), burnAmount);
-        // remaining amount is in this contract for the treasury
-
-        emit Events.SlashCommitted(nodeAddr, epoch);
+        // commit slashing
+        _commitSlashing(node, epoch, paymentProcessor);
     }
 
     /**
@@ -193,64 +185,63 @@ library RewardsAndSlashingLib {
     }
 
     /**
-     * @dev Records the slashing of a node.
-     * @param nodeAddr The address of the node being slashed.
-     * @param epoch The epoch in which the slashing occurred.
+     * @dev  Records the slashing of a node.
+     * @param node The node being slashed.
+     * @param epoch The epoch for which slashing is being recorded.
      */
-    function _recordSlashing(address nodeAddr, uint256 epoch) internal {
-        Node storage node = StorageLib.getNode(nodeAddr);
-
-        // A public good node can't be slashed.
-        if (node.publicGood) return;
-        if (node.status == NodeStatus.Slashing) revert SlashMoreThanOnce(nodeAddr, epoch);
-
+    function _recordSlashing(Node storage node, uint256 epoch) internal {
         // slash operation pool tokens
         uint256 slashedOperationPool = (node.operationPoolTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
             Const.DENOMINATOR;
-
         // slash staking pool tokens
         uint256 slashedStakingPool = (node.stakingPoolTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
-        // update slash record
-        SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
-        record.amountForOperationPool = slashedOperationPool;
-        record.amountForStakingPool = slashedStakingPool;
-        record.status = SlashStatus.Recorded;
-
         // record slashing amount
-        StakingCommonLib.decreaseOperationPool(node, record.amountForOperationPool);
-        StakingCommonLib.decreaseStakingPool(node, record.amountForStakingPool);
-        StakingCommonLib.increaseSlashingPoolByRecord(record.amountForOperationPool + record.amountForStakingPool);
+        StakingCommonLib.decreaseOperationPool(node, slashedOperationPool);
+        StakingCommonLib.decreaseStakingPool(node, slashedStakingPool);
+        StakingCommonLib.increaseSlashingPool(slashedOperationPool + slashedStakingPool);
+        // update slashed tokens
+        node.slashedOperationPoolTokens = slashedOperationPool;
+        node.slashedStakingPoolTokens = slashedStakingPool;
 
-        NodeStatus curStatus = node.status;
-        // set node status: slashing
-        node.status = NodeStatus.Slashing;
-        emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Slashing);
-
-        emit Events.SlashRecorded(nodeAddr, epoch, slashedOperationPool, slashedStakingPool);
+        emit Events.SlashRecorded(node.account, epoch, slashedOperationPool, slashedStakingPool);
     }
 
     /**
      * @dev Revoke slashing for a specific node and epoch.
-     * @param nodeAddr The address of the node.
+     * @param node The node being slashed.
      * @param epoch The epoch for which slashing is being revoked.
      */
-    function _revokeSlashing(address nodeAddr, uint256 epoch) internal {
-        SlashRecord storage record = StorageLib.getSlashRecord(nodeAddr, epoch);
-        Node storage node = StorageLib.getNode(nodeAddr);
-
-        _checkRecordedStatus(record, nodeAddr, epoch);
-        record.status = SlashStatus.Revoked;
-
+    function _revokeSlashing(Node storage node, uint256 epoch) internal {
         // revoke slashing amount
-        StakingCommonLib.decreaseSlashingPoolByRecord(record.amountForOperationPool + record.amountForStakingPool);
-        StakingCommonLib.increaseOperationPool(node, record.amountForOperationPool);
-        StakingCommonLib.increaseStakingPool(node, record.amountForStakingPool);
-        // set node status: online
-        node.status = NodeStatus.Online;
-        emit Events.NodeStatusChanged(nodeAddr, NodeStatus.Slashing, NodeStatus.Online);
+        StakingCommonLib.increaseOperationPool(node, node.slashedOperationPoolTokens);
+        StakingCommonLib.increaseStakingPool(node, node.slashedStakingPoolTokens);
+        StakingCommonLib.decreaseSlashingPool(node.slashedOperationPoolTokens + node.slashedStakingPoolTokens);
+        // update slashed tokens
+        delete node.slashedOperationPoolTokens;
+        delete node.slashedStakingPoolTokens;
 
-        emit Events.SlashRevoked(nodeAddr, epoch);
+        emit Events.SlashRevoked(node.account, epoch);
+    }
+
+    function _commitSlashing(Node storage node, uint256 epoch, address paymentProcessor) internal {
+        // commit slashing amount, distributes the amount to reporter and treasury
+        uint256 slashedAmount = node.slashedOperationPoolTokens + node.slashedStakingPoolTokens;
+        uint256 reporterAmount = (slashedAmount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 burnAmount = (slashedAmount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+
+        // update
+        StakingCommonLib.decreaseSlashingPool(slashedAmount);
+        delete node.slashedStakingPoolTokens;
+        delete node.slashedOperationPoolTokens;
+
+        // transfer slashed tokens to reporters
+        _transferToReporters(reporterAmount, node.account, epoch, paymentProcessor);
+        // burn slashed tokens
+        _transfer(address(0x0), burnAmount);
+        // remaining amount is in this contract for the treasury
+
+        emit Events.SlashCommitted(node.account, epoch);
     }
 
     function _transferToReporters(uint256 amount, address nodeAddr, uint256 epoch, address paymentProcessor) internal {
@@ -283,12 +274,6 @@ library RewardsAndSlashingLib {
         for (uint256 i = 0; i < demotionIds.length(); i++) {
             demotions[i] = StorageLib.getDemotions()[demotionIds.at(i)];
         }
-    }
-
-    /// @dev check if the status of a slash record is recorded
-    function _checkRecordedStatus(SlashRecord memory record, address nodeAddr, uint256 epoch) internal pure {
-        if (record.status == SlashStatus.NonExistent) revert SlashRecordNotExists(nodeAddr, epoch);
-        if (record.status != SlashStatus.Recorded) revert SlashStatusNotRecorded(nodeAddr, epoch);
     }
 
     /**

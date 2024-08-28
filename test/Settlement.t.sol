@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
-import {Node, Demotion, NodeStatus, SlashStatus, SlashRecord} from "../src/libraries/DataTypes.sol";
+import {Node, Demotion, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
@@ -896,15 +896,14 @@ contract SettlementTest is CommonTest {
         Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
         assertEq(demotions.length, 4);
 
-        // check slash record
-        SlashRecord memory record = _staking.getSlashingRecord(alice, uint256(1));
-        assertEq(record.amountForOperationPool, 100 ether);
-        assertEq(record.amountForStakingPool, 0);
-        assertEq(uint256(record.status), uint256(SlashStatus.Committed));
-
-        // check node status
+        // check node
         Node memory node = _staking.getNode(alice);
+        assertEq(node.slashedOperationPoolTokens, 0);
+        assertEq(node.slashedStakingPoolTokens, 0);
         assertEq(uint256(node.status), uint256(NodeStatus.Slashed));
+        // check slashing pool
+        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        assertEq(totalSlashingPoolTokens, 0);
     }
 
     function testCommitSlashingFail() public {

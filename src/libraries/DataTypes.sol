@@ -27,8 +27,13 @@ struct Node {
     uint256 stakingPoolTokens;
     /// @notice total shares of the pool
     uint256 totalShares;
+    /// @notice slashed tokens of operation pool
+    uint256 slashedOperationPoolTokens;
+    /// @notice slashed tokens of staking pool
+    uint256 slashedStakingPoolTokens;
     /// @notice the time node can safely exit
     uint256 exitTime;
+    /// @notice the status of the node
     NodeStatus status;
 }
 
@@ -61,12 +66,6 @@ struct Demotion {
     address reporter;
 }
 
-struct SlashRecord {
-    uint256 amountForOperationPool;
-    uint256 amountForStakingPool;
-    SlashStatus status; // 0: recorded, 1: committed, 2: revoked
-}
-
 enum NodeStatus {
     None, // 0
     Registered, // 1
@@ -78,13 +77,6 @@ enum NodeStatus {
     Slashed, // 7
     Exiting, // 8
     Exited // 9
-}
-
-enum SlashStatus {
-    NonExistent,
-    Recorded,
-    Committed,
-    Revoked
 }
 
 struct WithdrawalRequest {
