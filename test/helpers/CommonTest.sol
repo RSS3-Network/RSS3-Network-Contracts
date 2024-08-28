@@ -5,7 +5,8 @@ pragma solidity 0.8.20;
 import {DeployConfig} from "../../script/DeployConfig.s.sol";
 import {Chips} from "../../src/Chips.sol";
 import {Const} from "../../src/libraries/Const.sol";
-import {Node, Demotion} from "../../src/libraries/DataTypes.sol";
+import {Node, Demotion, NodeStatus} from "../../src/libraries/DataTypes.sol";
+import {StorageLib} from "../../src/libraries/StorageLib.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
 import {Settlement} from "../../src/Settlement.sol";
 import {Staking} from "../../src/Staking.sol";
@@ -131,6 +132,20 @@ contract CommonTest is Utils {
         _staking.deposit{value: depositAmount}();
     }
 
+    function _presetNodeStatus(address nodeAddr, NodeStatus status) internal {
+        bytes32 slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
+        // node.status is at offset 10 of struct Node
+        slot = bytes32(uint256(slot) + 10);
+        vm.store(address(_staking), slot, bytes32(uint256(status)));
+
+        if (status == NodeStatus.Exiting) {
+            slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
+            // node.exitTime is at offset 9 of struct Node
+            slot = bytes32(uint256(slot) + 9);
+            vm.store(address(_staking), slot, bytes32(uint256(block.timestamp + Const.NODE_EXIT_PERIOD)));
+        }
+    }
+
     function _getTreasuryAmount() internal returns (uint256) {
         address treasury_ = _staking.TREASURY();
 
@@ -140,6 +155,11 @@ contract CommonTest is Utils {
 
         return balanceAfter - balanceBefore;
     }
+
+    function _getNodeStatus(address nodeAddr) internal view returns (NodeStatus status) {
+        status = _staking.getNode(nodeAddr).status;
+    }
+
     function _checkDistribution(
         uint256[] memory depositAmounts,
         uint256[] memory stakeAmounts,
@@ -157,6 +177,31 @@ contract CommonTest is Utils {
             uint256 newStakingPool = stakeAmounts[i] + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
             assertEq(node.stakingPoolTokens, newStakingPool, "check staking pool failed");
         }
+    }
+
+    function _checkNodeProfile(address nodeAddr, string memory name, string memory description) internal view {
+        Node memory node = _staking.getNode(nodeAddr);
+        assertEq(node.name, name);
+        assertEq(node.description, description);
+    }
+
+    function _checkNode(
+        address nodeAddr,
+        uint256 nodeId,
+        string memory name,
+        string memory description,
+        uint64 taxRateBasisPoints,
+        uint256 operationPoolTokens,
+        bool publicGood,
+        bool alpha
+    ) internal view {
+        Node memory node = _staking.getNode(nodeAddr);
+        _checkNodeProfile(nodeAddr, name, description);
+        assertEq(node.nodeId, nodeId);
+        assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
+        assertEq(node.operationPoolTokens, operationPoolTokens);
+        assertEq(node.publicGood, publicGood);
+        assertEq(node.alpha, alpha);
     }
 
     function _checkDemotion(
