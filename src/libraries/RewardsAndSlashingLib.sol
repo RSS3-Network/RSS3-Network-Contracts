@@ -33,7 +33,7 @@ library RewardsAndSlashingLib {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             address nodeAddr = nodeAddrs[i];
             Node storage node = StorageLib.getNode(nodeAddr);
-            if (node.account == address(0)) revert NodeNotExists();
+            if (node.account == address(0)) revert NodeNotExists(nodeAddr);
             // public good node can't be demoted
             if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
 

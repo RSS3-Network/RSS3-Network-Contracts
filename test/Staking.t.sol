@@ -240,7 +240,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testDepositFailWithNonExistentNode() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
         _staking.deposit{value: 1}();
     }
 
@@ -352,7 +352,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testRequestWithdrawalFailWithNonExistentNode() public {
         _disableAlphaPhase();
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
         _staking.requestWithdrawal(1 ether);
     }
 
@@ -469,7 +469,8 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testStakeFailToNonExistentNode() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        // stake to a non-existent node will fail
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, alice));
         _staking.stake{value: 1000 ether}(alice);
     }
 

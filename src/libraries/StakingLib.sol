@@ -32,7 +32,7 @@ library StakingLib {
     function deposit(address nodeAddr, uint256 amount) external {
         Node storage node = StorageLib.getNode(nodeAddr);
 
-        if (node.account == address(0)) revert NodeNotExists();
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
         if (node.publicGood) revert DepositForPublicGoodNode();
 
         StakingCommonLib.increaseOperationPool(node, amount);

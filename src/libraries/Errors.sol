@@ -15,7 +15,7 @@ error NodeStakedOrDeposited();
 error NodeDepositBelowMinimum();
 
 /// @dev Node not exists.
-error NodeNotExists();
+error NodeNotExists(address nodeAddr);
 
 error TaxRateBasisPointsTooSmall();
 

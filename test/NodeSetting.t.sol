@@ -146,7 +146,7 @@ contract NodeSettingTest is CommonTest {
     }
 
     function testUpdateNodeFail() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
         _staking.updateNode("New Alice", "New Alice's node");
     }
 
@@ -226,7 +226,7 @@ contract NodeSettingTest is CommonTest {
     }
 
     function testSetTaxRateFailWithNonExistentNode() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, dave));
         vm.prank(dave);
         _staking.setTaxRateBasisPoints4Node(1000);
     }
@@ -313,7 +313,7 @@ contract NodeSettingTest is CommonTest {
 
     function testRegisterFail() public {
         // case 1: node not exists
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
         _staking.register();
 
         _createNode(alice);
@@ -346,7 +346,7 @@ contract NodeSettingTest is CommonTest {
 
     function testOnlineFail() public {
         // case 1: node not exists
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
         _staking.online();
 
         _createNode(alice);
@@ -388,7 +388,7 @@ contract NodeSettingTest is CommonTest {
 
     function testExitFail() public {
         // case 1: NodeNotExists
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
         _staking.exit();
 
         vm.startPrank(alice);

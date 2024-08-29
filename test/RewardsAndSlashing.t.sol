@@ -42,11 +42,16 @@ contract RewardsAndSlashingTest is CommonTest {
         _staking.submitDemotions(1, array(alice), array(REASON1), array(REPORTER, address(0xee)));
 
         // case 3: NodeNotExists
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(111)));
+        vm.prank(address(_settlement));
+        _staking.submitDemotions(1, array(address(111)), array(REASON1), array(REPORTER));
+
+        // case 4: NodeNotExists
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(0)));
         vm.prank(address(_settlement));
         _staking.submitDemotions(1, array(address(0)), array(REASON1), array(REPORTER));
 
-        // case 4: NodeIsPublicGood
+        // case 5: NodeIsPublicGood
         _createPublicGoodNode(alice);
         vm.expectRevert(abi.encodeWithSelector(NodeIsPublicGood.selector, alice));
         vm.prank(address(_settlement));

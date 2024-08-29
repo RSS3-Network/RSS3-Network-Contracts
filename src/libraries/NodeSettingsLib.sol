@@ -29,9 +29,7 @@ library NodeSettingsLib {
         _validateTaxRateBasisPoints(taxRateBasisPoints);
 
         Node storage node = StorageLib.getNode(nodeAddr);
-
-        _validateNodeAddress(node.account);
-
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
         if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
 
         node.taxRateBasisPoints = taxRateBasisPoints;
@@ -51,7 +49,7 @@ library NodeSettingsLib {
 
     function updateNode(address nodeAddr, string calldata name, string calldata description) external {
         Node storage node = StorageLib.getNode(nodeAddr);
-        _validateNodeAddress(node.account);
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
 
         node.name = name;
         node.description = description;
@@ -104,7 +102,7 @@ library NodeSettingsLib {
      */
     function exit(address nodeAddr) external {
         Node storage node = StorageLib.getNode(nodeAddr);
-        _validateNodeAddress(node.account);
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
 
         // validate node exit status
         NodeStatus curStatus = _getNodeStatus(node);
@@ -133,7 +131,7 @@ library NodeSettingsLib {
      */
     function register(address nodeAddr) external {
         Node storage node = StorageLib.getNode(nodeAddr);
-        _validateNodeAddress(node.account);
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
 
         NodeStatus curStatus = _getNodeStatus(node);
         // throws a `NodeNotInExitStatus` error if the node is not in "Exiting" or "Exited" status.
@@ -155,7 +153,7 @@ library NodeSettingsLib {
      */
     function online(address nodeAddr) external {
         Node storage node = StorageLib.getNode(nodeAddr);
-        _validateNodeAddress(node.account);
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
 
         // if the current status is not Offline, Slashed, or Outdated, it reverts with an error
         NodeStatus curStatus = _getNodeStatus(node);
@@ -240,10 +238,6 @@ library NodeSettingsLib {
         if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
 
         if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
-    }
-
-    function _validateNodeAddress(address nodeAddr) internal pure {
-        if (nodeAddr == address(0)) revert NodeNotExists();
     }
 
     /**

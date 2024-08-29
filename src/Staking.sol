@@ -205,7 +205,7 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     /// @inheritdoc IStaking
     function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId) {
         Node storage node = _nodes[msg.sender];
-        _validateNodeAddress(node.account);
+        if (node.account == address(0)) revert NodeNotExists(msg.sender);
 
         //  withdrawal amount should not exceed the operation pool tokens
         if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
@@ -231,7 +231,7 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
         Node storage node = StorageLib.getNode(nodeAddr);
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
-        if (node.account == address(0)) revert NodeNotExists();
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
 
         // node should not in exit status
         NodeSettingsLib._validateNodeNotInExitStatus(node);
@@ -484,9 +484,5 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
 
         delete _totalOperationPoolTokens;
         delete _totalStakingPoolTokens;
-    }
-
-    function _validateNodeAddress(address nodeAddr) internal pure {
-        if (nodeAddr == address(0)) revert NodeNotExists();
     }
 }
