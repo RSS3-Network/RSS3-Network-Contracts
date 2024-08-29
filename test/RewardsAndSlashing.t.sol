@@ -107,9 +107,8 @@ contract RewardsAndSlashingTest is CommonTest {
         uint256 stakedTokens = 40000 ether;
         uint256 depositedTokens = 10000 ether;
 
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+        uint256 expectedSlashedStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 expectedSlashedOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
             Const.DENOMINATOR;
 
         _createNode(alice);
@@ -129,7 +128,7 @@ contract RewardsAndSlashingTest is CommonTest {
         }
 
         expectEmit();
-        emit Events.SlashRecorded(alice, 1, expectedSlashedTokensOnOperationPool, expectedSlashedTokensOnStakingPool);
+        emit Events.SlashRecorded(alice, 1, expectedSlashedOperationPool, expectedSlashedStakingPool);
         expectEmit();
         emit Events.NodeStatusChanged(alice, NodeStatus.Online, NodeStatus.Slashing);
         expectEmit();
@@ -139,19 +138,19 @@ contract RewardsAndSlashingTest is CommonTest {
 
         // check staking pool and operation tokens
         Node memory node = _staking.getNode(alice);
-        assertEq(node.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(node.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-        assertEq(node.slashedOperationPoolTokens, expectedSlashedTokensOnOperationPool);
-        assertEq(node.slashedStakingPoolTokens, expectedSlashedTokensOnStakingPool);
+        assertEq(node.stakingPoolTokens, stakedTokens - expectedSlashedStakingPool);
+        assertEq(node.operationPoolTokens, depositedTokens - expectedSlashedOperationPool);
+        assertEq(node.slashedOperationPoolTokens, expectedSlashedOperationPool);
+        assertEq(node.slashedStakingPoolTokens, expectedSlashedStakingPool);
         // slash status updated correctly
         assertEq(uint256(node.status), uint256(NodeStatus.Slashing));
         // check slashing pool
         (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
-        assertEq(totalSlashingPoolTokens, expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool);
+        assertEq(totalSlashingPoolTokens, expectedSlashedOperationPool + expectedSlashedStakingPool);
 
         // check chip info
         (, uint256 tokens, ) = _staking.getChipInfo(chipId);
-        assertEq(tokens, stakedTokens - expectedSlashedTokensOnStakingPool);
+        assertEq(tokens, stakedTokens - expectedSlashedStakingPool);
     }
 
     // Test:
@@ -208,9 +207,8 @@ contract RewardsAndSlashingTest is CommonTest {
         uint256 stakedTokens = 40000 ether;
         uint256 depositedTokens = 10000 ether;
 
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+        uint256 expectedSlashedStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 expectedSlashedOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
             Const.DENOMINATOR;
 
         _createNode(alice);
@@ -241,15 +239,15 @@ contract RewardsAndSlashingTest is CommonTest {
 
         // check staking pool and operation tokens
         Node memory node = _staking.getNode(alice);
-        assertEq(node.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(node.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
+        assertEq(node.stakingPoolTokens, stakedTokens - expectedSlashedStakingPool);
+        assertEq(node.operationPoolTokens, depositedTokens - expectedSlashedOperationPool);
         assertEq(node.slashedOperationPoolTokens, 0);
         assertEq(node.slashedStakingPoolTokens, 0);
         // slash status updated correctly
         assertEq(uint256(node.status), uint256(NodeStatus.Slashed));
 
         // check balances
-        uint256 amount = expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool;
+        uint256 amount = expectedSlashedOperationPool + expectedSlashedStakingPool;
         uint256 burnAmount = (amount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
         assertEq(address(0).balance, burnAmount);
 
@@ -263,7 +261,70 @@ contract RewardsAndSlashingTest is CommonTest {
 
         // check chip info
         (, uint256 tokens, ) = _staking.getChipInfo(chipId);
-        assertEq(tokens, stakedTokens - expectedSlashedTokensOnStakingPool);
+        assertEq(tokens, stakedTokens - expectedSlashedStakingPool);
+    }
+
+    function testCommitSlashingWithRewards(uint256 depositedTokens, uint256 stakedTokens) public {
+        depositedTokens = bound(depositedTokens, 10000, 20000);
+        stakedTokens = bound(stakedTokens, 500, 1000);
+
+        depositedTokens *= 1 ether;
+        stakedTokens *= 1 ether;
+
+        uint256 expectedSlashedStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 expectedSlashedOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
+            Const.DENOMINATOR;
+
+        _createNode(alice);
+
+        vm.prank(alice);
+        _staking.deposit{value: depositedTokens}();
+
+        vm.prank(bob);
+        uint256 chipId = _staking.stake{value: stakedTokens}(alice);
+
+        _presetNodeStatus(alice, NodeStatus.Online);
+
+        // submit demotions with reporter
+        for (uint256 i = 0; i < 4; i++) {
+            vm.prank(address(_settlement));
+            _staking.submitDemotions(1, array(alice), array(REASON1), array(address(uint160(i))));
+        }
+
+        skip(Const.SLASHING_COMMIT_PERIOD_IN_EPOCH * 18 hours);
+
+        // commit slashing
+        vm.prank(address(_settlement));
+        _staking.commitSlashing(alice, 1);
+
+        // check staking pool and operation tokens
+        Node memory node = _staking.getNode(alice);
+        assertEq(node.stakingPoolTokens, stakedTokens - expectedSlashedStakingPool);
+        assertEq(node.operationPoolTokens, depositedTokens - expectedSlashedOperationPool);
+        assertEq(node.slashedOperationPoolTokens, 0);
+        assertEq(node.slashedStakingPoolTokens, 0);
+        // slash status updated correctly
+        assertEq(uint256(node.status), uint256(NodeStatus.Slashed));
+
+        // check balances
+        uint256 amount = expectedSlashedOperationPool + expectedSlashedStakingPool;
+        uint256 burnAmount = (amount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        assertEq(address(0).balance, burnAmount);
+
+        uint256 reporterAmount = (amount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        // check balances of reporters
+        assertEq(_staking.PAYMENT_PROCESSOR().balance, reporterAmount / 4);
+        for (uint256 i = 1; i < 4; i++) {
+            assertEq(address(uint160(i)).balance, reporterAmount / 4);
+        }
+
+        // check slashing pool
+        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        assertEq(totalSlashingPoolTokens, 0);
+
+        // check chip info
+        (, uint256 tokens, ) = _staking.getChipInfo(chipId);
+        assertEq(tokens, stakedTokens - expectedSlashedStakingPool);
     }
 
     function testCommitSlashingFail() public {

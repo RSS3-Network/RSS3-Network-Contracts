@@ -1045,7 +1045,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "demotionIds",
+        "name": "demotionIdsToRevoke",
         "type": "uint256[]",
         "internalType": "uint256[]"
       }
@@ -1534,7 +1534,13 @@
   {
     "type": "error",
     "name": "NodeNotExists",
-    "inputs": []
+    "inputs": [
+      {
+        "name": "nodeAddr",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
   },
   {
     "type": "error",
