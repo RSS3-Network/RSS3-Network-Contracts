@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable var-name-mixedcase
+// solhint-disable var-name-mixedcase,no-empty-blocks
 
 pragma solidity 0.8.20;
 
@@ -260,6 +260,7 @@ library StakingLib {
         uint256 tokenId,
         uint256 SHARES_PER_CHIP
     ) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {
+        // get chip issuer
         nodeAddr = _issuerOf(tokenId);
         if (nodeAddr == address(0)) return (address(0), 0, 0);
 
@@ -287,6 +288,11 @@ library StakingLib {
     function _issuerOf(uint256 tokenId) internal view returns (address) {
         // check the token was not burned, and fetch ownership from the anchors
         // Note: no need for safe cast, we know that tokenId <= type(uint96).max
+        // return address(0) if the chip is not existing
+        address chips = StorageLib.getChipsContract();
+        try IERC721(chips).ownerOf(tokenId) returns (address) {} catch (bytes memory) {
+            return address(0);
+        }
 
         address issuer = StorageLib.getIssuerFromFamilies(tokenId);
         return issuer != address(0) ? issuer : StorageLib.getIssuerFromChipIssuers(tokenId);

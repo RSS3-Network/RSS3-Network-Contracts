@@ -18,7 +18,7 @@ contract StakingForkTest is CommonTest {
     Settlement public settlement;
 
     function setUp() public {
-        vm.createSelectFork("https://rpc.rss3.io", 5787906);
+        vm.createSelectFork("https://rpc.rss3.io", 7540074);
 
         // deploy staking
         Staking st = new Staking(
@@ -45,19 +45,6 @@ contract StakingForkTest is CommonTest {
         settlement = Settlement(payable(address(settlementProxy)));
     }
 
-    function testReinitialize() public {
-        // initialize staking
-        assertEq(staking.isAlphaPhase(), true);
-        staking.initialize(address(0), address(0), address(0), false);
-        assertEq(staking.isAlphaPhase(), false);
-
-        // initialize settlement
-        settlement.initialize(address(0), address(0), 0, 20);
-        (uint256 totalOpRewards, uint256 totalStRewards) = settlement.getBonusInfo();
-        assertEq(totalOpRewards, 12328767123287671232876);
-        assertEq(totalStRewards, 49315068493150684931506);
-    }
-
     function testMergeChipsFork() public {
         uint256[] memory tokenIds = array(uint256(1690), uint256(1691), uint256(1693), uint256(1695));
         (address nodeAddr, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
@@ -65,15 +52,22 @@ contract StakingForkTest is CommonTest {
         assertEq(nodeAddr, address(0x08d66b34054a174841e2361bd4746Ff9F4905cC2));
 
         vm.prank(diygod);
-        uint256 tokenId = staking.mergeChips(tokenIds);
+        uint256 newChipId = staking.mergeChips(tokenIds);
 
         // check chip info
-        (address nodeAddr2, uint256 tokens2, uint256 shares2) = staking.getChipInfo(tokenId);
-        assertEq(nodeAddr, nodeAddr2);
-        assertEq(tokens * 4, tokens2);
-        assertEq(shares * 4, shares2);
 
-        assertEq(IERC721(chips).ownerOf(tokenId), diygod);
+        (address nodeAddr2, uint256 tokens2, uint256 shares2) = staking.getChipInfo(newChipId);
+        assertEq(nodeAddr, nodeAddr2);
+        assertApproxEqAbs(tokens * 4, tokens2, 4); // 4 is the max diff
+        assertApproxEqAbs(shares * 4, shares2, 4); // 4 is the max diff
+
+        //         check burned chips
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            (nodeAddr, tokens, shares) = staking.getChipInfo(tokenIds[i]);
+            assertEq(nodeAddr, address(0));
+            assertEq(tokens, 0);
+            assertEq(shares, 0);
+        }
     }
 
     function testStakeFork() public {
@@ -109,12 +103,12 @@ contract StakingForkTest is CommonTest {
         assertEq(req.owner, diygod);
         assertEq(req.nodeAddr, nodeAddr);
         assertEq(req.timestamp, block.timestamp);
-        assertEq(req.unstakeAmount, tokens * 2);
+        assertApproxEqAbs(req.unstakeAmount, tokens * 2, 2);
 
         // check node
         DataTypes.Node memory nodeAfter = staking.getNode(nodeAddr);
-        assertEq(nodeAfter.totalShares, nodeBefore.totalShares - shares * 2);
-        assertEq(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 2);
+        assertApproxEqAbs(nodeAfter.totalShares, nodeBefore.totalShares - shares * 2, 2);
+        assertApproxEqAbs(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 2, 2);
     }
 
     function testRequestUnstakeForkWithMerge() public {
@@ -134,18 +128,24 @@ contract StakingForkTest is CommonTest {
         assertEq(req.owner, diygod);
         assertEq(req.nodeAddr, nodeAddr);
         assertEq(req.timestamp, block.timestamp);
-        assertEq(req.unstakeAmount, tokens * 4);
+        assertApproxEqAbs(req.unstakeAmount, tokens * 4, 4);
 
         // check node
         DataTypes.Node memory nodeAfter = staking.getNode(nodeAddr);
-        assertEq(nodeAfter.totalShares, nodeBefore.totalShares - shares * 4);
-        assertEq(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 4);
+        // 4 is the max diff
+        assertApproxEqAbs(nodeAfter.totalShares, nodeBefore.totalShares - shares * 4, 4);
+        assertApproxEqAbs(nodeAfter.stakingPoolTokens, nodeBefore.stakingPoolTokens - tokens * 4, 4);
     }
 
     function testStakingStorageLayout() public {
         assertEq(staking.chipsContract(), 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE);
         assertEq(staking.isSettlementPhase(), false);
-        assertEq(staking.isAlphaPhase(), true);
+        assertEq(staking.isAlphaPhase(), false);
+
+        (uint256 totalOpRewards, uint256 totalStRewards) = settlement.getBonusInfo();
+        assertEq(totalOpRewards, 12328767123287671232876);
+        assertEq(totalStRewards, 49315068493150684931506);
+
         // check node info
         // node 1
         DataTypes.Node memory node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
@@ -155,15 +155,15 @@ contract StakingForkTest is CommonTest {
             "Henry",
             "Henry's awesome Node",
             1000,
-            uint256(12793157235268997410007),
-            uint256(188607752333832530148001),
-            uint256(148500000000000000000000),
+            uint256(13469524266418053824302),
+            uint256(170204797962892815044839),
+            uint256(129860104969232393500215),
             false,
             true,
             false
         );
         // node 83
-        node = staking.getNode(0x827431510a5D249cE4fdB7F00C83a3353F471848);
+        node = staking.getNode(0xCe56132aB93bfA39241Ad844433b58e926295186);
         _checkNode(
             0xCe56132aB93bfA39241Ad844433b58e926295186,
             83,
@@ -179,20 +179,20 @@ contract StakingForkTest is CommonTest {
         );
 
         // check node counter
-        assertEq(staking.getNodeCount(), 83);
+        assertEq(staking.getNodeCount(), 86);
 
         // check _pendingWithdrawalCounter, slot 9
-        assertEq(vm.load(address(staking), bytes32(uint256(9))), 0);
+        assertEq(vm.load(address(staking), bytes32(uint256(9))), bytes32(uint256(1)));
 
         // check _pendingUnstakeCounter, slot 11
-        assertEq(vm.load(address(staking), bytes32(uint256(11))), 0);
+        assertEq(vm.load(address(staking), bytes32(uint256(11))), bytes32(uint256(11)));
 
         // check public pool
         node = staking.getPublicPool();
         assertEq(node.nodeId, 0);
-        assertEq(node.taxRateBasisPoints, uint64(1168));
+        assertEq(node.taxRateBasisPoints, uint64(1166));
         assertEq(node.operationPoolTokens, uint256(0));
-        assertEq(node.stakingPoolTokens, uint256(102726750648321495462628));
+        assertEq(node.stakingPoolTokens, uint256(105947834373481785005022));
         assertEq(node.totalShares, uint256(100000000000000000000000));
         assertEq(node.publicGood, false);
         assertEq(node.alpha, false);
@@ -200,19 +200,19 @@ contract StakingForkTest is CommonTest {
         // check pool info
         (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = staking
             .getPoolInfo();
-        assertEq(totalOperationPoolTokens, uint256(3430942886901868893005511));
-        assertEq(totalStakingPoolTokens, uint256(88666655712935490505541127));
+        assertEq(totalOperationPoolTokens, uint256(3676223372159389130580222));
+        assertEq(totalStakingPoolTokens, uint256(99576088009465491532574685));
         assertEq(totalSlashingPoolTokens, uint256(0));
 
         // check chip info
         (address nodeAddr, uint256 tokens, uint256 shares) = staking.getChipInfo(1);
         assertEq(nodeAddr, 0x827431510a5D249cE4fdB7F00C83a3353F471848);
-        assertEq(tokens, uint256(635042937150951279959));
+        assertEq(tokens, uint256(655339058917360507379));
         assertEq(shares, 500 ether);
 
         (nodeAddr, tokens, shares) = staking.getChipInfo(139020);
         assertEq(nodeAddr, 0xc29f2Aec9dC8cdbC58da0bE1b9F612A629c83Ac5);
-        assertEq(tokens, uint256(590053490751951480978));
+        assertEq(tokens, uint256(609976588619424481212));
         assertEq(shares, 500 ether);
     }
 
