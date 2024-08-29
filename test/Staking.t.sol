@@ -37,15 +37,6 @@ import {Staking} from "../src/Staking.sol";
 contract StakingTest is CommonTest, IERC721Errors {
     using stdJson for string;
 
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Paused(address account);
-    event Unpaused(address account);
-
-    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-    error EnforcedPause();
-    error ExpectedPause();
-
     function setUp() public {
         _setUp();
 

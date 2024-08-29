@@ -21,8 +21,6 @@ import {
 import {Events} from "../src/libraries/Events.sol";
 
 contract NodeSettingTest is CommonTest {
-    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-
     function setUp() public {
         _setUp();
 

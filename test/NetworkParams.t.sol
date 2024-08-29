@@ -12,8 +12,6 @@ contract NetworkParamsTest is CommonTest {
 
     event ParamsSet(uint64 indexed epoch, string params);
 
-    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-
     function setUp() public {
         _params = new NetworkParams();
         _params.initialize(alice);

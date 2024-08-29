@@ -18,10 +18,6 @@ import {Events} from "../src/libraries/Events.sol";
 import {Settlement} from "../src/Settlement.sol";
 
 contract SettlementTest is CommonTest {
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-
     receive() external payable {}
 
     function setUp() public {

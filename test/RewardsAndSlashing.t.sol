@@ -9,10 +9,6 @@ import {NodeNotExists, SlashingNotExist, InvalidArrayLength, NodeIsPublicGood} f
 import {Events} from "../src/libraries/Events.sol";
 
 contract RewardsAndSlashingTest is CommonTest {
-    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-    error EnforcedPause();
-    error ExpectedPause();
-
     function setUp() public {
         _setUp();
 
