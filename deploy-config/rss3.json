@@ -14,6 +14,7 @@
   "chipsSymbol": "Chips",
   "settlementStartTime": "1710208800",
   "operationRewardsPercent": 20,
+  "checkEpochInterval": "true",
   "paymentProcessor": "0x8AC80fa0993D95C9d6B8Cb494E561E6731038941",
   "networkParamsManager": "0xDfCE83dc6030e111425f787395250FF24E9109C6",
   "isAlphaPhase": "false"

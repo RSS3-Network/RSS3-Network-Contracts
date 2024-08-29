@@ -38,7 +38,7 @@ contract StakingForkTest is CommonTest {
         staking = Staking(address(stakingProxy));
 
         // deploy settlement
-        Settlement settlement_ = new Settlement();
+        Settlement settlement_ = new Settlement(true);
         Proxy settlementProxy = Proxy(payable(0x0cE3159BF19F3C55B648D04E8f0Ae1Ae118D2A0B));
         vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);
         IProxy(address(settlementProxy)).upgradeTo(address(settlement_));
