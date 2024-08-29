@@ -30,6 +30,9 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
 
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 
+    /// @dev Whether to check the epoch interval when updating the epoch.
+    bool public immutable CHECK_EPOCH_INTERVAL;
+
     /// @dev Staking contract address.
     address internal _staking;
 
@@ -51,6 +54,14 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
 
     // solhint-disable-next-line comprehensive-interface
     receive() external payable {}
+
+    /**
+     * @notice constructor.
+     * @param checkEpochInterval Whether to check the epoch interval when updating the epoch.
+     */
+    constructor(bool checkEpochInterval) {
+        CHECK_EPOCH_INTERVAL = checkEpochInterval;
+    }
 
     /// @inheritdoc ISettlement
     function initialize(
@@ -200,8 +211,10 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
         _endTimestamp = block.timestamp;
 
         // check epoch interval
-        uint256 submissionInterval = EPOCH_DURATION - 1 hours;
-        if (_endTimestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+        if (CHECK_EPOCH_INTERVAL) {
+            uint256 submissionInterval = EPOCH_DURATION - 1 hours;
+            if (_endTimestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+        }
     }
 
     /// @dev check epoch number
