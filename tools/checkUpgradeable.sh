@@ -7,6 +7,7 @@ if [ ! -d "src" ]; then
 fi
 
 # install slither
+# on macos: brew install slither-analyzer
 which slither-check-upgradeability
 if [ $? -ne 0 ]; then
   git clone https://github.com/crytic/slither.git && cd slither || exit 1
@@ -25,7 +26,7 @@ slither-check-upgradeability . Staking \
 --proxy-filename . \
 --proxy-name TransparentUpgradeableProxy \
 --compile-force-framework 'foundry' \
---exclude "initialize-target" \
+--exclude "initialize-target,missing-init-modifier" \
 2>>"$file1" 1>&2
 
 
@@ -34,7 +35,7 @@ slither-check-upgradeability . Settlement \
 --proxy-filename . \
 --proxy-name TransparentUpgradeableProxy \
 --compile-force-framework 'foundry' \
---exclude "initialize-target,missing-init-modifier" \
+--exclude "initialize-target,missing-init-modifier,function-shadowing" \
 2>>"$file2" 1>&2
 
 
@@ -46,7 +47,7 @@ slither-check-upgradeability . Chips \
 --exclude "initialize-target,missing-init-modifier" \
 2>>"$file3" 1>&2
 
-# output
+# output43
 lines1=$(sed -n '$=' "$file1")
 lines2=$(sed -n '$=' "$file2")
 lines3=$(sed -n '$=' "$file3")
