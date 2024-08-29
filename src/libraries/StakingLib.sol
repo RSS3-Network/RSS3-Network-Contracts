@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable var-name-mixedcase
+// solhint-disable var-name-mixedcase,no-empty-blocks
 
 pragma solidity 0.8.20;
 
@@ -260,6 +260,13 @@ library StakingLib {
         uint256 tokenId,
         uint256 SHARES_PER_CHIP
     ) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {
+        // return all 0 if the chip is not existing
+        address chips = StorageLib.getChipsContract();
+        try IERC721(chips).ownerOf(tokenId) returns (address) {} catch (bytes memory) {
+            return (address(0), 0, 0);
+        }
+
+        // get chip issuer
         nodeAddr = _issuerOf(tokenId);
         if (nodeAddr == address(0)) return (address(0), 0, 0);
 
