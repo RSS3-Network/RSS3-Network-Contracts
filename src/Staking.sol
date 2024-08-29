@@ -333,9 +333,9 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     function revokeDemotions(
         address nodeAddr,
         uint256 epoch,
-        uint256[] calldata demotionIds
+        uint256[] calldata demotionIdsToRevoke
     ) external override onlyRole(ORACLE_ROLE) {
-        RewardsAndSlashingLib.revokeDemotions(nodeAddr, epoch, demotionIds);
+        RewardsAndSlashingLib.revokeDemotions(nodeAddr, epoch, demotionIdsToRevoke);
     }
 
     /// @inheritdoc IStaking

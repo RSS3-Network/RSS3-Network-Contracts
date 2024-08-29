@@ -826,7 +826,7 @@ contract SettlementTest is CommonTest {
         assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
     }
 
-    function testSubmitDemotionsxx() public {
+    function testSubmitDemotions() public {
         _createNode(alice);
         _createNode(bob);
 
@@ -847,21 +847,26 @@ contract SettlementTest is CommonTest {
     }
 
     function testRevokeDemotions() public {
+        uint256 epoch = 1;
+
         _createNode(alice);
-        _presetCurrentEpoch(1);
+        _presetCurrentEpoch(epoch);
 
         // submit demotion
         vm.prank(oracleAccount);
         _settlement.submitDemotions(array(alice), array(REASON1), array(REPORTER));
 
-        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
+        // check demotion
+        Demotion[] memory demotions = _staking.getDemotions(alice, epoch);
         assertEq(demotions.length, 1);
-        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), REASON1, REPORTER);
+        _checkDemotion(demotions[0], uint256(1), alice, epoch, REASON1, REPORTER);
 
         // revoke demotion
         vm.prank(oracleAccount);
-        _settlement.revokeDemotions(alice, 0, array(uint256(1)));
-        demotions = _staking.getDemotions(alice, uint256(0));
+        _settlement.revokeDemotions(alice, epoch, array(uint256(1)));
+
+        // check demotion
+        demotions = _staking.getDemotions(alice, epoch);
         assertEq(demotions.length, 0);
     }
 

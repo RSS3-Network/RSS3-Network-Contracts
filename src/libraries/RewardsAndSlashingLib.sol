@@ -6,7 +6,7 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
 import {Node, Demotion, NodeStatus, PoolStatData} from "./DataTypes.sol";
-import {NodeNotExists, SlashingNotExist, NodeIsPublicGood, InvalidArrayLength} from "./Errors.sol";
+import {NodeNotExists, SlashingNotExist, NodeIsPublicGood, NodeHasNoDemotions, InvalidArrayLength} from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
@@ -32,16 +32,13 @@ library RewardsAndSlashingLib {
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             address nodeAddr = nodeAddrs[i];
+
             Node storage node = StorageLib.getNode(nodeAddr);
             if (node.account == address(0)) revert NodeNotExists(nodeAddr);
             // public good node can't be demoted
             if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
 
             uint256 demotionId = StorageLib.nextDemotionId();
-
-            EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
-            // save demotion id
-            demotionIds.add(demotionId);
             // save demotion
             StorageLib.getDemotions()[demotionId] = Demotion({
                 demotionId: demotionId,
@@ -50,6 +47,9 @@ library RewardsAndSlashingLib {
                 reason: reasons[i],
                 reporter: reporters[i]
             });
+            // save demotion id
+            EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
+            demotionIds.add(demotionId);
 
             if (node.status != NodeStatus.Slashing && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD) {
                 // record slashing
@@ -69,16 +69,17 @@ library RewardsAndSlashingLib {
      * @dev Revoke demotions for a specific node in a given epoch.
      * @param nodeAddr The address of the node.
      * @param epoch The epoch number.
-     * @param demotionIdsToDelete An array of demotion IDs to delete.
+     * @param demotionIdsToRevoke An array of demotion IDs to revoke.
      */
-    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToDelete) external {
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToRevoke) external {
         EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
+        if (demotionIds.length() == 0) revert NodeHasNoDemotions(nodeAddr, epoch);
 
-        for (uint256 i = 0; i < demotionIdsToDelete.length; i++) {
-            demotionIds.remove(demotionIdsToDelete[i]);
-            delete StorageLib.getDemotions()[demotionIdsToDelete[i]];
+        for (uint256 i = 0; i < demotionIdsToRevoke.length; i++) {
+            demotionIds.remove(demotionIdsToRevoke[i]);
+            delete StorageLib.getDemotions()[demotionIdsToRevoke[i]];
 
-            emit Events.DemotionRevoked(demotionIdsToDelete[i]);
+            emit Events.DemotionRevoked(demotionIdsToRevoke[i]);
         }
 
         Node storage node = StorageLib.getNode(nodeAddr);

@@ -5,7 +5,13 @@ pragma solidity 0.8.20;
 import {CommonTest} from "test/helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, Demotion, NodeStatus} from "../src/libraries/DataTypes.sol";
-import {NodeNotExists, SlashingNotExist, InvalidArrayLength, NodeIsPublicGood} from "../src/libraries/Errors.sol";
+import {
+    NodeNotExists,
+    SlashingNotExist,
+    NodeHasNoDemotions,
+    InvalidArrayLength,
+    NodeIsPublicGood
+} from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 
 contract RewardsAndSlashingTest is CommonTest {
@@ -21,14 +27,22 @@ contract RewardsAndSlashingTest is CommonTest {
     }
 
     function testSubmitDemotions() public {
+        uint256 epoch = 4;
+
         _createNode(alice);
+        _presetNodeStatus(alice, NodeStatus.Online);
 
+        expectEmit();
+        emit Events.DemotionSubmitted(epoch, alice, uint256(1), REASON1, REPORTER);
         vm.prank(address(_settlement));
-        _staking.submitDemotions(1, array(alice), array(REASON1), array(REPORTER));
+        _staking.submitDemotions(epoch, array(alice), array(REASON1), array(REPORTER));
 
-        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
+        // check demotion
+        Demotion[] memory demotions = _staking.getDemotions(alice, epoch);
         assertEq(demotions.length, 1);
-        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), REASON1, REPORTER);
+        _checkDemotion(demotions[0], uint256(1), alice, epoch, REASON1, REPORTER);
+        // check node status
+        assertEq(uint256(_staking.getNode(alice).status), uint256(NodeStatus.Online));
     }
 
     function testSubmitDemotionsFail() public {
@@ -42,9 +56,9 @@ contract RewardsAndSlashingTest is CommonTest {
         _staking.submitDemotions(1, array(alice), array(REASON1), array(REPORTER, address(0xee)));
 
         // case 3: NodeNotExists
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(111)));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(0x111)));
         vm.prank(address(_settlement));
-        _staking.submitDemotions(1, array(address(111)), array(REASON1), array(REPORTER));
+        _staking.submitDemotions(1, array(address(0x111)), array(REASON1), array(REPORTER));
 
         // case 4: NodeNotExists
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(0)));
@@ -59,21 +73,34 @@ contract RewardsAndSlashingTest is CommonTest {
     }
 
     function testRevokeDemotions() public {
+        uint256 epoch = 4;
+
         _createNode(alice);
 
         // submit demotion
         vm.prank(address(_settlement));
-        _staking.submitDemotions(1, array(alice), array(REASON1), array(REPORTER));
+        _staking.submitDemotions(epoch, array(alice), array(REASON1), array(REPORTER));
 
-        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
+        Demotion[] memory demotions = _staking.getDemotions(alice, epoch);
         assertEq(demotions.length, 1);
-        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), REASON1, REPORTER);
+        _checkDemotion(demotions[0], uint256(1), alice, epoch, REASON1, REPORTER);
 
         // revoke demotion
         vm.prank(address(_settlement));
-        _staking.revokeDemotions(alice, 1, array(uint256(1)));
-        demotions = _staking.getDemotions(alice, 1);
+        _staking.revokeDemotions(alice, epoch, array(uint256(1)));
+        demotions = _staking.getDemotions(alice, epoch);
         assertEq(demotions.length, 0);
+    }
+
+    function testRevokeDemotionsFail() public {
+        // case 1: caller has no `ORACLE_ROLE` permission
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _staking.revokeDemotions(alice, 1, array(uint256(1)));
+
+        // case 2: NodeHasNoDemotion
+        vm.expectRevert(abi.encodeWithSelector(NodeHasNoDemotions.selector, alice, 1));
+        vm.prank(address(_settlement));
+        _staking.revokeDemotions(alice, 1, array(uint256(1)));
     }
 
     function testRecordSlashing() public {
@@ -91,7 +118,7 @@ contract RewardsAndSlashingTest is CommonTest {
         _staking.deposit{value: depositedTokens}();
 
         vm.prank(bob);
-        _staking.stake{value: stakedTokens}(alice);
+        uint256 chipId = _staking.stake{value: stakedTokens}(alice);
 
         _presetNodeStatus(alice, NodeStatus.Online);
 
@@ -121,6 +148,10 @@ contract RewardsAndSlashingTest is CommonTest {
         // check slashing pool
         (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
         assertEq(totalSlashingPoolTokens, expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool);
+
+        // check chip info
+        (, uint256 tokens, ) = _staking.getChipInfo(chipId);
+        assertEq(tokens, stakedTokens - expectedSlashedTokensOnStakingPool);
     }
 
     // Test:
@@ -137,7 +168,7 @@ contract RewardsAndSlashingTest is CommonTest {
         _staking.deposit{value: depositedTokens}();
 
         vm.prank(bob);
-        _staking.stake{value: stakedTokens}(alice);
+        uint256 chipId = _staking.stake{value: stakedTokens}(alice);
 
         _presetNodeStatus(alice, NodeStatus.Online);
 
@@ -167,6 +198,10 @@ contract RewardsAndSlashingTest is CommonTest {
         // check slashing pool
         (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
         assertEq(totalSlashingPoolTokens, 0);
+
+        // check chip info
+        (, uint256 tokens, ) = _staking.getChipInfo(chipId);
+        assertEq(tokens, stakedTokens);
     }
 
     function testCommitSlashingSucceeds() public {
@@ -184,7 +219,7 @@ contract RewardsAndSlashingTest is CommonTest {
         _staking.deposit{value: depositedTokens}();
 
         vm.prank(bob);
-        _staking.stake{value: stakedTokens}(alice);
+        uint256 chipId = _staking.stake{value: stakedTokens}(alice);
 
         _presetNodeStatus(alice, NodeStatus.Online);
 
@@ -196,19 +231,22 @@ contract RewardsAndSlashingTest is CommonTest {
 
         skip(Const.SLASHING_COMMIT_PERIOD_IN_EPOCH * 18 hours);
 
+        // commit slashing
+        expectEmit();
+        emit Events.NodeStatusChanged(alice, NodeStatus.Slashing, NodeStatus.Slashed);
         expectEmit();
         emit Events.SlashCommitted(alice, 1);
         vm.prank(address(_settlement));
         _staking.commitSlashing(alice, 1);
 
         // check staking pool and operation tokens
-        Node memory aliceNode = _staking.getNode(alice);
-        assertEq(aliceNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(aliceNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-        assertEq(aliceNode.slashedOperationPoolTokens, 0);
-        assertEq(aliceNode.slashedStakingPoolTokens, 0);
+        Node memory node = _staking.getNode(alice);
+        assertEq(node.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
+        assertEq(node.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
+        assertEq(node.slashedOperationPoolTokens, 0);
+        assertEq(node.slashedStakingPoolTokens, 0);
         // slash status updated correctly
-        assertEq(uint256(aliceNode.status), uint256(NodeStatus.Slashed));
+        assertEq(uint256(node.status), uint256(NodeStatus.Slashed));
 
         // check balances
         uint256 amount = expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool;
@@ -222,6 +260,10 @@ contract RewardsAndSlashingTest is CommonTest {
         // check slashing pool
         (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
         assertEq(totalSlashingPoolTokens, 0);
+
+        // check chip info
+        (, uint256 tokens, ) = _staking.getChipInfo(chipId);
+        assertEq(tokens, stakedTokens - expectedSlashedTokensOnStakingPool);
     }
 
     function testCommitSlashingFail() public {

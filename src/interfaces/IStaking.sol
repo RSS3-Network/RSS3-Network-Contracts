@@ -180,9 +180,9 @@ interface IStaking {
      * - The caller must have the `ORACLE_ROLE`.
      * @param nodeAddr The address of node to revoke.
      * @param epoch The epoch number.
-     * @param demotionIds The ids of demotions to revoke.
+     * @param demotionIdsToRevoke The ids of demotions to revoke.
      */
-    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds) external;
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToRevoke) external;
 
     /**
      * @notice Commit slashing node.

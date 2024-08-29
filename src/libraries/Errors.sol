@@ -129,3 +129,6 @@ error NodeIsPublicGood(address nodeAddr);
 
 /// @dev Epoch not elapsed.
 error CommitEpochNotElapsed(uint256 recordedEpoch, uint256 currentEpoch);
+
+/// @dev Node has no demotions
+error NodeHasNoDemotions(address nodeAddr, uint256 epoch);
