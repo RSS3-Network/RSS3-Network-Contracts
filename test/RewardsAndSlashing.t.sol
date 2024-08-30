@@ -2,7 +2,7 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {CommonTest} from "test/helpers/CommonTest.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, Demotion, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {

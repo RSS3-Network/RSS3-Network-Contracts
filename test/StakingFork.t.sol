@@ -3,7 +3,7 @@
 pragma solidity 0.8.20;
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {CommonTest} from "test/helpers/CommonTest.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, UnstakeRequest} from "../src/libraries/DataTypes.sol";
 import {Settlement} from "../src/Settlement.sol";

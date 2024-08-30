@@ -2,7 +2,7 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {CommonTest} from "test/helpers/CommonTest.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
@@ -239,55 +239,96 @@ contract NodeSettingTest is CommonTest {
         _staking.setTaxRateBasisPoints4Node(1000);
     }
 
-    function testNodeStatus() public {
-        _disableAlphaPhase();
-        uint256 amount = 10000 ether;
+    function testExitSucceeds() public {
+        vm.startPrank(alice);
+        // create node and deposit
+        _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
-        _createNode(alice);
+        // node in these status can initiate exit
+        NodeStatus[] memory status = array(
+            NodeStatus.None,
+            NodeStatus.Registered,
+            NodeStatus.Initializing,
+            NodeStatus.Online,
+            NodeStatus.Outdated,
+            NodeStatus.Slashed
+        );
+        for (uint256 i = 0; i < status.length; i++) {
+            // preset node status
+            _presetNodeStatus(alice, status[i]);
 
-        // none
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.None));
+            NodeStatus expectedStatus = status[i] == NodeStatus.Online ? NodeStatus.Exiting : NodeStatus.Exited;
+            // exit
+            expectEmit();
+            emit Events.NodeStatusChanged(alice, status[i], expectedStatus);
+            _staking.exit();
+
+            // check new status
+            Node memory node = _staking.getNode(alice);
+            assertEq(uint256(node.status), uint256(expectedStatus));
+
+            // check exit time if node is in Exiting status
+            if (node.status == NodeStatus.Exiting) {
+                assertEq(node.exitTime, block.timestamp + Const.NODE_EXIT_PERIOD);
+
+                // skip the exit period, node should be in Exited status
+                skip(Const.NODE_EXIT_PERIOD);
+                assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
+            }
+        }
+        vm.stopPrank();
+    }
+
+    function testExitFail() public {
+        // case 1: NodeNotExists
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
+        _staking.exit();
 
         vm.startPrank(alice);
-        _staking.deposit{value: amount}();
+        _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
 
-        // registered
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+        // case 2: CurStateCantExit
+        // node in these status can't initiate exit
+        NodeStatus[] memory status = array(
+            NodeStatus.Slashing,
+            NodeStatus.Offline,
+            NodeStatus.Exiting,
+            NodeStatus.Exited
+        );
+        for (uint256 i = 0; i < status.length; i++) {
+            // preset node status
+            _presetNodeStatus(alice, status[i]);
 
-        _presetNodeStatus(alice, NodeStatus.Online);
-
-        // exiting
-        _staking.exit();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
-
-        // exited
-        skip(Const.NODE_EXIT_PERIOD);
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
-
-        // registered
-        _staking.register();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+            vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(status[i])));
+            _staking.exit();
+        }
 
         vm.stopPrank();
     }
 
-    function testNodeExitedStatus() public {
-        // case 1: Registered -> Exited
+    function testNodeStatus() public {
         _createNode(alice);
+        // None
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.None));
 
+        // None -> Registered
         vm.startPrank(alice);
-        _staking.deposit{value: 10000 ether}();
-        _staking.exit();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
+        _staking.deposit{value: Const.MIN_DEPOSIT}();
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
-        // case 2: Online -> Exiting -> Exited
+        // Registered -> Initializing
         _presetNodeStatus(alice, NodeStatus.Online);
         _staking.exit();
-
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
 
+        // Exiting -> Exited
         skip(Const.NODE_EXIT_PERIOD);
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
+
+        // Exited -> Registered
+        _staking.register();
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
         vm.stopPrank();
     }
@@ -369,42 +410,6 @@ contract NodeSettingTest is CommonTest {
             );
             _staking.online();
         }
-        vm.stopPrank();
-    }
-
-    function testExitSucceeds() public {
-        vm.prank(alice);
-        _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
-
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
-
-        expectEmit();
-        emit Events.NodeStatusChanged(alice, NodeStatus.Registered, NodeStatus.Exited);
-        vm.prank(alice);
-        _staking.exit();
-
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
-    }
-
-    function testExitFail() public {
-        // case 1: NodeNotExists
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
-        _staking.exit();
-
-        vm.startPrank(alice);
-        _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
-
-        // case 2: CurStateCantExit Slashing -> Exiting
-        _presetNodeStatus(alice, NodeStatus.Slashing);
-        vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.Slashing)));
-        _staking.exit();
-
-        // TODO: Offline -> Exiting is not allowed ???
-        // case 4: CurStateCantExit Offline -> Exiting
-        _presetNodeStatus(alice, NodeStatus.Offline);
-        vm.expectRevert(abi.encodeWithSelector(CurStateCantExit.selector, uint256(NodeStatus.Offline)));
-        _staking.exit();
-
         vm.stopPrank();
     }
 

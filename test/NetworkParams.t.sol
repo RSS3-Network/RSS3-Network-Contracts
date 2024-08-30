@@ -2,7 +2,7 @@
 // solhint-disable comprehensive-interface
 pragma solidity 0.8.20;
 
-import {CommonTest} from "test/helpers/CommonTest.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 import {NetworkParams} from "../src/NetworkParams.sol";
 
 contract NetworkParamsTest is CommonTest {
