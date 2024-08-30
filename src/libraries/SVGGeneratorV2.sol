@@ -295,6 +295,7 @@ library SVGGeneratorV2 {
             string.concat(
                 '<style type="text/css">',
                 fontStr,
+                ".a{fill:#DEE5D9;}",
                 ".b{fill:",
                 getColor(frameColor),
                 ";}.c{fill:",
