@@ -290,7 +290,7 @@ library StakingLib {
             return address(0);
         }
 
-        // fetch issuer
+        // fetch issuer, if not found in families, then fetch from chipIssuers
         address issuer = StorageLib.getIssuerFromFamilies(tokenId);
         return issuer != address(0) ? issuer : StorageLib.chipIssuers()[tokenId];
     }

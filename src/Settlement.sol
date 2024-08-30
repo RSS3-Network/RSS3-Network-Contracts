@@ -55,9 +55,6 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     // rewarded node addresses
     mapping(uint256 epoch => mapping(address nodeAddr => bool rewarded)) internal _rewardedAddresses;
 
-    // solhint-disable-next-line comprehensive-interface
-    receive() external payable {}
-
     /**
      * @notice constructor.
      * @param checkEpochInterval Whether to check the epoch interval when updating the epoch.
@@ -66,13 +63,16 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         CHECK_EPOCH_INTERVAL = checkEpochInterval;
     }
 
+    // solhint-disable-next-line comprehensive-interface
+    receive() external payable {}
+
     /// @inheritdoc ISettlement
     function initialize(
         address staking,
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
-    ) external override reinitializer(4) {
+    ) external override reinitializer(5) {
         if (staking != address(0)) {
             _staking = staking;
         }

@@ -142,7 +142,7 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
         address pauseAccount,
         address oracleAccount,
         bool isAlphaPhase_
-    ) external override reinitializer(2) {
+    ) external override reinitializer(3) {
         if (chips != address(0)) {
             _chips = chips;
         }

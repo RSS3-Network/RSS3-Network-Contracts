@@ -93,6 +93,7 @@ library StorageLib {
         assembly {
             families.slot := FAMILIES_SLOT
         }
+        // Note: no need for safe cast, we know that tokenId <= type(uint96).max
         issuer = address(families.lowerLookup(tokenId.toUint96()));
     }
 
