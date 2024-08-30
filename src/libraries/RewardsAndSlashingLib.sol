@@ -245,6 +245,15 @@ library RewardsAndSlashingLib {
         emit Events.SlashCommitted(node.account, epoch);
     }
 
+    /**
+     * @dev Transfers a specified amount of tokens to reporters based on demotions.
+     *  It will divide the total amount of tokens by the number of demotions,
+     * and the tokens will be transferred to the payment processor if the reporter is address(0).
+     * @param amount The total amount of tokens to be transferred.
+     * @param nodeAddr The address of the node to get demotions.
+     * @param epoch The epoch number to get demotions.
+     * @param paymentProcessor The address of the payment processor contract.
+     */
     function _transferToReporters(uint256 amount, address nodeAddr, uint256 epoch, address paymentProcessor) internal {
         Demotion[] memory demotions = _getDemotions(nodeAddr, epoch);
         uint256 averageAmount = amount / demotions.length;
@@ -292,13 +301,13 @@ library RewardsAndSlashingLib {
         uint256 fullTax = _getFullTax(rewards, taxRateBasisPoints);
 
         if (operationPool < Const.MIN_DEPOSIT) {
-            // node will receive no tax
+            // node will receive no tax if operation pool is below minimum
             return (fullTax, 0);
         } else if (operationPool >= Const.MIN_DEPOSIT && operationPool * Const.STAKE_RATIO >= stakingPool) {
-            // node will receive its full tax
+            // node will receive its full tax if operation pool is exceeding 1/25 of staking pool
             return (fullTax, fullTax);
         } else {
-            // node will receive part of its tax
+            // node will receive part of its tax if operation pool is below 1/25 of staking pool
             uint256 partialTax = (fullTax * operationPool * Const.STAKE_RATIO) / stakingPool;
             return (fullTax, partialTax);
         }
