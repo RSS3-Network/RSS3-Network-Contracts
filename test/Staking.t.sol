@@ -19,7 +19,7 @@ import {
     WithdrawalAmountExceedsOperationPoolTokens,
     ClaimTimeNotReady,
     ClaimIdNotExists,
-    ChipIdsLengthTooShort,
+    ChipIdsArrayTooSmall,
     SettlementPhase,
     EmptyChipIds,
     ChipsNotSameOwner,
@@ -817,8 +817,8 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testMergeChipsFail() public {
         // case 1: chipIds array length too short
-        vm.expectRevert(abi.encodeWithSelector(ChipIdsLengthTooShort.selector));
-        _staking.mergeChips(new uint256[](0));
+        vm.expectRevert(abi.encodeWithSelector(ChipIdsArrayTooSmall.selector, 1));
+        _staking.mergeChips(new uint256[](1));
 
         // case 2: chips are issued by the same node
         _createNode(bob);
@@ -833,6 +833,26 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(ChipNotValid.selector, 2, bob));
         _staking.mergeChips(array(uint256(1), uint256(2)));
         vm.stopPrank();
+    }
+
+    function testMergeChipsFailWithBurnedChips() public {
+        // case 3: chips are not existed
+        _createNode(bob);
+        _deposit(bob, 10000 ether);
+
+        vm.startPrank(alice);
+        _staking.stake{value: 500 ether}(bob);
+        _staking.stake{value: 600 ether}(bob);
+        vm.stopPrank();
+
+        vm.startPrank(address(_staking));
+        _chips.burn(1);
+        _chips.burn(2);
+        vm.stopPrank();
+
+        vm.expectRevert(abi.encodeWithSelector(ERC721NonexistentToken.selector, 1));
+        vm.prank(alice);
+        _staking.mergeChips(array(uint256(1), uint256(2)));
     }
 
     // solhint-disable-next-line function-max-lines

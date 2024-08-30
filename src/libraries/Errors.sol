@@ -56,7 +56,7 @@ error ChipNotAuthorized(uint256 tokenId);
 error EmptyChipIds();
 
 /// @dev ChipIds array length is too short.
-error ChipIdsLengthTooShort();
+error ChipIdsArrayTooSmall(uint256 length);
 
 /// @dev Chips are not same owner.
 error ChipsNotSameOwner();
