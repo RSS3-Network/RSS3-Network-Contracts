@@ -125,11 +125,15 @@ contract Deploy is Deployer {
     }
 
     function deploySettlement() public broadcast returns (address addr_) {
-        Settlement settlement = new Settlement();
+        Settlement settlement = new Settlement(cfg.checkEpochInterval());
 
         // check states
         require(!settlement.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "oracle role error");
         require(settlement.stakingContract() == address(0), "check settlement contract error");
+        require(
+            settlement.CHECK_EPOCH_INTERVAL() == cfg.checkEpochInterval(),
+            "check settlement checkEpochInterval error"
+        );
 
         save("Settlement", address(settlement));
         console.log("Settlement deployed at %s", address(settlement));

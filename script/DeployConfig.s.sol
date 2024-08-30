@@ -23,6 +23,7 @@ contract DeployConfig is Script {
     string public chipsSymbol;
     uint256 public settlementStartTime;
     uint256 public operationRewardsPercent;
+    bool public checkEpochInterval;
     address public paymentProcessor;
     address public networkParamsManager;
     bool public isAlphaPhase;
@@ -46,6 +47,7 @@ contract DeployConfig is Script {
         chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");
         settlementStartTime = stdJson.readUint(_json, "$.settlementStartTime");
         operationRewardsPercent = stdJson.readUint(_json, "$.operationRewardsPercent");
+        checkEpochInterval = stdJson.readBool(_json, "$.checkEpochInterval");
         paymentProcessor = stdJson.readAddress(_json, "$.paymentProcessor");
         networkParamsManager = stdJson.readAddress(_json, "$.networkParamsManager");
         isAlphaPhase = stdJson.readBool(_json, "$.isAlphaPhase");

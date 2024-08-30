@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable var-name-mixedcase
-
+// solhint-disable var-name-mixedcase,no-empty-blocks
 pragma solidity 0.8.20;
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -285,9 +284,13 @@ library StakingLib {
 
     /// @dev returns the node address which issued the chips
     function _issuerOf(uint256 tokenId) internal view returns (address) {
-        // check the token was not burned, and fetch ownership from the anchors
-        // Note: no need for safe cast, we know that tokenId <= type(uint96).max
+        // return address(0) if the chip is not existing or burned
+        address chips = StorageLib.getChipsContract();
+        try IERC721(chips).ownerOf(tokenId) returns (address) {} catch (bytes memory) {
+            return address(0);
+        }
 
+        // fetch issuer
         address issuer = StorageLib.getIssuerFromFamilies(tokenId);
         return issuer != address(0) ? issuer : StorageLib.chipIssuers()[tokenId];
     }

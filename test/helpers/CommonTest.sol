@@ -88,7 +88,7 @@ contract CommonTest is Utils {
         // deploy chips token
         Chips chipsImpl = new Chips();
         // deploy settlement contract
-        Settlement settlementImpl = new Settlement();
+        Settlement settlementImpl = new Settlement(_cfg.checkEpochInterval());
 
         // deploy staking proxy
         Proxy stakingProxy = new Proxy(address(stakingImpl), proxyAdmin, "");
