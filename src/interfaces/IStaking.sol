@@ -161,7 +161,7 @@ interface IStaking {
     function mergeChips(uint256[] calldata chipIds) external returns (uint256 newTokenId);
 
     /**
-     * @notice Submits demotions for nodes.
+     * @dev Submits demotions for a given epoch and node addresses.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`
      * If the domiton count in the same epoch is greater than the threshold, the node will be in a slashing status.
@@ -169,6 +169,7 @@ interface IStaking {
      * @param epoch Current epoch number.
      * @param nodeAddrs Addresses of node operator to demote.
      * @param reasons The reasons of demotion.
+     * @param reporters The reporters of demotion.
      */
     function submitDemotions(
         uint256 epoch,
@@ -178,7 +179,7 @@ interface IStaking {
     ) external;
 
     /**
-     * @notice Revoke demotions.
+     * @dev Revoke demotions for a specific node in a given epoch.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @dev Emits the `DemotionRevoked` event.
@@ -189,7 +190,7 @@ interface IStaking {
     function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToRevoke) external;
 
     /**
-     * @notice Commit slashing node.
+     * @notice Commits slashing for a specific node and epoch.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @dev Emits the `SlashCommitted` event.
@@ -199,7 +200,7 @@ interface IStaking {
     function commitSlashing(address nodeAddr, uint256 epoch) external;
 
     /**
-     * @notice Sets node status.
+     * @dev Sets the status for nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @dev Emits a `NodeStatusChanged` event with the updated status.

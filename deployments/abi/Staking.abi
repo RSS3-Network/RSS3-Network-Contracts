@@ -1528,11 +1528,6 @@
   },
   {
     "type": "error",
-    "name": "NodeInExitStatus",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "NodeNotExists",
     "inputs": [
       {

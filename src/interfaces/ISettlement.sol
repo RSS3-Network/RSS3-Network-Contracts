@@ -45,8 +45,9 @@ interface ISettlement {
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 
     /**
-     * @notice Submits demotions for nodes.
-     * @dev The caller must have the `ORACLE_ROLE`.
+     * @dev Submits demotions for nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`
      * @param nodeAddrs Addresses of node operator to demote.
      * @param reasons The reasons of demotion.
      * @param reporters The reporters of demotion.
@@ -58,22 +59,24 @@ interface ISettlement {
     ) external;
 
     /**
-     * @notice Revokes slashing.
-     * @param nodeAddr The address of node to revoke demotions.
-     * @param epoch The epoch numbers to revoke demotions.
+     * @dev Revoke demotions for a specific node in a given epoch.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param nodeAddr The address of node to revoke.
+     * @param epoch The epoch number.
      * @param demotionIds The ids of demotions to revoke.
      */
     function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds) external;
 
     /**
-     * @notice Commit slashing.
+     * @notice Commits slashing for a specific node and epoch.
      * @param nodeAddrs The addresses of nodes to commit slashing.
      * @param epochs The epoch number to commit slashing.
      */
     function commitSlashing(address[] calldata nodeAddrs, uint256[] calldata epochs) external;
 
     /**
-     * @notice Sets node status.
+     * @dev Sets the status for nodes.
      * @param nodeAddrs Addresses of node operator to set.
      * @param status Status to set.
      */
