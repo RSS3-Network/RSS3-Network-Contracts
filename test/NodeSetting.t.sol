@@ -2,7 +2,6 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {CommonTest} from "./helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
@@ -15,10 +14,12 @@ import {
     NodeDepositBelowMinimum,
     NodeNotInExitStatus,
     DepositForPublicGoodNode,
-    WrongNodeStatus,
-    CurStateCantExit
+    InvalidNodeStatusTransition,
+    CurStateCantExit,
+    CurStatusCantOnline
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 
 contract NodeSettingTest is CommonTest {
     function setUp() public {
@@ -33,7 +34,7 @@ contract NodeSettingTest is CommonTest {
     }
 
     function testCreateNode(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints >= Const.MIN_TAX_RATE_BASIS_POINTS && taxRateBasisPoints <= 10000);
+        taxRateBasisPoints = uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10000));
 
         string memory name = "Alice";
         string memory description = "Alice's node";
@@ -77,8 +78,8 @@ contract NodeSettingTest is CommonTest {
     }
 
     function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
-        vm.assume(taxRateBasisPoints >= Const.MIN_TAX_RATE_BASIS_POINTS && taxRateBasisPoints <= 10000);
-        vm.assume(amount > 1 && amount < _initialAmount);
+        taxRateBasisPoints = uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10000));
+        amount = bound(amount, 1, _initialAmount);
 
         string memory name = "Alice";
         string memory description = "Alice's node";
@@ -339,17 +340,21 @@ contract NodeSettingTest is CommonTest {
         vm.startPrank(alice);
         _staking.deposit{value: 10000 ether}();
 
-        _staking.exit();
+        NodeStatus[] memory status = array(NodeStatus.Exiting, NodeStatus.Exited);
+        for (uint256 i = 0; i < status.length; i++) {
+            // preset node status
+            _presetNodeStatus(alice, status[i]);
 
-        // register
-        vm.expectEmit();
-        emit Events.NodeStatusChanged(alice, NodeStatus.Exited, NodeStatus.Registered);
-        _staking.register();
+            // register
+            vm.expectEmit();
+            emit Events.NodeStatusChanged(alice, status[i], NodeStatus.Registered);
+            _staking.register();
+
+            // check node status
+            assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+        }
+
         vm.stopPrank();
-
-        // check node status
-        NodeStatus status = _getNodeStatus(alice);
-        assertEq(uint256(status), uint256(NodeStatus.Registered));
     }
 
     function testRegisterFail() public {
@@ -361,8 +366,23 @@ contract NodeSettingTest is CommonTest {
         vm.startPrank(alice);
 
         // case 2: node not in exit status
-        vm.expectRevert(abi.encodeWithSelector(NodeNotInExitStatus.selector));
-        _staking.register();
+        NodeStatus[] memory status = array(
+            NodeStatus.None,
+            NodeStatus.Registered,
+            NodeStatus.Initializing,
+            NodeStatus.Outdated,
+            NodeStatus.Online,
+            NodeStatus.Offline,
+            NodeStatus.Slashing,
+            NodeStatus.Slashed
+        );
+        for (uint256 i = 0; i < status.length; i++) {
+            // preset node status
+            _presetNodeStatus(alice, status[i]);
+
+            vm.expectRevert(abi.encodeWithSelector(NodeNotInExitStatus.selector, uint256(status[i])));
+            _staking.register();
+        }
 
         // case 3: node deposit is below minimum
         _presetNodeStatus(alice, NodeStatus.Exiting);
@@ -373,16 +393,21 @@ contract NodeSettingTest is CommonTest {
 
     function testOnlineSucceeds() public {
         _createNode(alice);
-        _presetNodeStatus(alice, NodeStatus.Offline);
 
-        expectEmit();
-        emit Events.NodeStatusChanged(alice, NodeStatus.Offline, NodeStatus.Online);
-        vm.prank(alice);
-        _staking.online();
+        NodeStatus[] memory status = array(NodeStatus.Offline, NodeStatus.Slashed, NodeStatus.Outdated);
+        for (uint256 i = 0; i < status.length; i++) {
+            // preset node status
+            _presetNodeStatus(alice, status[i]);
 
-        // check node status
-        NodeStatus status = _getNodeStatus(alice);
-        assertEq(uint256(status), uint256(NodeStatus.Online));
+            // online
+            expectEmit();
+            emit Events.NodeStatusChanged(alice, status[i], NodeStatus.Online);
+            vm.prank(alice);
+            _staking.online();
+
+            // check node status
+            assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Online));
+        }
     }
 
     function testOnlineFail() public {
@@ -393,7 +418,7 @@ contract NodeSettingTest is CommonTest {
         _createNode(alice);
 
         vm.startPrank(alice);
-        // case 2: wrong node status
+        // case 2: CurStatusCantOnline
         NodeStatus[] memory status = array(
             NodeStatus.None,
             NodeStatus.Registered,
@@ -405,9 +430,7 @@ contract NodeSettingTest is CommonTest {
         );
         for (uint256 i = 0; i < status.length; i++) {
             _presetNodeStatus(alice, status[i]);
-            vm.expectRevert(
-                abi.encodeWithSelector(WrongNodeStatus.selector, uint256(status[i]), uint256(NodeStatus.Online))
-            );
+            vm.expectRevert(abi.encodeWithSelector(CurStatusCantOnline.selector, uint256(status[i])));
             _staking.online();
         }
         vm.stopPrank();
@@ -446,7 +469,7 @@ contract NodeSettingTest is CommonTest {
     function testSetNodesStatusFail() public {
         _createNode(alice);
 
-        // WrongNodeStatus
+        // InvalidNodeStatusTransition
         // transitions to these status are not allowed by the `setNodeStatus`
         NodeStatus[] memory status = array(
             NodeStatus.None,
@@ -529,7 +552,9 @@ contract NodeSettingTest is CommonTest {
     function _invalidNodeStatusTransition(address nodeAddr, NodeStatus curStatus, NodeStatus newStatus) internal {
         _presetNodeStatus(nodeAddr, curStatus);
 
-        vm.expectRevert(abi.encodeWithSelector(WrongNodeStatus.selector, uint256(curStatus), uint256(newStatus)));
+        vm.expectRevert(
+            abi.encodeWithSelector(InvalidNodeStatusTransition.selector, uint256(curStatus), uint256(newStatus))
+        );
         vm.prank(address(_settlement));
         _staking.setNodeStatus(array(nodeAddr), array(newStatus));
     }

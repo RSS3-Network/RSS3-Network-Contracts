@@ -28,11 +28,14 @@ error InvalidEpochNumber(uint256 current, uint256 got);
 /// @dev Submission interval has not elapsed.
 error SubmissionIntervalNotElapsed();
 
-/// @dev Wrong node status
-error WrongNodeStatus(uint256 curStatus, uint256 newStatus);
+/// @dev Invalid node status transition
+error InvalidNodeStatusTransition(uint256 curStatus, uint256 newStatus);
 
 /// @dev Can't request exit in current state
 error CurStateCantExit(uint256 curStatus);
+
+/// @dev Can't set status to online in current state
+error CurStatusCantOnline(uint256 curStatus);
 
 /// @dev Request already claimed.
 error AlreadyClaimed();
@@ -80,7 +83,7 @@ error ExcessWithdrawalAmount();
 error WithdrawalAmountExceedsOperationPoolTokens();
 
 /// @dev Node is not in an exit status
-error NodeNotInExitStatus();
+error NodeNotInExitStatus(uint256 curStatus);
 
 /// @dev Deposit is not allowed for public good node.
 error DepositForPublicGoodNode();

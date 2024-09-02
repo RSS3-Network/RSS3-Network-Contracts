@@ -10,9 +10,10 @@ import {
     NodeIsPublicGood,
     NodeNotExists,
     NodeInExitStatus,
+    CurStatusCantOnline,
     CurStateCantExit,
     NodeNotInExitStatus,
-    WrongNodeStatus,
+    InvalidNodeStatusTransition,
     InvalidArrayLength,
     TaxRateBasisPointsTooLarge,
     PublicGoodNodeTaxNotZero,
@@ -135,7 +136,9 @@ library NodeSettingsLib {
 
         NodeStatus curStatus = _getNodeStatus(node);
         // throws a `NodeNotInExitStatus` error if the node is not in "Exiting" or "Exited" status.
-        if (NodeStatus.Exiting != curStatus && NodeStatus.Exited != curStatus) revert NodeNotInExitStatus();
+        if (NodeStatus.Exiting != curStatus && NodeStatus.Exited != curStatus) {
+            revert NodeNotInExitStatus(uint256(curStatus));
+        }
 
         // check if the node's operation pool tokens are below the minimum deposit amount.
         uint256 operationPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
@@ -158,7 +161,7 @@ library NodeSettingsLib {
         // if the current status is not Offline, Slashed, or Outdated, it reverts with an error
         NodeStatus curStatus = _getNodeStatus(node);
         if (NodeStatus.Offline != curStatus && NodeStatus.Slashed != curStatus && NodeStatus.Outdated != curStatus)
-            revert WrongNodeStatus(uint256(curStatus), uint256(NodeStatus.Online));
+            revert CurStatusCantOnline(uint256(curStatus));
 
         // set node status
         node.status = NodeStatus.Online;
@@ -203,11 +206,18 @@ library NodeSettingsLib {
         }
     }
 
+    /**
+     * @dev Sets the status of a node.
+     * @param nodeAddr The address of the node to update.
+     * @param newStatus The new status to set for the node.
+     */
     function _setNodeStatus(address nodeAddr, NodeStatus newStatus) internal {
         Node storage node = StorageLib.getNode(nodeAddr);
         NodeStatus curStatus = _getNodeStatus(node);
 
-        if (!_isValidTransition(curStatus, newStatus)) revert WrongNodeStatus(uint256(curStatus), uint256(newStatus));
+        // throws a `InvalidNodeStatusTransition` error if the transition is invalid.
+        if (!_isValidTransition(curStatus, newStatus))
+            revert InvalidNodeStatusTransition(uint256(curStatus), uint256(newStatus));
 
         node.status = newStatus;
         emit Events.NodeStatusChanged(nodeAddr, curStatus, newStatus);
@@ -262,29 +272,26 @@ library NodeSettingsLib {
      * @param newStatus The new status to check valid transitions for.
      * @return validTransitions An array of valid transitions for the given `newStatus`.
      */
-    function _getValidTransitions(NodeStatus newStatus) internal pure returns (NodeStatus[] memory) {
+    function _getValidTransitions(NodeStatus newStatus) internal pure returns (NodeStatus[] memory validTransitions) {
         if (newStatus == NodeStatus.Offline) {
-            NodeStatus[] memory validTransitions = new NodeStatus[](2);
+            validTransitions = new NodeStatus[](2);
             validTransitions[0] = NodeStatus.Online;
             validTransitions[1] = NodeStatus.Exiting;
-            return validTransitions;
         } else if (newStatus == NodeStatus.Online) {
-            NodeStatus[] memory validTransitions = new NodeStatus[](4);
+            validTransitions = new NodeStatus[](4);
             validTransitions[0] = NodeStatus.Initializing;
             validTransitions[1] = NodeStatus.Offline;
             validTransitions[2] = NodeStatus.Slashed;
             validTransitions[3] = NodeStatus.Outdated;
-            return validTransitions;
         } else if (newStatus == NodeStatus.Outdated) {
-            NodeStatus[] memory validTransitions = new NodeStatus[](1);
+            validTransitions = new NodeStatus[](1);
             validTransitions[0] = NodeStatus.Initializing;
-            return validTransitions;
         } else if (newStatus == NodeStatus.Initializing) {
-            NodeStatus[] memory validTransitions = new NodeStatus[](1);
+            validTransitions = new NodeStatus[](1);
             validTransitions[0] = NodeStatus.Registered;
-            return validTransitions;
         } else {
-            return new NodeStatus[](0);
+            validTransitions = new NodeStatus[](0);
         }
+        return validTransitions;
     }
 }

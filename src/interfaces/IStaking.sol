@@ -162,7 +162,10 @@ interface IStaking {
 
     /**
      * @notice Submits demotions for nodes.
-     * @dev The caller must have the `ORACLE_ROLE`.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`
+     * If the domiton count in the same epoch is greater than the threshold, the node will be in a slashing status.
+     * @dev Emits the `DemotionSubmitted` event.
      * @param epoch Current epoch number.
      * @param nodeAddrs Addresses of node operator to demote.
      * @param reasons The reasons of demotion.
@@ -178,6 +181,7 @@ interface IStaking {
      * @notice Revoke demotions.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
+     * @dev Emits the `DemotionRevoked` event.
      * @param nodeAddr The address of node to revoke.
      * @param epoch The epoch number.
      * @param demotionIdsToRevoke The ids of demotions to revoke.
@@ -188,23 +192,28 @@ interface IStaking {
      * @notice Commit slashing node.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
+     * @dev Emits the `SlashCommitted` event.
      * @param nodeAddr The address of node to commit.
      * @param epoch The epoch number.
      */
     function commitSlashing(address nodeAddr, uint256 epoch) external;
 
     /**
-     * @notice Allows a node to exit from the network.
-     * @dev The caller must be the owner of node operator.
-     */
-    function exit() external;
-
-    /**
      * @notice Sets node status.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @dev Emits a `NodeStatusChanged` event with the updated status.
      * @param nodeAddrs Addresses of node operator to set.
      * @param status Status to set.
      */
     function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
+
+    /**
+     * @notice Allows a node to exit from the network.
+     * @dev Emits the `NodeStatusChanged` event with the updated status.
+     * @dev The caller must be the owner of node operator.
+     */
+    function exit() external;
 
     /**
      * @notice Registers a node by setting its status to "Registered".
@@ -221,7 +230,7 @@ interface IStaking {
     function online() external;
 
     /**
-     * @notice Sets the settlement phase.
+     * @notice Sets the settlement phase when rewards are distributing.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @param enabled Enable/disable the settlement phase.
