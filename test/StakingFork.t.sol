@@ -3,13 +3,13 @@
 pragma solidity 0.8.20;
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {CommonTest} from "./helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, UnstakeRequest} from "../src/libraries/DataTypes.sol";
 import {Settlement} from "../src/Settlement.sol";
 import {Staking} from "../src/Staking.sol";
 import {TransparentUpgradeableProxy as Proxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {ITransparentUpgradeableProxy as IProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 
 contract StakingForkTest is CommonTest {
     address public constant diygod = 0xC8b960D09C0078c18Dcbe7eB9AB9d816BcCa8944;

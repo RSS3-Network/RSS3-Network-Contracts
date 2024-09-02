@@ -287,10 +287,16 @@ library RewardsAndSlashingLib {
     }
 
     /**
-     * @dev get tax amount
+     * @dev Calculate tax amount based on rewards and pool sizes.
      *  For a node operator to receive its full tax,
      * it needs to stake at least 1/25 of the tokens staked by external delegators,
      * or the exceeding part of the tax will be sent to the staking pool.
+     * @param rewards Total rewards
+     * @param taxRateBasisPoints Tax rate in basis points
+     * @param operationPool tokens of operation pool
+     * @param stakingPool tokens of staking pool
+     * @return fullTax Full tax amount
+     * @return receivedTax Actual tax received by node
      */
     function _getTax(
         uint256 rewards,
@@ -300,17 +306,19 @@ library RewardsAndSlashingLib {
     ) internal pure returns (uint256, uint256) {
         uint256 fullTax = _getFullTax(rewards, taxRateBasisPoints);
 
+        // node will receive no tax if operation pool is below minimum
         if (operationPool < Const.MIN_DEPOSIT) {
-            // node will receive no tax if operation pool is below minimum
             return (fullTax, 0);
-        } else if (operationPool >= Const.MIN_DEPOSIT && operationPool * Const.STAKE_RATIO >= stakingPool) {
-            // node will receive its full tax if operation pool is exceeding 1/25 of staking pool
-            return (fullTax, fullTax);
-        } else {
-            // node will receive part of its tax if operation pool is below 1/25 of staking pool
-            uint256 partialTax = (fullTax * operationPool * Const.STAKE_RATIO) / stakingPool;
-            return (fullTax, partialTax);
         }
+
+        // node will receive its full tax if operation pool >= 1/25 of staking pool
+        if (operationPool * Const.STAKE_RATIO >= stakingPool) {
+            return (fullTax, fullTax);
+        }
+
+        // node will receive part of its tax if operation pool < 1/25 of staking pool
+        uint256 partialTax = (fullTax * operationPool * Const.STAKE_RATIO) / stakingPool;
+        return (fullTax, partialTax);
     }
 
     /// @dev returns the full tax amount

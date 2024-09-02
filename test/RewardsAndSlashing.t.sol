@@ -2,7 +2,6 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {CommonTest} from "./helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, Demotion, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
@@ -13,6 +12,7 @@ import {
     NodeIsPublicGood
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 
 contract RewardsAndSlashingTest is CommonTest {
     function setUp() public {

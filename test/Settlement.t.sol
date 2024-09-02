@@ -2,7 +2,6 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {CommonTest} from "./helpers/CommonTest.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, Demotion, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
@@ -16,6 +15,7 @@ import {
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {Settlement} from "../src/Settlement.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 
 contract SettlementTest is CommonTest {
     receive() external payable {}
@@ -43,8 +43,9 @@ contract SettlementTest is CommonTest {
         assertEq(opRewards, totalStakingRewardsPerEpoch);
     }
 
-    function testSetTaxRateBasisPoints4PublicPool(uint64 taxRate) public {
-        vm.assume(taxRate >= 0 && taxRate <= 10000);
+    function testSetTaxRateBasisPoints4PublicPool(uint256 x) public {
+        x = bound(x, 0, 10000);
+        uint64 taxRate = uint64(x);
 
         vm.prank(oracleAccount);
         _settlement.setTaxRateBasisPoints4PublicPool(taxRate);
@@ -792,7 +793,7 @@ contract SettlementTest is CommonTest {
     }
 
     function testStakingRewards(uint256 stakingAmount) public {
-        vm.assume(stakingAmount > 5000 && stakingAmount < 10000);
+        stakingAmount = bound(stakingAmount, 500, 10000);
         stakingAmount = stakingAmount * 1 ether;
 
         _createNode(alice);

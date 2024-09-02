@@ -5,8 +5,6 @@ pragma solidity 0.8.20;
 import {stdJson} from "forge-std/StdJson.sol";
 import {Base64} from "solady/utils/Base64.sol";
 import {LibString} from "solady/utils/LibString.sol";
-import {CommonTest} from "./helpers/CommonTest.sol";
-import {TestEvents} from "./helpers/TestEvents.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, NodeStatus, UnstakeRequest, WithdrawalRequest} from "../src/libraries/DataTypes.sol";
@@ -31,6 +29,8 @@ import {
 import {Events} from "../src/libraries/Events.sol";
 import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
 import {Staking} from "../src/Staking.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
+import {TestEvents} from "./helpers/TestEvents.sol";
 
 //import {console2 as console} from "forge-std/console2.sol";
 
@@ -200,7 +200,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testDeposit(uint256 amount) public {
-        vm.assume(amount > 10000 ether && amount < _initialAmount);
+        amount = bound(amount, 10000 ether, _initialAmount);
 
         _createNode(alice);
 
@@ -446,8 +446,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testStake(uint256 amount) public {
-        vm.assume(amount >= 500 && amount <= 1000000);
-        amount *= 1 ether;
+        amount = bound(amount, 500 ether, _initialAmount);
 
         _createNode(alice);
 
@@ -516,8 +515,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testStakeToPublicPool(uint256 amount) public {
-        vm.assume(amount >= 500 && amount < 10000);
-        amount = amount * 1 ether;
+        amount = bound(amount, 500 ether, _initialAmount);
 
         _createPublicGoodNode(alice);
 
@@ -685,8 +683,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testClaimUnstake(uint256 amount) public {
-        vm.assume(amount > 500 && amount < 10000);
-        amount *= 1 ether;
+        amount = bound(amount, 500 ether, _initialAmount);
 
         _disableAlphaPhase();
 
@@ -941,7 +938,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testWithdraw2Treasury(uint256 amount) public {
-        vm.assume(amount > 0);
+        amount = bound(amount, 0, 10000 ether);
 
         vm.deal(address(_staking), amount);
 
@@ -971,12 +968,12 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(found2 != LibString.NOT_FOUND, true);
     }
 
-    function testCalcTax1(uint256 operationPool) public pure {
+    function testCalcTax1(uint256 operationPool, uint256 rewards, uint256 stakingPool) public pure {
         // case 1: receives no tax rewards
-        vm.assume(operationPool < 10000 ether);
+        operationPool = bound(operationPool, 1, 10000 ether - 1); // operation pool < 10000 ether
+        rewards = bound(rewards, 1, 1000000 ether);
+        stakingPool = bound(stakingPool, 1, 100000 ether);
 
-        uint256 rewards = 10000 ether;
-        uint256 stakingPool = 1000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
         (uint256 tax1, uint256 partialTax1) = RewardsAndSlashingLib._getTax(
@@ -990,11 +987,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(partialTax1, 0);
     }
 
-    function testCalcTax2() public pure {
+    function testCalcTax2(uint256 operationPool, uint256 stakeRatio) public pure {
         // case 2: receives full tax rewards
-        uint256 operationPool = Const.MIN_DEPOSIT;
-        uint256 stakeRatio;
-        vm.assume(stakeRatio < 25);
+        operationPool = bound(operationPool, 10000 ether, 20000 ether); // operation pool < 10000 ether
+        stakeRatio = bound(stakeRatio, 1, 25);
 
         uint256 stakingPool = operationPool * stakeRatio;
 
