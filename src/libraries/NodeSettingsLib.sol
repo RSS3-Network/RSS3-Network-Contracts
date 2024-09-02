@@ -234,7 +234,12 @@ library NodeSettingsLib {
         return status;
     }
 
-    function _validateNodeNotInExitStatus(Node storage node) internal view {
+    /**
+     * @dev Validates that a node is not in an exit status (Exiting or Exited).
+     * @param nodeAddr The address of the node to validate.
+     */
+    function _validateNodeNotInExitStatus(address nodeAddr) internal view {
+        Node storage node = StorageLib.getNode(nodeAddr);
         NodeStatus status = _getNodeStatus(node);
         if (NodeStatus.Exiting == status || NodeStatus.Exited == status) revert NodeInExitStatus();
     }

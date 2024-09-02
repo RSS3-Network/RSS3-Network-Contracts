@@ -233,9 +233,6 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
         if (node.account == address(0)) revert NodeNotExists(nodeAddr);
 
-        // node should not in exit status
-        NodeSettingsLib._validateNodeNotInExitStatus(node);
-
         tokenId = StakingLib.stakeToNode(node, msg.value, nodeAddr, msg.sender);
     }
 
@@ -245,9 +242,6 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
         Node storage node = StorageLib.getNode(nodeAddr);
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
-
-        // node should not in exit status
-        NodeSettingsLib._validateNodeNotInExitStatus(node);
 
         tokenId = StakingLib.stakeToNode(StorageLib.publicPool(), msg.value, nodeAddr, msg.sender);
     }

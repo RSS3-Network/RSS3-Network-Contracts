@@ -57,6 +57,9 @@ library StakingLib {
         // staking amount must be greater than MIN_STAKE
         if (amount < Const.MIN_STAKE) revert StakeAmountTooSmall();
 
+        // node should not in exit status
+        NodeSettingsLib._validateNodeNotInExitStatus(nodeAddr);
+
         uint256 sharesToMint = _tokensToShares(amount, nodeAddr);
 
         // update staking pool
