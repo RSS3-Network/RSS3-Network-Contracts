@@ -258,11 +258,6 @@ interface IStaking {
     function setSettlementPhase(bool enabled) external;
 
     /**
-     * @notice Disable the alpha phase.
-     */
-    function disableAlphaPhase() external;
-
-    /**
      * @notice Withdraws tokens from staking contract to treasury.
      */
     function withdraw2Treasury() external;

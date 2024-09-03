@@ -210,13 +210,6 @@
   },
   {
     "type": "function",
-    "name": "disableAlphaPhase",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "distributeRewards",
     "inputs": [
       {

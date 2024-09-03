@@ -54,6 +54,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.getNodeCount(), 0);
         assertEq(_staking.chipsContract(), address(_chips));
 
+        assertEq(_staking.isAlphaPhase(), _cfg.isAlphaPhase());
+
         assertEq(_staking.version(), "2.0.0");
         assertEq(_staking.TREASURY(), _cfg.treasury());
         assertEq(_staking.PAYMENT_PROCESSOR(), _cfg.paymentProcessor());
@@ -225,8 +227,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testDepositAfterExit() public {
-        _disableAlphaPhase();
-
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
@@ -263,10 +263,8 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestWithdrawalSucceeds() public {
-        _disableAlphaPhase();
-
         uint256 depositAmount = 100000 ether;
-        uint256 withdrawalAmount = depositAmount - Const.MIN_DEPOSIT;
+        uint256 withdrawalAmount = depositAmount / 2 + 1;
 
         vm.startPrank(alice);
         _staking.createNode{value: depositAmount}("Alice", "Alice's node", uint64(1000), false);
@@ -292,8 +290,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestWithdrawalSucceedsWithExit() public {
-        _disableAlphaPhase();
-
         uint256 amount = 100000 ether;
 
         vm.startPrank(alice);
@@ -318,8 +314,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testMultipleDepositAndRequestWithdrawal() public {
-        _disableAlphaPhase();
-
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
@@ -341,7 +335,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestWithdrawalFailWithInsufficientTokens() public {
-        _disableAlphaPhase();
         uint256 amount = 10000 ether;
 
         _createNode(alice);
@@ -362,14 +355,11 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestWithdrawalFailWithNonExistentNode() public {
-        _disableAlphaPhase();
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
         _staking.requestWithdrawal(1 ether);
     }
 
     function testClaimWithdrawal() public {
-        _disableAlphaPhase();
-
         uint256 amount = 10000 ether;
 
         _createNode(alice);
@@ -400,7 +390,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testMultipleRequestAndClaimWithdrawal() public {
-        _disableAlphaPhase();
         _createNode(alice);
 
         uint256 depositAmount = 10000 ether;
@@ -434,15 +423,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.setSettlementPhase(false);
         assertEq(_staking.isSettlementPhase(), false);
         vm.stopPrank();
-    }
-
-    function testAlphaPhase() public {
-        vm.prank(alice);
-        assertEq(_staking.isAlphaPhase(), true);
-
-        _disableAlphaPhase();
-
-        assertEq(_staking.isAlphaPhase(), false);
     }
 
     function testSetSettlementPhaseFail() public {
@@ -571,22 +551,17 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testRequestUnstakeFromPublic() public {
         _createPublicGoodNode(alice);
 
-        _disableAlphaPhase();
         // stake and then request unstake
         _testRequestUnstakeFromNode(alice, true);
     }
 
     function testRequestUnstake() public {
-        _disableAlphaPhase();
-
         _createNode(alice);
         // stake and then request unstake
         _testRequestUnstakeFromNode(alice, false);
     }
 
     function testRequestUnstakeApprovedChip() public {
-        _disableAlphaPhase();
-
         _createNode(alice);
         // stake and then request unstake
         _testRequestUnstakeApprovedChipFromNode(alice, false);
@@ -605,8 +580,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         _chips.transferFrom(bob, carol, 2);
         vm.stopPrank();
 
-        _disableAlphaPhase();
-
         // request unstake
         vm.prank(carol);
         uint256 requestId = _staking.requestUnstake(alice, array(uint256(1), uint256(2)));
@@ -622,20 +595,16 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testRequestUnstakeApprovedChipsFromPublicGoodNode() public {
         _createPublicGoodNode(alice);
 
-        _disableAlphaPhase();
         _testRequestUnstakeApprovedChipsFromNode(alice, true);
     }
 
     function testRequestUnstakeApprovedChipFromPublicGoodNode() public {
         _createPublicGoodNode(alice);
 
-        _disableAlphaPhase();
         _testRequestUnstakeApprovedChipFromNode(alice, true);
     }
 
     function testRequestUnstakeFailInEmptyChipsIds() public {
-        _disableAlphaPhase();
-
         _createNode(alice);
 
         vm.expectRevert(abi.encodeWithSelector(EmptyChipIds.selector));
@@ -643,8 +612,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestUnstakeFailInChipsNotSameOwner() public {
-        _disableAlphaPhase();
-
         _createNode(alice);
 
         vm.startPrank(bob);
@@ -660,8 +627,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestUnstakeFailInSettlementPhase() public {
-        _disableAlphaPhase();
-
         _createNode(alice);
 
         _staking.stake{value: 5000 ether}(alice);
@@ -674,8 +639,6 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestUnstakeFailWithBurnedChip() public {
-        _disableAlphaPhase();
-
         uint256 amount = 10000 ether;
 
         _createNode(alice);
@@ -695,8 +658,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testClaimUnstake(uint256 amount) public {
         amount = bound(amount, 500 ether, _initialAmount);
-
-        _disableAlphaPhase();
 
         _createNode(alice);
 
@@ -732,7 +693,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testClaimUnstakeFail() public {
         _createNode(alice);
-        _disableAlphaPhase();
 
         vm.startPrank(bob);
 
@@ -756,7 +716,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         _createNode(bob);
         _deposit(bob, depositAmount);
-        _disableAlphaPhase();
 
         vm.startPrank(alice);
         _staking.stake{value: stakeAmount}(bob);

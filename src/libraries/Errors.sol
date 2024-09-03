@@ -17,8 +17,6 @@ error NodeDepositBelowMinimum();
 /// @dev Node not exists.
 error NodeNotExists(address nodeAddr);
 
-error TaxRateBasisPointsTooSmall();
-
 /// @dev Invalid array length.
 error InvalidArrayLength();
 
@@ -124,8 +122,8 @@ error SettlementPhase();
 /// @dev Slash is not able to be committed or revoked.
 error SlashingNotExist(address nodeAddr, uint256 epochId);
 
-/// @dev Basis points of tax rate too large.
-error TaxRateBasisPointsTooLarge();
+/// @dev Basis points of tax rate out of range.
+error TaxRateBasisPointsOutOfRange(uint64 taxRateBasisPoints);
 
 /// @dev Can't set tax for public good node
 error NodeIsPublicGood(address nodeAddr);

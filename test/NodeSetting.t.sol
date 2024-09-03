@@ -15,8 +15,7 @@ import {
     NodeNotExists,
     NodeNotInExitStatus,
     PublicGoodNodeTaxNotZero,
-    TaxRateBasisPointsTooLarge,
-    TaxRateBasisPointsTooSmall
+    TaxRateBasisPointsOutOfRange
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
@@ -40,24 +39,15 @@ contract NodeSettingTest is CommonTest {
         string memory name = "Alice";
         string memory description = "Alice's node";
 
-        // case 1: create a node before alpha phase
+        // create a node
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, true);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, false);
         vm.prank(alice);
         _staking.createNode(name, description, taxRateBasisPoints, false);
 
         // check node info
-        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, false, true);
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, false, false);
         assertEq(_staking.getNodeCount(), 1);
-
-        // case 2: create a node after alpha phase
-        _disableAlphaPhase();
-        expectEmit();
-        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false, false);
-        vm.prank(bob);
-        _staking.createNode(name, description, taxRateBasisPoints, false);
-        _checkNode(bob, 2, name, description, taxRateBasisPoints, 0, false, false);
-        assertEq(_staking.getNodeCount(), 2);
     }
 
     function testCreatePGNode() public {
@@ -65,12 +55,12 @@ contract NodeSettingTest is CommonTest {
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, 0, true, true);
+        emit Events.NodeCreated(1, alice, name, description, 0, true, false);
         vm.prank(alice);
         _staking.createNode(name, description, 0, true);
 
         // check node info
-        _checkNode(alice, 1, name, description, 0, 0, true, true);
+        _checkNode(alice, 1, name, description, 0, 0, true, false);
         assertEq(_staking.getNodeCount(), 1);
     }
 
@@ -88,25 +78,15 @@ contract NodeSettingTest is CommonTest {
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, true);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, false);
         expectEmit();
         emit Events.Deposited(alice, amount);
-
         vm.prank(alice);
         _staking.createNode{value: amount}(name, description, taxRateBasisPoints, false);
 
         // check node info
-        _checkNode(alice, 1, name, description, taxRateBasisPoints, amount, false, true);
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, amount, false, false);
         assertEq(_staking.getNodeCount(), 1);
-
-        // create node after alpha phase
-        _disableAlphaPhase();
-        expectEmit();
-        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false, false);
-        vm.prank(bob);
-        _staking.createNode(name, description, taxRateBasisPoints, false);
-        _checkNode(bob, 2, name, description, taxRateBasisPoints, 0, false, false);
-        assertEq(_staking.getNodeCount(), 2);
     }
 
     function testGetNodeCount() public {
@@ -161,17 +141,12 @@ contract NodeSettingTest is CommonTest {
         _createNode(alice);
     }
 
-    function testCreateNodeFailWithLargeTaxRate(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints > 10000);
+    function testCreateNodeFailWithTaxRateOutOfRange(uint64 taxRateBasisPoints) public {
+        vm.assume(taxRateBasisPoints > 10000 || taxRateBasisPoints < 500);
 
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
-        _staking.createNode("Alice", "Alice's node", taxRateBasisPoints, false);
-    }
-
-    function testCreateNodeFailWithSmallTaxRate(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints < 500);
-
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooSmall.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(TaxRateBasisPointsOutOfRange.selector, taxRateBasisPoints)
+        );
         _staking.createNode("Alice", "Alice's node", taxRateBasisPoints, false);
     }
 
@@ -181,10 +156,8 @@ contract NodeSettingTest is CommonTest {
     }
 
     function testSetTaxRate4Node(uint64 taxRateBasisPoints) public {
-        vm.assume(
-            taxRateBasisPoints <= Const.DENOMINATOR
-                && taxRateBasisPoints >= Const.MIN_TAX_RATE_BASIS_POINTS
-        );
+        taxRateBasisPoints =
+            uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, Const.DENOMINATOR));
 
         _createNode(alice);
 
@@ -198,36 +171,36 @@ contract NodeSettingTest is CommonTest {
         assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
     }
 
-    function testSetTaxRate4PublicPool(uint64 expectedTaxRateBasisPoints) public {
-        vm.assume(expectedTaxRateBasisPoints <= Const.DENOMINATOR);
+    function testSetTaxRate4PublicPool(uint64 taxRateBasisPoints) public {
+        taxRateBasisPoints =
+            uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, Const.DENOMINATOR));
 
         vm.startPrank(address(_settlement));
         expectEmit();
-        emit Events.PublicPoolTaxRateBasisPointsSet(expectedTaxRateBasisPoints);
-        _staking.setTaxRateBasisPoints4PublicPool(expectedTaxRateBasisPoints);
+        emit Events.PublicPoolTaxRateBasisPointsSet(taxRateBasisPoints);
+        _staking.setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
         vm.stopPrank();
 
         uint64 realTaxRateBasisPoints = _staking.getPublicPool().taxRateBasisPoints;
 
-        assertEq(realTaxRateBasisPoints, expectedTaxRateBasisPoints);
+        assertEq(realTaxRateBasisPoints, taxRateBasisPoints);
     }
 
-    function testSetTaxRateTooSmallError(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS);
+    function testSetTaxRateFailWithTaxRateOutOfRange(uint64 taxRateBasisPoints) public {
+        vm.assume(
+            taxRateBasisPoints > Const.DENOMINATOR
+                || taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS
+        );
 
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooSmall.selector));
-        vm.prank(oracleAccount);
-        _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
-    }
-
-    function testSetTaxRateTooLargeError(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints > Const.DENOMINATOR);
-
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(TaxRateBasisPointsOutOfRange.selector, taxRateBasisPoints)
+        );
         vm.prank(alice);
         _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
 
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
+        vm.expectRevert(
+            abi.encodeWithSelector(TaxRateBasisPointsOutOfRange.selector, taxRateBasisPoints)
+        );
         vm.prank(address(_settlement));
         _staking.setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
     }
