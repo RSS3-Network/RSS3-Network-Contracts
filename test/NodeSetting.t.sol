@@ -39,24 +39,15 @@ contract NodeSettingTest is CommonTest {
         string memory name = "Alice";
         string memory description = "Alice's node";
 
-        // case 1: create a node before alpha phase
+        // create a node
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, true);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, false);
         vm.prank(alice);
         _staking.createNode(name, description, taxRateBasisPoints, false);
 
         // check node info
-        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, false, true);
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, false, false);
         assertEq(_staking.getNodeCount(), 1);
-
-        // case 2: create a node after alpha phase
-        _disableAlphaPhase();
-        expectEmit();
-        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false, false);
-        vm.prank(bob);
-        _staking.createNode(name, description, taxRateBasisPoints, false);
-        _checkNode(bob, 2, name, description, taxRateBasisPoints, 0, false, false);
-        assertEq(_staking.getNodeCount(), 2);
     }
 
     function testCreatePGNode() public {
@@ -64,12 +55,12 @@ contract NodeSettingTest is CommonTest {
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, 0, true, true);
+        emit Events.NodeCreated(1, alice, name, description, 0, true, false);
         vm.prank(alice);
         _staking.createNode(name, description, 0, true);
 
         // check node info
-        _checkNode(alice, 1, name, description, 0, 0, true, true);
+        _checkNode(alice, 1, name, description, 0, 0, true, false);
         assertEq(_staking.getNodeCount(), 1);
     }
 
@@ -87,25 +78,15 @@ contract NodeSettingTest is CommonTest {
         string memory description = "Alice's node";
 
         expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, true);
+        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, false);
         expectEmit();
         emit Events.Deposited(alice, amount);
-
         vm.prank(alice);
         _staking.createNode{value: amount}(name, description, taxRateBasisPoints, false);
 
         // check node info
-        _checkNode(alice, 1, name, description, taxRateBasisPoints, amount, false, true);
+        _checkNode(alice, 1, name, description, taxRateBasisPoints, amount, false, false);
         assertEq(_staking.getNodeCount(), 1);
-
-        // create node after alpha phase
-        _disableAlphaPhase();
-        expectEmit();
-        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false, false);
-        vm.prank(bob);
-        _staking.createNode(name, description, taxRateBasisPoints, false);
-        _checkNode(bob, 2, name, description, taxRateBasisPoints, 0, false, false);
-        assertEq(_staking.getNodeCount(), 2);
     }
 
     function testGetNodeCount() public {

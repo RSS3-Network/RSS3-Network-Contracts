@@ -429,11 +429,6 @@ contract Staking is
     }
 
     /// @inheritdoc IStaking
-    function disableAlphaPhase() external override onlyRole(PAUSE_ROLE) {
-        _isAlphaPhase = false;
-    }
-
-    /// @inheritdoc IStaking
     function withdraw2Treasury() external override {
         RewardsAndSlashingLib.withdraw2Treasury(TREASURY);
     }
