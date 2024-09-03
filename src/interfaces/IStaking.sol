@@ -72,17 +72,16 @@ interface IStaking {
      * @dev Emits the `NodeTaxRateBasisPointsSet` event.
      * @dev Only node operator can call to set tax rate for itself.
      * @param taxRateBasisPoints The basis points of tax rate to set for the node.
-     * Each basis point represents 0.01%.
+     * Each basis point represents 0.01%. The tax rate must be in the range of 500 to 10000.
      */
     function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external;
 
     /**
      * @notice Sets tax rate for public pool.
-     * Requirements:
      * The caller must have the `ORACLE_ROLE`.
      * @dev Emits the `PublicPoolTaxRateBasisPointsSet` event.
      * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool.
-     * Each basis point represents 0.01%.
+     * Each basis point represents 0.01%. The tax rate must be in the range of 500 to 10000.
      */
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 
@@ -130,7 +129,7 @@ interface IStaking {
 
     /**
      * @notice Updates accounting stats and distribute rewards.
-     * @dev periodically called.
+     * @dev This function is periodically called every epoch.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @param epochInfo The current epoch info.
@@ -161,7 +160,7 @@ interface IStaking {
     function mergeChips(uint256[] calldata chipIds) external returns (uint256 newTokenId);
 
     /**
-     * @dev Submits demotions for a given epoch and node addresses.
+     * @notice Submits demotions for a given epoch and node addresses.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`
      * If the domiton count in the same epoch is greater than the threshold, the node will be in a slashing status.
@@ -179,7 +178,7 @@ interface IStaking {
     ) external;
 
     /**
-     * @dev Revoke demotions for a specific node in a given epoch.
+     * @notice Revokes demotions for a specific node in a given epoch.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @dev Emits the `DemotionRevoked` event.
@@ -200,7 +199,7 @@ interface IStaking {
     function commitSlashing(address nodeAddr, uint256 epoch) external;
 
     /**
-     * @dev Sets the status for nodes.
+     * @notice Sets the status for nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @dev Emits a `NodeStatusChanged` event with the updated status.

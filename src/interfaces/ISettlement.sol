@@ -21,7 +21,9 @@ interface ISettlement {
 
     /**
      * @notice Updates accounting stats and distribute rewards.
-     * @dev periodically called.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @dev This function is periodically called every epoch.
      * @param epoch The current epoch number.
      * @param nodeAddrs Addresses of node operator to receive the rewards.
      * @param operationRewards Amounts of operation rewards.
@@ -40,12 +42,13 @@ interface ISettlement {
      * @notice Sets tax fraction for public pool.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool.
+     * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool. Each 1 base point is
+     * 0.01%.
      */
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 
     /**
-     * @dev Submits demotions for nodes.
+     * @notice Submits demotions for nodes.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`
      * @param nodeAddrs Addresses of node operator to demote.
@@ -59,7 +62,7 @@ interface ISettlement {
     ) external;
 
     /**
-     * @dev Revoke demotions for a specific node in a given epoch.
+     * @notice Revokes demotions for a specific node in a given epoch.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @param nodeAddr The address of node to revoke.
@@ -70,13 +73,17 @@ interface ISettlement {
 
     /**
      * @notice Commits slashing for a specific node and epoch.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
      * @param nodeAddrs The addresses of nodes to commit slashing.
      * @param epochs The epoch number to commit slashing.
      */
     function commitSlashing(address[] calldata nodeAddrs, uint256[] calldata epochs) external;
 
     /**
-     * @dev Sets the status for nodes.
+     * @notice Sets the status for nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
      * @param nodeAddrs Addresses of node operator to set.
      * @param status Status to set.
      */
