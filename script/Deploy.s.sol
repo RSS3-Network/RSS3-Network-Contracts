@@ -2,7 +2,6 @@
 // solhint-disable no-console,ordering,custom-errors
 pragma solidity 0.8.20;
 
-import {console2 as console} from "forge-std/console2.sol";
 import {Chips} from "../src/Chips.sol";
 import {NetworkParams} from "../src/NetworkParams.sol";
 import {Settlement} from "../src/Settlement.sol";
@@ -10,15 +9,19 @@ import {Staking} from "../src/Staking.sol";
 import {TransparentUpgradeableProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {DeployConfig} from "./DeployConfig.s.sol";
 import {Deployer} from "./Deployer.sol";
+import {console2 as console} from "forge-std/console2.sol";
 
 contract Deploy is Deployer {
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
     // keccak256("PAUSE_ROLE");
-    bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
+    bytes32 public constant PAUSE_ROLE =
+        0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
     // keccak256("ORACLE_ROLE");
-    bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+    bytes32 public constant ORACLE_ROLE =
+        0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
     // keccak256("ADMIN_ROLE")
-    bytes32 public constant ADMIN_ROLE = 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
+    bytes32 public constant ADMIN_ROLE =
+        0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
 
     // solhint-disable private-vars-leading-underscore
     DeployConfig internal cfg;
@@ -38,7 +41,8 @@ contract Deploy is Deployer {
 
     function setUp() public override {
         super.setUp();
-        string memory path = string.concat(vm.projectRoot(), "/deploy-config/", deploymentContext, ".json");
+        string memory path =
+            string.concat(vm.projectRoot(), "/deploy-config/", deploymentContext, ".json");
         cfg = new DeployConfig(path);
 
         console.log("Deploying from %s", deployScript);
@@ -183,11 +187,17 @@ contract Deploy is Deployer {
         );
 
         // check states
-        require(settlementProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error");
-        require(settlementProxy.stakingContract() == stakingProxy, "check settlement contract error");
+        require(
+            settlementProxy.hasRole(ORACLE_ROLE, cfg.oracleAccount()), "check oracle role error"
+        );
+        require(
+            settlementProxy.stakingContract() == stakingProxy, "check settlement contract error"
+        );
         require(settlementProxy.currentEpoch() == 0, "check start epoch error");
         require(settlementProxy.EPOCH_DURATION() == 18 hours, "check start epoch error");
-        require(settlementProxy.TOTAL_REWARDS_PER_YEAR() == 30000000 ether, "check start epoch error");
+        require(
+            settlementProxy.TOTAL_REWARDS_PER_YEAR() == 30000000 ether, "check start epoch error"
+        );
     }
 
     function initializeNetworkParams() public broadcast {
@@ -196,6 +206,9 @@ contract Deploy is Deployer {
         networkParamsProxy.initialize(cfg.networkParamsManager());
 
         // check states
-        require(networkParamsProxy.hasRole(ADMIN_ROLE, cfg.networkParamsManager()), "check admin role error");
+        require(
+            networkParamsProxy.hasRole(ADMIN_ROLE, cfg.networkParamsManager()),
+            "check admin role error"
+        );
     }
 }

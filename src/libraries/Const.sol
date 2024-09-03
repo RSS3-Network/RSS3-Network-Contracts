@@ -10,7 +10,8 @@ library Const {
     uint256 public constant MIN_DEPOSIT = 10000 ether;
 
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
-    /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by external delegators
+    /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by
+    /// external delegators
     uint256 public constant STAKE_RATIO = 25;
 
     /// @dev the minimum value of tax rate basis points

@@ -3,17 +3,19 @@
 // solhint-disable ordering,no-inline-assembly
 pragma solidity 0.8.20;
 
-import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import {IERC721Errors} from "../interfaces/IERC721Errors.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {IERC721Errors} from "../interfaces/IERC721Errors.sol";
+import {ERC165, IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 /**
- * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
- * the Metadata extension, but not including the Enumerable extension, which is available separately as
+ * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token
+ * Standard, including
+ * the Metadata extension, but not including the Enumerable extension, which is available separately
+ * as
  * {ERC721Enumerable}.
  */
 abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Errors {
@@ -45,11 +47,15 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return
-            interfaceId == type(IERC721).interfaceId ||
-            interfaceId == type(IERC721Metadata).interfaceId ||
-            super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC165, IERC165)
+        returns (bool)
+    {
+        return interfaceId == type(IERC721).interfaceId
+            || interfaceId == type(IERC721Metadata).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -127,7 +133,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         if (to == address(0)) {
             revert ERC721InvalidReceiver(address(0));
         }
-        // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the token exists
+        // Setting an "auth" arguments enables the `_isAuthorized` check which verifies that the
+        // token exists
         // (from != 0). Therefore, it is not needed to verify that the return value is not 0 here.
         address previousOwner = _update(to, tokenId, _msgSender());
         if (previousOwner != from) {
@@ -145,7 +152,10 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     /**
      * @dev See {IERC721-safeTransferFrom}.
      */
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public virtual {
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
+        public
+        virtual
+    {
         transferFrom(from, to, tokenId);
         _checkOnERC721Received(from, to, tokenId, data);
     }
@@ -155,7 +165,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
      *
      * IMPORTANT: Any overrides to this function that add ownership of tokens not tracked by the
      * core ERC721 logic MUST be matched with the use of {_increaseBalance} to keep balances
-     * consistent with ownership. The invariant to preserve is that for any address `a` the value returned by
+     * consistent with ownership. The invariant to preserve is that for any address `a` the value
+     * returned by
      * `balanceOf(a)` must be equal to the number of tokens such that `_ownerOf(tokenId)` is `a`.
      */
     function _ownerOf(uint256 tokenId) internal view virtual returns (address) {
@@ -173,24 +184,38 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
      * @dev Returns whether `spender` is allowed to manage `owner`'s tokens, or `tokenId` in
      * particular (ignoring whether it is owned by `owner`).
      *
-     * WARNING: This function assumes that `owner` is the actual owner of `tokenId` and does not verify this
+     * WARNING: This function assumes that `owner` is the actual owner of `tokenId` and does not
+     * verify this
      * assumption.
      */
-    function _isAuthorized(address owner, address spender, uint256 tokenId) internal view virtual returns (bool) {
-        return
-            spender != address(0) &&
-            (owner == spender || isApprovedForAll(owner, spender) || _getApproved(tokenId) == spender);
+    function _isAuthorized(address owner, address spender, uint256 tokenId)
+        internal
+        view
+        virtual
+        returns (bool)
+    {
+        return spender != address(0)
+            && (
+                owner == spender || isApprovedForAll(owner, spender) || _getApproved(tokenId) == spender
+            );
     }
 
     /**
-     * @dev Checks if `spender` can operate on `tokenId`, assuming the provided `owner` is the actual owner.
-     * Reverts if `spender` does not have approval from the provided `owner` for the given token or for all its assets
+     * @dev Checks if `spender` can operate on `tokenId`, assuming the provided `owner` is the
+     * actual owner.
+     * Reverts if `spender` does not have approval from the provided `owner` for the given token or
+     * for all its assets
      * the `spender` for the specific `tokenId`.
      *
-     * WARNING: This function assumes that `owner` is the actual owner of `tokenId` and does not verify this
+     * WARNING: This function assumes that `owner` is the actual owner of `tokenId` and does not
+     * verify this
      * assumption.
      */
-    function _checkAuthorized(address owner, address spender, uint256 tokenId) internal view virtual {
+    function _checkAuthorized(address owner, address spender, uint256 tokenId)
+        internal
+        view
+        virtual
+    {
         if (!_isAuthorized(owner, spender, tokenId)) {
             if (owner == address(0)) {
                 revert ERC721NonexistentToken(tokenId);
@@ -201,17 +226,23 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     }
 
     /**
-     * @dev Transfers `tokenId` from its current owner to `to`, or alternatively mints (or burns) if the current owner
+     * @dev Transfers `tokenId` from its current owner to `to`, or alternatively mints (or burns) if
+     * the current owner
      * (or `to`) is the zero address. Returns the owner of the `tokenId` before the update.
      *
-     * The `auth` argument is optional. If the value passed is non 0, then this function will check that
+     * The `auth` argument is optional. If the value passed is non 0, then this function will check
+     * that
      * `auth` is either the owner of the token, or approved to operate on the token (by the owner).
      *
      * Emits a {Transfer} event.
      *
      * NOTE: If overriding this function in a way that tracks balances, see also {_increaseBalance}.
      */
-    function _update(address to, uint256 tokenId, address auth) internal virtual returns (address) {
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        virtual
+        returns (address)
+    {
         address from = _ownerOf(tokenId);
 
         // Perform (optional) operator check
@@ -264,7 +295,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         }
     }
 
-    /// @dev Mints tokens with consecutive tokenIds in the range [startTokenId, endTokenId] and transfers them to `to`.
+    /// @dev Mints tokens with consecutive tokenIds in the range [startTokenId, endTokenId] and
+    /// transfers them to `to`.
     function _mintConsecutive(address to, uint256 startTokenId, uint256 endTokenId) internal {
         if (to == address(0)) {
             revert ERC721InvalidReceiver(address(0));
@@ -281,7 +313,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     /**
      * @dev Destroys `tokenId`.
      * The approval is cleared when the token is burned.
-     * This is an internal function that does not check if the sender is authorized to operate on the token.
+     * This is an internal function that does not check if the sender is authorized to operate on
+     * the token.
      *
      * Requirements:
      *
@@ -299,19 +332,22 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     /**
      * @dev Approve `to` to operate on `tokenId`
      *
-     * The `auth` argument is optional. If the value passed is non 0, then this function will check that `auth` is
+     * The `auth` argument is optional. If the value passed is non 0, then this function will check
+     * that `auth` is
      * either the owner of the token, or approved to operate on all tokens held by this owner.
      *
      * Emits an {Approval} event.
      *
-     * Overrides to this logic should be done to the variant with an additional `bool emitEvent` argument.
+     * Overrides to this logic should be done to the variant with an additional `bool emitEvent`
+     * argument.
      */
     function _approve(address to, uint256 tokenId, address auth) internal {
         _approve(to, tokenId, auth, true);
     }
 
     /**
-     * @dev Variant of `_approve` with an optional flag to enable or disable the {Approval} event. The event is not
+     * @dev Variant of `_approve` with an optional flag to enable or disable the {Approval} event.
+     * The event is not
      * emitted in the context of transfers.
      */
     function _approve(address to, uint256 tokenId, address auth, bool emitEvent) internal virtual {
@@ -319,7 +355,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         if (emitEvent || auth != address(0)) {
             address owner = _requireOwned(tokenId);
 
-            // We do not use _isAuthorized because single-token approvals should not be able to call approve
+            // We do not use _isAuthorized because single-token approvals should not be able to call
+            // approve
             if (auth != address(0) && owner != auth && !isApprovedForAll(owner, auth)) {
                 revert ERC721InvalidApprover(auth);
             }
@@ -349,7 +386,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     }
 
     /**
-     * @dev Reverts if the `tokenId` doesn't have a current owner (it hasn't been minted, or it has been burned).
+     * @dev Reverts if the `tokenId` doesn't have a current owner (it hasn't been minted, or it has
+     * been burned).
      * Returns the owner.
      *
      * Overrides to ownership logic should be done to {_ownerOf}.
@@ -363,17 +401,23 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     }
 
     /**
-     * @dev Private function to invoke {IERC721Receiver-onERC721Received} on a target address. This will revert if the
-     * recipient doesn't accept the token transfer. The call is not executed if the target address is not a contract.
+     * @dev Private function to invoke {IERC721Receiver-onERC721Received} on a target address. This
+     * will revert if the
+     * recipient doesn't accept the token transfer. The call is not executed if the target address
+     * is not a contract.
      *
      * @param from address representing the previous owner of the given token ID
      * @param to target address that will receive the tokens
      * @param tokenId uint256 ID of the token to be transferred
      * @param data bytes optional data to send along with the call
      */
-    function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory data) private {
+    function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory data)
+        private
+    {
         if (to.code.length > 0) {
-            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (bytes4 retval) {
+            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (
+                bytes4 retval
+            ) {
                 if (retval != IERC721Receiver.onERC721Received.selector) {
                     revert ERC721InvalidReceiver(to);
                 }

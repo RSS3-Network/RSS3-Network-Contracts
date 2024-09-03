@@ -1,23 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {Const} from "./libraries/Const.sol";
 import {NodeStatus, RewardsData} from "./libraries/DataTypes.sol";
 import {
+    CommitEpochNotElapsed,
     InvalidArrayLength,
     InvalidEpochNumber,
-    SubmissionIntervalNotElapsed,
-    RewardsAlreadyDistributed,
     OperationRewardsExceed,
-    CommitEpochNotElapsed
+    RewardsAlreadyDistributed,
+    SubmissionIntervalNotElapsed
 } from "./libraries/Errors.sol";
+import {AccessControlEnumerable} from
+    "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnumerable {
     using Math for uint256;
@@ -97,7 +98,8 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         uint256[] calldata requestCounts,
         bool isFinal
     ) external override onlyRole(ORACLE_ROLE) {
-        if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != requestCounts.length) {
+        if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != requestCounts.length)
+        {
             revert InvalidArrayLength();
         }
 
@@ -137,7 +139,11 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     }
 
     /// @inheritdoc ISettlement
-    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external override onlyRole(ORACLE_ROLE) {
+    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints)
+        external
+        override
+        onlyRole(ORACLE_ROLE)
+    {
         IStaking(_staking).setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
     }
 
@@ -151,36 +157,39 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     }
 
     /// @inheritdoc ISettlement
-    function revokeDemotions(
-        address nodeAddr,
-        uint256 epoch,
-        uint256[] calldata demotionIds
-    ) external override onlyRole(ORACLE_ROLE) {
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds)
+        external
+        override
+        onlyRole(ORACLE_ROLE)
+    {
         IStaking(_staking).revokeDemotions(nodeAddr, epoch, demotionIds);
     }
 
     /// @inheritdoc ISettlement
-    function commitSlashing(
-        address[] calldata nodeAddrs,
-        uint256[] calldata epochs
-    ) external override onlyRole(ORACLE_ROLE) {
+    function commitSlashing(address[] calldata nodeAddrs, uint256[] calldata epochs)
+        external
+        override
+        onlyRole(ORACLE_ROLE)
+    {
         if (nodeAddrs.length != epochs.length) {
             revert InvalidArrayLength();
         }
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            if (_currentEpoch < epochs[i] + Const.SLASHING_COMMIT_PERIOD_IN_EPOCH)
+            if (_currentEpoch < epochs[i] + Const.SLASHING_COMMIT_PERIOD_IN_EPOCH) {
                 revert CommitEpochNotElapsed(epochs[i], _currentEpoch);
+            }
 
             IStaking(_staking).commitSlashing(nodeAddrs[i], epochs[i]);
         }
     }
 
     /// @inheritdoc ISettlement
-    function setNodeStatus(
-        address[] calldata nodeAddrs,
-        NodeStatus[] calldata status
-    ) external override onlyRole(ORACLE_ROLE) {
+    function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status)
+        external
+        override
+        onlyRole(ORACLE_ROLE)
+    {
         IStaking(_staking).setNodeStatus(nodeAddrs, status);
     }
 
@@ -201,15 +210,19 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
 
     function _updateRewardsRatio(uint256 operationRewardsPercent) internal {
         _totalOperationRewardsPerEpoch =
-            (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) /
-            (100 * 365 days);
-        _totalStakingRewardsPerEpoch =
-            ((TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION) * (100 - operationRewardsPercent)) /
-            (100 * 365 days);
+            (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) / (100 * 365 days);
+        _totalStakingRewardsPerEpoch = (
+            (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION) * (100 - operationRewardsPercent)
+        ) / (100 * 365 days);
     }
 
-    /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch
-    function _checkRewards(uint256 epoch, address[] memory nodeAddrs, uint256[] memory operationRewards) internal {
+    /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per
+    /// epoch
+    function _checkRewards(
+        uint256 epoch,
+        address[] memory nodeAddrs,
+        uint256[] memory operationRewards
+    ) internal {
         uint256 distributedOperationRewards = _distributedOperationRewards[epoch];
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             if (_isRewarded(epoch, nodeAddrs[i])) revert RewardsAlreadyDistributed(nodeAddrs[i]);
@@ -218,13 +231,15 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
             distributedOperationRewards += operationRewards[i];
         }
 
-        if (distributedOperationRewards > _totalOperationRewardsPerEpoch) revert OperationRewardsExceed();
+        if (distributedOperationRewards > _totalOperationRewardsPerEpoch) {
+            revert OperationRewardsExceed();
+        }
 
         _distributedOperationRewards[epoch] = distributedOperationRewards;
     }
 
     function _saveTotalStakingSnapshot() internal {
-        (, _totalStakingSnapshot[_currentEpoch], ) = IStaking(_staking).getPoolInfo();
+        (, _totalStakingSnapshot[_currentEpoch],) = IStaking(_staking).getPoolInfo();
     }
 
     function _updateEpochInfo(uint256 epoch) internal {
@@ -240,7 +255,9 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         // check epoch interval
         if (CHECK_EPOCH_INTERVAL) {
             uint256 submissionInterval = EPOCH_DURATION - 1 hours;
-            if (_endTimestamp - _startTimestamp <= submissionInterval) revert SubmissionIntervalNotElapsed();
+            if (_endTimestamp - _startTimestamp <= submissionInterval) {
+                revert SubmissionIntervalNotElapsed();
+            }
         }
     }
 
@@ -255,7 +272,7 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
 
     /// @dev Returns staking rewards per epoch for public pool
     function _getPublicPoolStakingRewards() internal view returns (uint256) {
-        (, uint256 totalStaking, ) = IStaking(_staking).getPoolInfo();
+        (, uint256 totalStaking,) = IStaking(_staking).getPoolInfo();
         if (totalStaking == 0) return 0;
 
         uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
@@ -263,7 +280,11 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     }
 
     /// @dev returns staking rewards
-    function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256[] memory nodeRewards) {
+    function _getStakingRewards(address[] calldata nodeAddrs)
+        internal
+        view
+        returns (uint256[] memory nodeRewards)
+    {
         uint256 len = nodeAddrs.length;
         nodeRewards = new uint256[](len);
 
@@ -281,7 +302,7 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     function _getTotalStaking() internal view returns (uint256 totalStaking) {
         totalStaking = _totalStakingSnapshot[_currentEpoch];
         if (totalStaking == 0) {
-            (, totalStaking, ) = IStaking(_staking).getPoolInfo();
+            (, totalStaking,) = IStaking(_staking).getPoolInfo();
         }
     }
 

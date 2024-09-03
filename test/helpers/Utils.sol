@@ -2,8 +2,8 @@
 // solhint-disable comprehensive-interface
 pragma solidity 0.8.20;
 
-import {Test} from "forge-std/Test.sol";
 import {NodeStatus} from "../../src/libraries/DataTypes.sol";
+import {Test} from "forge-std/Test.sol";
 
 contract Utils is Test {
     uint8 public constant CheckTopic1 = 0x1;
@@ -104,7 +104,11 @@ contract Utils is Test {
         return arr;
     }
 
-    function array(string memory a, string memory b, string memory c) public pure returns (string[] memory) {
+    function array(string memory a, string memory b, string memory c)
+        public
+        pure
+        returns (string[] memory)
+    {
         string[] memory arr = new string[](3);
         arr[0] = a;
         arr[1] = b;
@@ -112,7 +116,11 @@ contract Utils is Test {
         return arr;
     }
 
-    function array(uint256 a, uint256 b, uint256 c, uint256 d) public pure returns (uint256[] memory) {
+    function array(uint256 a, uint256 b, uint256 c, uint256 d)
+        public
+        pure
+        returns (uint256[] memory)
+    {
         uint256[] memory arr = new uint256[](4);
         arr[0] = a;
         arr[1] = b;
@@ -121,7 +129,11 @@ contract Utils is Test {
         return arr;
     }
 
-    function array(address a, address b, address c, address d) public pure returns (address[] memory) {
+    function array(address a, address b, address c, address d)
+        public
+        pure
+        returns (address[] memory)
+    {
         address[] memory arr = new address[](4);
         arr[0] = a;
         arr[1] = b;
@@ -130,7 +142,11 @@ contract Utils is Test {
         return arr;
     }
 
-    function array(bytes32 a, bytes32 b, bytes32 c, bytes32 d) public pure returns (bytes32[] memory) {
+    function array(bytes32 a, bytes32 b, bytes32 c, bytes32 d)
+        public
+        pure
+        returns (bytes32[] memory)
+    {
         bytes32[] memory arr = new bytes32[](4);
         arr[0] = a;
         arr[1] = b;
@@ -152,7 +168,11 @@ contract Utils is Test {
         return arr;
     }
 
-    function array(NodeStatus a, NodeStatus b, NodeStatus c) public pure returns (NodeStatus[] memory) {
+    function array(NodeStatus a, NodeStatus b, NodeStatus c)
+        public
+        pure
+        returns (NodeStatus[] memory)
+    {
         NodeStatus[] memory arr = new NodeStatus[](3);
         arr[0] = a;
         arr[1] = b;
@@ -160,7 +180,11 @@ contract Utils is Test {
         return arr;
     }
 
-    function array(NodeStatus a, NodeStatus b, NodeStatus c, NodeStatus d) public pure returns (NodeStatus[] memory) {
+    function array(NodeStatus a, NodeStatus b, NodeStatus c, NodeStatus d)
+        public
+        pure
+        returns (NodeStatus[] memory)
+    {
         NodeStatus[] memory arr = new NodeStatus[](4);
         arr[0] = a;
         arr[1] = b;
@@ -169,13 +193,11 @@ contract Utils is Test {
         return arr;
     }
 
-    function array(
-        NodeStatus a,
-        NodeStatus b,
-        NodeStatus c,
-        NodeStatus d,
-        NodeStatus e
-    ) public pure returns (NodeStatus[] memory) {
+    function array(NodeStatus a, NodeStatus b, NodeStatus c, NodeStatus d, NodeStatus e)
+        public
+        pure
+        returns (NodeStatus[] memory)
+    {
         NodeStatus[] memory arr = new NodeStatus[](5);
         arr[0] = a;
         arr[1] = b;

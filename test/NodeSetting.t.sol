@@ -5,18 +5,18 @@ pragma solidity 0.8.20;
 import {Const} from "../src/libraries/Const.sol";
 import {Node, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
-    NodeNotExists,
-    TaxRateBasisPointsTooSmall,
-    TaxRateBasisPointsTooLarge,
-    PublicGoodNodeTaxNotZero,
-    NodeExists,
-    NodeIsPublicGood,
-    NodeDepositBelowMinimum,
-    NodeNotInExitStatus,
+    CurStateCantExit,
+    CurStatusCantOnline,
     DepositForPublicGoodNode,
     InvalidNodeStatusTransition,
-    CurStateCantExit,
-    CurStatusCantOnline
+    NodeDepositBelowMinimum,
+    NodeExists,
+    NodeIsPublicGood,
+    NodeNotExists,
+    NodeNotInExitStatus,
+    PublicGoodNodeTaxNotZero,
+    TaxRateBasisPointsTooLarge,
+    TaxRateBasisPointsTooSmall
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
@@ -34,7 +34,8 @@ contract NodeSettingTest is CommonTest {
     }
 
     function testCreateNode(uint64 taxRateBasisPoints) public {
-        taxRateBasisPoints = uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10000));
+        taxRateBasisPoints =
+            uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10000));
 
         string memory name = "Alice";
         string memory description = "Alice's node";
@@ -58,6 +59,7 @@ contract NodeSettingTest is CommonTest {
         _checkNode(bob, 2, name, description, taxRateBasisPoints, 0, false, false);
         assertEq(_staking.getNodeCount(), 2);
     }
+
     function testCreatePGNode() public {
         string memory name = "Alice";
         string memory description = "Alice's node";
@@ -78,7 +80,8 @@ contract NodeSettingTest is CommonTest {
     }
 
     function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
-        taxRateBasisPoints = uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10000));
+        taxRateBasisPoints =
+            uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10000));
         amount = bound(amount, 1, _initialAmount);
 
         string memory name = "Alice";
@@ -178,7 +181,10 @@ contract NodeSettingTest is CommonTest {
     }
 
     function testSetTaxRate4Node(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints <= Const.DENOMINATOR && taxRateBasisPoints >= Const.MIN_TAX_RATE_BASIS_POINTS);
+        vm.assume(
+            taxRateBasisPoints <= Const.DENOMINATOR
+                && taxRateBasisPoints >= Const.MIN_TAX_RATE_BASIS_POINTS
+        );
 
         _createNode(alice);
 
@@ -259,7 +265,8 @@ contract NodeSettingTest is CommonTest {
             // preset node status
             _presetNodeStatus(alice, status[i]);
 
-            NodeStatus expectedStatus = status[i] == NodeStatus.Online ? NodeStatus.Exiting : NodeStatus.Exited;
+            NodeStatus expectedStatus =
+                status[i] == NodeStatus.Online ? NodeStatus.Exiting : NodeStatus.Exited;
             // exit
             expectEmit();
             emit Events.NodeStatusChanged(alice, status[i], expectedStatus);
@@ -291,12 +298,8 @@ contract NodeSettingTest is CommonTest {
 
         // case 2: CurStateCantExit
         // node in these status can't initiate exit
-        NodeStatus[] memory status = array(
-            NodeStatus.Slashing,
-            NodeStatus.Offline,
-            NodeStatus.Exiting,
-            NodeStatus.Exited
-        );
+        NodeStatus[] memory status =
+            array(NodeStatus.Slashing, NodeStatus.Offline, NodeStatus.Exiting, NodeStatus.Exited);
         for (uint256 i = 0; i < status.length; i++) {
             // preset node status
             _presetNodeStatus(alice, status[i]);
@@ -380,7 +383,9 @@ contract NodeSettingTest is CommonTest {
             // preset node status
             _presetNodeStatus(alice, status[i]);
 
-            vm.expectRevert(abi.encodeWithSelector(NodeNotInExitStatus.selector, uint256(status[i])));
+            vm.expectRevert(
+                abi.encodeWithSelector(NodeNotInExitStatus.selector, uint256(status[i]))
+            );
             _staking.register();
         }
 
@@ -394,7 +399,8 @@ contract NodeSettingTest is CommonTest {
     function testOnlineSucceeds() public {
         _createNode(alice);
 
-        NodeStatus[] memory status = array(NodeStatus.Offline, NodeStatus.Slashed, NodeStatus.Outdated);
+        NodeStatus[] memory status =
+            array(NodeStatus.Offline, NodeStatus.Slashed, NodeStatus.Outdated);
         for (uint256 i = 0; i < status.length; i++) {
             // preset node status
             _presetNodeStatus(alice, status[i]);
@@ -430,7 +436,9 @@ contract NodeSettingTest is CommonTest {
         );
         for (uint256 i = 0; i < status.length; i++) {
             _presetNodeStatus(alice, status[i]);
-            vm.expectRevert(abi.encodeWithSelector(CurStatusCantOnline.selector, uint256(status[i])));
+            vm.expectRevert(
+                abi.encodeWithSelector(CurStatusCantOnline.selector, uint256(status[i]))
+            );
             _staking.online();
         }
         vm.stopPrank();
@@ -549,17 +557,25 @@ contract NodeSettingTest is CommonTest {
         }
     }
 
-    function _invalidNodeStatusTransition(address nodeAddr, NodeStatus curStatus, NodeStatus newStatus) internal {
+    function _invalidNodeStatusTransition(
+        address nodeAddr,
+        NodeStatus curStatus,
+        NodeStatus newStatus
+    ) internal {
         _presetNodeStatus(nodeAddr, curStatus);
 
         vm.expectRevert(
-            abi.encodeWithSelector(InvalidNodeStatusTransition.selector, uint256(curStatus), uint256(newStatus))
+            abi.encodeWithSelector(
+                InvalidNodeStatusTransition.selector, uint256(curStatus), uint256(newStatus)
+            )
         );
         vm.prank(address(_settlement));
         _staking.setNodeStatus(array(nodeAddr), array(newStatus));
     }
 
-    function _setAndCheckNodeStatus(address nodeAddr, NodeStatus curStatus, NodeStatus newStatus) internal {
+    function _setAndCheckNodeStatus(address nodeAddr, NodeStatus curStatus, NodeStatus newStatus)
+        internal
+    {
         _presetNodeStatus(nodeAddr, curStatus);
 
         expectEmit();

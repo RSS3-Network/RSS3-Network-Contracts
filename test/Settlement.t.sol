@@ -2,19 +2,19 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
+import {Settlement} from "../src/Settlement.sol";
 import {Const} from "../src/libraries/Const.sol";
-import {Node, Demotion, NodeStatus} from "../src/libraries/DataTypes.sol";
+import {Demotion, Node, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
+    CommitEpochNotElapsed,
     InvalidArrayLength,
     InvalidEpochNumber,
-    SubmissionIntervalNotElapsed,
-    RewardsAlreadyDistributed,
     OperationRewardsExceed,
-    TaxRateBasisPointsTooLarge,
-    CommitEpochNotElapsed
+    RewardsAlreadyDistributed,
+    SubmissionIntervalNotElapsed,
+    TaxRateBasisPointsTooLarge
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
-import {Settlement} from "../src/Settlement.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
 
 contract SettlementTest is CommonTest {
@@ -38,8 +38,9 @@ contract SettlementTest is CommonTest {
 
         s = new Settlement(true);
         s.initialize(address(_staking), address(0x0), 0, 20);
-        (uint256 opRewards, ) = s.getBonusInfo();
-        uint256 totalStakingRewardsPerEpoch = (s.TOTAL_REWARDS_PER_YEAR() * s.EPOCH_DURATION() * 20) / (100 * 365 days);
+        (uint256 opRewards,) = s.getBonusInfo();
+        uint256 totalStakingRewardsPerEpoch =
+            (s.TOTAL_REWARDS_PER_YEAR() * s.EPOCH_DURATION() * 20) / (100 * 365 days);
         assertEq(opRewards, totalStakingRewardsPerEpoch);
     }
 
@@ -55,7 +56,11 @@ contract SettlementTest is CommonTest {
 
     function testSetTaxRateBasisPoints4PublicPoolFail() public {
         // case 1: caller has no `ORACLE_ROLE` permission
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
         _settlement.setTaxRateBasisPoints4PublicPool(10001);
 
         // case 2: tax rate is greater than 10000
@@ -77,7 +82,8 @@ contract SettlementTest is CommonTest {
         _staking.stake{value: stakeAmount}(alice);
         _staking.stake{value: stakeAmount}(bob);
 
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+            _settlement.getBonusInfo();
 
         uint256 operationReward = operationRewardsPerEpoch / 2;
         uint256 stakingReward = totalStakingRewardsPerEpoch / 2;
@@ -135,7 +141,8 @@ contract SettlementTest is CommonTest {
         _staking.stake{value: stakeAmount}(carol);
         _staking.stake{value: stakeAmount}(dave);
 
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+            _settlement.getBonusInfo();
         uint256 operationReward = operationRewardsPerEpoch / 4;
         uint256 stakingReward = totalStakingRewardsPerEpoch / 4;
 
@@ -203,7 +210,8 @@ contract SettlementTest is CommonTest {
 
         skip(18 hours);
 
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+            _settlement.getBonusInfo();
         uint256 operationReward = operationRewardsPerEpoch / 4;
         uint256 stakingReward = totalStakingRewardsPerEpoch / 4;
 
@@ -265,7 +273,8 @@ contract SettlementTest is CommonTest {
         _staking.stake{value: stakeAmount * 3}(carol);
         _staking.stake{value: stakeAmount * 4}(dave);
 
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+            _settlement.getBonusInfo();
         uint256 operationReward = operationRewardsPerEpoch / 4;
 
         // distributeRewards
@@ -300,7 +309,11 @@ contract SettlementTest is CommonTest {
             // check balance
             uint256 balanceAfter = address(_staking).balance;
             uint256 delta = balanceAfter - balanceBefore;
-            assertEq(delta, operationRewardsPerEpoch + totalStakingRewardsPerEpoch, "check balance failed");
+            assertEq(
+                delta,
+                operationRewardsPerEpoch + totalStakingRewardsPerEpoch,
+                "check balance failed"
+            );
         }
     }
 
@@ -320,7 +333,8 @@ contract SettlementTest is CommonTest {
         _staking.stake{value: stakeAmount}(alice);
         _staking.stakeToPublicPool{value: stakeAmount}(carol);
 
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+            _settlement.getBonusInfo();
         uint256 operationReward = operationRewardsPerEpoch / 2;
         uint256 stakingReward = totalStakingRewardsPerEpoch / 2;
 
@@ -365,7 +379,8 @@ contract SettlementTest is CommonTest {
         // stake
         _staking.stake{value: stakeAmount}(alice);
 
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+            _settlement.getBonusInfo();
 
         skip(18 hours);
 
@@ -396,7 +411,8 @@ contract SettlementTest is CommonTest {
         // stake
         _staking.stake{value: stakeAmount}(alice);
 
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+            _settlement.getBonusInfo();
 
         skip(18 hours);
 
@@ -446,7 +462,10 @@ contract SettlementTest is CommonTest {
         );
 
         // check operation pool and staking pool of alice
-        assertEq(_staking.getNode(alice).stakingPoolTokens, stakeAmount + stakingRewards + operationRewards - tax);
+        assertEq(
+            _staking.getNode(alice).stakingPoolTokens,
+            stakeAmount + stakingRewards + operationRewards - tax
+        );
         assertEq(_staking.getNode(alice).operationPoolTokens, depositAmount + tax);
 
         // check treasury
@@ -483,7 +502,10 @@ contract SettlementTest is CommonTest {
         );
 
         // check operation pool and staking pool of alice
-        assertEq(_staking.getNode(alice).stakingPoolTokens, stakeAmount + stakingRewards + operationRewards - fullTax);
+        assertEq(
+            _staking.getNode(alice).stakingPoolTokens,
+            stakeAmount + stakingRewards + operationRewards - fullTax
+        );
         assertEq(_staking.getNode(alice).operationPoolTokens, depositAmount + partialTax);
 
         // check treasury
@@ -494,7 +516,11 @@ contract SettlementTest is CommonTest {
 
     function testDistributeRewardsFailNoPermission() public {
         // caller has no `ORACLE_ROLE` permission
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
         _settlement.distributeRewards(
             1,
             array(alice), // node addresses
@@ -618,7 +644,7 @@ contract SettlementTest is CommonTest {
             _staking.stake{value: stakeAmount}(user);
         }
 
-        (uint256 operationRewardsPerEpoch, ) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch,) = _settlement.getBonusInfo();
         uint256 operationReward = operationRewardsPerEpoch / 10;
 
         for (uint256 i = 1; i <= 9; i++) {
@@ -638,7 +664,9 @@ contract SettlementTest is CommonTest {
         skip(18 hours);
         vm.expectRevert(abi.encodeWithSelector(OperationRewardsExceed.selector));
         vm.prank(oracleAccount);
-        _settlement.distributeRewards(1, array(vm.addr(10)), array(operationReward + 10), array(uint256(100)), true);
+        _settlement.distributeRewards(
+            1, array(vm.addr(10)), array(operationReward + 10), array(uint256(100)), true
+        );
     }
 
     function testDistributeRewardsFailWithDuplicatedNodeAddr() public {
@@ -657,7 +685,7 @@ contract SettlementTest is CommonTest {
         _staking.stake{value: stakeAmount}(alice);
         _staking.stake{value: stakeAmount}(bob);
 
-        (uint256 operationRewardsPerEpoch, ) = _settlement.getBonusInfo();
+        (uint256 operationRewardsPerEpoch,) = _settlement.getBonusInfo();
         uint256 operationReward = operationRewardsPerEpoch / 16;
 
         vm.startPrank(oracleAccount);
@@ -703,19 +731,15 @@ contract SettlementTest is CommonTest {
 
         expectEmit();
         emit Events.RewardDistributed(
-            1,
-            startTime,
-            endTime,
-            zeroAddrArr,
-            zeroUintArr,
-            zeroUintArr,
-            zeroUintArr,
-            zeroUintArr
+            1, startTime, endTime, zeroAddrArr, zeroUintArr, zeroUintArr, zeroUintArr, zeroUintArr
         );
         vm.prank(oracleAccount);
-        _settlement.distributeRewards(1, new address[](0), new uint256[](0), new uint256[](0), false);
+        _settlement.distributeRewards(
+            1, new address[](0), new uint256[](0), new uint256[](0), false
+        );
 
-        (uint256 totalOperationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) = _settlement.getBonusInfo();
+        (uint256 totalOperationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+            _settlement.getBonusInfo();
 
         // check balance diff
         uint256 balanceAfterStaking = address(_staking).balance;
@@ -725,7 +749,9 @@ contract SettlementTest is CommonTest {
             "check staking balance diff error"
         );
 
-        assertEq(_staking.getPublicPool().stakingPoolTokens, 0, "check public pool balance diff error");
+        assertEq(
+            _staking.getPublicPool().stakingPoolTokens, 0, "check public pool balance diff error"
+        );
 
         // check treasury amount
         uint256 treasuryAmount = _getTreasuryAmount();
@@ -757,7 +783,7 @@ contract SettlementTest is CommonTest {
         uint256 endTime = block.timestamp;
 
         uint256 pgStakingPoolTokens = _staking.getPublicPool().stakingPoolTokens;
-        (, uint256 totalStakingPoolTokens, ) = _staking.getPoolInfo();
+        (, uint256 totalStakingPoolTokens,) = _staking.getPoolInfo();
         (uint256 totalOpRewards, uint256 totalStRewards) = _settlement.getBonusInfo();
         uint256 pgRewards = (pgStakingPoolTokens * totalStRewards) / totalStakingPoolTokens;
 
@@ -768,14 +794,7 @@ contract SettlementTest is CommonTest {
         emit Events.PublicGoodRewardDistributed(1, startTime, endTime, pgRewards, 0);
         expectEmit();
         emit Events.RewardDistributed(
-            1,
-            startTime,
-            endTime,
-            zeroAddrArr,
-            zeroUintArr,
-            zeroUintArr,
-            zeroUintArr,
-            zeroUintArr
+            1, startTime, endTime, zeroAddrArr, zeroUintArr, zeroUintArr, zeroUintArr, zeroUintArr
         );
         vm.prank(oracleAccount);
         _settlement.distributeRewards(1, zeroAddrArr, zeroUintArr, zeroUintArr, false);
@@ -824,7 +843,9 @@ contract SettlementTest is CommonTest {
             sum += nodeRewards[i];
         }
 
-        assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
+        assertApproxEqAbs(
+            sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length
+        );
     }
 
     function testSubmitDemotions() public {
@@ -835,7 +856,9 @@ contract SettlementTest is CommonTest {
 
         // submit demotion
         vm.prank(oracleAccount);
-        _settlement.submitDemotions(array(alice, bob), array(REASON1, REASON2), array(REPORTER, address(0xffff)));
+        _settlement.submitDemotions(
+            array(alice, bob), array(REASON1, REASON2), array(REPORTER, address(0xffff))
+        );
 
         // check demotions
         Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
@@ -900,18 +923,24 @@ contract SettlementTest is CommonTest {
         assertEq(node.slashedStakingPoolTokens, 0);
         assertEq(uint256(node.status), uint256(NodeStatus.Slashed));
         // check slashing pool
-        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        (,, uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
         assertEq(totalSlashingPoolTokens, 0);
     }
 
     function testCommitSlashingFail() public {
         // case 1: caller has no `ORACLE_ROLE` permission
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
         _settlement.commitSlashing(array(alice), array(uint256(0)));
 
         // case 2: epoch not reached
         _presetCurrentEpoch(uint256(3));
-        vm.expectRevert(abi.encodeWithSelector(CommitEpochNotElapsed.selector, uint256(1), uint256(3)));
+        vm.expectRevert(
+            abi.encodeWithSelector(CommitEpochNotElapsed.selector, uint256(1), uint256(3))
+        );
         vm.prank(oracleAccount);
         _settlement.commitSlashing(array(alice), array(uint256(1)));
     }
@@ -938,17 +967,26 @@ contract SettlementTest is CommonTest {
 
     function testSetNodeStatusFail() public {
         address[] memory nodeAddrs = array(alice, bob, carol);
-        NodeStatus[] memory status = array(NodeStatus.Online, NodeStatus.Offline, NodeStatus.Initializing);
+        NodeStatus[] memory status =
+            array(NodeStatus.Online, NodeStatus.Offline, NodeStatus.Initializing);
 
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
         _settlement.setNodeStatus(nodeAddrs, status);
     }
 
     function invariantTreasuryBalance() public view {
-        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = _staking
-            .getPoolInfo();
+        (
+            uint256 totalOperationPoolTokens,
+            uint256 totalStakingPoolTokens,
+            uint256 totalSlashingPoolTokens
+        ) = _staking.getPoolInfo();
         assertTrue(
-            address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens - totalSlashingPoolTokens >= 0
+            address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens
+                - totalSlashingPoolTokens >= 0
         );
     }
 

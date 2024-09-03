@@ -11,7 +11,11 @@ contract InternalSettlement is Settlement {
         return super._getPublicPoolStakingRewards();
     }
 
-    function getStakingRewards(address[] calldata nodeAddrs) external view returns (uint256[] memory) {
+    function getStakingRewards(address[] calldata nodeAddrs)
+        external
+        view
+        returns (uint256[] memory)
+    {
         return super._getStakingRewards(nodeAddrs);
     }
 

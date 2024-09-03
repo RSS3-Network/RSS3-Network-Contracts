@@ -2,7 +2,8 @@
 // solhint-disable comprehensive-interface
 pragma solidity 0.8.20;
 
-import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {AccessControlEnumerable} from
+    "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
@@ -41,7 +42,8 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
 
     /**
      * @notice Retrieves configuration parameters based on the epoch provided.
-     * @dev Performs a binary search on the sorted set of epochs to find the closest preceding or exact match.
+     * @dev Performs a binary search on the sorted set of epochs to find the closest preceding or
+     * exact match.
      * @param epoch The epoch for which the parameters are requested.
      * @return params The configuration parameters associated with the nearest epoch.
      */

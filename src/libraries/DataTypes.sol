@@ -77,6 +77,7 @@ enum NodeStatus {
     Slashed, // 7
     Exiting, // 8
     Exited // 9
+
 }
 
 struct WithdrawalRequest {

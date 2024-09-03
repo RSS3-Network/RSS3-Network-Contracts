@@ -2,35 +2,35 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {stdJson} from "forge-std/StdJson.sol";
-import {Base64} from "solady/utils/Base64.sol";
-import {LibString} from "solady/utils/LibString.sol";
+import {Staking} from "../src/Staking.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, NodeStatus, UnstakeRequest, WithdrawalRequest} from "../src/libraries/DataTypes.sol";
 import {
-    NodeNotExists,
-    NodeInExitStatus,
-    InvalidArrayLength,
-    ChipNotValid,
-    ExcessWithdrawalAmount,
-    WithdrawalAmountExceedsOperationPoolTokens,
-    ClaimTimeNotReady,
-    ClaimIdNotExists,
     ChipIdsArrayTooSmall,
-    SettlementPhase,
-    EmptyChipIds,
+    ChipNotValid,
     ChipsNotSameOwner,
-    StakeAmountTooSmall,
+    ClaimIdNotExists,
+    ClaimTimeNotReady,
+    DepositForPublicGoodNode,
+    EmptyChipIds,
+    ExcessWithdrawalAmount,
+    InvalidArrayLength,
+    NodeInExitStatus,
+    NodeNotExists,
     NodeNotPublicGood,
+    SettlementPhase,
+    StakeAmountTooSmall,
     StakeToPublicGoodNode,
-    DepositForPublicGoodNode
+    WithdrawalAmountExceedsOperationPoolTokens
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
-import {Staking} from "../src/Staking.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
 import {TestEvents} from "./helpers/TestEvents.sol";
+import {stdJson} from "forge-std/StdJson.sol";
+import {Base64} from "solady/utils/Base64.sol";
+import {LibString} from "solady/utils/LibString.sol";
 
 //import {console2 as console} from "forge-std/console2.sol";
 
@@ -90,7 +90,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(shares, 0);
 
         // check constants
-        assertLt(Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS, Const.DENOMINATOR);
+        assertLt(
+            Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS,
+            Const.DENOMINATOR
+        );
         assertLt(Const.NODE_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
         assertLt(Const.USER_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
         assertLt(Const.MIN_TAX_RATE_BASIS_POINTS, Const.DENOMINATOR);
@@ -109,7 +112,11 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testPauseFail() public {
         // case 1: caller is not PAUSE_ROLE
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), PAUSE_ROLE));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), PAUSE_ROLE
+            )
+        );
         _staking.pause();
         // check paused
         assertEq(_staking.paused(), false);
@@ -151,7 +158,11 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.pause();
         // check paused
         assertEq(_staking.paused(), true);
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), PAUSE_ROLE));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), PAUSE_ROLE
+            )
+        );
         _staking.unpause();
         // check paused
         assertEq(_staking.paused(), true);
@@ -869,10 +880,10 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // stake
         uint256 tokenId1 = _staking.stake{value: stakeAmount}(alice);
-        (, , uint256 shares1) = _staking.getChipInfo(tokenId1);
+        (,, uint256 shares1) = _staking.getChipInfo(tokenId1);
 
         uint256 tokenId2 = _staking.stake{value: stakeAmount}(bob);
-        (, , uint256 shares2) = _staking.getChipInfo(tokenId2);
+        (,, uint256 shares2) = _staking.getChipInfo(tokenId2);
 
         // distribute rewards
         uint256 startTime = block.timestamp;
@@ -950,25 +961,27 @@ contract StakingTest is CommonTest, IERC721Errors {
         string memory nodeAvatarURI = _staking.getNodeAvatar(bob);
         string memory base64prefix = "data:application/json;base64,";
 
-        string memory decodedTokenURI = string(
-            Base64.decode(LibString.slice(nodeAvatarURI, bytes(base64prefix).length))
-        );
+        string memory decodedTokenURI =
+            string(Base64.decode(LibString.slice(nodeAvatarURI, bytes(base64prefix).length)));
         assertEq(decodedTokenURI.readString(".name"), "Node Avatar");
         string memory base64Image = decodedTokenURI.readString(".image");
 
         string memory base64Imageprefix = "data:image/svg+xml;base64,";
 
-        string memory decodedImageURI = string(
-            Base64.decode(LibString.slice(base64Image, bytes(base64Imageprefix).length))
-        );
+        string memory decodedImageURI =
+            string(Base64.decode(LibString.slice(base64Image, bytes(base64Imageprefix).length)));
         uint256 found1 = LibString.indexOf(decodedImageURI, "d{fill:#DEE5D9;}"); // head color white
         assertEq(found1 != LibString.NOT_FOUND, true);
 
-        uint256 found2 = LibString.indexOf(decodedImageURI, "e{fill:#DEE5D9;}"); // head detail color white
+        uint256 found2 = LibString.indexOf(decodedImageURI, "e{fill:#DEE5D9;}"); // head detail
+            // color white
         assertEq(found2 != LibString.NOT_FOUND, true);
     }
 
-    function testCalcTax1(uint256 operationPool, uint256 rewards, uint256 stakingPool) public pure {
+    function testCalcTax1(uint256 operationPool, uint256 rewards, uint256 stakingPool)
+        public
+        pure
+    {
         // case 1: receives no tax rewards
         operationPool = bound(operationPool, 1, 10000 ether - 1); // operation pool < 10000 ether
         rewards = bound(rewards, 1, 1000000 ether);
@@ -976,12 +989,8 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
-        (uint256 tax1, uint256 partialTax1) = RewardsAndSlashingLib._getTax(
-            rewards,
-            taxRateBasisPoints,
-            operationPool,
-            stakingPool
-        );
+        (uint256 tax1, uint256 partialTax1) =
+            RewardsAndSlashingLib._getTax(rewards, taxRateBasisPoints, operationPool, stakingPool);
 
         assertEq(tax1, _getFullTax(rewards, taxRateBasisPoints));
         assertEq(partialTax1, 0);
@@ -989,7 +998,8 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testCalcTax2(uint256 operationPool, uint256 stakeRatio) public pure {
         // case 2: receives full tax rewards
-        operationPool = bound(operationPool, 10000 ether, 20000 ether); // operation pool < 10000 ether
+        operationPool = bound(operationPool, 10000 ether, 20000 ether); // operation pool < 10000
+            // ether
         stakeRatio = bound(stakeRatio, 1, 25);
 
         uint256 stakingPool = operationPool * stakeRatio;
@@ -997,12 +1007,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 rewards = 10000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
-        (uint256 tax, uint256 partialTax) = RewardsAndSlashingLib._getTax(
-            rewards,
-            taxRateBasisPoints,
-            operationPool,
-            stakingPool
-        );
+        (uint256 tax, uint256 partialTax) =
+            RewardsAndSlashingLib._getTax(rewards, taxRateBasisPoints, operationPool, stakingPool);
 
         assertEq(tax, partialTax);
     }
@@ -1016,17 +1022,13 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 rewards = 10000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
-        (uint256 tax, uint256 partialTax) = RewardsAndSlashingLib._getTax(
-            rewards,
-            taxRateBasisPoints,
-            operationPool,
-            stakingPool
-        );
+        (uint256 tax, uint256 partialTax) =
+            RewardsAndSlashingLib._getTax(rewards, taxRateBasisPoints, operationPool, stakingPool);
 
         // partialTax has precision 1
         assert(
-            tax * operationPool * 25 >= partialTax * stakingPool &&
-                tax * operationPool * 25 < (partialTax + 1) * stakingPool
+            tax * operationPool * 25 >= partialTax * stakingPool
+                && tax * operationPool * 25 < (partialTax + 1) * stakingPool
         );
         // assert(tax / partialTax >= stakingPool / (operationPool * 25));
     }
@@ -1063,7 +1065,9 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(node.totalShares, 0);
     }
 
-    function _testRequestUnstakeApprovedChipsFromNode(address nodeAddr, bool isPublicGood) internal {
+    function _testRequestUnstakeApprovedChipsFromNode(address nodeAddr, bool isPublicGood)
+        internal
+    {
         uint256 amount = 10000 ether;
 
         // stake
@@ -1097,7 +1101,9 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(node.totalShares, 0);
     }
 
-    function _testRequestUnstakeApprovedChipFromNode(address nodeAddr, bool isPublicGood) internal {
+    function _testRequestUnstakeApprovedChipFromNode(address nodeAddr, bool isPublicGood)
+        internal
+    {
         uint256 amount = 10000 ether;
 
         // stake

@@ -2,14 +2,16 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {Const} from "../src/libraries/Const.sol";
-import {Node, UnstakeRequest} from "../src/libraries/DataTypes.sol";
 import {Settlement} from "../src/Settlement.sol";
 import {Staking} from "../src/Staking.sol";
-import {TransparentUpgradeableProxy as Proxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
-import {ITransparentUpgradeableProxy as IProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
+import {Const} from "../src/libraries/Const.sol";
+import {Node, UnstakeRequest} from "../src/libraries/DataTypes.sol";
+import {TransparentUpgradeableProxy as Proxy} from
+    "../src/upgradeability/TransparentUpgradeableProxy.sol";
+import {ITransparentUpgradeableProxy as IProxy} from
+    "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract StakingForkTest is CommonTest {
     address public constant diygod = 0xC8b960D09C0078c18Dcbe7eB9AB9d816BcCa8944;
@@ -59,7 +61,8 @@ contract StakingForkTest is CommonTest {
     }
 
     function testMergeChipsFork() public {
-        uint256[] memory tokenIds = array(uint256(1690), uint256(1691), uint256(1693), uint256(1695));
+        uint256[] memory tokenIds =
+            array(uint256(1690), uint256(1691), uint256(1693), uint256(1695));
         (address nodeAddr, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
         assertEq(shares, Const.SHARES_PER_CHIP);
         assertEq(nodeAddr, address(0x08d66b34054a174841e2361bd4746Ff9F4905cC2));
@@ -128,7 +131,8 @@ contract StakingForkTest is CommonTest {
         (, uint256 tokens, uint256 shares) = staking.getChipInfo(1690);
         Node memory nodeBefore = staking.getNode(nodeAddr);
 
-        uint256[] memory tokenIds = array(uint256(1690), uint256(1691), uint256(1693), uint256(1695));
+        uint256[] memory tokenIds =
+            array(uint256(1690), uint256(1691), uint256(1693), uint256(1695));
         vm.prank(diygod);
         uint256 tokenId = staking.mergeChips(tokenIds);
 
@@ -211,14 +215,20 @@ contract StakingForkTest is CommonTest {
 
         // check PAUSE_ROLE
         assertEq(staking.getRoleMemberCount(keccak256("PAUSE_ROLE")), 1);
-        assertEq(staking.hasRole(keccak256("PAUSE_ROLE"), 0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E), true);
+        assertEq(
+            staking.hasRole(keccak256("PAUSE_ROLE"), 0x7ef00577fAAa44D0491970D6516eB7b90EC3c80E),
+            true
+        );
         // check ORACLE_ROLE
         assertEq(staking.getRoleMemberCount(keccak256("ORACLE_ROLE")), 1);
         assertEq(staking.hasRole(keccak256("ORACLE_ROLE"), address(settlement)), true);
 
         // check pool info
-        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = staking
-            .getPoolInfo();
+        (
+            uint256 totalOperationPoolTokens,
+            uint256 totalStakingPoolTokens,
+            uint256 totalSlashingPoolTokens
+        ) = staking.getPoolInfo();
         assertEq(totalOperationPoolTokens, uint256(3676223372159389130580222));
         assertEq(totalStakingPoolTokens, uint256(99576088009465491532574685));
         assertEq(totalSlashingPoolTokens, uint256(0));

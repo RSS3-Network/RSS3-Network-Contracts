@@ -2,9 +2,9 @@
 // solhint-disable private-vars-leading-underscore,no-console
 pragma solidity 0.8.20;
 
-import {console2 as console} from "forge-std/console2.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
+import {console2 as console} from "forge-std/console2.sol";
 
 /// @title DeployConfig
 /// @notice Represents the configuration required to deploy the system. It is expected
@@ -33,7 +33,9 @@ contract DeployConfig is Script {
         try vm.readFile(_path) returns (string memory data) {
             _json = data;
         } catch {
-            console.log("Warning: unable to read config. Do not deploy unless you are not using config.");
+            console.log(
+                "Warning: unable to read config. Do not deploy unless you are not using config."
+            );
             return;
         }
 

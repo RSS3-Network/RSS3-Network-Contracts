@@ -4,11 +4,13 @@ pragma solidity 0.8.20;
 
 /**
  * @dev Standard ERC-721 Errors
- * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-721 tokens.
+ * Interface of the https://eips.ethereum.org/EIPS/eip-6093[ERC-6093] custom errors for ERC-721
+ * tokens.
  */
 interface IERC721Errors {
     /**
-     * @dev Indicates that an address can't be an owner. For example, `address(0)` is a forbidden owner in ERC-20.
+     * @dev Indicates that an address can't be an owner. For example, `address(0)` is a forbidden
+     * owner in ERC-20.
      * Used in balance queries.
      * @param owner Address of the current owner of a token.
      */
