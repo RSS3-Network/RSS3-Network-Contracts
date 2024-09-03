@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable comprehensive-interface,no-console
+// solhint-disable comprehensive-interface,no-console,function-max-lines
 pragma solidity 0.8.20;
 
 import {Settlement} from "../src/Settlement.sol";

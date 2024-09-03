@@ -39,40 +39,7 @@ library RewardsAndSlashingLib {
         }
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            address nodeAddr = nodeAddrs[i];
-
-            Node storage node = StorageLib.getNode(nodeAddr);
-            if (node.account == address(0)) revert NodeNotExists(nodeAddr);
-            // public good node can't be demoted
-            if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
-
-            uint256 demotionId = StorageLib.nextDemotionId();
-            // save demotion
-            StorageLib.getDemotions()[demotionId] = Demotion({
-                demotionId: demotionId,
-                nodeAddr: nodeAddr,
-                epoch: epoch,
-                reason: reasons[i],
-                reporter: reporters[i]
-            });
-            // save demotion id
-            EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
-            demotionIds.add(demotionId);
-
-            if (
-                node.status != NodeStatus.Slashing
-                    && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD
-            ) {
-                // record slashing
-                _recordSlashing(node, epoch);
-
-                // set node status: slashing
-                NodeStatus curStatus = node.status;
-                node.status = NodeStatus.Slashing;
-                emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Slashing);
-            }
-
-            emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reasons[i], reporters[i]);
+            _submitSingleDemotion(epoch, nodeAddrs[i], reasons[i], reporters[i]);
         }
     }
 
@@ -206,6 +173,54 @@ library RewardsAndSlashingLib {
     }
 
     /**
+     * @dev Submits a single demotion for a node.
+     * @param epoch The epoch for which the demotion is being submitted.
+     * @param nodeAddr The address of the node being demoted.
+     * @param reason The reason for the demotion.
+     * @param reporter The address of the account reporting the demotion.
+     */
+    function _submitSingleDemotion(
+        uint256 epoch,
+        address nodeAddr,
+        string calldata reason,
+        address reporter
+    ) internal {
+        Node storage node = StorageLib.getNode(nodeAddr);
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
+        // public good node can't be demoted
+        if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
+
+        uint256 demotionId = StorageLib.nextDemotionId();
+        // save demotion
+        StorageLib.getDemotions()[demotionId] = Demotion({
+            demotionId: demotionId,
+            nodeAddr: nodeAddr,
+            epoch: epoch,
+            reason: reason,
+            reporter: reporter
+        });
+        // save demotion id
+        EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
+        demotionIds.add(demotionId);
+
+        // check and record slashing
+        if (
+            node.status != NodeStatus.Slashing
+                && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD
+        ) {
+            // record slashing
+            _recordSlashing(node, epoch);
+
+            // set node status: slashing
+            NodeStatus curStatus = node.status;
+            node.status = NodeStatus.Slashing;
+            emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Slashing);
+        }
+
+        emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reason, reporter);
+    }
+
+    /**
      * @dev  Records the slashing of a node.
      * @param node The node being slashed.
      * @param epoch The epoch for which slashing is being recorded.
@@ -261,7 +276,7 @@ library RewardsAndSlashingLib {
         delete node.slashedStakingPoolTokens;
         delete node.slashedOperationPoolTokens;
 
-        // transfer slashed tokens to reporters
+        // distribute slashed tokens to reporters
         _transferToReporters(reporterAmount, node.account, epoch, paymentProcessor);
         // burn slashed tokens
         _transfer(address(0x0), burnAmount);
@@ -286,17 +301,14 @@ library RewardsAndSlashingLib {
         address paymentProcessor
     ) internal {
         Demotion[] memory demotions = _getDemotions(nodeAddr, epoch);
+        // each reporter will receive the same amount of tokens
         uint256 averageAmount = amount / demotions.length;
 
         for (uint256 i = 0; i < demotions.length; i++) {
-            address reporter = demotions[i].reporter;
-            if (reporter == address(0)) {
-                // transfer slashed tokens to payment processor
-                _transfer(paymentProcessor, averageAmount);
-            } else {
-                // transfer slashed tokens to reporter
-                _transfer(reporter, averageAmount);
-            }
+            // if reporter is address(0), transfer to payment processor
+            address recipient =
+                demotions[i].reporter == address(0) ? paymentProcessor : demotions[i].reporter;
+            _transfer(recipient, averageAmount);
         }
     }
 
