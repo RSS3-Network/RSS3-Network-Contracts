@@ -2,27 +2,27 @@
 // solhint-disable var-name-mixedcase,no-empty-blocks
 pragma solidity 0.8.20;
 
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IChips} from "../interfaces/IChips.sol";
 import {Const} from "./Const.sol";
 import {Node, NodeStatus, UnstakeRequest, WithdrawalRequest} from "./DataTypes.sol";
 import {
-    NodeNotExists,
-    DepositForPublicGoodNode,
-    StakeAmountTooSmall,
-    ChipNotValid,
-    ChipNotAuthorized,
-    EmptyChipIds,
-    ChipsNotSameOwner,
     ChipIdsArrayTooSmall,
+    ChipNotAuthorized,
+    ChipNotValid,
+    ChipsNotSameOwner,
+    ClaimIdNotExists,
     ClaimTimeNotReady,
-    ClaimIdNotExists
+    DepositForPublicGoodNode,
+    EmptyChipIds,
+    NodeNotExists,
+    StakeAmountTooSmall
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {NodeSettingsLib} from "./NodeSettingsLib.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 library StakingLib {
     using Address for address;
@@ -48,12 +48,10 @@ library StakingLib {
         emit Events.Deposited(nodeAddr, amount);
     }
 
-    function stakeToNode(
-        Node storage node,
-        uint256 amount,
-        address nodeAddr,
-        address staker
-    ) external returns (uint256 tokenId) {
+    function stakeToNode(Node storage node, uint256 amount, address nodeAddr, address staker)
+        external
+        returns (uint256 tokenId)
+    {
         // staking amount must be greater than MIN_STAKE
         if (amount < Const.MIN_STAKE) revert StakeAmountTooSmall();
 
@@ -75,7 +73,10 @@ library StakingLib {
     }
 
     /// @dev unstake from a node by burning chips
-    function unstakeFromNode(address nodeAddr, uint256[] calldata chipIds) external returns (uint256 requestId) {
+    function unstakeFromNode(address nodeAddr, uint256[] calldata chipIds)
+        external
+        returns (uint256 requestId)
+    {
         if (chipIds.length == 0) revert EmptyChipIds();
 
         address owner = _checkChipsConditions(nodeAddr, chipIds);
@@ -108,7 +109,10 @@ library StakingLib {
         emit Events.UnstakeRequested(owner, nodeAddr, requestId, unstakeAmount, chipIds);
     }
 
-    function requestWithdrawal(Node storage node, uint256 amount) external returns (uint256 requestId) {
+    function requestWithdrawal(Node storage node, uint256 amount)
+        external
+        returns (uint256 requestId)
+    {
         StakingCommonLib.decreaseOperationPool(node, amount);
 
         requestId = StorageLib.nextPendingWithdrawalId();
@@ -163,7 +167,7 @@ library StakingLib {
         uint256 totalShares;
         for (uint256 i = 0; i < chipIds.length; i++) {
             uint256 tokenId = chipIds[i];
-            (, , uint256 shares) = _chipInfo(tokenId);
+            (,, uint256 shares) = _chipInfo(tokenId);
             totalShares += shares;
 
             // burn chips and clear corresponding shares
@@ -177,7 +181,11 @@ library StakingLib {
     }
 
     /// @dev get chip info: node address, tokens, shares
-    function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares) {
+    function getChipInfo(uint256 tokenId)
+        external
+        view
+        returns (address nodeAddr, uint256 tokens, uint256 shares)
+    {
         (nodeAddr, tokens, shares) = _chipInfo(tokenId);
     }
 
@@ -189,7 +197,10 @@ library StakingLib {
      * @param shares The number of shares associated with the minted chip token.
      * @return tokenId The ID of the minted chip token.
      */
-    function _mintChipWithShares(address issuer, address to, uint256 shares) internal returns (uint256 tokenId) {
+    function _mintChipWithShares(address issuer, address to, uint256 shares)
+        internal
+        returns (uint256 tokenId)
+    {
         address chips = StorageLib.getChipsContract();
         tokenId = IChips(chips).mint(to);
 
@@ -230,7 +241,11 @@ library StakingLib {
     /// 1. caller has the authorization to unstake/merge the chips
     /// 2. chips are issued by the same node
     /// 3. chips have the same owner
-    function _checkChipsConditions(address nodeAddr, uint256[] calldata chipIds) internal view returns (address) {
+    function _checkChipsConditions(address nodeAddr, uint256[] calldata chipIds)
+        internal
+        view
+        returns (address)
+    {
         address chips = StorageLib.getChipsContract();
         address lastOwner;
         for (uint256 i = 0; i < chipIds.length; i++) {
@@ -279,14 +294,19 @@ library StakingLib {
     }
 
     /// @dev returns chip info: node address, tokens, shares
-    function _chipInfo(uint256 tokenId) internal view returns (address nodeAddr, uint256 tokens, uint256 shares) {
+    function _chipInfo(uint256 tokenId)
+        internal
+        view
+        returns (address nodeAddr, uint256 tokens, uint256 shares)
+    {
         nodeAddr = _issuerOf(tokenId);
         // return (0, 0, 0) if the chip issuer is not found
         if (nodeAddr == address(0)) return (address(0), 0, 0);
 
         shares = StorageLib.chipToShares()[tokenId];
 
-        // if shares is 0, it always mean the chip is old version, and the shares is fixed to SHARES_PER_CHIP
+        // if shares is 0, it always mean the chip is old version, and the shares is fixed to
+        // SHARES_PER_CHIP
         if (shares == 0) {
             shares = Const.SHARES_PER_CHIP;
         }
@@ -296,20 +316,23 @@ library StakingLib {
     }
 
     /// @dev returns whether user is token owner or approved
-    function _isAuthorized(address owner, uint256 tokenId, address user) internal view returns (bool) {
+    function _isAuthorized(address owner, uint256 tokenId, address user)
+        internal
+        view
+        returns (bool)
+    {
         address chips = StorageLib.getChipsContract();
 
-        return
-            owner == user ||
-            IERC721(chips).getApproved(tokenId) == user ||
-            IERC721(chips).isApprovedForAll(owner, user);
+        return owner == user || IERC721(chips).getApproved(tokenId) == user
+            || IERC721(chips).isApprovedForAll(owner, user);
     }
 
     /// @dev returns the node address which issued the chips
     function _issuerOf(uint256 tokenId) internal view returns (address) {
         // return address(0) if the chip is not existing or burned
         address chips = StorageLib.getChipsContract();
-        try IERC721(chips).ownerOf(tokenId) returns (address) {} catch (bytes memory) {
+        try IERC721(chips).ownerOf(tokenId) returns (address) {}
+        catch (bytes memory) {
             return address(0);
         }
 

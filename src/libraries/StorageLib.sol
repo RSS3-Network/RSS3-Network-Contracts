@@ -2,10 +2,16 @@
 // solhint-disable no-inline-assembly
 pragma solidity 0.8.20;
 
+import {
+    Demotion,
+    Node,
+    PoolStatData,
+    UnstakeRequest,
+    WithdrawalRequest
+} from "../libraries/DataTypes.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Node, Demotion, PoolStatData, UnstakeRequest, WithdrawalRequest} from "../libraries/DataTypes.sol";
 
 library StorageLib {
     using Checkpoints for Checkpoints.Trace160;
@@ -18,9 +24,12 @@ library StorageLib {
 
     uint256 public constant IS_ALPHA_PHASE_OFFSET = 21;
 
-    uint256 public constant NODES_ADDRESS_SET_SLOT = 5; // EnumerableSet.AddressSet _nodeAddrs
-    uint256 public constant NODES_MAPPING_BY_NODE_ADDRESS_SLOT = 7; // mapping(address nodeAddr => Node)_nodes
-    uint256 public constant NODE_ID_COUNTER_SLOT = 8; // uint256 _nodeIdCounter
+    // EnumerableSet.AddressSet internal _nodeAddrs
+    uint256 public constant NODES_ADDRESS_SET_SLOT = 5;
+    // mapping(address nodeAddr =>Node) internal  _nodes
+    uint256 public constant NODES_MAPPING_BY_NODE_ADDRESS_SLOT = 7;
+    // uint256 _nodeIdCounter
+    uint256 public constant NODE_ID_COUNTER_SLOT = 8;
     uint256 public constant PENDING_WITHDRAWAL_COUNTER_SLOT = 9;
     uint256 public constant PENDING_WITHDRAWAL_MAPPING_BY_REQUEST_ID_SLOT = 10;
     uint256 public constant PENDING_UNSTAKE_COUNTER_SLOT = 11;
@@ -35,11 +44,13 @@ library StorageLib {
     uint256 public constant DEMOTION_IDS_SLOT = 27;
     uint256 public constant DEMOTIONS_SLOT = 28;
 
-    // keccak256(abi.encode(uint256(keccak256("staking.storage.public.pool")) - 1)) & ~bytes32(uint256(0xff))
+    // keccak256(abi.encode(uint256(keccak256("staking.storage.public.pool")) - 1)) &
+    // ~bytes32(uint256(0xff))
     bytes32 public constant PUBLIC_POOL_SLOT_LOCATION =
         0x8f8113410d98c63dc5c1c4f1ac9eaef4d76f695bf1ef91dca2f23702b51d9400;
 
-    // keccak256(abi.encode(uint256(keccak256("staking.storage.pool.stat")) - 1)) & ~bytes32(uint256(0xff))
+    // keccak256(abi.encode(uint256(keccak256("staking.storage.pool.stat")) - 1)) &
+    // ~bytes32(uint256(0xff))
     bytes32 public constant POOL_STAT_INFO_SLOT_LOCATION =
         0xfcb6ad95c34c6d7d192743b3169b67a70694ba6d050a056cf57adc19b560c500;
 
@@ -97,22 +108,31 @@ library StorageLib {
         issuer = address(families.lowerLookup(tokenId.toUint96()));
     }
 
-    function chipIssuers() internal pure returns (mapping(uint256 => address) storage _chipIssuers) {
+    function chipIssuers()
+        internal
+        pure
+        returns (mapping(uint256 => address) storage _chipIssuers)
+    {
         assembly {
             _chipIssuers.slot := CHIP_ISSUERS_MAPPING_SLOT
         }
     }
 
-    function chipToShares() internal pure returns (mapping(uint256 => uint256) storage _chipToShares) {
+    function chipToShares()
+        internal
+        pure
+        returns (mapping(uint256 => uint256) storage _chipToShares)
+    {
         assembly {
             _chipToShares.slot := CHIP_TO_SHARES_MAPPING_SLOT
         }
     }
 
-    function getDemotionIds(
-        address nodeAddr,
-        uint256 epochId
-    ) internal pure returns (EnumerableSet.UintSet storage demotionIds) {
+    function getDemotionIds(address nodeAddr, uint256 epochId)
+        internal
+        pure
+        returns (EnumerableSet.UintSet storage demotionIds)
+    {
         assembly {
             mstore(0x00, nodeAddr)
             mstore(0x20, DEMOTION_IDS_SLOT)
@@ -122,13 +142,21 @@ library StorageLib {
         }
     }
 
-    function getDemotions() internal pure returns (mapping(uint256 => Demotion) storage _demotions) {
+    function getDemotions()
+        internal
+        pure
+        returns (mapping(uint256 => Demotion) storage _demotions)
+    {
         assembly {
             _demotions.slot := DEMOTIONS_SLOT
         }
     }
 
-    function getPendingUnstake() internal pure returns (mapping(uint256 => UnstakeRequest) storage _pendingUnstake) {
+    function getPendingUnstake()
+        internal
+        pure
+        returns (mapping(uint256 => UnstakeRequest) storage _pendingUnstake)
+    {
         assembly {
             _pendingUnstake.slot := PENDING_UNSTAKE_MAPPING_BY_REQUEST_ID_SLOT
         }

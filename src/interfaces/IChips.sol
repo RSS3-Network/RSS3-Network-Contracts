@@ -24,7 +24,9 @@ interface IChips {
      * @return startTokenId The start of new minted chips token ids.
      * @return endTokenId The end of new minted chips token ids.
      */
-    function mintBatch(address to, uint256 batchSize) external returns (uint256 startTokenId, uint256 endTokenId);
+    function mintBatch(address to, uint256 batchSize)
+        external
+        returns (uint256 startTokenId, uint256 endTokenId);
 
     /**
      * @notice Destroys `tokenId`.

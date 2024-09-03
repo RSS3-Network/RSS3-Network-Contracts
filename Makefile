@@ -60,7 +60,7 @@ regenerate-storage-layout:
 	rm ./tools/storageLayout/* && ./tools/checkStorageLayout.sh
 
 # Lints
-lint :; npx prettier --plugin=prettier-plugin-solidity  --write "{src,test,script}/**/*.sol"
+lint :; forge fmt
 
 abi:
 	@echo " > \033[32mGenerating abi...\033[0m"

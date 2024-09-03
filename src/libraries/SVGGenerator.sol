@@ -2,7 +2,7 @@
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
 
-import {NodeTraits, ChipTraits} from "./DataTypes.sol";
+import {ChipTraits, NodeTraits} from "./DataTypes.sol";
 import {ChipDetail} from "./SVGs/ChipDetail.sol";
 import {Corners} from "./SVGs/Corners.sol";
 import {Eyes} from "./SVGs/Eyes.sol";
@@ -62,8 +62,10 @@ library SVGGenerator {
             chipTraits.headDetailColor
         );
 
-        (string memory innerSVG1, string memory attributes1) = getNodeTraitsInnerSVGAndAttributes(nodeTraits);
-        (string memory innerSVG2, string memory attributes2) = getChipTraitsInnerSVGAndAttributes(chipTraits);
+        (string memory innerSVG1, string memory attributes1) =
+            getNodeTraitsInnerSVGAndAttributes(nodeTraits);
+        (string memory innerSVG2, string memory attributes2) =
+            getChipTraitsInnerSVGAndAttributes(chipTraits);
 
         return (
             string.concat(baseSVGHead, styleSVG, innerSVG1, innerSVG2, baseSVGTail),
@@ -71,18 +73,22 @@ library SVGGenerator {
         );
     }
 
-    function getNodeTraitsInnerSVGAndAttributes(
-        NodeTraits memory nodeTraits
-    ) internal pure returns (string memory, string memory) {
+    function getNodeTraitsInnerSVGAndAttributes(NodeTraits memory nodeTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
         (string memory corner, string memory cornerTrait) = nodeTraits.pg
             ? (Corners.pgSVG, "Public Good Node")
             : nodeTraits.alpha
                 ? (Corners.alphaSVG, "Alpha Node")
                 : Corners.getCorner(nodeTraits.chipCornerId);
         (string memory frameSVGs, string memory frameTrait) = Frame.getFrame(nodeTraits.frameId);
-        (string memory chipSVGs, string memory chipTrait) = ChipDetail.getChipDetail(nodeTraits.chipDetailId);
+        (string memory chipSVGs, string memory chipTrait) =
+            ChipDetail.getChipDetail(nodeTraits.chipDetailId);
 
-        string memory innerSVG1 = string.concat(frameSVGs, '<svg class="c">', chipSVGs, "</svg>", corner);
+        string memory innerSVG1 =
+            string.concat(frameSVGs, '<svg class="c">', chipSVGs, "</svg>", corner);
 
         string memory attributes1 = string.concat(
             '{"trait_type": "Frame", "value": "',
@@ -101,10 +107,13 @@ library SVGGenerator {
         return (innerSVG1, attributes1);
     }
 
-    function getChipTraitsInnerSVGAndAttributes(
-        ChipTraits memory chipTraits
-    ) internal pure returns (string memory, string memory) {
-        (string memory svgParts, string memory headShapeTrait) = getHeadShape(chipTraits.headShapeId % 3);
+    function getChipTraitsInnerSVGAndAttributes(ChipTraits memory chipTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
+        (string memory svgParts, string memory headShapeTrait) =
+            getHeadShape(chipTraits.headShapeId % 3);
 
         string memory attributes = string.concat(
             '{"trait_type": "Head Shape", "value": "',
@@ -121,11 +130,11 @@ library SVGGenerator {
         return (svgParts, attributes);
     }
 
-    function addEyes(
-        string memory svgs,
-        string memory attrs,
-        ChipTraits memory chipTraits
-    ) internal pure returns (string memory, string memory) {
+    function addEyes(string memory svgs, string memory attrs, ChipTraits memory chipTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
         (string memory eyesSVG, string memory eyesTrait) = Eyes.getEyes(chipTraits.eyesId);
 
         return (
@@ -134,11 +143,11 @@ library SVGGenerator {
         );
     }
 
-    function addMouth(
-        string memory svgs,
-        string memory attrs,
-        ChipTraits memory chipTraits
-    ) internal pure returns (string memory, string memory) {
+    function addMouth(string memory svgs, string memory attrs, ChipTraits memory chipTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
         (string memory mouthSVG, string memory mouthTrait) = Mouths.getMouth(chipTraits.mouthId);
 
         return (
@@ -147,11 +156,11 @@ library SVGGenerator {
         );
     }
 
-    function addHeadDetail(
-        string memory svgs,
-        string memory attrs,
-        ChipTraits memory chipTraits
-    ) internal pure returns (string memory, string memory) {
+    function addHeadDetail(string memory svgs, string memory attrs, ChipTraits memory chipTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
         (string memory headSVG, string memory headTraits) = Head.getHead(chipTraits.headDetailId);
 
         return (
@@ -173,18 +182,17 @@ library SVGGenerator {
         uint8 headShapeColor,
         uint8 headDetailColor
     ) internal pure returns (string memory) {
-        return
-            string.concat(
-                '<style type="text/css">.f{fill:',
-                getColor(frameColor),
-                ";}.c{fill:",
-                getColor(chipDetailColor),
-                ";}.b{fill:",
-                getColor(headShapeColor),
-                ";}.h{fill:",
-                getColor(headDetailColor),
-                ";}.alpha{fill:#1477FB;}.pg{fill:#FB1467;}.e{fill-rule:evenodd;clip-rule:evenodd;}</style>"
-            );
+        return string.concat(
+            '<style type="text/css">.f{fill:',
+            getColor(frameColor),
+            ";}.c{fill:",
+            getColor(chipDetailColor),
+            ";}.b{fill:",
+            getColor(headShapeColor),
+            ";}.h{fill:",
+            getColor(headDetailColor),
+            ";}.alpha{fill:#1477FB;}.pg{fill:#FB1467;}.e{fill-rule:evenodd;clip-rule:evenodd;}</style>"
+        );
     }
 
     function getColor(uint8 id) internal pure returns (string memory) {

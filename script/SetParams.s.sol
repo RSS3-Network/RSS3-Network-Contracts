@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {Script} from "forge-std/Script.sol";
 import {NetworkParams} from "../src/NetworkParams.sol";
+import {Script} from "forge-std/Script.sol";
 
 contract SetParams is Script {
     /* solhint-disable comprehensive-interface */

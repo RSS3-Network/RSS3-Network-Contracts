@@ -9,7 +9,8 @@ interface ISettlement {
      * @param staking Address of the Staking contract.
      * @param oracleAccount Address who makes settlement with the Staking contract.
      * @param startTime The start time of the first epoch.
-     * @param operationRewardsPercent The percentage of the total rewards to be allocated to the request bonus.
+     * @param operationRewardsPercent The percentage of the total rewards to be allocated to the
+     * request bonus.
      * Others will be allocated to the staking rewards.
      */
     function initialize(
@@ -42,7 +43,8 @@ interface ISettlement {
      * @notice Sets tax fraction for public pool.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool. Each 1 base point is
+     * @param taxRateBasisPoints The basis points of the tax rate to set for the public pool. Each 1
+     * base point is
      * 0.01%.
      */
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
@@ -69,7 +71,8 @@ interface ISettlement {
      * @param epoch The epoch number.
      * @param demotionIds The ids of demotions to revoke.
      */
-    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds) external;
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds)
+        external;
 
     /**
      * @notice Commits slashing for a specific node and epoch.
@@ -103,7 +106,8 @@ interface ISettlement {
 
     /**
      * @notice  Returns the bonus info.
-     * @return (operationRewardsPerEpoch, stakingRewardsPerEpoch) The amount of request bonus per epoch.
+     * @return (operationRewardsPerEpoch, stakingRewardsPerEpoch) The amount of request bonus per
+     * epoch.
      */
     function getBonusInfo() external view returns (uint256, uint256);
 }

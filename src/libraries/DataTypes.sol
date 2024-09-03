@@ -59,24 +59,40 @@ struct PoolStatData {
 }
 
 struct Demotion {
+    /// @notice unique identifier for the demotion
     uint256 demotionId;
+    /// @notice address of the node being demoted
     address nodeAddr;
+    /// @notice epoch when the demotion occurred
     uint256 epoch;
+    /// @notice reason for the demotion
     string reason;
+    /// @notice address of the account that reported the demotion
     address reporter;
 }
 
+/// @notice Enum representing the various states a node can be in
 enum NodeStatus {
-    None, // 0
-    Registered, // 1
-    Initializing, // 2
-    Outdated, // 3
-    Online, // 4
-    Offline, // 5
-    Slashing, // 6
-    Slashed, // 7
-    Exiting, // 8
-    Exited // 9
+    /// @notice Default state, node not yet registered
+    None,
+    /// @notice Node has been registered but not yet initialized
+    Registered,
+    /// @notice Node is in the process of initializing
+    Initializing,
+    /// @notice Node's software or configuration is outdated
+    Outdated,
+    /// @notice Node is online and functioning normally
+    Online,
+    /// @notice Node is currently offline or unreachable
+    Offline,
+    /// @notice Node is in the process of being slashed (penalized)
+    Slashing,
+    /// @notice Node has been slashed (penalized)
+    Slashed,
+    /// @notice Node is in the process of exiting the network
+    Exiting,
+    /// @notice Node has successfully exited the network
+    Exited
 }
 
 struct WithdrawalRequest {

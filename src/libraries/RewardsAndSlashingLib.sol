@@ -2,14 +2,20 @@
 // solhint-disable var-name-mixedcase
 pragma solidity 0.8.20;
 
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
-import {Node, Demotion, NodeStatus, PoolStatData} from "./DataTypes.sol";
-import {NodeNotExists, SlashingNotExist, NodeIsPublicGood, NodeHasNoDemotions, InvalidArrayLength} from "./Errors.sol";
+import {Demotion, Node, NodeStatus, PoolStatData} from "./DataTypes.sol";
+import {
+    InvalidArrayLength,
+    NodeHasNoDemotions,
+    NodeIsPublicGood,
+    NodeNotExists,
+    SlashingNotExist
+} from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 library RewardsAndSlashingLib {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -28,40 +34,12 @@ library RewardsAndSlashingLib {
         string[] calldata reasons,
         address[] calldata reporters
     ) external {
-        if (nodeAddrs.length != reasons.length || nodeAddrs.length != reporters.length) revert InvalidArrayLength();
+        if (nodeAddrs.length != reasons.length || nodeAddrs.length != reporters.length) {
+            revert InvalidArrayLength();
+        }
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            address nodeAddr = nodeAddrs[i];
-
-            Node storage node = StorageLib.getNode(nodeAddr);
-            if (node.account == address(0)) revert NodeNotExists(nodeAddr);
-            // public good node can't be demoted
-            if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
-
-            uint256 demotionId = StorageLib.nextDemotionId();
-            // save demotion
-            StorageLib.getDemotions()[demotionId] = Demotion({
-                demotionId: demotionId,
-                nodeAddr: nodeAddr,
-                epoch: epoch,
-                reason: reasons[i],
-                reporter: reporters[i]
-            });
-            // save demotion id
-            EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
-            demotionIds.add(demotionId);
-
-            if (node.status != NodeStatus.Slashing && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD) {
-                // record slashing
-                _recordSlashing(node, epoch);
-
-                // set node status: slashing
-                NodeStatus curStatus = node.status;
-                node.status = NodeStatus.Slashing;
-                emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Slashing);
-            }
-
-            emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reasons[i], reporters[i]);
+            _submitSingleDemotion(epoch, nodeAddrs[i], reasons[i], reporters[i]);
         }
     }
 
@@ -71,7 +49,11 @@ library RewardsAndSlashingLib {
      * @param epoch The epoch number.
      * @param demotionIdsToRevoke An array of demotion IDs to revoke.
      */
-    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToRevoke) external {
+    function revokeDemotions(
+        address nodeAddr,
+        uint256 epoch,
+        uint256[] calldata demotionIdsToRevoke
+    ) external {
         EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
         if (demotionIds.length() == 0) revert NodeHasNoDemotions(nodeAddr, epoch);
 
@@ -83,7 +65,10 @@ library RewardsAndSlashingLib {
         }
 
         Node storage node = StorageLib.getNode(nodeAddr);
-        if (node.status == NodeStatus.Slashing && demotionIds.length() <= Const.DEMOTION_COUNT_THRESHOLD) {
+        if (
+            node.status == NodeStatus.Slashing
+                && demotionIds.length() <= Const.DEMOTION_COUNT_THRESHOLD
+        ) {
             // revoke slashing
             _revokeSlashing(node, epoch);
 
@@ -135,17 +120,17 @@ library RewardsAndSlashingLib {
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             Node storage node = StorageLib.getNode(nodeAddrs[i]);
-            if (node.account == address(0) || node.publicGood || node.operationPoolTokens < Const.MIN_DEPOSIT) {
+            if (
+                node.account == address(0) || node.publicGood
+                    || node.operationPoolTokens < Const.MIN_DEPOSIT
+            ) {
                 continue;
             }
 
             // operation rewards and staking rewards are sent to staking pool
             uint256 rewards = operationRewards[i] + stakingRewards[i];
             (uint256 fullTax, uint256 receivedTax) = _getTax(
-                rewards,
-                node.taxRateBasisPoints,
-                node.operationPoolTokens,
-                node.stakingPoolTokens
+                rewards, node.taxRateBasisPoints, node.operationPoolTokens, node.stakingPoolTokens
             );
 
             taxCollected[i] = receivedTax;
@@ -167,10 +152,8 @@ library RewardsAndSlashingLib {
      */
     function withdraw2Treasury(address treasury) external {
         PoolStatData storage pool = StorageLib.poolStatStorage();
-        uint256 amount = address(this).balance -
-            pool.totalOperationPoolTokens -
-            pool.totalStakingPoolTokens -
-            pool.totalSlashingPoolTokens;
+        uint256 amount = address(this).balance - pool.totalOperationPoolTokens
+            - pool.totalStakingPoolTokens - pool.totalSlashingPoolTokens;
 
         _transfer(treasury, amount);
     }
@@ -181,8 +164,60 @@ library RewardsAndSlashingLib {
      * @param epoch The epoch number.
      * @return demotions An array of demotions.
      */
-    function getDemotions(address nodeAddr, uint256 epoch) external view returns (Demotion[] memory demotions) {
+    function getDemotions(address nodeAddr, uint256 epoch)
+        external
+        view
+        returns (Demotion[] memory demotions)
+    {
         demotions = _getDemotions(nodeAddr, epoch);
+    }
+
+    /**
+     * @dev Submits a single demotion for a node.
+     * @param epoch The epoch for which the demotion is being submitted.
+     * @param nodeAddr The address of the node being demoted.
+     * @param reason The reason for the demotion.
+     * @param reporter The address of the account reporting the demotion.
+     */
+    function _submitSingleDemotion(
+        uint256 epoch,
+        address nodeAddr,
+        string calldata reason,
+        address reporter
+    ) internal {
+        Node storage node = StorageLib.getNode(nodeAddr);
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
+        // public good node can't be demoted
+        if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
+
+        uint256 demotionId = StorageLib.nextDemotionId();
+        // save demotion
+        StorageLib.getDemotions()[demotionId] = Demotion({
+            demotionId: demotionId,
+            nodeAddr: nodeAddr,
+            epoch: epoch,
+            reason: reason,
+            reporter: reporter
+        });
+        // save demotion id
+        EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
+        demotionIds.add(demotionId);
+
+        // check and record slashing
+        if (
+            node.status != NodeStatus.Slashing
+                && demotionIds.length() > Const.DEMOTION_COUNT_THRESHOLD
+        ) {
+            // record slashing
+            _recordSlashing(node, epoch);
+
+            // set node status: slashing
+            NodeStatus curStatus = node.status;
+            node.status = NodeStatus.Slashing;
+            emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Slashing);
+        }
+
+        emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reason, reporter);
     }
 
     /**
@@ -192,10 +227,11 @@ library RewardsAndSlashingLib {
      */
     function _recordSlashing(Node storage node, uint256 epoch) internal {
         // slash operation pool tokens
-        uint256 slashedOperationPool = (node.operationPoolTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
+        uint256 slashedOperationPool =
+            (node.operationPoolTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
         // slash staking pool tokens
-        uint256 slashedStakingPool = (node.stakingPoolTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 slashedStakingPool =
+            (node.stakingPoolTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         // record slashing amount
         StakingCommonLib.decreaseOperationPool(node, slashedOperationPool);
@@ -217,7 +253,9 @@ library RewardsAndSlashingLib {
         // revoke slashing amount
         StakingCommonLib.increaseOperationPool(node, node.slashedOperationPoolTokens);
         StakingCommonLib.increaseStakingPool(node, node.slashedStakingPoolTokens);
-        StakingCommonLib.decreaseSlashingPool(node.slashedOperationPoolTokens + node.slashedStakingPoolTokens);
+        StakingCommonLib.decreaseSlashingPool(
+            node.slashedOperationPoolTokens + node.slashedStakingPoolTokens
+        );
         // update slashed tokens
         delete node.slashedOperationPoolTokens;
         delete node.slashedStakingPoolTokens;
@@ -228,15 +266,17 @@ library RewardsAndSlashingLib {
     function _commitSlashing(Node storage node, uint256 epoch, address paymentProcessor) internal {
         // commit slashing amount, distributes the amount to reporter and treasury
         uint256 slashedAmount = node.slashedOperationPoolTokens + node.slashedStakingPoolTokens;
-        uint256 reporterAmount = (slashedAmount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
-        uint256 burnAmount = (slashedAmount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 reporterAmount =
+            (slashedAmount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 burnAmount =
+            (slashedAmount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         // update
         StakingCommonLib.decreaseSlashingPool(slashedAmount);
         delete node.slashedStakingPoolTokens;
         delete node.slashedOperationPoolTokens;
 
-        // transfer slashed tokens to reporters
+        // distribute slashed tokens to reporters
         _transferToReporters(reporterAmount, node.account, epoch, paymentProcessor);
         // burn slashed tokens
         _transfer(address(0x0), burnAmount);
@@ -254,19 +294,21 @@ library RewardsAndSlashingLib {
      * @param epoch The epoch number to get demotions.
      * @param paymentProcessor The address of the payment processor contract.
      */
-    function _transferToReporters(uint256 amount, address nodeAddr, uint256 epoch, address paymentProcessor) internal {
+    function _transferToReporters(
+        uint256 amount,
+        address nodeAddr,
+        uint256 epoch,
+        address paymentProcessor
+    ) internal {
         Demotion[] memory demotions = _getDemotions(nodeAddr, epoch);
+        // each reporter will receive the same amount of tokens
         uint256 averageAmount = amount / demotions.length;
 
         for (uint256 i = 0; i < demotions.length; i++) {
-            address reporter = demotions[i].reporter;
-            if (reporter == address(0)) {
-                // transfer slashed tokens to payment processor
-                _transfer(paymentProcessor, averageAmount);
-            } else {
-                // transfer slashed tokens to reporter
-                _transfer(reporter, averageAmount);
-            }
+            // if reporter is address(0), transfer to payment processor
+            address recipient =
+                demotions[i].reporter == address(0) ? paymentProcessor : demotions[i].reporter;
+            _transfer(recipient, averageAmount);
         }
     }
 
@@ -277,7 +319,11 @@ library RewardsAndSlashingLib {
         Address.sendValue(payable(to), amount);
     }
 
-    function _getDemotions(address nodeAddr, uint256 epoch) internal view returns (Demotion[] memory demotions) {
+    function _getDemotions(address nodeAddr, uint256 epoch)
+        internal
+        view
+        returns (Demotion[] memory demotions)
+    {
         EnumerableSet.UintSet storage demotionIds = StorageLib.getDemotionIds(nodeAddr, epoch);
 
         demotions = new Demotion[](demotionIds.length());
@@ -322,7 +368,11 @@ library RewardsAndSlashingLib {
     }
 
     /// @dev returns the full tax amount
-    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
+    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints)
+        internal
+        pure
+        returns (uint256)
+    {
         return (rewards * taxRateBasisPoints) / Const.DENOMINATOR;
     }
 }

@@ -4,13 +4,15 @@ pragma solidity 0.8.20;
 
 import {DeployConfig} from "../../script/DeployConfig.s.sol";
 import {Chips} from "../../src/Chips.sol";
-import {Const} from "../../src/libraries/Const.sol";
-import {Node, Demotion, NodeStatus} from "../../src/libraries/DataTypes.sol";
-import {StorageLib} from "../../src/libraries/StorageLib.sol";
-import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
+
 import {Settlement} from "../../src/Settlement.sol";
 import {Staking} from "../../src/Staking.sol";
-import {TransparentUpgradeableProxy as Proxy} from "../../src/upgradeability/TransparentUpgradeableProxy.sol";
+import {Const} from "../../src/libraries/Const.sol";
+import {Demotion, Node, NodeStatus} from "../../src/libraries/DataTypes.sol";
+import {StorageLib} from "../../src/libraries/StorageLib.sol";
+import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
+import {TransparentUpgradeableProxy as Proxy} from
+    "../../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {InternalSettlement} from "./InternalSettlement.sol";
 import {Utils} from "./Utils.sol";
 
@@ -25,8 +27,10 @@ contract CommonTest is Utils {
     address public constant pauseAccount = address(0x888);
     address public constant oracleAccount = address(0x999);
 
-    bytes32 public constant PAUSE_ROLE = 0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
-    bytes32 public constant ORACLE_ROLE = 0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
+    bytes32 public constant PAUSE_ROLE =
+        0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d;
+    bytes32 public constant ORACLE_ROLE =
+        0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1;
 
     address[] public zeroAddrArr = new address[](0);
     uint256[] public zeroUintArr = new uint256[](0);
@@ -66,12 +70,7 @@ contract CommonTest is Utils {
 
     function _setUp() internal {
         // read config from local.json
-        string memory path = string.concat(
-            vm.projectRoot(),
-            "/deploy-config/",
-            "local"
-            ".json"
-        );
+        string memory path = string.concat(vm.projectRoot(), "/deploy-config/", "local" ".json");
         _cfg = new DeployConfig(path);
 
         // deploy rss3 token
@@ -103,7 +102,9 @@ contract CommonTest is Utils {
         _settlement = Settlement(payable(settlementProxy));
 
         // init
-        _staking.initialize(address(_chips), pauseAccount, address(_settlement), _cfg.isAlphaPhase());
+        _staking.initialize(
+            address(_chips), pauseAccount, address(_settlement), _cfg.isAlphaPhase()
+        );
         _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
         _chips.initialize(chipsName, chipsSymbol, address(_staking));
 
@@ -144,7 +145,8 @@ contract CommonTest is Utils {
     }
 
     function _presetNodeStatus(address nodeAddr, NodeStatus status) internal {
-        bytes32 slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
+        bytes32 slot =
+            keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
         // node.status is at offset 10 of struct Node
         slot = bytes32(uint256(slot) + 10);
         vm.store(address(_staking), slot, bytes32(uint256(status)));
@@ -153,7 +155,9 @@ contract CommonTest is Utils {
             slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
             // node.exitTime is at offset 9 of struct Node
             slot = bytes32(uint256(slot) + 9);
-            vm.store(address(_staking), slot, bytes32(uint256(block.timestamp + Const.NODE_EXIT_PERIOD)));
+            vm.store(
+                address(_staking), slot, bytes32(uint256(block.timestamp + Const.NODE_EXIT_PERIOD))
+            );
         }
     }
 
@@ -185,12 +189,16 @@ contract CommonTest is Utils {
             uint256 newOperationPool = depositAmounts[i] + taxAmounts[i];
             assertEq(node.operationPoolTokens, newOperationPool, "check operation pool failed");
 
-            uint256 newStakingPool = stakeAmounts[i] + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
+            uint256 newStakingPool =
+                stakeAmounts[i] + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
             assertEq(node.stakingPoolTokens, newStakingPool, "check staking pool failed");
         }
     }
 
-    function _checkNodeProfile(address nodeAddr, string memory name, string memory description) internal view {
+    function _checkNodeProfile(address nodeAddr, string memory name, string memory description)
+        internal
+        view
+    {
         Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.name, name);
         assertEq(node.description, description);
@@ -230,7 +238,11 @@ contract CommonTest is Utils {
         assertEq(demotion.reporter, reporter);
     }
 
-    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints) internal pure returns (uint256) {
+    function _getFullTax(uint256 rewards, uint64 taxRateBasisPoints)
+        internal
+        pure
+        returns (uint256)
+    {
         return (rewards * taxRateBasisPoints) / Const.DENOMINATOR;
     }
 }

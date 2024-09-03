@@ -2,43 +2,51 @@
 // solhint-disable private-vars-leading-underscore
 pragma solidity 0.8.20;
 
-import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
-import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
 import {Const} from "./libraries/Const.sol";
 import {
+    Demotion,
     Node,
     NodeObsoleted,
     NodeStatus,
-    WithdrawalRequest,
-    UnstakeRequest,
     PoolStatData,
-    Demotion
+    UnstakeRequest,
+    WithdrawalRequest
 } from "./libraries/DataTypes.sol";
 import {
-    NodeNotExists,
     ExcessWithdrawalAmount,
-    WithdrawalAmountExceedsOperationPoolTokens,
     InvalidArrayLength,
+    NodeNotExists,
+    NodeNotPublicGood,
     SettlementPhase,
     StakeToPublicGoodNode,
-    NodeNotPublicGood
+    WithdrawalAmountExceedsOperationPoolTokens
 } from "./libraries/Errors.sol";
 import {Events} from "./libraries/Events.sol";
 import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
 import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
 import {StakingLib} from "./libraries/StakingLib.sol";
 import {StorageLib} from "./libraries/StorageLib.sol";
+import {AccessControlEnumerable} from
+    "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard {
+contract Staking is
+    IStaking,
+    Multicall,
+    Pausable,
+    Initializable,
+    AccessControlEnumerable,
+    ReentrancyGuard
+{
     using Math for uint256;
     using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -107,7 +115,8 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
 
     /// @dev demotion
     uint256 internal _demotionIdCounter; // slot 26
-    mapping(address nodeAddr => mapping(uint256 epochId => EnumerableSet.UintSet demotionIds)) internal _demotionIds;
+    mapping(address nodeAddr => mapping(uint256 epochId => EnumerableSet.UintSet demotionIds))
+        internal _demotionIds;
     mapping(uint256 demotionId => Demotion demotion) internal _demotions; // slot 28
 
     modifier whenNotSettlementPhase() {
@@ -119,7 +128,8 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
      * @notice constructor.
      * @param treasury The address of treasury.
      * @param stakeUnbondingPeriod Time in seconds user need to wait to unstake its stake.
-     * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its deposit.
+     * @param depositUnbondingPeriod Time in seconds node operator need to wait to withdraw its
+     * deposit.
      * @param paymentProcessor The address of payment processor contract.
      */
     constructor(
@@ -191,7 +201,11 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function updateNode(string calldata name, string calldata description) external override whenNotPaused {
+    function updateNode(string calldata name, string calldata description)
+        external
+        override
+        whenNotPaused
+    {
         NodeSettingsLib.updateNode(msg.sender, name, description);
     }
 
@@ -203,7 +217,12 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId) {
+    function requestWithdrawal(uint256 amount)
+        external
+        override
+        whenNotPaused
+        returns (uint256 requestId)
+    {
         Node storage node = _nodes[msg.sender];
         if (node.account == address(0)) revert NodeNotExists(msg.sender);
 
@@ -212,23 +231,34 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
 
         // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
         NodeStatus status = NodeSettingsLib.getNodeStatus(node);
-        if (NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT)
+        if (NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT) {
             revert ExcessWithdrawalAmount();
+        }
 
         return StakingLib.requestWithdrawal(node, amount);
     }
 
     /// @inheritdoc IStaking
-    function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused nonReentrant {
+    function claimWithdrawal(uint256[] calldata requestIds)
+        external
+        override
+        whenNotPaused
+        nonReentrant
+    {
         for (uint256 i = 0; i < requestIds.length; i++) {
             StakingLib.claimWithdrawal(requestIds[i], DEPOSIT_UNBONDING_PERIOD);
         }
     }
 
     /// @inheritdoc IStaking
-    function stake(
-        address nodeAddr
-    ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
+    function stake(address nodeAddr)
+        external
+        payable
+        override
+        whenNotPaused
+        whenNotSettlementPhase
+        returns (uint256 tokenId)
+    {
         Node storage node = StorageLib.getNode(nodeAddr);
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
         if (node.account == address(0)) revert NodeNotExists(nodeAddr);
@@ -237,9 +267,14 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function stakeToPublicPool(
-        address nodeAddr
-    ) external payable override whenNotPaused whenNotSettlementPhase returns (uint256 tokenId) {
+    function stakeToPublicPool(address nodeAddr)
+        external
+        payable
+        override
+        whenNotPaused
+        whenNotSettlementPhase
+        returns (uint256 tokenId)
+    {
         Node storage node = StorageLib.getNode(nodeAddr);
         if (!node.publicGood) revert NodeNotPublicGood(nodeAddr);
 
@@ -247,27 +282,43 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function requestUnstake(
-        address nodeAddr,
-        uint256[] calldata chipIds
-    ) external override whenNotPaused whenNotSettlementPhase returns (uint256 requestId) {
+    function requestUnstake(address nodeAddr, uint256[] calldata chipIds)
+        external
+        override
+        whenNotPaused
+        whenNotSettlementPhase
+        returns (uint256 requestId)
+    {
         return StakingLib.unstakeFromNode(nodeAddr, chipIds);
     }
 
     /// @inheritdoc IStaking
-    function claimUnstake(uint256[] calldata requestIds) external override whenNotPaused nonReentrant {
+    function claimUnstake(uint256[] calldata requestIds)
+        external
+        override
+        whenNotPaused
+        nonReentrant
+    {
         for (uint256 i = 0; i < requestIds.length; i++) {
             StakingLib.claimUnstake(requestIds[i], STAKE_UNBONDING_PERIOD);
         }
     }
 
     /// @inheritdoc IStaking
-    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override whenNotPaused {
+    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints)
+        external
+        override
+        whenNotPaused
+    {
         NodeSettingsLib.setTaxRateBasisPoints4Node(taxRateBasisPoints, msg.sender);
     }
 
     /// @inheritdoc IStaking
-    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external override onlyRole(ORACLE_ROLE) {
+    function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints)
+        external
+        override
+        onlyRole(ORACLE_ROLE)
+    {
         NodeSettingsLib.setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
     }
 
@@ -280,20 +331,23 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
         uint256[] calldata requestCounts,
         uint256 publicPoolRewards
     ) external payable override onlyRole(ORACLE_ROLE) {
-        if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != stakingRewards.length)
+        if (
+            nodeAddrs.length != operationRewards.length || nodeAddrs.length != stakingRewards.length
+        ) {
             revert InvalidArrayLength();
+        }
 
         // distribute rewards for public pool
         if (publicPoolRewards > 0) {
             uint256 tax = RewardsAndSlashingLib.distributePublicPoolRewards(publicPoolRewards);
-            emit Events.PublicGoodRewardDistributed(epochInfo[0], epochInfo[1], epochInfo[2], publicPoolRewards, tax);
+            emit Events.PublicGoodRewardDistributed(
+                epochInfo[0], epochInfo[1], epochInfo[2], publicPoolRewards, tax
+            );
         }
 
         // distribute rewards for other nodes
         uint256[] memory taxCollected = RewardsAndSlashingLib.distributeNodesRewards(
-            nodeAddrs,
-            operationRewards,
-            stakingRewards
+            nodeAddrs, operationRewards, stakingRewards
         );
 
         emit Events.RewardDistributed(
@@ -309,7 +363,11 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function mergeChips(uint256[] calldata chipIds) external override returns (uint256 newTokenId) {
+    function mergeChips(uint256[] calldata chipIds)
+        external
+        override
+        returns (uint256 newTokenId)
+    {
         return StakingLib.mergeChips(chipIds);
     }
 
@@ -333,15 +391,20 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function commitSlashing(address nodeAddr, uint256 epoch) external override onlyRole(ORACLE_ROLE) {
+    function commitSlashing(address nodeAddr, uint256 epoch)
+        external
+        override
+        onlyRole(ORACLE_ROLE)
+    {
         RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, PAYMENT_PROCESSOR);
     }
 
     /// @inheritdoc IStaking
-    function setNodeStatus(
-        address[] calldata nodeAddrs,
-        NodeStatus[] calldata status
-    ) external override onlyRole(ORACLE_ROLE) {
+    function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status)
+        external
+        override
+        onlyRole(ORACLE_ROLE)
+    {
         NodeSettingsLib.setNodesStatus(nodeAddrs, status);
     }
 
@@ -376,10 +439,12 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function getDemotions(
-        address nodeAddr,
-        uint256 epoch
-    ) external view override returns (Demotion[] memory demotions) {
+    function getDemotions(address nodeAddr, uint256 epoch)
+        external
+        view
+        override
+        returns (Demotion[] memory demotions)
+    {
         demotions = RewardsAndSlashingLib.getDemotions(nodeAddr, epoch);
     }
 
@@ -394,19 +459,32 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function getPendingWithdrawal(uint256 requestId) external view override returns (WithdrawalRequest memory) {
+    function getPendingWithdrawal(uint256 requestId)
+        external
+        view
+        override
+        returns (WithdrawalRequest memory)
+    {
         return _pendingWithdrawals[requestId];
     }
 
     /// @inheritdoc IStaking
-    function getPendingUnstake(uint256 requestId) external view override returns (UnstakeRequest memory) {
+    function getPendingUnstake(uint256 requestId)
+        external
+        view
+        override
+        returns (UnstakeRequest memory)
+    {
         return _pendingUnstake[requestId];
     }
 
     /// @inheritdoc IStaking
-    function getChipInfo(
-        uint256 tokenId
-    ) external view override returns (address nodeAddr, uint256 tokens, uint256 shares) {
+    function getChipInfo(uint256 tokenId)
+        external
+        view
+        override
+        returns (address nodeAddr, uint256 tokens, uint256 shares)
+    {
         (nodeAddr, tokens, shares) = StakingLib.getChipInfo(tokenId);
     }
 
@@ -425,7 +503,11 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
         external
         view
         override
-        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens)
+        returns (
+            uint256 totalOperationPoolTokens,
+            uint256 totalStakingPoolTokens,
+            uint256 totalSlashingPoolTokens
+        )
     {
         PoolStatData storage pool = StorageLib.poolStatStorage();
 
@@ -442,7 +524,12 @@ contract Staking is IStaking, Multicall, Pausable, Initializable, AccessControlE
     }
 
     /// @inheritdoc IStaking
-    function getNodes(address[] calldata nodeAddrs) external view override returns (Node[] memory nodes) {
+    function getNodes(address[] calldata nodeAddrs)
+        external
+        view
+        override
+        returns (Node[] memory nodes)
+    {
         return NodeSettingsLib.getNodes(nodeAddrs);
     }
 

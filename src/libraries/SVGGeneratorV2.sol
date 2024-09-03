@@ -2,9 +2,7 @@
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
 
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {LibString} from "solady/utils/LibString.sol";
-import {NodeTraits, ChipTraits, NftCardTraits} from "./DataTypes.sol";
+import {ChipTraits, NftCardTraits, NodeTraits} from "./DataTypes.sol";
 import {Fonts1} from "./Fonts/Fonts1.sol";
 import {Fonts2} from "./Fonts/Fonts2.sol";
 import {ChipCorners} from "./SVGsV2/ChipCorners.sol";
@@ -15,6 +13,8 @@ import {HeadDetails} from "./SVGsV2/HeadDetails.sol";
 import {HeadShapes} from "./SVGsV2/HeadShapes.sol";
 import {Mouths} from "./SVGsV2/Mouths.sol";
 import {NftCards} from "./SVGsV2/NftCards.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {LibString} from "solady/utils/LibString.sol";
 
 library SVGGeneratorV2 {
     using Strings for uint256;
@@ -66,9 +66,11 @@ library SVGGeneratorV2 {
                 ? (NftCards.getAlphaNftCard(), "Alpha Node")
                 : NftCards.getNftCard(nftCardTraits.nftCardId);
 
-        (string memory nodeSVG, string memory attributes1) = getNodeTraitsInnerSVGAndAttributes(nodeTraits);
+        (string memory nodeSVG, string memory attributes1) =
+            getNodeTraitsInnerSVGAndAttributes(nodeTraits);
 
-        (string memory chipSVG, string memory attributes2) = getChipTraitsInnerSVGAndAttributes(chipTraits);
+        (string memory chipSVG, string memory attributes2) =
+            getChipTraitsInnerSVGAndAttributes(chipTraits);
 
         return (
             string.concat(
@@ -81,7 +83,14 @@ library SVGGeneratorV2 {
                 "</g>",
                 baseSVGTail
             ),
-            string.concat(attributes1, ",", attributes2, ', {"trait_type": "NFT Card", "value": "', nftCardTrait, '"}')
+            string.concat(
+                attributes1,
+                ",",
+                attributes2,
+                ', {"trait_type": "NFT Card", "value": "',
+                nftCardTrait,
+                '"}'
+            )
         );
     }
 
@@ -97,9 +106,11 @@ library SVGGeneratorV2 {
             false
         );
 
-        (string memory nodeSVG, string memory attributes1) = getNodeTraitsInnerSVGAndAttributes(nodeTraits);
+        (string memory nodeSVG, string memory attributes1) =
+            getNodeTraitsInnerSVGAndAttributes(nodeTraits);
 
-        (string memory chipSVG, string memory attributes2) = getChipTraitsInnerSVGAndAttributes(chipTraits);
+        (string memory chipSVG, string memory attributes2) =
+            getChipTraitsInnerSVGAndAttributes(chipTraits);
 
         return (
             string.concat(_getSVGHead(100, 100), styleSVG, nodeSVG, chipSVG, baseSVGTail),
@@ -107,10 +118,11 @@ library SVGGeneratorV2 {
         );
     }
 
-    function getNftCardSvgs(
-        string memory nftCard,
-        NftCardTraits calldata nftCardTraits
-    ) internal pure returns (string memory) {
+    function getNftCardSvgs(string memory nftCard, NftCardTraits calldata nftCardTraits)
+        internal
+        pure
+        returns (string memory)
+    {
         (string memory addrPart1, string memory addrPart2) = _splitAddress(nftCardTraits.nodeAddr);
 
         uint256 opTokens = nftCardTraits.operationPoolTokens / 1 ether;
@@ -127,31 +139,32 @@ library SVGGeneratorV2 {
             stTokens > 1000 ? "K+</text>" : "</text>"
         );
 
-        return
-            string.concat(
-                '<g transform="translate(6,6)">',
-                nftCard,
-                '<text x="10" y="27" fill="url(#a)" font-size="6" font-family="AuxMono">ID:',
-                nftCardTraits.tokenId.toString(),
-                "</text>",
-                '<g fill="#000" font-size="6" font-family="AuxMono"><text text-anchor="end" y="-1em" transform="translate(106 14.53)">',
-                ((nftCardTraits.chipTokens + 0.5 ether) / 1 ether).toString(),
-                '</text><text text-anchor="end" transform="translate(106 14.53)">$RSS3</text></g>',
-                '<g fill="url(#a)" font-size="5" font-family="AuxMono"><text x="43.5" y="6.1" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 140)">',
-                addrPart1,
-                '</text><text x="43.5" y="9.9" letter-spacing="-.38" dominant-baseline="middle" transform="translate(-20 140)">',
-                addrPart2,
-                "</text></g>",
-                ops,
-                sps,
-                "</g>"
-            );
+        return string.concat(
+            '<g transform="translate(6,6)">',
+            nftCard,
+            '<text x="10" y="27" fill="url(#a)" font-size="6" font-family="AuxMono">ID:',
+            nftCardTraits.tokenId.toString(),
+            "</text>",
+            '<g fill="#000" font-size="6" font-family="AuxMono"><text text-anchor="end" y="-1em" transform="translate(106 14.53)">',
+            ((nftCardTraits.chipTokens + 0.5 ether) / 1 ether).toString(),
+            '</text><text text-anchor="end" transform="translate(106 14.53)">$RSS3</text></g>',
+            '<g fill="url(#a)" font-size="5" font-family="AuxMono"><text x="43.5" y="6.1" letter-spacing="-.38" dominant-baseline="middle" text-anchor="middle" transform="translate(19 140)">',
+            addrPart1,
+            '</text><text x="43.5" y="9.9" letter-spacing="-.38" dominant-baseline="middle" transform="translate(-20 140)">',
+            addrPart2,
+            "</text></g>",
+            ops,
+            sps,
+            "</g>"
+        );
     }
 
     // get node traits and nft card trait
-    function getNodeTraitsInnerSVGAndAttributes(
-        NodeTraits memory nodeTraits
-    ) internal pure returns (string memory, string memory) {
+    function getNodeTraitsInnerSVGAndAttributes(NodeTraits memory nodeTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
         string memory svgParts = "";
         string memory attributes = "";
 
@@ -166,20 +179,19 @@ library SVGGeneratorV2 {
 
         string memory innerSVG1 = string.concat(svgParts, corner);
 
-        string memory attributes1 = string.concat(
-            attributes,
-            ', {"trait_type": "Corner", "value": "',
-            cornerTrait,
-            '"}'
-        );
+        string memory attributes1 =
+            string.concat(attributes, ', {"trait_type": "Corner", "value": "', cornerTrait, '"}');
 
         return (innerSVG1, attributes1);
     }
 
-    function getChipTraitsInnerSVGAndAttributes(
-        ChipTraits memory chipTraits
-    ) internal pure returns (string memory, string memory) {
-        (string memory svgParts, string memory headShapeTrait) = HeadShapes.getHeadShape(chipTraits.headShapeId % 3);
+    function getChipTraitsInnerSVGAndAttributes(ChipTraits memory chipTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
+        (string memory svgParts, string memory headShapeTrait) =
+            HeadShapes.getHeadShape(chipTraits.headShapeId % 3);
 
         string memory attributes = string.concat(
             '{"trait_type": "Head Shape", "value": "',
@@ -196,11 +208,11 @@ library SVGGeneratorV2 {
         return (svgParts, attributes);
     }
 
-    function addEyes(
-        string memory svgs,
-        string memory attrs,
-        ChipTraits memory chipTraits
-    ) internal pure returns (string memory, string memory) {
+    function addEyes(string memory svgs, string memory attrs, ChipTraits memory chipTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
         (string memory eyesSVG, string memory eyesTrait) = Eyes.getEye(chipTraits.eyesId);
 
         return (
@@ -209,11 +221,11 @@ library SVGGeneratorV2 {
         );
     }
 
-    function addMouth(
-        string memory svgs,
-        string memory attrs,
-        ChipTraits memory chipTraits
-    ) internal pure returns (string memory, string memory) {
+    function addMouth(string memory svgs, string memory attrs, ChipTraits memory chipTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
         (string memory mouthSVG, string memory mouthTrait) = Mouths.getMouth(chipTraits.mouthId);
 
         return (
@@ -222,12 +234,13 @@ library SVGGeneratorV2 {
         );
     }
 
-    function addHeadDetail(
-        string memory svgs,
-        string memory attrs,
-        ChipTraits memory chipTraits
-    ) internal pure returns (string memory, string memory) {
-        (string memory headSVG, string memory headTraits) = HeadDetails.getHeadDetail(chipTraits.headDetailId);
+    function addHeadDetail(string memory svgs, string memory attrs, ChipTraits memory chipTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
+        (string memory headSVG, string memory headTraits) =
+            HeadDetails.getHeadDetail(chipTraits.headDetailId);
 
         return (
             string.concat(svgs, headSVG),
@@ -242,12 +255,13 @@ library SVGGeneratorV2 {
         );
     }
 
-    function getChipFrame(
-        string memory svgs,
-        string memory attrs,
-        NodeTraits memory nodeTraits
-    ) internal pure returns (string memory, string memory) {
-        (string memory chipSVGs, string memory chipTrait) = ChipFrames.getChipFrame(nodeTraits.frameId);
+    function getChipFrame(string memory svgs, string memory attrs, NodeTraits memory nodeTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
+        (string memory chipSVGs, string memory chipTrait) =
+            ChipFrames.getChipFrame(nodeTraits.frameId);
 
         return (
             string.concat(svgs, chipSVGs),
@@ -262,12 +276,13 @@ library SVGGeneratorV2 {
         );
     }
 
-    function addChipDetail(
-        string memory svgs,
-        string memory attrs,
-        NodeTraits memory nodeTraits
-    ) internal pure returns (string memory, string memory) {
-        (string memory chipSVGs, string memory chipTrait) = ChipDetails.getChipDetail(nodeTraits.chipDetailId);
+    function addChipDetail(string memory svgs, string memory attrs, NodeTraits memory nodeTraits)
+        internal
+        pure
+        returns (string memory, string memory)
+    {
+        (string memory chipSVGs, string memory chipTrait) =
+            ChipDetails.getChipDetail(nodeTraits.chipDetailId);
 
         return (
             string.concat(svgs, chipSVGs),
@@ -289,37 +304,36 @@ library SVGGeneratorV2 {
         uint8 headDetailColor,
         bool includeFonts
     ) internal pure returns (string memory) {
-        string memory fontStr = includeFonts ? string.concat(Fonts1.getFont(), Fonts2.getFont()) : "";
-        return
-            string.concat(
-                '<style type="text/css">',
-                fontStr,
-                ".a{fill:#DEE5D9;}",
-                ".b{fill:",
-                getColor(frameColor),
-                ";}.c{fill:",
-                getColor(chipDetailColor),
-                ";}.d{fill:",
-                getColor(headShapeColor),
-                ";}.e{fill:",
-                getColor(headDetailColor),
-                ";}</style>"
-            );
+        string memory fontStr =
+            includeFonts ? string.concat(Fonts1.getFont(), Fonts2.getFont()) : "";
+        return string.concat(
+            '<style type="text/css">',
+            fontStr,
+            ".a{fill:#DEE5D9;}",
+            ".b{fill:",
+            getColor(frameColor),
+            ";}.c{fill:",
+            getColor(chipDetailColor),
+            ";}.d{fill:",
+            getColor(headShapeColor),
+            ";}.e{fill:",
+            getColor(headDetailColor),
+            ";}</style>"
+        );
     }
 
     function _getSVGHead(uint256 w, uint256 h) internal pure returns (string memory) {
-        return
-            string.concat(
-                '<?xml version="1.0" encoding="utf-8"?><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 ',
-                w.toString(),
-                " ",
-                h.toString(),
-                '" style="enable-background:new 0 0 ',
-                w.toString(),
-                " ",
-                h.toString(),
-                ';background-color:black;" xml:space="preserve">'
-            );
+        return string.concat(
+            '<?xml version="1.0" encoding="utf-8"?><svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 ',
+            w.toString(),
+            " ",
+            h.toString(),
+            '" style="enable-background:new 0 0 ',
+            w.toString(),
+            " ",
+            h.toString(),
+            ';background-color:black;" xml:space="preserve">'
+        );
     }
 
     function getColor(uint8 id) internal pure returns (string memory) {
@@ -333,7 +347,11 @@ library SVGGeneratorV2 {
         return (LibString.slice(addrHex, 0, 25), LibString.slice(addrHex, 26, 42));
     }
 
-    function _getSlice(uint256 begin, uint256 end, string memory text) internal pure returns (string memory) {
+    function _getSlice(uint256 begin, uint256 end, string memory text)
+        internal
+        pure
+        returns (string memory)
+    {
         bytes memory a = new bytes(end - begin);
         for (uint256 i = 0; i < end - begin; i++) {
             a[i] = bytes(text)[i + begin];

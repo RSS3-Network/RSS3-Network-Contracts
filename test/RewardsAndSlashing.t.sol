@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
-// solhint-disable comprehensive-interface,no-console
+// solhint-disable comprehensive-interface,no-console,function-max-lines
 pragma solidity 0.8.20;
 
 import {Const} from "../src/libraries/Const.sol";
-import {Node, Demotion, NodeStatus} from "../src/libraries/DataTypes.sol";
+import {Demotion, Node, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
-    NodeNotExists,
-    SlashingNotExist,
-    NodeHasNoDemotions,
     InvalidArrayLength,
-    NodeIsPublicGood
+    NodeHasNoDemotions,
+    NodeIsPublicGood,
+    NodeNotExists,
+    SlashingNotExist
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
@@ -47,7 +47,11 @@ contract RewardsAndSlashingTest is CommonTest {
 
     function testSubmitDemotionsFail() public {
         // case 1: caller has no `ORACLE_ROLE` permission
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
         _staking.submitDemotions(1, array(alice), array(REASON1), array(REPORTER));
 
         // case 2: InvalidArrayLength
@@ -94,7 +98,11 @@ contract RewardsAndSlashingTest is CommonTest {
 
     function testRevokeDemotionsFail() public {
         // case 1: caller has no `ORACLE_ROLE` permission
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
         _staking.revokeDemotions(alice, 1, array(uint256(1)));
 
         // case 2: NodeHasNoDemotion
@@ -107,9 +115,10 @@ contract RewardsAndSlashingTest is CommonTest {
         uint256 stakedTokens = 40000 ether;
         uint256 depositedTokens = 10000 ether;
 
-        uint256 expectedSlashedStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
-        uint256 expectedSlashedOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
+        uint256 expectedSlashedStakingPool =
+            (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 expectedSlashedOperationPool =
+            (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         _createNode(alice);
 
@@ -128,7 +137,9 @@ contract RewardsAndSlashingTest is CommonTest {
         }
 
         expectEmit();
-        emit Events.SlashRecorded(alice, 1, expectedSlashedOperationPool, expectedSlashedStakingPool);
+        emit Events.SlashRecorded(
+            alice, 1, expectedSlashedOperationPool, expectedSlashedStakingPool
+        );
         expectEmit();
         emit Events.NodeStatusChanged(alice, NodeStatus.Online, NodeStatus.Slashing);
         expectEmit();
@@ -145,11 +156,11 @@ contract RewardsAndSlashingTest is CommonTest {
         // slash status updated correctly
         assertEq(uint256(node.status), uint256(NodeStatus.Slashing));
         // check slashing pool
-        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        (,, uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
         assertEq(totalSlashingPoolTokens, expectedSlashedOperationPool + expectedSlashedStakingPool);
 
         // check chip info
-        (, uint256 tokens, ) = _staking.getChipInfo(chipId);
+        (, uint256 tokens,) = _staking.getChipInfo(chipId);
         assertEq(tokens, stakedTokens - expectedSlashedStakingPool);
     }
 
@@ -195,11 +206,11 @@ contract RewardsAndSlashingTest is CommonTest {
         assertEq(node.slashedOperationPoolTokens, 0);
         assertEq(node.slashedStakingPoolTokens, 0);
         // check slashing pool
-        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        (,, uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
         assertEq(totalSlashingPoolTokens, 0);
 
         // check chip info
-        (, uint256 tokens, ) = _staking.getChipInfo(chipId);
+        (, uint256 tokens,) = _staking.getChipInfo(chipId);
         assertEq(tokens, stakedTokens);
     }
 
@@ -207,9 +218,10 @@ contract RewardsAndSlashingTest is CommonTest {
         uint256 stakedTokens = 40000 ether;
         uint256 depositedTokens = 10000 ether;
 
-        uint256 expectedSlashedStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
-        uint256 expectedSlashedOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
+        uint256 expectedSlashedStakingPool =
+            (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 expectedSlashedOperationPool =
+            (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         _createNode(alice);
 
@@ -251,16 +263,17 @@ contract RewardsAndSlashingTest is CommonTest {
         uint256 burnAmount = (amount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
         assertEq(address(0).balance, burnAmount);
 
-        uint256 reporterAmount = (amount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 reporterAmount =
+            (amount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
         address paymentProcessor = _staking.PAYMENT_PROCESSOR();
         assertEq(paymentProcessor.balance, reporterAmount);
 
         // check slashing pool
-        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        (,, uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
         assertEq(totalSlashingPoolTokens, 0);
 
         // check chip info
-        (, uint256 tokens, ) = _staking.getChipInfo(chipId);
+        (, uint256 tokens,) = _staking.getChipInfo(chipId);
         assertEq(tokens, stakedTokens - expectedSlashedStakingPool);
     }
 
@@ -271,9 +284,10 @@ contract RewardsAndSlashingTest is CommonTest {
         depositedTokens *= 1 ether;
         stakedTokens *= 1 ether;
 
-        uint256 expectedSlashedStakingPool = (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
-        uint256 expectedSlashedOperationPool = (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) /
-            Const.DENOMINATOR;
+        uint256 expectedSlashedStakingPool =
+            (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 expectedSlashedOperationPool =
+            (depositedTokens * Const.NODE_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         _createNode(alice);
 
@@ -311,7 +325,8 @@ contract RewardsAndSlashingTest is CommonTest {
         uint256 burnAmount = (amount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
         assertEq(address(0).balance, burnAmount);
 
-        uint256 reporterAmount = (amount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
+        uint256 reporterAmount =
+            (amount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
         // check balances of reporters
         assertEq(_staking.PAYMENT_PROCESSOR().balance, reporterAmount / 4);
         for (uint256 i = 1; i < 4; i++) {
@@ -319,17 +334,21 @@ contract RewardsAndSlashingTest is CommonTest {
         }
 
         // check slashing pool
-        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        (,, uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
         assertEq(totalSlashingPoolTokens, 0);
 
         // check chip info
-        (, uint256 tokens, ) = _staking.getChipInfo(chipId);
+        (, uint256 tokens,) = _staking.getChipInfo(chipId);
         assertEq(tokens, stakedTokens - expectedSlashedStakingPool);
     }
 
     function testCommitSlashingFail() public {
         // case 1: caller has no `ORACLE_ROLE` permission
-        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
         _staking.commitSlashing(alice, uint256(100));
 
         // case 2: SlashingNotExist

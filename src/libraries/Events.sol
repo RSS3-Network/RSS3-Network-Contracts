@@ -10,7 +10,8 @@ library Events {
      * @param nodeAddr Address of node operator.
      * @param name Human-readable name.
      * @param description Description of node.
-     * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents 0.01%.
+     * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents
+     * 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
      * @param alpha Flag indicating if the node is an alpha node.
      */
@@ -45,7 +46,9 @@ library Events {
      * @param amount Amount of tokens to withdraw.
      * @param requestId The created withdraw request id.
      */
-    event WithdrawRequested(address indexed nodeAddr, uint256 indexed amount, uint256 indexed requestId);
+    event WithdrawRequested(
+        address indexed nodeAddr, uint256 indexed amount, uint256 indexed requestId
+    );
 
     /**
      * @dev Emitted on mergeChips()
@@ -117,7 +120,9 @@ library Events {
      * @param curStatus The current status of node operator.
      * @param newStatus The new status of node operator to set.
      */
-    event NodeStatusChanged(address indexed nodeAddr, NodeStatus indexed curStatus, NodeStatus indexed newStatus);
+    event NodeStatusChanged(
+        address indexed nodeAddr, NodeStatus indexed curStatus, NodeStatus indexed newStatus
+    );
 
     /**
      * @dev Emitted on claimWithdrawal()
@@ -125,7 +130,9 @@ library Events {
      * @param nodeAddr The address of node to withdraw.
      * @param amount Amount of tokens to withdraw.
      */
-    event WithdrawalClaimed(uint256 indexed requestId, address indexed nodeAddr, uint256 indexed amount);
+    event WithdrawalClaimed(
+        uint256 indexed requestId, address indexed nodeAddr, uint256 indexed amount
+    );
 
     /**
      * @dev Emitted on stake()

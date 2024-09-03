@@ -2,26 +2,26 @@
 // solhint-disable private-vars-leading-underscore,var-name-mixedcase
 pragma solidity 0.8.20;
 
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Const} from "./Const.sol";
 import {Node, NodeStatus} from "./DataTypes.sol";
 import {
+    CurStateCantExit,
+    CurStatusCantOnline,
+    InvalidArrayLength,
+    InvalidNodeStatusTransition,
+    NodeDepositBelowMinimum,
     NodeExists,
+    NodeInExitStatus,
     NodeIsPublicGood,
     NodeNotExists,
-    NodeInExitStatus,
-    CurStatusCantOnline,
-    CurStateCantExit,
     NodeNotInExitStatus,
-    InvalidNodeStatusTransition,
-    InvalidArrayLength,
-    TaxRateBasisPointsTooLarge,
     PublicGoodNodeTaxNotZero,
-    TaxRateBasisPointsTooSmall,
-    NodeDepositBelowMinimum
+    TaxRateBasisPointsTooLarge,
+    TaxRateBasisPointsTooSmall
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {StorageLib} from "./StorageLib.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 library NodeSettingsLib {
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -48,7 +48,9 @@ library NodeSettingsLib {
         emit Events.PublicPoolTaxRateBasisPointsSet(taxRateBasisPoints);
     }
 
-    function updateNode(address nodeAddr, string calldata name, string calldata description) external {
+    function updateNode(address nodeAddr, string calldata name, string calldata description)
+        external
+    {
         Node storage node = StorageLib.getNode(nodeAddr);
         if (node.account == address(0)) revert NodeNotExists(nodeAddr);
 
@@ -69,7 +71,9 @@ library NodeSettingsLib {
         if (publicGood) {
             if (taxRateBasisPoints > 0) revert PublicGoodNodeTaxNotZero();
         } else {
-            if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
+            if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) {
+                revert TaxRateBasisPointsTooSmall();
+            }
             if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
         }
 
@@ -89,7 +93,9 @@ library NodeSettingsLib {
         // add to node list
         StorageLib.nodeAddrs().add(nodeAddr);
 
-        emit Events.NodeCreated(nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood, isAlphaPhase);
+        emit Events.NodeCreated(
+            nodeId, nodeAddr, name, description, taxRateBasisPoints, publicGood, isAlphaPhase
+        );
     }
 
     /**
@@ -108,11 +114,9 @@ library NodeSettingsLib {
         // validate node exit status
         NodeStatus curStatus = _getNodeStatus(node);
         if (
-            curStatus == NodeStatus.None ||
-            curStatus == NodeStatus.Registered ||
-            curStatus == NodeStatus.Initializing ||
-            curStatus == NodeStatus.Outdated ||
-            curStatus == NodeStatus.Slashed
+            curStatus == NodeStatus.None || curStatus == NodeStatus.Registered
+                || curStatus == NodeStatus.Initializing || curStatus == NodeStatus.Outdated
+                || curStatus == NodeStatus.Slashed
         ) {
             node.status = NodeStatus.Exited;
         } else if (curStatus == NodeStatus.Online) {
@@ -160,8 +164,12 @@ library NodeSettingsLib {
 
         // if the current status is not Offline, Slashed, or Outdated, it reverts with an error
         NodeStatus curStatus = _getNodeStatus(node);
-        if (NodeStatus.Offline != curStatus && NodeStatus.Slashed != curStatus && NodeStatus.Outdated != curStatus)
+        if (
+            NodeStatus.Offline != curStatus && NodeStatus.Slashed != curStatus
+                && NodeStatus.Outdated != curStatus
+        ) {
             revert CurStatusCantOnline(uint256(curStatus));
+        }
 
         // set node status
         node.status = NodeStatus.Online;
@@ -216,8 +224,9 @@ library NodeSettingsLib {
         NodeStatus curStatus = _getNodeStatus(node);
 
         // throws a `InvalidNodeStatusTransition` error if the transition is invalid.
-        if (!_isValidTransition(curStatus, newStatus))
+        if (!_isValidTransition(curStatus, newStatus)) {
             revert InvalidNodeStatusTransition(uint256(curStatus), uint256(newStatus));
+        }
 
         node.status = newStatus;
         emit Events.NodeStatusChanged(nodeAddr, curStatus, newStatus);
@@ -252,7 +261,9 @@ library NodeSettingsLib {
     function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
         if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
 
-        if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) revert TaxRateBasisPointsTooSmall();
+        if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) {
+            revert TaxRateBasisPointsTooSmall();
+        }
     }
 
     /**
@@ -261,7 +272,11 @@ library NodeSettingsLib {
      * @param newStatus The new node status.
      * @return A boolean indicating whether the transition is valid or not.
      */
-    function _isValidTransition(NodeStatus curStatus, NodeStatus newStatus) internal pure returns (bool) {
+    function _isValidTransition(NodeStatus curStatus, NodeStatus newStatus)
+        internal
+        pure
+        returns (bool)
+    {
         // validate that the curStatus must in the validCurStatus
         NodeStatus[] memory validCurStatus = _getValidTransitions(newStatus);
         for (uint256 i = 0; i < validCurStatus.length; i++) {
@@ -277,7 +292,11 @@ library NodeSettingsLib {
      * @param newStatus The new status to check valid transitions for.
      * @return validTransitions An array of valid transitions for the given `newStatus`.
      */
-    function _getValidTransitions(NodeStatus newStatus) internal pure returns (NodeStatus[] memory validTransitions) {
+    function _getValidTransitions(NodeStatus newStatus)
+        internal
+        pure
+        returns (NodeStatus[] memory validTransitions)
+    {
         if (newStatus == NodeStatus.Offline) {
             validTransitions = new NodeStatus[](2);
             validTransitions[0] = NodeStatus.Online;

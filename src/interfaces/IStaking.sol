@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {Node, Demotion, NodeStatus, WithdrawalRequest, UnstakeRequest} from "../libraries/DataTypes.sol";
+import {
+    Demotion,
+    Node,
+    NodeStatus,
+    UnstakeRequest,
+    WithdrawalRequest
+} from "../libraries/DataTypes.sol";
 
 interface IStaking {
     /**
@@ -11,7 +17,12 @@ interface IStaking {
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
      * @param isAlphaPhase_ Flag indicating if the contract is in alpha phase.
      */
-    function initialize(address chips, address pauseAccount, address oracleAccount, bool isAlphaPhase_) external;
+    function initialize(
+        address chips,
+        address pauseAccount,
+        address oracleAccount,
+        bool isAlphaPhase_
+    ) external;
 
     /**
      * @notice Pauses interaction with the Staking contract.
@@ -32,7 +43,8 @@ interface IStaking {
      * @dev Emits the `NodeCreated` event and `Deposited` event.
      * @param name Human-readable name.
      * @param description Description of node.
-     * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents 0.01%.
+     * @param taxRateBasisPoints Tax rate measured in basis points. Each basis point represents
+     * 0.01%.
      * @param publicGood Flag indicating if the node is a public good.
      * msg.value carries the amount of tokens to deposit.
      */
@@ -104,11 +116,14 @@ interface IStaking {
     /**
      * @notice Requests unstake tokens from a node operator.
      * @dev This will burn the chips tokens and emits the `UnstakeRequested` event.
-     * @param nodeAddr Address of node operator to unstake. For public pool, the nodeAddress is address(0).
+     * @param nodeAddr Address of node operator to unstake. For public pool, the nodeAddress is
+     * address(0).
      * @param chipsIds The chips token ids for unstake.
      * @return requestId The created unstake request id.
      */
-    function requestUnstake(address nodeAddr, uint256[] calldata chipsIds) external returns (uint256 requestId);
+    function requestUnstake(address nodeAddr, uint256[] calldata chipsIds)
+        external
+        returns (uint256 requestId);
 
     /**
      * @notice Claims a batch of unstake requests.
@@ -163,7 +178,8 @@ interface IStaking {
      * @notice Submits demotions for a given epoch and node addresses.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`
-     * If the domiton count in the same epoch is greater than the threshold, the node will be in a slashing status.
+     * If the domiton count in the same epoch is greater than the threshold, the node will be in a
+     * slashing status.
      * @dev Emits the `DemotionSubmitted` event.
      * @param epoch Current epoch number.
      * @param nodeAddrs Addresses of node operator to demote.
@@ -186,7 +202,11 @@ interface IStaking {
      * @param epoch The epoch number.
      * @param demotionIdsToRevoke The ids of demotions to revoke.
      */
-    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToRevoke) external;
+    function revokeDemotions(
+        address nodeAddr,
+        uint256 epoch,
+        uint256[] calldata demotionIdsToRevoke
+    ) external;
 
     /**
      * @notice Commits slashing for a specific node and epoch.
@@ -253,7 +273,10 @@ interface IStaking {
      * @param epoch The epoch number to query.
      * @return demotions An array of demotions.
      */
-    function getDemotions(address nodeAddr, uint256 epoch) external view returns (Demotion[] memory demotions);
+    function getDemotions(address nodeAddr, uint256 epoch)
+        external
+        view
+        returns (Demotion[] memory demotions);
 
     /**
      * @notice Returns whether the current time is in settlement phase.
@@ -272,7 +295,10 @@ interface IStaking {
      * @param requestId The id of withdrawal request.
      * @return WithdrawalRequest The pending withdrawal request.
      */
-    function getPendingWithdrawal(uint256 requestId) external view returns (WithdrawalRequest memory);
+    function getPendingWithdrawal(uint256 requestId)
+        external
+        view
+        returns (WithdrawalRequest memory);
 
     /**
      * @notice Returns the pending unstake request by `requestId`.
@@ -288,7 +314,10 @@ interface IStaking {
      * @return tokens Amount of tokens the chip is equivalent to.
      * @return shares Amount of shares the chip owns.
      */
-    function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares);
+    function getChipInfo(uint256 tokenId)
+        external
+        view
+        returns (address nodeAddr, uint256 tokens, uint256 shares);
 
     /**
      * @notice Gets total count of nodes.
@@ -311,7 +340,11 @@ interface IStaking {
     function getPoolInfo()
         external
         view
-        returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens);
+        returns (
+            uint256 totalOperationPoolTokens,
+            uint256 totalStakingPoolTokens,
+            uint256 totalSlashingPoolTokens
+        );
 
     /**
      * @notice Gets node info by node address.

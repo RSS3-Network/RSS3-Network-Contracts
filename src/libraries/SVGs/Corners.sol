@@ -22,15 +22,8 @@ library Corners {
             '<path class="r" d="M94 88h-2v-2h2zm-2 0h-4v4h4zm2 6v-2h-2v2zm-8-8v2h2v-2zm0 8h2v-2h-2zm-74 0v-2h2v2zm0-6H8v4h4zm-6-2v2h2v-2zm8 0h-2v2h2zm-8 8h2v-2H6zm86-80v-2h2v2zm-6 0h2v-2h-2zm8-8h-2v2h2zm-2 2h-4v4h4zm-6-2v2h2V6zm-74 8v-2h2v2zm0-6H8v4h4zM6 6v2h2V6zm0 8h2v-2H6zm8-8h-2v2h2z"/>'
         ];
 
-        string[7] memory cornerTraits = [
-            "Corner 1",
-            "Corner 2",
-            "Corner 3",
-            "Corner 4",
-            "Corner 5",
-            "Corner 6",
-            "Corner 7"
-        ];
+        string[7] memory cornerTraits =
+            ["Corner 1", "Corner 2", "Corner 3", "Corner 4", "Corner 5", "Corner 6", "Corner 7"];
         uint256 idx = id % 7;
 
         return (svgs[idx], cornerTraits[idx]);
