@@ -8,7 +8,10 @@ import {
     CurStateCantExit,
     CurStatusCantOnline,
     InvalidArrayLength,
+    InvalidArrayLength,
     InvalidNodeStatusTransition,
+    InvalidNodeStatusTransition,
+    NodeDepositBelowMinimum,
     NodeDepositBelowMinimum,
     NodeExists,
     NodeInExitStatus,
@@ -16,8 +19,8 @@ import {
     NodeNotExists,
     NodeNotInExitStatus,
     PublicGoodNodeTaxNotZero,
-    TaxRateBasisPointsTooLarge,
-    TaxRateBasisPointsTooSmall
+    PublicGoodNodeTaxNotZero,
+    TaxRateBasisPointsOutOfRange
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {StorageLib} from "./StorageLib.sol";
@@ -39,10 +42,9 @@ library NodeSettingsLib {
     }
 
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external {
-        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
+        _validateTaxRateBasisPoints(taxRateBasisPoints);
 
         Node storage publicPool = StorageLib.publicPool();
-
         publicPool.taxRateBasisPoints = taxRateBasisPoints;
 
         emit Events.PublicPoolTaxRateBasisPointsSet(taxRateBasisPoints);
@@ -71,10 +73,7 @@ library NodeSettingsLib {
         if (publicGood) {
             if (taxRateBasisPoints > 0) revert PublicGoodNodeTaxNotZero();
         } else {
-            if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) {
-                revert TaxRateBasisPointsTooSmall();
-            }
-            if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
+            _validateTaxRateBasisPoints(taxRateBasisPoints);
         }
 
         uint256 nodeId = StorageLib.nextNodeId();
@@ -259,10 +258,11 @@ library NodeSettingsLib {
      * @dev Throws an exception if the tax rate basis points are too large or too small.
      */
     function _validateTaxRateBasisPoints(uint64 taxRateBasisPoints) internal pure {
-        if (taxRateBasisPoints > Const.DENOMINATOR) revert TaxRateBasisPointsTooLarge();
-
-        if (taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS) {
-            revert TaxRateBasisPointsTooSmall();
+        if (
+            taxRateBasisPoints < Const.MIN_TAX_RATE_BASIS_POINTS
+                || taxRateBasisPoints > Const.DENOMINATOR
+        ) {
+            revert TaxRateBasisPointsOutOfRange(taxRateBasisPoints);
         }
     }
 

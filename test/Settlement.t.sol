@@ -7,12 +7,13 @@ import {Const} from "../src/libraries/Const.sol";
 import {Demotion, Node, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
     CommitEpochNotElapsed,
+    CommitEpochNotElapsed,
     InvalidArrayLength,
     InvalidEpochNumber,
     OperationRewardsExceed,
     RewardsAlreadyDistributed,
     SubmissionIntervalNotElapsed,
-    TaxRateBasisPointsTooLarge
+    TaxRateBasisPointsOutOfRange
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
@@ -44,9 +45,8 @@ contract SettlementTest is CommonTest {
         assertEq(opRewards, totalStakingRewardsPerEpoch);
     }
 
-    function testSetTaxRateBasisPoints4PublicPool(uint256 x) public {
-        x = bound(x, 0, 10000);
-        uint64 taxRate = uint64(x);
+    function testSetTaxRateBasisPoints4PublicPool(uint64 taxRate) public {
+        taxRate = uint64(bound(taxRate, Const.MIN_TAX_RATE_BASIS_POINTS, Const.DENOMINATOR));
 
         vm.prank(oracleAccount);
         _settlement.setTaxRateBasisPoints4PublicPool(taxRate);
@@ -63,10 +63,17 @@ contract SettlementTest is CommonTest {
         );
         _settlement.setTaxRateBasisPoints4PublicPool(10001);
 
-        // case 2: tax rate is greater than 10000
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
+        // case 2: TaxRateBasisPointsOutOfRange, tax rate is greater than 10000
+        vm.expectRevert(
+            abi.encodeWithSelector(TaxRateBasisPointsOutOfRange.selector, uint64(10001))
+        );
         vm.prank(oracleAccount);
         _settlement.setTaxRateBasisPoints4PublicPool(10001);
+
+        // case 3: TaxRateBasisPointsOutOfRange, tax rate is less than 500
+        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsOutOfRange.selector, uint64(400)));
+        vm.prank(oracleAccount);
+        _settlement.setTaxRateBasisPoints4PublicPool(400);
     }
 
     function testDistributeRewards() public {
