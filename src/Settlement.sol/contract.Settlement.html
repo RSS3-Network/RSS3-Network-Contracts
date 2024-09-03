@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="settlement"><a class="header" href="#settlement">Settlement</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/97e0d7d7ec207e33fabc533d28d0f378578e4a63/src/Settlement.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1b42073bfb95dfc4e074790944d9f2e570ecaa7d/src/Settlement.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/ISettlement.sol/interface.ISettlement.html">ISettlement</a>, Multicall, Initializable, AccessControlEnumerable</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -244,10 +244,12 @@
 </code></pre>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the Settlement contract.</p>
-<pre><code class="language-solidity">function initialize(address staking, address oracleAccount, uint256 startTime, uint256 operationRewardsPercent)
-    external
-    override
-    reinitializer(5);
+<pre><code class="language-solidity">function initialize(
+    address staking,
+    address oracleAccount,
+    uint256 startTime,
+    uint256 operationRewardsPercent
+) external override reinitializer(5);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -288,7 +290,10 @@ Requirements:</p>
 <li>The caller must have the <code>ORACLE_ROLE</code>.</li>
 </ul>
 <p><em>we use a temp struct here to avoid <code>stack too deep</code></em></p>
-<pre><code class="language-solidity">function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external override onlyRole(ORACLE_ROLE);
+<pre><code class="language-solidity">function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints)
+    external
+    override
+    onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -301,10 +306,11 @@ Requirements:</p>
 <ul>
 <li>The caller must have the <code>ORACLE_ROLE</code></li>
 </ul>
-<pre><code class="language-solidity">function submitDemotions(address[] calldata nodeAddrs, string[] calldata reasons, address[] calldata reporters)
-    external
-    override
-    onlyRole(ORACLE_ROLE);
+<pre><code class="language-solidity">function submitDemotions(
+    address[] calldata nodeAddrs,
+    string[] calldata reasons,
+    address[] calldata reporters
+) external override onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -397,8 +403,10 @@ Requirements:</p>
 <pre><code class="language-solidity">function _updateRewardsRatio(uint256 operationRewardsPercent) internal;
 </code></pre>
 <h3 id="_checkrewards"><a class="header" href="#_checkrewards">_checkRewards</a></h3>
-<p><em>check distributed operationRewards and stakingRewards not exceeds the max rewards per epoch</em></p>
-<pre><code class="language-solidity">function _checkRewards(uint256 epoch, address[] memory nodeAddrs, uint256[] memory operationRewards) internal;
+<p><em>check distributed operationRewards and stakingRewards not exceeds the max rewards per
+epoch</em></p>
+<pre><code class="language-solidity">function _checkRewards(uint256 epoch, address[] memory nodeAddrs, uint256[] memory operationRewards)
+    internal;
 </code></pre>
 <h3 id="_savetotalstakingsnapshot"><a class="header" href="#_savetotalstakingsnapshot">_saveTotalStakingSnapshot</a></h3>
 <pre><code class="language-solidity">function _saveTotalStakingSnapshot() internal;
@@ -416,7 +424,10 @@ Requirements:</p>
 </code></pre>
 <h3 id="_getstakingrewards"><a class="header" href="#_getstakingrewards">_getStakingRewards</a></h3>
 <p><em>returns staking rewards</em></p>
-<pre><code class="language-solidity">function _getStakingRewards(address[] calldata nodeAddrs) internal view returns (uint256[] memory nodeRewards);
+<pre><code class="language-solidity">function _getStakingRewards(address[] calldata nodeAddrs)
+    internal
+    view
+    returns (uint256[] memory nodeRewards);
 </code></pre>
 <h3 id="_gettotalstaking"><a class="header" href="#_gettotalstaking">_getTotalStaking</a></h3>
 <p><em>returns amount of total staking tokens</em></p>

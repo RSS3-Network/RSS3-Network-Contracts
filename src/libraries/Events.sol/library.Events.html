@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="events"><a class="header" href="#events">Events</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/97e0d7d7ec207e33fabc533d28d0f378578e4a63/src/libraries/Events.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1b42073bfb95dfc4e074790944d9f2e570ecaa7d/src/libraries/Events.sol">Git Source</a></p>
 <h2 id="events-1"><a class="header" href="#events-1">Events</a></h2>
 <h3 id="nodecreated"><a class="header" href="#nodecreated">NodeCreated</a></h3>
 <p><em>Emitted on createNode()</em></p>
@@ -226,7 +226,9 @@
 </div>
 <h3 id="withdrawrequested"><a class="header" href="#withdrawrequested">WithdrawRequested</a></h3>
 <p><em>Emitted on requestWithdraw()</em></p>
-<pre><code class="language-solidity">event WithdrawRequested(address indexed nodeAddr, uint256 indexed amount, uint256 indexed requestId);
+<pre><code class="language-solidity">event WithdrawRequested(
+    address indexed nodeAddr, uint256 indexed amount, uint256 indexed requestId
+);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -237,7 +239,12 @@
 </div>
 <h3 id="chipsmerged"><a class="header" href="#chipsmerged">ChipsMerged</a></h3>
 <p><em>Emitted on mergeChips()</em></p>
-<pre><code class="language-solidity">event ChipsMerged(address indexed user, address indexed nodeAddr, uint256 indexed newTokenId, uint256[] burnedTokenIds);
+<pre><code class="language-solidity">event ChipsMerged(
+    address indexed user,
+    address indexed nodeAddr,
+    uint256 indexed newTokenId,
+    uint256[] burnedTokenIds
+);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -312,7 +319,9 @@
 </div>
 <h3 id="nodestatuschanged"><a class="header" href="#nodestatuschanged">NodeStatusChanged</a></h3>
 <p><em>Emitted on setNodesStatus()</em></p>
-<pre><code class="language-solidity">event NodeStatusChanged(address indexed nodeAddr, NodeStatus indexed curStatus, NodeStatus indexed newStatus);
+<pre><code class="language-solidity">event NodeStatusChanged(
+    address indexed nodeAddr, NodeStatus indexed curStatus, NodeStatus indexed newStatus
+);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -323,7 +332,9 @@
 </div>
 <h3 id="withdrawalclaimed"><a class="header" href="#withdrawalclaimed">WithdrawalClaimed</a></h3>
 <p><em>Emitted on claimWithdrawal()</em></p>
-<pre><code class="language-solidity">event WithdrawalClaimed(uint256 indexed requestId, address indexed nodeAddr, uint256 indexed amount);
+<pre><code class="language-solidity">event WithdrawalClaimed(
+    uint256 indexed requestId, address indexed nodeAddr, uint256 indexed amount
+);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -335,7 +346,11 @@
 <h3 id="staked"><a class="header" href="#staked">Staked</a></h3>
 <p><em>Emitted on stake()</em></p>
 <pre><code class="language-solidity">event Staked(
-    address indexed user, address indexed nodeAddr, uint256 indexed amount, uint256 startTokenId, uint256 endTokenId
+    address indexed user,
+    address indexed nodeAddr,
+    uint256 indexed amount,
+    uint256 startTokenId,
+    uint256 endTokenId
 );
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -350,7 +365,11 @@
 <h3 id="unstakerequested"><a class="header" href="#unstakerequested">UnstakeRequested</a></h3>
 <p><em>Emitted on requestUnstake()</em></p>
 <pre><code class="language-solidity">event UnstakeRequested(
-    address indexed user, address indexed nodeAddr, uint256 indexed requestId, uint256 unstakeAmount, uint256[] chipsIds
+    address indexed user,
+    address indexed nodeAddr,
+    uint256 indexed requestId,
+    uint256 unstakeAmount,
+    uint256[] chipsIds
 );
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -364,7 +383,9 @@
 </div>
 <h3 id="unstakeclaimed"><a class="header" href="#unstakeclaimed">UnstakeClaimed</a></h3>
 <p><em>Emitted on claimUnstake()</em></p>
-<pre><code class="language-solidity">event UnstakeClaimed(uint256 indexed requestId, address indexed nodeAddr, address indexed user, uint256 unstakeAmount);
+<pre><code class="language-solidity">event UnstakeClaimed(
+    uint256 indexed requestId, address indexed nodeAddr, address indexed user, uint256 unstakeAmount
+);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -377,7 +398,11 @@
 <h3 id="demotionsubmitted"><a class="header" href="#demotionsubmitted">DemotionSubmitted</a></h3>
 <p><em>Emitted on submitDemotions()</em></p>
 <pre><code class="language-solidity">event DemotionSubmitted(
-    uint256 indexed epoch, address indexed nodeAddr, uint256 indexed demotionId, string reason, address reporter
+    uint256 indexed epoch,
+    address indexed nodeAddr,
+    uint256 indexed demotionId,
+    string reason,
+    address reporter
 );
 </code></pre>
 <p><strong>Parameters</strong></p>
@@ -401,7 +426,10 @@
 <h3 id="slashrecorded"><a class="header" href="#slashrecorded">SlashRecorded</a></h3>
 <p><em>Emitted on recordSlashing()</em></p>
 <pre><code class="language-solidity">event SlashRecorded(
-    address indexed nodeAddr, uint256 indexed epoch, uint256 slashedOperationPool, uint256 slashedStakingPool
+    address indexed nodeAddr,
+    uint256 indexed epoch,
+    uint256 slashedOperationPool,
+    uint256 slashedStakingPool
 );
 </code></pre>
 <p><strong>Parameters</strong></p>

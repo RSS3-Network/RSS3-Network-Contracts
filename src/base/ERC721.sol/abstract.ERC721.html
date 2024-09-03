@@ -178,11 +178,13 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="erc721"><a class="header" href="#erc721">ERC721</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/97e0d7d7ec207e33fabc533d28d0f378578e4a63/src/base/ERC721.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1b42073bfb95dfc4e074790944d9f2e570ecaa7d/src/base/ERC721.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 Context, ERC165, IERC721, IERC721Metadata, <a href="/src/interfaces/IERC721Errors.sol/interface.IERC721Errors.html">IERC721Errors</a></p>
-<p><em>Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
-the Metadata extension, but not including the Enumerable extension, which is available separately as
+<p><em>Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token
+Standard, including
+the Metadata extension, but not including the Enumerable extension, which is available separately
+as
 {ERC721Enumerable}.</em></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
 <h3 id="_name"><a class="header" href="#_name">_name</a></h3>
@@ -209,31 +211,36 @@ the Metadata extension, but not including the Enumerable extension, which is ava
 <pre><code class="language-solidity">function __ERC721_init(string memory name_, string memory symbol_) internal;
 </code></pre>
 <h3 id="supportsinterface"><a class="header" href="#supportsinterface">supportsInterface</a></h3>
-<p><em>See <a href="/lib/solady/src/accounts/ERC6551.sol/abstract.ERC6551.html#supportsinterface">IERC165-supportsInterface</a>.</em></p>
-<pre><code class="language-solidity">function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool);
+<p><em>See <a href="/lib/solady/src/tokens/ERC6909.sol/abstract.ERC6909.html#supportsinterface">IERC165-supportsInterface</a>.</em></p>
+<pre><code class="language-solidity">function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(ERC165, IERC165)
+    returns (bool);
 </code></pre>
 <h3 id="balanceof"><a class="header" href="#balanceof">balanceOf</a></h3>
-<p><em>See <a href="/lib/solady/src/utils/SafeTransferLib.sol/library.SafeTransferLib.html#balanceof">IERC721-balanceOf</a>.</em></p>
+<p><em>See <a href="/lib/solady/ext/wake/weird/Uint96.sol/contract.Uint96ERC20.html#balanceof">IERC721-balanceOf</a>.</em></p>
 <pre><code class="language-solidity">function balanceOf(address owner) public view virtual returns (uint256);
 </code></pre>
 <h3 id="ownerof"><a class="header" href="#ownerof">ownerOf</a></h3>
-<p><em>See <a href="/lib/solady/src/tokens/ERC721.sol/abstract.ERC721.html#ownerof">IERC721-ownerOf</a>.</em></p>
+<p><em>See <a href="/lib/solady/ext/wake/ERC721Mock.sol/contract.ERC721Mock.html#ownerof">IERC721-ownerOf</a>.</em></p>
 <pre><code class="language-solidity">function ownerOf(uint256 tokenId) public view virtual returns (address);
 </code></pre>
 <h3 id="name"><a class="header" href="#name">name</a></h3>
-<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC721.sol/contract.MockERC721.html#name">IERC721Metadata-name</a>.</em></p>
+<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC20.sol/contract.MockERC20.html#name">IERC721Metadata-name</a>.</em></p>
 <pre><code class="language-solidity">function name() public view virtual returns (string memory);
 </code></pre>
 <h3 id="symbol"><a class="header" href="#symbol">symbol</a></h3>
-<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC721.sol/contract.MockERC721.html#symbol">IERC721Metadata-symbol</a>.</em></p>
+<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC20.sol/contract.MockERC20.html#symbol">IERC721Metadata-symbol</a>.</em></p>
 <pre><code class="language-solidity">function symbol() public view virtual returns (string memory);
 </code></pre>
 <h3 id="tokenuri"><a class="header" href="#tokenuri">tokenURI</a></h3>
-<p><em>See <a href="/src/Chips.sol/contract.Chips.html#tokenuri">IERC721Metadata-tokenURI</a>.</em></p>
+<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC6909.sol/contract.MockERC6909.html#tokenuri">IERC721Metadata-tokenURI</a>.</em></p>
 <pre><code class="language-solidity">function tokenURI(uint256) public view virtual returns (string memory);
 </code></pre>
 <h3 id="approve"><a class="header" href="#approve">approve</a></h3>
-<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC721.sol/contract.MockERC721.html#approve">IERC721-approve</a>.</em></p>
+<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC20LikeUSDT.sol/contract.MockERC20LikeUSDT.html#approve">IERC721-approve</a>.</em></p>
 <pre><code class="language-solidity">function approve(address to, uint256 tokenId) public virtual;
 </code></pre>
 <h3 id="getapproved"><a class="header" href="#getapproved">getApproved</a></h3>
@@ -245,26 +252,29 @@ the Metadata extension, but not including the Enumerable extension, which is ava
 <pre><code class="language-solidity">function setApprovalForAll(address operator, bool approved) public virtual;
 </code></pre>
 <h3 id="isapprovedforall"><a class="header" href="#isapprovedforall">isApprovedForAll</a></h3>
-<p><em>See <a href="/lib/solady/src/tokens/ERC721.sol/abstract.ERC721.html#isapprovedforall">IERC721-isApprovedForAll</a>.</em></p>
+<p><em>See <a href="/lib/solady/src/tokens/ERC1155.sol/abstract.ERC1155.html#isapprovedforall">IERC721-isApprovedForAll</a>.</em></p>
 <pre><code class="language-solidity">function isApprovedForAll(address owner, address operator) public view virtual returns (bool);
 </code></pre>
 <h3 id="transferfrom"><a class="header" href="#transferfrom">transferFrom</a></h3>
-<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC721.sol/contract.MockERC721.html#transferfrom">IERC721-transferFrom</a>.</em></p>
+<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC20.sol/contract.MockERC20.html#transferfrom">IERC721-transferFrom</a>.</em></p>
 <pre><code class="language-solidity">function transferFrom(address from, address to, uint256 tokenId) public virtual;
 </code></pre>
 <h3 id="safetransferfrom"><a class="header" href="#safetransferfrom">safeTransferFrom</a></h3>
-<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC721.sol/contract.MockERC721.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
+<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC1155.sol/contract.MockERC1155.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
 <pre><code class="language-solidity">function safeTransferFrom(address from, address to, uint256 tokenId) public;
 </code></pre>
 <h3 id="safetransferfrom-1"><a class="header" href="#safetransferfrom-1">safeTransferFrom</a></h3>
-<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC721.sol/contract.MockERC721.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
-<pre><code class="language-solidity">function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public virtual;
+<p><em>See <a href="/lib/solady/test/utils/mocks/MockERC1155.sol/contract.MockERC1155.html#safetransferfrom">IERC721-safeTransferFrom</a>.</em></p>
+<pre><code class="language-solidity">function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data)
+    public
+    virtual;
 </code></pre>
 <h3 id="_ownerof"><a class="header" href="#_ownerof">_ownerOf</a></h3>
 <p><em>Returns the owner of the <code>tokenId</code>. Does NOT revert if token doesn't exist
 IMPORTANT: Any overrides to this function that add ownership of tokens not tracked by the
 core ERC721 logic MUST be matched with the use of {_increaseBalance} to keep balances
-consistent with ownership. The invariant to preserve is that for any address <code>a</code> the value returned by
+consistent with ownership. The invariant to preserve is that for any address <code>a</code> the value
+returned by
 <code>balanceOf(a)</code> must be equal to the number of tokens such that <code>_ownerOf(tokenId)</code> is <code>a</code>.</em></p>
 <pre><code class="language-solidity">function _ownerOf(uint256 tokenId) internal view virtual returns (address);
 </code></pre>
@@ -275,22 +285,32 @@ consistent with ownership. The invariant to preserve is that for any address <co
 <h3 id="_isauthorized"><a class="header" href="#_isauthorized">_isAuthorized</a></h3>
 <p><em>Returns whether <code>spender</code> is allowed to manage <code>owner</code>'s tokens, or <code>tokenId</code> in
 particular (ignoring whether it is owned by <code>owner</code>).
-WARNING: This function assumes that <code>owner</code> is the actual owner of <code>tokenId</code> and does not verify this
+WARNING: This function assumes that <code>owner</code> is the actual owner of <code>tokenId</code> and does not
+verify this
 assumption.</em></p>
-<pre><code class="language-solidity">function _isAuthorized(address owner, address spender, uint256 tokenId) internal view virtual returns (bool);
+<pre><code class="language-solidity">function _isAuthorized(address owner, address spender, uint256 tokenId)
+    internal
+    view
+    virtual
+    returns (bool);
 </code></pre>
 <h3 id="_checkauthorized"><a class="header" href="#_checkauthorized">_checkAuthorized</a></h3>
-<p><em>Checks if <code>spender</code> can operate on <code>tokenId</code>, assuming the provided <code>owner</code> is the actual owner.
-Reverts if <code>spender</code> does not have approval from the provided <code>owner</code> for the given token or for all its assets
+<p><em>Checks if <code>spender</code> can operate on <code>tokenId</code>, assuming the provided <code>owner</code> is the
+actual owner.
+Reverts if <code>spender</code> does not have approval from the provided <code>owner</code> for the given token or
+for all its assets
 the <code>spender</code> for the specific <code>tokenId</code>.
-WARNING: This function assumes that <code>owner</code> is the actual owner of <code>tokenId</code> and does not verify this
+WARNING: This function assumes that <code>owner</code> is the actual owner of <code>tokenId</code> and does not
+verify this
 assumption.</em></p>
 <pre><code class="language-solidity">function _checkAuthorized(address owner, address spender, uint256 tokenId) internal view virtual;
 </code></pre>
 <h3 id="_update"><a class="header" href="#_update">_update</a></h3>
-<p><em>Transfers <code>tokenId</code> from its current owner to <code>to</code>, or alternatively mints (or burns) if the current owner
+<p><em>Transfers <code>tokenId</code> from its current owner to <code>to</code>, or alternatively mints (or burns) if
+the current owner
 (or <code>to</code>) is the zero address. Returns the owner of the <code>tokenId</code> before the update.
-The <code>auth</code> argument is optional. If the value passed is non 0, then this function will check that
+The <code>auth</code> argument is optional. If the value passed is non 0, then this function will check
+that
 <code>auth</code> is either the owner of the token, or approved to operate on the token (by the owner).
 Emits a {Transfer} event.
 NOTE: If overriding this function in a way that tracks balances, see also {_increaseBalance}.</em></p>
@@ -308,13 +328,15 @@ Emits a {Transfer} event.*</li>
 <pre><code class="language-solidity">function _mint(address to, uint256 tokenId) internal;
 </code></pre>
 <h3 id="_mintconsecutive"><a class="header" href="#_mintconsecutive">_mintConsecutive</a></h3>
-<p><em>Mints tokens with consecutive tokenIds in the range [startTokenId, endTokenId] and transfers them to <code>to</code>.</em></p>
+<p><em>Mints tokens with consecutive tokenIds in the range [startTokenId, endTokenId] and
+transfers them to <code>to</code>.</em></p>
 <pre><code class="language-solidity">function _mintConsecutive(address to, uint256 startTokenId, uint256 endTokenId) internal;
 </code></pre>
 <h3 id="_burn"><a class="header" href="#_burn">_burn</a></h3>
 <p>*Destroys <code>tokenId</code>.
 The approval is cleared when the token is burned.
-This is an internal function that does not check if the sender is authorized to operate on the token.
+This is an internal function that does not check if the sender is authorized to operate on
+the token.
 Requirements:</p>
 <ul>
 <li><code>tokenId</code> must exist.
@@ -324,14 +346,17 @@ Emits a {Transfer} event.*</li>
 </code></pre>
 <h3 id="_approve"><a class="header" href="#_approve">_approve</a></h3>
 <p><em>Approve <code>to</code> to operate on <code>tokenId</code>
-The <code>auth</code> argument is optional. If the value passed is non 0, then this function will check that <code>auth</code> is
+The <code>auth</code> argument is optional. If the value passed is non 0, then this function will check
+that <code>auth</code> is
 either the owner of the token, or approved to operate on all tokens held by this owner.
 Emits an {Approval} event.
-Overrides to this logic should be done to the variant with an additional <code>bool emitEvent</code> argument.</em></p>
+Overrides to this logic should be done to the variant with an additional <code>bool emitEvent</code>
+argument.</em></p>
 <pre><code class="language-solidity">function _approve(address to, uint256 tokenId, address auth) internal;
 </code></pre>
 <h3 id="_approve-1"><a class="header" href="#_approve-1">_approve</a></h3>
-<p><em>Variant of <code>_approve</code> with an optional flag to enable or disable the {Approval} event. The event is not
+<p><em>Variant of <code>_approve</code> with an optional flag to enable or disable the {Approval} event.
+The event is not
 emitted in the context of transfers.</em></p>
 <pre><code class="language-solidity">function _approve(address to, uint256 tokenId, address auth, bool emitEvent) internal virtual;
 </code></pre>
@@ -345,15 +370,19 @@ Emits an {ApprovalForAll} event.*</li>
 <pre><code class="language-solidity">function _setApprovalForAll(address owner, address operator, bool approved) internal virtual;
 </code></pre>
 <h3 id="_requireowned"><a class="header" href="#_requireowned">_requireOwned</a></h3>
-<p><em>Reverts if the <code>tokenId</code> doesn't have a current owner (it hasn't been minted, or it has been burned).
+<p><em>Reverts if the <code>tokenId</code> doesn't have a current owner (it hasn't been minted, or it has
+been burned).
 Returns the owner.
 Overrides to ownership logic should be done to <a href="/src/base/ERC721.sol/abstract.ERC721.html#_ownerof">_ownerOf</a>.</em></p>
 <pre><code class="language-solidity">function _requireOwned(uint256 tokenId) internal view returns (address);
 </code></pre>
 <h3 id="_checkonerc721received"><a class="header" href="#_checkonerc721received">_checkOnERC721Received</a></h3>
-<p><em>Private function to invoke <a href="/lib/solady/test/utils/mocks/MockERC1271Wallet.sol/abstract.ERC721TokenReceiver.html#onerc721received">IERC721Receiver-onERC721Received</a> on a target address. This will revert if the
-recipient doesn't accept the token transfer. The call is not executed if the target address is not a contract.</em></p>
-<pre><code class="language-solidity">function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory data) private;
+<p><em>Private function to invoke <a href="/lib/solady/test/utils/mocks/MockERC1271Wallet.sol/abstract.ERC721TokenReceiver.html#onerc721received">IERC721Receiver-onERC721Received</a> on a target address. This
+will revert if the
+recipient doesn't accept the token transfer. The call is not executed if the target address
+is not a contract.</em></p>
+<pre><code class="language-solidity">function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory data)
+    private;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>

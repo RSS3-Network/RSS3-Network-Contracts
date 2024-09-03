@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="svggenerator"><a class="header" href="#svggenerator">SVGGenerator</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/97e0d7d7ec207e33fabc533d28d0f378578e4a63/src/libraries/SVGGenerator.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1b42073bfb95dfc4e074790944d9f2e570ecaa7d/src/libraries/SVGGenerator.sol">Git Source</a></p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
 <h3 id="basesvghead"><a class="header" href="#basesvghead">baseSVGHead</a></h3>
 <pre><code class="language-solidity">string public constant baseSVGHead =
@@ -267,10 +267,12 @@
     returns (string memory, string memory);
 </code></pre>
 <h3 id="getsvgstyle"><a class="header" href="#getsvgstyle">getSVGStyle</a></h3>
-<pre><code class="language-solidity">function getSVGStyle(uint8 frameColor, uint8 chipDetailColor, uint8 headShapeColor, uint8 headDetailColor)
-    internal
-    pure
-    returns (string memory);
+<pre><code class="language-solidity">function getSVGStyle(
+    uint8 frameColor,
+    uint8 chipDetailColor,
+    uint8 headShapeColor,
+    uint8 headDetailColor
+) internal pure returns (string memory);
 </code></pre>
 <h3 id="getcolor"><a class="header" href="#getcolor">getColor</a></h3>
 <pre><code class="language-solidity">function getColor(uint8 id) internal pure returns (string memory);

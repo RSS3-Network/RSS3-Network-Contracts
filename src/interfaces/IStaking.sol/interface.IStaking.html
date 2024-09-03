@@ -178,11 +178,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/97e0d7d7ec207e33fabc533d28d0f378578e4a63/src/interfaces/IStaking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1b42073bfb95dfc4e074790944d9f2e570ecaa7d/src/interfaces/IStaking.sol">Git Source</a></p>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
-<pre><code class="language-solidity">function initialize(address chips, address pauseAccount, address oracleAccount, bool isAlphaPhase_) external;
+<pre><code class="language-solidity">function initialize(address chips, address pauseAccount, address oracleAccount, bool isAlphaPhase_)
+    external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -211,9 +212,12 @@ Requirements:</p>
 <h3 id="createnode"><a class="header" href="#createnode">createNode</a></h3>
 <p>Creates a node and deposits tokens.</p>
 <p><em>Emits the <code>NodeCreated</code> event and <code>Deposited</code> event.</em></p>
-<pre><code class="language-solidity">function createNode(string calldata name, string calldata description, uint64 taxRateBasisPoints, bool publicGood)
-    external
-    payable;
+<pre><code class="language-solidity">function createNode(
+    string calldata name,
+    string calldata description,
+    uint64 taxRateBasisPoints,
+    bool publicGood
+) external payable;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -305,7 +309,9 @@ The caller must have the <code>ORACLE_ROLE</code>.</p>
 <h3 id="requestunstake"><a class="header" href="#requestunstake">requestUnstake</a></h3>
 <p>Requests unstake tokens from a node operator.</p>
 <p><em>This will burn the chips tokens and emits the <code>UnstakeRequested</code> event.</em></p>
-<pre><code class="language-solidity">function requestUnstake(address nodeAddr, uint256[] calldata chipsIds) external returns (uint256 requestId);
+<pre><code class="language-solidity">function requestUnstake(address nodeAddr, uint256[] calldata chipsIds)
+    external
+    returns (uint256 requestId);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -389,7 +395,8 @@ Requirements:</p>
 Requirements:</p>
 <ul>
 <li>The caller must have the <code>ORACLE_ROLE</code>
-If the domiton count in the same epoch is greater than the threshold, the node will be in a slashing status.</li>
+If the domiton count in the same epoch is greater than the threshold, the node will be in a
+slashing status.</li>
 </ul>
 <p><em>Emits the <code>DemotionSubmitted</code> event.</em></p>
 <pre><code class="language-solidity">function submitDemotions(
@@ -414,7 +421,8 @@ Requirements:</p>
 <li>The caller must have the <code>ORACLE_ROLE</code>.</li>
 </ul>
 <p><em>Emits the <code>DemotionRevoked</code> event.</em></p>
-<pre><code class="language-solidity">function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToRevoke) external;
+<pre><code class="language-solidity">function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToRevoke)
+    external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -494,7 +502,10 @@ Requirements:</p>
 </code></pre>
 <h3 id="getdemotions"><a class="header" href="#getdemotions">getDemotions</a></h3>
 <p>Returns the demotions for a specific node address and epoch.</p>
-<pre><code class="language-solidity">function getDemotions(address nodeAddr, uint256 epoch) external view returns (Demotion[] memory demotions);
+<pre><code class="language-solidity">function getDemotions(address nodeAddr, uint256 epoch)
+    external
+    view
+    returns (Demotion[] memory demotions);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -555,7 +566,10 @@ Requirements:</p>
 </div>
 <h3 id="getchipinfo"><a class="header" href="#getchipinfo">getChipInfo</a></h3>
 <p>Gets chip info by <code>tokenId</code>.</p>
-<pre><code class="language-solidity">function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares);
+<pre><code class="language-solidity">function getChipInfo(uint256 tokenId)
+    external
+    view
+    returns (address nodeAddr, uint256 tokens, uint256 shares);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -597,7 +611,11 @@ Requirements:</p>
 <pre><code class="language-solidity">function getPoolInfo()
     external
     view
-    returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens);
+    returns (
+        uint256 totalOperationPoolTokens,
+        uint256 totalStakingPoolTokens,
+        uint256 totalSlashingPoolTokens
+    );
 </code></pre>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>

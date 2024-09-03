@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="staking"><a class="header" href="#staking">Staking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/97e0d7d7ec207e33fabc533d28d0f378578e4a63/src/Staking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/1b42073bfb95dfc4e074790944d9f2e570ecaa7d/src/Staking.sol">Git Source</a></p>
 <p><strong>Inherits:</strong>
 <a href="/src/interfaces/IStaking.sol/interface.IStaking.html">IStaking</a>, Multicall, Pausable, Initializable, AccessControlEnumerable, ReentrancyGuard</p>
 <h2 id="state-variables"><a class="header" href="#state-variables">State Variables</a></h2>
@@ -278,7 +278,8 @@ requestUnstake/requestWithdrawal is not allowed in alpha phase.</em></p>
 <pre><code class="language-solidity">uint256 internal _demotionIdCounter;
 </code></pre>
 <h3 id="_demotionids"><a class="header" href="#_demotionids">_demotionIds</a></h3>
-<pre><code class="language-solidity">mapping(address nodeAddr =&gt; mapping(uint256 epochId =&gt; EnumerableSet.UintSet demotionIds)) internal _demotionIds;
+<pre><code class="language-solidity">mapping(address nodeAddr =&gt; mapping(uint256 epochId =&gt; EnumerableSet.UintSet demotionIds)) internal
+    _demotionIds;
 </code></pre>
 <h3 id="_demotions"><a class="header" href="#_demotions">_demotions</a></h3>
 <pre><code class="language-solidity">mapping(uint256 demotionId =&gt; Demotion demotion) internal _demotions;
@@ -289,7 +290,12 @@ requestUnstake/requestWithdrawal is not allowed in alpha phase.</em></p>
 </code></pre>
 <h3 id="constructor"><a class="header" href="#constructor">constructor</a></h3>
 <p>constructor.</p>
-<pre><code class="language-solidity">constructor(address treasury, uint256 stakeUnbondingPeriod, uint256 depositUnbondingPeriod, address paymentProcessor);
+<pre><code class="language-solidity">constructor(
+    address treasury,
+    uint256 stakeUnbondingPeriod,
+    uint256 depositUnbondingPeriod,
+    address paymentProcessor
+);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -329,11 +335,12 @@ Requirements:</p>
 <h3 id="createnode"><a class="header" href="#createnode">createNode</a></h3>
 <p>Creates a node and deposits tokens.</p>
 <p><em>Emits the <code>NodeCreated</code> event and <code>Deposited</code> event.</em></p>
-<pre><code class="language-solidity">function createNode(string calldata name, string calldata description, uint64 taxRateBasisPoints, bool publicGood)
-    external
-    payable
-    override
-    whenNotPaused;
+<pre><code class="language-solidity">function createNode(
+    string calldata name,
+    string calldata description,
+    uint64 taxRateBasisPoints,
+    bool publicGood
+) external payable override whenNotPaused;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -346,7 +353,10 @@ Requirements:</p>
 <h3 id="updatenode"><a class="header" href="#updatenode">updateNode</a></h3>
 <p>Updates node name and description.</p>
 <p><em>Emits the <code>NodeUpdated</code> event.</em></p>
-<pre><code class="language-solidity">function updateNode(string calldata name, string calldata description) external override whenNotPaused;
+<pre><code class="language-solidity">function updateNode(string calldata name, string calldata description)
+    external
+    override
+    whenNotPaused;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -363,7 +373,11 @@ msg.value carries the amount of tokens to deposit.</em></p>
 <h3 id="requestwithdrawal"><a class="header" href="#requestwithdrawal">requestWithdrawal</a></h3>
 <p>Requests withdraw tokens from operation pool for node operator.</p>
 <p><em>Emits the <code>WithdrawRequested</code> event.</em></p>
-<pre><code class="language-solidity">function requestWithdrawal(uint256 amount) external override whenNotPaused returns (uint256 requestId);
+<pre><code class="language-solidity">function requestWithdrawal(uint256 amount)
+    external
+    override
+    whenNotPaused
+    returns (uint256 requestId);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -378,7 +392,11 @@ msg.value carries the amount of tokens to deposit.</em></p>
 <h3 id="claimwithdrawal"><a class="header" href="#claimwithdrawal">claimWithdrawal</a></h3>
 <p>Claims a batch of withdrawal requests.</p>
 <p><em>Emits the <code>WithdrawalClaimed</code> event.</em></p>
-<pre><code class="language-solidity">function claimWithdrawal(uint256[] calldata requestIds) external override whenNotPaused nonReentrant;
+<pre><code class="language-solidity">function claimWithdrawal(uint256[] calldata requestIds)
+    external
+    override
+    whenNotPaused
+    nonReentrant;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -472,7 +490,10 @@ msg.value carries the amount of tokens to deposit.</em></p>
 <p>Sets tax rate for public pool.
 The caller must have the <code>ORACLE_ROLE</code>.</p>
 <p><em>Emits the <code>PublicPoolTaxRateBasisPointsSet</code> event.</em></p>
-<pre><code class="language-solidity">function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external override onlyRole(ORACLE_ROLE);
+<pre><code class="language-solidity">function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints)
+    external
+    override
+    onlyRole(ORACLE_ROLE);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -525,7 +546,8 @@ Requirements:</p>
 Requirements:</p>
 <ul>
 <li>The caller must have the <code>ORACLE_ROLE</code>
-If the domiton count in the same epoch is greater than the threshold, the node will be in a slashing status.</li>
+If the domiton count in the same epoch is greater than the threshold, the node will be in a
+slashing status.</li>
 </ul>
 <p><em>Emits the <code>DemotionSubmitted</code> event.</em></p>
 <pre><code class="language-solidity">function submitDemotions(
@@ -633,7 +655,11 @@ Requirements:</p>
 </code></pre>
 <h3 id="getdemotions"><a class="header" href="#getdemotions">getDemotions</a></h3>
 <p>Returns the demotions for a specific node address and epoch.</p>
-<pre><code class="language-solidity">function getDemotions(address nodeAddr, uint256 epoch) external view override returns (Demotion[] memory demotions);
+<pre><code class="language-solidity">function getDemotions(address nodeAddr, uint256 epoch)
+    external
+    view
+    override
+    returns (Demotion[] memory demotions);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -666,7 +692,11 @@ Requirements:</p>
 </div>
 <h3 id="getpendingwithdrawal"><a class="header" href="#getpendingwithdrawal">getPendingWithdrawal</a></h3>
 <p>Returns the pending withdrawal request by <code>requestId</code>.</p>
-<pre><code class="language-solidity">function getPendingWithdrawal(uint256 requestId) external view override returns (WithdrawalRequest memory);
+<pre><code class="language-solidity">function getPendingWithdrawal(uint256 requestId)
+    external
+    view
+    override
+    returns (WithdrawalRequest memory);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -680,7 +710,11 @@ Requirements:</p>
 </div>
 <h3 id="getpendingunstake"><a class="header" href="#getpendingunstake">getPendingUnstake</a></h3>
 <p>Returns the pending unstake request by <code>requestId</code>.</p>
-<pre><code class="language-solidity">function getPendingUnstake(uint256 requestId) external view override returns (UnstakeRequest memory);
+<pre><code class="language-solidity">function getPendingUnstake(uint256 requestId)
+    external
+    view
+    override
+    returns (UnstakeRequest memory);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -741,7 +775,11 @@ Requirements:</p>
     external
     view
     override
-    returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens);
+    returns (
+        uint256 totalOperationPoolTokens,
+        uint256 totalStakingPoolTokens,
+        uint256 totalSlashingPoolTokens
+    );
 </code></pre>
 <p><strong>Returns</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
@@ -766,7 +804,11 @@ Requirements:</p>
 </div>
 <h3 id="getnodes"><a class="header" href="#getnodes">getNodes</a></h3>
 <p>Gets nodes info by node addresses.</p>
-<pre><code class="language-solidity">function getNodes(address[] calldata nodeAddrs) external view override returns (Node[] memory nodes);
+<pre><code class="language-solidity">function getNodes(address[] calldata nodeAddrs)
+    external
+    view
+    override
+    returns (Node[] memory nodes);
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
