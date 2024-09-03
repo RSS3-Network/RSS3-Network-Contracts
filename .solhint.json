@@ -29,7 +29,7 @@
     "gas-strict-inequalities": "off",
     "gas-struct-packing": "warn",
     "immutable-vars-naming": ["warn",{"immutablesAsConstants":true}],
-    "imports-on-top": "error",
+    "imports-on-top": "off",
     "imports-order": "warn",
     "interface-starts-with-i": "warn",
     "max-line-length": ["error", 120],

@@ -978,59 +978,63 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(found2 != LibString.NOT_FOUND, true);
     }
 
-    function testCalcTax1(uint256 operationPool, uint256 rewards, uint256 stakingPool)
+    function testCalcTaxNoRewards(uint256 operationPool, uint256 rewards, uint256 stakingPool)
         public
         pure
     {
-        // case 1: receives no tax rewards
-        operationPool = bound(operationPool, 1, 10000 ether - 1); // operation pool < 10000 ether
+        // Case 1: Node receives no tax rewards (operation pool < 10000 ether)
+        operationPool = bound(operationPool, 1, 10000 ether - 1);
         rewards = bound(rewards, 1, 1000000 ether);
         stakingPool = bound(stakingPool, 1, 100000 ether);
 
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
-        (uint256 tax1, uint256 partialTax1) =
+        (uint256 totalTax, uint256 partialTax) =
             RewardsAndSlashingLib._getTax(rewards, taxRateBasisPoints, operationPool, stakingPool);
 
-        assertEq(tax1, _getFullTax(rewards, taxRateBasisPoints));
-        assertEq(partialTax1, 0);
+        uint256 expectedFullTax = _getFullTax(rewards, taxRateBasisPoints);
+        assertEq(totalTax, expectedFullTax, "Total tax should equal full tax");
+        assertEq(partialTax, 0, "Partial tax should be zero");
     }
 
-    function testCalcTax2(uint256 operationPool, uint256 stakeRatio) public pure {
-        // case 2: receives full tax rewards
-        operationPool = bound(operationPool, 10000 ether, 20000 ether); // operation pool < 10000
-            // ether
+    function testCalcTaxFullRewards(uint256 operationPool, uint256 stakeRatio) public pure {
+        // Case 2: Node receives full tax rewards (operation pool >= 10000 ether)
+        operationPool = bound(operationPool, 10000 ether, 20000 ether);
         stakeRatio = bound(stakeRatio, 1, 25);
 
         uint256 stakingPool = operationPool * stakeRatio;
-
         uint256 rewards = 10000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
-        (uint256 tax, uint256 partialTax) =
+        (uint256 totalTax, uint256 partialTax) =
             RewardsAndSlashingLib._getTax(rewards, taxRateBasisPoints, operationPool, stakingPool);
 
-        assertEq(tax, partialTax);
+        assertEq(totalTax, partialTax, "Total tax should equal partial tax for full rewards");
+
+        uint256 expectedTax = _getFullTax(rewards, taxRateBasisPoints);
+        assertEq(totalTax, expectedTax, "Total tax should equal expected full tax");
     }
 
-    function testCalcTax3(uint256 stakingPool) public pure {
-        // case 2: receives partial tax rewards
+    function testCalcTaxPartialRewards(uint256 stakingPool) public pure {
+        // Case 3: Node receives partial tax rewards (operation pool >= MIN_DEPOSIT)
         uint256 operationPool = Const.MIN_DEPOSIT;
-
-        vm.assume(stakingPool > 25 * operationPool && Const.STAKE_RATIO < 100 * operationPool);
+        stakingPool = bound(stakingPool, 25 * operationPool + 1, 100 * operationPool);
 
         uint256 rewards = 10000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
-        (uint256 tax, uint256 partialTax) =
+        (uint256 totalTax, uint256 partialTax) =
             RewardsAndSlashingLib._getTax(rewards, taxRateBasisPoints, operationPool, stakingPool);
 
-        // partialTax has precision 1
-        assert(
-            tax * operationPool * 25 >= partialTax * stakingPool
-                && tax * operationPool * 25 < (partialTax + 1) * stakingPool
+        uint256 expectedPartialTax = (totalTax * operationPool * 25) / stakingPool;
+        assertApproxEqAbs(
+            partialTax, expectedPartialTax, 12, "Partial tax should be less than upper bound"
         );
-        // assert(tax / partialTax >= stakingPool / (operationPool * 25));
+
+        // Additional check to ensure totalTax is greater than partialTax
+        assertGt(totalTax, partialTax, "Total tax should be greater than partial tax");
+
+        assert(totalTax / partialTax >= stakingPool / (operationPool * 25));
     }
 
     /// @dev stake and then request unstake
