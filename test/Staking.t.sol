@@ -2,59 +2,40 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {CommonTest} from "test/helpers/CommonTest.sol";
-import {TestEvents} from "test/helpers/TestEvents.sol";
-import {DataTypes} from "../src/libraries/DataTypes.sol";
-import {Staking} from "../src/Staking.sol";
-import {Events} from "../src/libraries/Events.sol";
-import {Const} from "../src/libraries/Const.sol";
-import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
-import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
-import {LibString} from "solady/utils/LibString.sol";
-import {Base64} from "solady/utils/Base64.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-
-// import {console2 as console} from "forge-std/console2.sol";
-
+import {Base64} from "solady/utils/Base64.sol";
+import {LibString} from "solady/utils/LibString.sol";
+import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
+import {Const} from "../src/libraries/Const.sol";
+import {Node, NodeStatus, UnstakeRequest, WithdrawalRequest} from "../src/libraries/DataTypes.sol";
 import {
     NodeNotExists,
-    TaxRateBasisPointsTooSmall,
-    TaxRateBasisPointsTooLarge,
-    PublicGoodNodeTaxNotZero,
-    SlashStatusNotRecorded,
-    SlashMoreThanOnce,
-    SlashRecordNotExists,
-    SlashPublicGoodNode,
+    NodeInExitStatus,
     InvalidArrayLength,
-    NodeExists,
-    NodeIsPublicGood,
-    CreateNodeToZeroAddress,
     ChipNotValid,
-    InsufficientValue,
     ExcessWithdrawalAmount,
+    WithdrawalAmountExceedsOperationPoolTokens,
     ClaimTimeNotReady,
     ClaimIdNotExists,
-    ChipIdsLengthTooShort,
+    ChipIdsArrayTooSmall,
     SettlementPhase,
     EmptyChipIds,
     ChipsNotSameOwner,
     StakeAmountTooSmall,
     NodeNotPublicGood,
     StakeToPublicGoodNode,
-    PublicGoodNodeNotDeposited
+    DepositForPublicGoodNode
 } from "../src/libraries/Errors.sol";
+import {Events} from "../src/libraries/Events.sol";
+import {RewardsAndSlashingLib} from "../src/libraries/RewardsAndSlashingLib.sol";
+import {Staking} from "../src/Staking.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
+import {TestEvents} from "./helpers/TestEvents.sol";
+
+//import {console2 as console} from "forge-std/console2.sol";
 
 contract StakingTest is CommonTest, IERC721Errors {
     using stdJson for string;
-
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Paused(address account);
-    event Unpaused(address account);
-
-    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-    error EnforcedPause();
-    error ExpectedPause();
 
     function setUp() public {
         _setUp();
@@ -71,24 +52,19 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_staking.paused(), false);
 
         assertEq(_staking.getNodeCount(), 0);
-        assertEq(_staking.MIN_DEPOSIT(), minDeposit);
         assertEq(_staking.chipsContract(), address(_chips));
 
-        assertEq(_staking.STAKE_UNBONDING_PERIOD(), stakeUnbondingPeriod);
-        assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), depositUnbondingPeriod);
-        assertEq(_staking.NODE_SLASH_RATE_BASIS_POINTS(), nodeSlashRateBasisPoints);
-        assertEq(_staking.USER_SLASH_RATE_BASIS_POINTS(), userSlashRateBasisPoints);
-        assertEq(_staking.STAKE_RATIO(), _cfg.stakeRatio());
+        assertEq(_staking.version(), "2.0.0");
         assertEq(_staking.TREASURY(), _cfg.treasury());
-        assertEq(_staking.SHARES_PER_CHIP(), 500 ether);
-        assertEq(_staking.MIN_DEPOSIT(), minDeposit);
-        assertEq(_staking.MIN_TAX_RATE_BASIS_POINTS(), minTaxRateBasisPoints);
+        assertEq(_staking.PAYMENT_PROCESSOR(), _cfg.paymentProcessor());
+        assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), _cfg.depositUnbondingPeriod());
+        assertEq(_staking.STAKE_UNBONDING_PERIOD(), _cfg.stakeUnbondingPeriod());
 
         vm.mockCall(
             address(_staking),
             abi.encodeWithSelector(Staking.getPublicPool.selector),
             abi.encode(
-                DataTypes.Node({
+                Node({
                     nodeId: 0,
                     account: address(0),
                     taxRateBasisPoints: 0,
@@ -99,7 +75,10 @@ contract StakingTest is CommonTest, IERC721Errors {
                     operationPoolTokens: 0,
                     stakingPoolTokens: 0,
                     totalShares: 0,
-                    slashStatus: false
+                    slashedStakingPoolTokens: 0,
+                    slashedOperationPoolTokens: 0,
+                    exitTime: 0,
+                    status: NodeStatus.None
                 })
             )
         );
@@ -111,14 +90,10 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(shares, 0);
 
         // check constants
-        assertLt(
-            RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
-                RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS,
-            Const.DENOMINATOR
-        );
-        assertLt(_staking.NODE_SLASH_RATE_BASIS_POINTS(), Const.DENOMINATOR);
-        assertLt(_staking.USER_SLASH_RATE_BASIS_POINTS(), Const.DENOMINATOR);
-        assertLt(_staking.MIN_TAX_RATE_BASIS_POINTS(), Const.DENOMINATOR);
+        assertLt(Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS, Const.DENOMINATOR);
+        assertLt(Const.NODE_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
+        assertLt(Const.USER_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
+        assertLt(Const.MIN_TAX_RATE_BASIS_POINTS, Const.DENOMINATOR);
     }
 
     function testPause() public {
@@ -215,217 +190,17 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.stakeToPublicPool{value: 100}(alice);
 
-        // case 8: set settlement phase
-        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
-        _staking.setSettlementPhase(true);
-
-        // case 9: unstake
+        // case 8: unstake
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.requestUnstake(alice, new uint256[](1));
 
-        // case 10: claim unstake
+        // case 9: claim unstake
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
         _staking.claimUnstake(new uint256[](1));
-
-        // case 11: distribute rewards
-        vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
-        _staking.distributeRewards(
-            [uint256(1), uint256(1), uint256(2)],
-            array(alice, bob),
-            array(1, 1),
-            array(1, 1),
-            array(1, 2),
-            1 ether // public pool reward
-        );
-    }
-
-    function testCreateNode(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
-
-        string memory name = "Alice";
-        string memory description = "Alice's node";
-
-        // case 1: create a node before alpha phase
-        expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, true);
-        vm.prank(alice);
-        _staking.createNode(name, description, taxRateBasisPoints, false);
-
-        // check node info
-        _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, false, true);
-        assertEq(_staking.getNodeCount(), 1);
-
-        // case 2: create a node after alpha phase
-        _disableAlphaPhase();
-        expectEmit();
-        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false, false);
-        vm.prank(bob);
-        _staking.createNode(name, description, taxRateBasisPoints, false);
-        _checkNode(bob, 2, name, description, taxRateBasisPoints, 0, false, false);
-        assertEq(_staking.getNodeCount(), 2);
-    }
-
-    function testCreatePGNode() public {
-        string memory name = "Alice";
-        string memory description = "Alice's node";
-
-        expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, 0, true, true);
-        vm.prank(alice);
-        _staking.createNode(name, description, 0, true);
-
-        // check node info
-        _checkNode(alice, 1, name, description, 0, 0, true, true);
-        assertEq(_staking.getNodeCount(), 1);
-    }
-
-    function testCreatePGNodeFail() public {
-        vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeTaxNotZero.selector));
-        _staking.createNode("Alice", "Alice's node", 1, true);
-    }
-
-    function testNodeAvatar() public {
-        string memory nodeAvatarURI = _staking.getNodeAvatar(bob);
-        string memory base64prefix = "data:application/json;base64,";
-
-        string memory decodedTokenURI = string(
-            Base64.decode(LibString.slice(nodeAvatarURI, bytes(base64prefix).length))
-        );
-        assertEq(decodedTokenURI.readString(".name"), "Node Avatar");
-        string memory base64Image = decodedTokenURI.readString(".image");
-
-        string memory base64Imageprefix = "data:image/svg+xml;base64,";
-
-        string memory decodedImageURI = string(
-            Base64.decode(LibString.slice(base64Image, bytes(base64Imageprefix).length))
-        );
-        uint256 found1 = LibString.indexOf(decodedImageURI, "d{fill:#DEE5D9;}"); // head color white
-        assertEq(found1 != LibString.NOT_FOUND, true);
-
-        uint256 found2 = LibString.indexOf(decodedImageURI, "e{fill:#DEE5D9;}"); // head detail color white
-        assertEq(found2 != LibString.NOT_FOUND, true);
-    }
-
-    function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
-        vm.assume(taxRateBasisPoints >= minTaxRateBasisPoints && taxRateBasisPoints <= 10000);
-        vm.assume(amount > 1 && amount < _initialAmount);
-
-        string memory name = "Alice";
-        string memory description = "Alice's node";
-
-        expectEmit();
-        emit Events.NodeCreated(1, alice, name, description, taxRateBasisPoints, false, true);
-        expectEmit();
-        emit Events.Deposited(alice, amount);
-
-        vm.prank(alice);
-        _staking.createNode{value: amount}(name, description, taxRateBasisPoints, false);
-
-        // check node info
-        _checkNode(alice, 1, name, description, taxRateBasisPoints, amount, false, true);
-        assertEq(_staking.getNodeCount(), 1);
-
-        // create node after alpha phase
-        _disableAlphaPhase();
-        expectEmit();
-        emit Events.NodeCreated(2, bob, name, description, taxRateBasisPoints, false, false);
-        vm.prank(bob);
-        _staking.createNode(name, description, taxRateBasisPoints, false);
-        _checkNode(bob, 2, name, description, taxRateBasisPoints, 0, false, false);
-        assertEq(_staking.getNodeCount(), 2);
-    }
-
-    function testGetNodeCount() public {
-        _createNode(alice);
-        _createNode(bob);
-        _createPublicGoodNode(carol);
-
-        assertEq(_staking.getNodeCount(), 3);
-    }
-
-    function testGetNodes() public {
-        _createNode(alice);
-        _createNode(bob);
-        _createPublicGoodNode(carol);
-        _createNode(dave);
-
-        // get nodes with pagination
-        DataTypes.Node[] memory nodes = _staking.getNodesWithPagination(0, 4);
-        assertEq(nodes.length, 4);
-        assertEq(nodes[0].account, alice);
-        assertEq(nodes[1].account, bob);
-        assertEq(nodes[2].account, carol);
-        assertEq(nodes[3].account, dave);
-        assertEq(nodes[0].nodeId, 1);
-        assertEq(nodes[1].nodeId, 2);
-        assertEq(nodes[2].nodeId, 3);
-        assertEq(nodes[3].nodeId, 4);
-
-        // get nodes by addresses
-        DataTypes.Node[] memory nodes2 = _staking.getNodes(array(alice, bob, carol, dave));
-        assertEq(nodes2.length, 4);
-        assertEq(nodes2[0].account, alice);
-        assertEq(nodes2[1].account, bob);
-        assertEq(nodes2[2].account, carol);
-        assertEq(nodes2[3].account, dave);
-        assertEq(nodes2[0].nodeId, 1);
-        assertEq(nodes2[1].nodeId, 2);
-        assertEq(nodes2[2].nodeId, 3);
-        assertEq(nodes2[3].nodeId, 4);
-    }
-
-    function testUpdateNode() public {
-        _createNode(alice);
-        string memory newName = "New Alice";
-        string memory newDescription = "New Alice's node";
-
-        expectEmit();
-        emit Events.NodeUpdated(alice, newName, newDescription);
-        vm.prank(alice);
-        _staking.updateNode(newName, newDescription);
-
-        _checkNodeProfile(alice, newName, newDescription);
-    }
-
-    function testUpdateNodeFail() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.updateNode("New Alice", "New Alice's node");
-    }
-
-    function testCreateNodeFailWithMultipleNodes() public {
-        _createNode(alice);
-
-        vm.expectRevert(abi.encodeWithSelector(NodeExists.selector));
-        _createNode(alice);
-    }
-
-    function testCreateNodeFailToZeroAddress() public {
-        // create node to address(0) will fail
-        vm.expectRevert(abi.encodeWithSelector(CreateNodeToZeroAddress.selector));
-        _createNode(address(0));
-    }
-
-    function testCreateNodeFailWithLargeTaxRate(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints > 10000);
-
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
-        _staking.createNode("Alice", "Alice's node", taxRateBasisPoints, false);
-    }
-
-    function testCreateNodeFailWithSmallTaxRate(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints < 500);
-
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooSmall.selector));
-        _staking.createNode("Alice", "Alice's node", taxRateBasisPoints, false);
-    }
-
-    function testCreateNodeFailWithPublicGoodNodeDeposited() public {
-        vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeNotDeposited.selector));
-        _staking.createNode{value: 1}("Alice", "Alice's node", uint64(100), true);
     }
 
     function testDeposit(uint256 amount) public {
-        vm.assume(amount > 10000 ether && amount < _initialAmount);
+        amount = bound(amount, 10000 ether, _initialAmount);
 
         _createNode(alice);
 
@@ -434,43 +209,100 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.prank(alice);
         _staking.deposit{value: amount}();
 
-        DataTypes.Node memory node = _staking.getNode(alice);
+        Node memory node = _staking.getNode(alice);
         assertEq(node.operationPoolTokens, amount);
     }
 
-    function testDepositFailWithNonExistentNode() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.deposit{value: 1}();
-    }
-
-    function testDepositFailWithStakeAmountTooSmall() public {
-        vm.expectRevert(abi.encodeWithSelector(InsufficientValue.selector));
-        _staking.deposit{value: 0}();
-    }
-
-    function testRequestWithdrawal() public {
+    function testDepositAfterExit() public {
         _disableAlphaPhase();
 
         uint256 amount = 10000 ether;
 
         vm.startPrank(alice);
-        _staking.createNode{value: amount}("Alice", "Alice's node", uint64(1000), false);
+        _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, false);
+        _staking.deposit{value: 2 * amount}();
 
-        uint256 requestId = _staking.requestWithdrawal(amount);
+        _staking.exit();
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
+
+        _staking.requestWithdrawal(2 * amount);
+
+        // op pool < min deposit
+        _staking.deposit{value: amount / 2}();
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
+
+        // op pool > min deposit
+        expectEmit();
+        emit Events.NodeStatusChanged(alice, NodeStatus.Exited, NodeStatus.Registered);
+        _staking.deposit{value: amount / 2}();
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+        vm.stopPrank();
+    }
+
+    function testDepositFailWithNonExistentNode() public {
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
+        _staking.deposit{value: 1}();
+    }
+
+    function testDepositFailWithPublicGoodNodeDeposited() public {
+        _staking.createNode("Alice", "Alice's node", uint64(0), true);
+
+        vm.expectRevert(abi.encodeWithSelector(DepositForPublicGoodNode.selector));
+        _staking.deposit{value: 1}();
+    }
+
+    function testRequestWithdrawalSucceeds() public {
+        _disableAlphaPhase();
+
+        uint256 depositAmount = 100000 ether;
+        uint256 withdrawalAmount = depositAmount - Const.MIN_DEPOSIT;
+
+        vm.startPrank(alice);
+        _staking.createNode{value: depositAmount}("Alice", "Alice's node", uint64(1000), false);
+
+        vm.expectEmit();
+        emit Events.WithdrawRequested(alice, withdrawalAmount, 1);
+        uint256 requestId = _staking.requestWithdrawal(withdrawalAmount);
 
         // requestWithdrawal again will fail
-        vm.expectRevert(abi.encodeWithSelector(ExcessWithdrawalAmount.selector));
-        _staking.requestWithdrawal(amount);
+        vm.expectRevert(abi.encodeWithSelector(WithdrawalAmountExceedsOperationPoolTokens.selector));
+        _staking.requestWithdrawal(withdrawalAmount);
         vm.stopPrank();
 
         // check status
-        DataTypes.WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
+        WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
+        assertEq(req.owner, alice);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.amount, withdrawalAmount);
+
+        // check node info
+        Node memory node = _staking.getNode(alice);
+        assertEq(node.operationPoolTokens, depositAmount - withdrawalAmount);
+    }
+
+    function testRequestWithdrawalSucceedsWithExit() public {
+        _disableAlphaPhase();
+
+        uint256 amount = 100000 ether;
+
+        vm.startPrank(alice);
+        _staking.createNode{value: amount}("Alice", "Alice's node", uint64(1000), false);
+
+        _staking.exit();
+        skip(Const.NODE_EXIT_PERIOD);
+
+        uint256 requestId = _staking.requestWithdrawal(amount);
+
+        // check status
+        WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
         assertEq(req.owner, alice);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.amount, amount);
 
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
+
         // check node info
-        DataTypes.Node memory node = _staking.getNode(alice);
+        Node memory node = _staking.getNode(alice);
         assertEq(node.operationPoolTokens, 0);
     }
 
@@ -484,11 +316,14 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         _staking.deposit{value: amount}();
 
+        _staking.exit();
+        skip(Const.NODE_EXIT_PERIOD);
+
         uint256 requestId = _staking.requestWithdrawal(2 * amount);
         vm.stopPrank();
 
         // check status
-        DataTypes.WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
+        WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
         assertEq(req.owner, alice);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.amount, 2 * amount);
@@ -503,14 +338,21 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.startPrank(alice);
         _staking.deposit{value: amount}();
 
-        vm.expectRevert(abi.encodeWithSelector(ExcessWithdrawalAmount.selector));
+        // case 1: ExcessWithdrawalAmount
+        vm.expectRevert(abi.encodeWithSelector(WithdrawalAmountExceedsOperationPoolTokens.selector));
         _staking.requestWithdrawal(amount + 1);
+
+        // case 2: ExcessWithdrawalAmount
+        _presetNodeStatus(alice, NodeStatus.Online);
+        _staking.exit();
+        vm.expectRevert(abi.encodeWithSelector(ExcessWithdrawalAmount.selector));
+        _staking.requestWithdrawal(amount);
         vm.stopPrank();
     }
 
     function testRequestWithdrawalFailWithNonExistentNode() public {
         _disableAlphaPhase();
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
         _staking.requestWithdrawal(1 ether);
     }
 
@@ -523,6 +365,8 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         vm.startPrank(alice);
         _staking.deposit{value: amount}();
+        _staking.exit();
+        skip(Const.NODE_EXIT_PERIOD);
 
         uint256 requestId = _staking.requestWithdrawal(amount);
 
@@ -555,6 +399,9 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         uint256 withdrawAmount = 10 ether;
         assertEq(depositAmount % withdrawAmount, 0);
+
+        _staking.exit();
+        skip(Const.NODE_EXIT_PERIOD);
 
         uint256[] memory requestIds = new uint256[](depositAmount / withdrawAmount);
         for (uint256 i = 0; i < requestIds.length; i++) {
@@ -598,72 +445,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.setSettlementPhase(true);
     }
 
-    function testSetTaxRate4Node(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints <= _denominator() && taxRateBasisPoints >= minTaxRateBasisPoints);
-
-        _createNode(alice);
-
-        vm.startPrank(alice);
-        expectEmit();
-        emit Events.NodeTaxRateBasisPointsSet(alice, taxRateBasisPoints);
-        _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
-        vm.stopPrank();
-
-        DataTypes.Node memory node = _staking.getNode(alice);
-        assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
-    }
-
-    function testSetTaxRate4PublicPool(uint64 expectedTaxRateBasisPoints) public {
-        vm.assume(expectedTaxRateBasisPoints <= _denominator());
-
-        vm.startPrank(address(_settlement));
-        expectEmit();
-        emit Events.PublicPoolTaxRateBasisPointsSet(expectedTaxRateBasisPoints);
-        _staking.setTaxRateBasisPoints4PublicPool(expectedTaxRateBasisPoints);
-        vm.stopPrank();
-
-        uint64 realTaxRateBasisPoints = _staking.getPublicPool().taxRateBasisPoints;
-
-        assertEq(realTaxRateBasisPoints, expectedTaxRateBasisPoints);
-    }
-
-    function testSetTaxRateTooSmallError(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints < minTaxRateBasisPoints);
-
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooSmall.selector));
-        vm.prank(oracleAccount);
-        _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
-    }
-
-    function testSetTaxRateTooLargeError(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints > _denominator());
-
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
-        vm.prank(alice);
-        _staking.setTaxRateBasisPoints4Node(taxRateBasisPoints);
-
-        vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsTooLarge.selector));
-        vm.prank(address(_settlement));
-        _staking.setTaxRateBasisPoints4PublicPool(taxRateBasisPoints);
-    }
-
-    function testSetTaxRateFailWithNonExistentNode() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        vm.prank(dave);
-        _staking.setTaxRateBasisPoints4Node(1000);
-    }
-
-    function testSetTaxRateFailWithPublicGoodNode() public {
-        _createPublicGoodNode(dave);
-
-        vm.expectRevert(abi.encodeWithSelector(NodeIsPublicGood.selector));
-        vm.prank(dave);
-        _staking.setTaxRateBasisPoints4Node(1000);
-    }
-
     function testStake(uint256 amount) public {
-        vm.assume(amount >= 500 && amount <= 1000000);
-        amount *= 1 ether;
+        amount = bound(amount, 500 ether, _initialAmount);
 
         _createNode(alice);
 
@@ -674,7 +457,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.prank(bob);
         uint256 tokenId = _staking.stake{value: amount}(alice);
 
-        DataTypes.Node memory node = _staking.getNode(alice);
+        Node memory node = _staking.getNode(alice);
         assertEq(node.stakingPoolTokens, amount);
         assertEq(node.totalShares, amount);
 
@@ -685,8 +468,9 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testStakeFailToNonExistentNode() public {
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.stake{value: 1}(alice);
+        // stake to a non-existent node will fail
+        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, alice));
+        _staking.stake{value: 1000 ether}(alice);
     }
 
     function testStakeFailToPublicGoodNode() public {
@@ -718,9 +502,20 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.stake{value: 10000 ether}(alice);
     }
 
+    function testStakeFailWithNodeInExitStatus() public {
+        _createNode(alice);
+
+        vm.startPrank(alice);
+        _staking.deposit{value: 10000 ether}();
+        _staking.exit();
+        vm.stopPrank();
+
+        vm.expectRevert(abi.encodeWithSelector(NodeInExitStatus.selector));
+        _staking.stake{value: 10000 ether}(alice);
+    }
+
     function testStakeToPublicPool(uint256 amount) public {
-        vm.assume(amount >= 500 && amount < 10000);
-        amount = amount * 1 ether;
+        amount = bound(amount, 500 ether, _initialAmount);
 
         _createPublicGoodNode(alice);
 
@@ -742,12 +537,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         vm.expectRevert(abi.encodeWithSelector(NodeNotPublicGood.selector, bob));
         _staking.stakeToPublicPool{value: 1}(bob);
-    }
-
-    function testStakeToPublicPoolFailToNonExistentNode() public {
-        // stake to public pool with empty node addr will fail
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        _staking.stakeToPublicPool{value: 1}(address(0xabc));
     }
 
     function testStakeToPublicPoolFailWithStakeAmountTooSmall() public {
@@ -812,7 +601,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 requestId = _staking.requestUnstake(alice, array(uint256(1), uint256(2)));
 
         // check status
-        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
         assertEq(req.owner, carol);
         assertEq(req.nodeAddr, alice);
         assertEq(req.timestamp, block.timestamp);
@@ -894,8 +683,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testClaimUnstake(uint256 amount) public {
-        vm.assume(amount > 500 && amount < 10000);
-        amount *= 1 ether;
+        amount = bound(amount, 500 ether, _initialAmount);
 
         _disableAlphaPhase();
 
@@ -924,7 +712,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         // check balances
         assertEq(bob.balance, _initialAmount);
 
-        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
         assertEq(req.owner, address(0));
         assertEq(req.nodeAddr, address(0));
         assertEq(req.timestamp, 0);
@@ -978,14 +766,14 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 balAfter = alice.balance;
         assertEq(balAfter - balBefore, stakeAmount * 3);
 
-        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
         assertEq(req.owner, address(0));
         assertEq(req.nodeAddr, address(0));
         assertEq(req.timestamp, 0);
         assertEq(req.unstakeAmount, 0);
 
         // check node
-        DataTypes.Node memory node = _staking.getNode(bob);
+        Node memory node = _staking.getNode(bob);
         assertEq(node.stakingPoolTokens, 0);
     }
 
@@ -1026,8 +814,8 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testMergeChipsFail() public {
         // case 1: chipIds array length too short
-        vm.expectRevert(abi.encodeWithSelector(ChipIdsLengthTooShort.selector));
-        _staking.mergeChips(new uint256[](0));
+        vm.expectRevert(abi.encodeWithSelector(ChipIdsArrayTooSmall.selector, 1));
+        _staking.mergeChips(new uint256[](1));
 
         // case 2: chips are issued by the same node
         _createNode(bob);
@@ -1044,6 +832,27 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
     }
 
+    function testMergeChipsFailWithBurnedChips() public {
+        // case 3: chips are not existed
+        _createNode(bob);
+        _deposit(bob, 10000 ether);
+
+        vm.startPrank(alice);
+        _staking.stake{value: 500 ether}(bob);
+        _staking.stake{value: 600 ether}(bob);
+        vm.stopPrank();
+
+        vm.startPrank(address(_staking));
+        _chips.burn(1);
+        _chips.burn(2);
+        vm.stopPrank();
+
+        vm.expectRevert(abi.encodeWithSelector(ERC721NonexistentToken.selector, 1));
+        vm.prank(alice);
+        _staking.mergeChips(array(uint256(1), uint256(2)));
+    }
+
+    // solhint-disable-next-line function-max-lines
     function testDistributeRewardsSucceeds() public {
         uint256 depositAmount = 10000 ether;
         uint256 stakeAmount = 20000 ether;
@@ -1129,7 +938,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testWithdraw2Treasury(uint256 amount) public {
-        vm.assume(amount > 0);
+        amount = bound(amount, 0, 10000 ether);
 
         vm.deal(address(_staking), amount);
 
@@ -1137,369 +946,51 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(_cfg.treasury().balance, amount);
     }
 
-    // Test errors: InvalidArrayLength, NodeNotExists, SlashPublicGoodNode, SlashMoreThanOnce
-    function testRecordSlashingFail() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
+    function testNodeAvatar() public view {
+        string memory nodeAvatarURI = _staking.getNodeAvatar(bob);
+        string memory base64prefix = "data:application/json;base64,";
 
-        _setUpNodes(depositedTokens, stakedTokens);
+        string memory decodedTokenURI = string(
+            Base64.decode(LibString.slice(nodeAvatarURI, bytes(base64prefix).length))
+        );
+        assertEq(decodedTokenURI.readString(".name"), "Node Avatar");
+        string memory base64Image = decodedTokenURI.readString(".image");
 
-        address[] memory reporters = array(carol, dave);
+        string memory base64Imageprefix = "data:image/svg+xml;base64,";
 
-        DataTypes.Slashing[] memory slashings = _createSlashings(array(alice, bob), array(123, 123));
+        string memory decodedImageURI = string(
+            Base64.decode(LibString.slice(base64Image, bytes(base64Imageprefix).length))
+        );
+        uint256 found1 = LibString.indexOf(decodedImageURI, "d{fill:#DEE5D9;}"); // head color white
+        assertEq(found1 != LibString.NOT_FOUND, true);
 
-        address[] memory wrongReporters = array(carol);
-
-        // InvalidArrayLength
-        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, wrongReporters);
-
-        // NodeNotExists
-        slashings[1].nodeAddr = address(0x0); // alice, 0x0
-        vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector));
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-
-        // SlashMoreThanOnce
-        slashings[1].nodeAddr = alice; // alice, alice
-        vm.expectRevert(abi.encodeWithSelector(SlashMoreThanOnce.selector, alice, 123));
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-
-        // SlashPublicGoodNode
-        _createPublicGoodNode(carol);
-        DataTypes.Slashing memory slashCarol = DataTypes.Slashing(carol, 123);
-        DataTypes.Slashing[] memory slashingPGs = new DataTypes.Slashing[](1);
-        slashingPGs[0] = slashCarol;
-        address[] memory reporters2 = array(dave);
-
-        vm.expectRevert(abi.encodeWithSelector(SlashPublicGoodNode.selector, carol));
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashingPGs, reporters2);
+        uint256 found2 = LibString.indexOf(decodedImageURI, "e{fill:#DEE5D9;}"); // head detail color white
+        assertEq(found2 != LibString.NOT_FOUND, true);
     }
 
-    // Test:
-    // 1. event emitted as expected
-    // 2. staking and operation pool tokens decreased as expected
-    // 3. record info updated as expected
-    function testRecordSlashing() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        _setUpNodes(depositedTokens, stakedTokens);
-
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
-
-        address[] memory nodeAddrs = array(alice, bob);
-        address[] memory reporters = array(carol, dave);
-        uint256[] memory epochIds = array(123, 123);
-
-        DataTypes.Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
-
-        // 1. events emitted as expected
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            expectEmit();
-            emit Events.SlashRecorded(
-                nodeAddrs[i],
-                epochIds[i],
-                reporters[i],
-                expectedSlashedTokensOnOperationPool,
-                expectedSlashedTokensOnStakingPool
-            );
-        }
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-
-        DataTypes.SlashRecord[] memory records = _staking.getSlashingRecords(slashings);
-        // 2. records info updated correctly
-        for (uint256 i = 0; i < records.length; i++) {
-            assertEq(records[i].reporter, reporters[i]);
-            assertEq(records[i].amountForOperationPool, expectedSlashedTokensOnOperationPool);
-            assertEq(records[i].amountForStakingPool, expectedSlashedTokensOnStakingPool);
-            assertTrue(records[i].status == DataTypes.SlashStatus.Recorded);
-        }
-
-        // 3. check staking pool and operation tokens
-        DataTypes.Node memory aliceNode = _staking.getNode(alice);
-        DataTypes.Node memory bobNode = _staking.getNode(bob);
-        assertEq(aliceNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(aliceNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-        assertEq(bobNode.stakingPoolTokens, stakedTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(bobNode.operationPoolTokens, depositedTokens - expectedSlashedTokensOnOperationPool);
-
-        // 4. slash status updated correctly
-        assertEq(aliceNode.slashStatus, true);
-        assertEq(bobNode.slashStatus, true);
-    }
-
-    // Test errors: SlashRecordNotExists, SlashStatusNotRecorded
-    function testCommitSlashingFail() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        _setUpNodes(depositedTokens, stakedTokens);
-
-        address[] memory nodeAddrs = array(alice, bob);
-        uint256[] memory epochIds = array(123, 123);
-        DataTypes.Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
-        DataTypes.Slashing[] memory slashingAlices = _createSlashings(array(alice), array(123));
-        DataTypes.Slashing[] memory slashingBobs = _createSlashings(array(bob), array(123));
-
-        address[] memory reporters = array(address(0xabc), address(0xdef));
-
-        vm.startPrank(address(_settlement));
-
-        // 1. cannot commit a non-exsistent one
-        DataTypes.Slashing[] memory slashingNulls = _createSlashings(array(carol), array(789));
-        vm.expectRevert(abi.encodeWithSelector(SlashRecordNotExists.selector, carol, 789));
-        _staking.commitSlashing(slashingNulls);
-
-        _recordSlashingWithReasons(slashings, reporters);
-
-        // 2.1 cannot commit a revoked one
-        _staking.revokeSlashing(slashingAlices);
-
-        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, alice, 123));
-        _staking.commitSlashing(slashingAlices);
-
-        // 2.2 cannot commit a committed one
-        _staking.commitSlashing(slashingBobs);
-
-        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, bob, 123));
-        _staking.commitSlashing(slashingBobs);
-
-        vm.stopPrank();
-    }
-
-    // Test:
-    // 1. Events emitted as expected
-    // 2. Slashed tokens distributed as expected
-    // 3. Slashing info updated as expected
-    function testCommitSlashing() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
-
-        _setUpNodes(depositedTokens, stakedTokens);
-        uint256 treasuryAmount = _getTreasuryAmount();
-
-        address[] memory nodeAddrs = array(alice, bob);
-        uint256[] memory epochIds = array(123, 123);
-
-        address[] memory reporters = array(address(0xabc), address(0x0));
-
-        DataTypes.Slashing[] memory slashings = _createSlashings(nodeAddrs, epochIds);
-
-        uint256 stakingPoolTokens = _staking.getNode(alice).stakingPoolTokens;
-        uint256 operationPoolTokens = _staking.getNode(alice).operationPoolTokens;
-
-        // 1. record slashing
-        vm.prank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-
-        // 1.1 check: treasury amount will not change after record slashing
-        assertEq(treasuryAmount, 0);
-
-        // 2. commit slashing and events emitted as expected
-        expectEmit();
-        emit Events.SlashCommitted(alice, 123);
-        emit Events.SlashCommitted(bob, 123);
-        vm.prank(address(_settlement));
-        _staking.commitSlashing(slashings);
-
-        // 3. check: slashed tokens distributed as expected
-        // 3.1 reporters balance correct
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            uint256 value = ((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / _denominator();
-            if (reporters[i] == address(0x0)) {
-                assertEq(paymentProcessor.balance, value);
-            } else {
-                assertEq(reporters[i].balance, value);
-            }
-        }
-
-        // 3.2 Treasury amount correct
-        uint256 treasuryAmountAfterSlashing = _getTreasuryAmount();
-        uint256 expectedTreasuryAmount = 2 *
-            (expectedSlashedTokensOnOperationPool +
-                expectedSlashedTokensOnStakingPool -
-                (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
-                        RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS)) / _denominator()));
-
-        assertEq(treasuryAmountAfterSlashing, expectedTreasuryAmount);
-        // 3.3 Node pool tokens correct
-        DataTypes.Node memory aliceNode = _staking.getNode(alice);
-        assertEq(aliceNode.stakingPoolTokens, stakingPoolTokens - expectedSlashedTokensOnStakingPool);
-        assertEq(aliceNode.operationPoolTokens, operationPoolTokens - expectedSlashedTokensOnOperationPool);
-
-        DataTypes.SlashRecord[] memory records = _staking.getSlashingRecords(slashings);
-        // 4. Record status updated correctly
-        for (uint256 i = 0; i < records.length; i++) {
-            assertTrue(records[i].status == DataTypes.SlashStatus.Committed);
-        }
-        assertEq(aliceNode.slashStatus, false);
-    }
-
-    // Test Errors: SlashRecordNotExists, SlashStatusNotRecorded
-    function testRevokeSlashingFail() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        address[] memory nodeAddrs = array(alice, bob);
-        uint256[] memory epochIds = array(123, 123);
-
-        address[] memory reporters = array(address(0xabc), address(0xdef));
-
-        _setUpNodes(depositedTokens, stakedTokens);
-        vm.startPrank(address(_settlement));
-
-        // 1. Cannot revoke a non-exsistent one
-        vm.expectRevert(abi.encodeWithSelector(SlashRecordNotExists.selector, alice, 123));
-        DataTypes.Slashing[] memory slashingAlices = _createSlashings(array(alice), array(123));
-        _staking.revokeSlashing(slashingAlices);
-
-        _recordSlashingWithReasons(_createSlashings(nodeAddrs, epochIds), reporters);
-
-        // 2. Cannot revoke a revoked one
-        _staking.revokeSlashing(slashingAlices);
-
-        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, alice, 123));
-        _staking.revokeSlashing(slashingAlices);
-
-        // 3. Cannot revoke a committed one
-        DataTypes.Slashing[] memory slashingBobs = _createSlashings(array(bob), array(123));
-
-        _staking.commitSlashing(slashingBobs);
-
-        vm.expectRevert(abi.encodeWithSelector(SlashStatusNotRecorded.selector, bob, 123));
-        _staking.revokeSlashing(slashingBobs);
-
-        vm.stopPrank();
-    }
-
-    // Test:
-    // 1. Events emitted as expected
-    // 2. Slashed tokens returned as expected
-    // 3. Slashing info updated as expected
-    function testRevokeSlashing() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-        _setUpNodes(depositedTokens, stakedTokens);
-
-        // 1. record slashing
-        vm.startPrank(address(_settlement));
-        DataTypes.Slashing[] memory slashings = _createSlashings(array(alice, bob), array(123, 123));
-        _recordSlashingWithReasons(slashings, array(carol, dave));
-
-        // 2. revoke slashing and events emitted as expected
-        expectEmit();
-        emit Events.SlashRevoked(alice, 123);
-        emit Events.SlashRevoked(bob, 123);
-        _staking.revokeSlashing(slashings);
-        vm.stopPrank();
-
-        // 3. check: slashed tokens returned as expected
-        // 3.1 staking pool and operation pool tokens correct
-        DataTypes.Node memory aliceNode = _staking.getNode(alice);
-        DataTypes.Node memory bobNode = _staking.getNode(bob);
-        assertEq(aliceNode.stakingPoolTokens, stakedTokens);
-        assertEq(aliceNode.operationPoolTokens, depositedTokens);
-        assertEq(bobNode.stakingPoolTokens, stakedTokens);
-        assertEq(bobNode.operationPoolTokens, depositedTokens);
-
-        // 3.2 reporters balance correct
-        for (uint256 i = 0; i < 2; i++) {
-            assertEq(carol.balance, _initialAmount);
-            assertEq(dave.balance, _initialAmount);
-        }
-
-        // 3.3 treasury balance correct
-        uint256 amount = _getTreasuryAmount();
-        assertEq(amount, 0);
-
-        // 4. slash status updated correctly
-        assertEq(aliceNode.slashStatus, false);
-        assertEq(bobNode.slashStatus, false);
-    }
-
-    // Test multiple slashings
-    function testRecordSlashingMulti() public {
-        uint256 depositedTokens = 10000 ether;
-        uint256 stakedTokens = 40000 ether;
-
-        _setUpNodes(depositedTokens, stakedTokens);
-
-        address[] memory reporters = array(carol, dave);
-        uint256[] memory epochIds = array(123, 123);
-
-        DataTypes.Slashing[] memory slashings = _createSlashings(array(alice, bob), epochIds);
-        DataTypes.Slashing[] memory slashingAlices = _createSlashings(array(alice), array(123));
-
-        // 1. record slashing alice and bob
-        vm.startPrank(address(_settlement));
-        _recordSlashingWithReasons(slashings, reporters);
-        // 2. revoke slashing alice
-        _staking.revokeSlashing(slashingAlices);
-        // 3. record slashing alice again
-        _recordSlashingWithReasons(slashingAlices, array(dave));
-        // 4. commit all slashing: alice and bob
-        _staking.commitSlashing(slashings);
-
-        // 5. Check: treasury amount correct
-        uint256 treasuryAmount = _getTreasuryAmount();
-
-        uint256 expectedSlashedTokensOnOperationPool = (depositedTokens * nodeSlashRateBasisPoints) / _denominator();
-        uint256 expectedSlashedTokensOnStakingPool = (stakedTokens * userSlashRateBasisPoints) / _denominator();
-
-        uint256 expectedTreasuryAmount = 2 *
-            (expectedSlashedTokensOnOperationPool +
-                expectedSlashedTokensOnStakingPool -
-                (((expectedSlashedTokensOnOperationPool + expectedSlashedTokensOnStakingPool) *
-                    (RewardsAndSlashingLib.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS +
-                        RewardsAndSlashingLib.SLASH_BURN_RATE_BASIS_POINTS)) / _denominator()));
-        assertEq(treasuryAmount, expectedTreasuryAmount);
-
-        // 6. record slashing alice twice will reverted
-        address[] memory sameNodeAddrs = array(alice, alice);
-        uint256[] memory diffEpochIds = array(124, 125);
-
-        DataTypes.Slashing[] memory slashings2 = _createSlashings(sameNodeAddrs, diffEpochIds);
-        vm.expectRevert(abi.encodeWithSelector(SlashMoreThanOnce.selector, alice, 125));
-        _recordSlashingWithReasons(slashings2, reporters);
-    }
-
-    function testCalcTax1(uint256 operationPool) public {
+    function testCalcTax1(uint256 operationPool, uint256 rewards, uint256 stakingPool) public pure {
         // case 1: receives no tax rewards
-        vm.assume(operationPool < 10000 ether);
+        operationPool = bound(operationPool, 1, 10000 ether - 1); // operation pool < 10000 ether
+        rewards = bound(rewards, 1, 1000000 ether);
+        stakingPool = bound(stakingPool, 1, 100000 ether);
 
-        uint256 rewards = 10000 ether;
-        uint256 stakingPool = 1000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
         (uint256 tax1, uint256 partialTax1) = RewardsAndSlashingLib._getTax(
             rewards,
             taxRateBasisPoints,
             operationPool,
-            stakingPool,
-            _staking.MIN_DEPOSIT(),
-            _staking.STAKE_RATIO()
+            stakingPool
         );
 
         assertEq(tax1, _getFullTax(rewards, taxRateBasisPoints));
         assertEq(partialTax1, 0);
     }
 
-    function testCalcTax2() public {
+    function testCalcTax2(uint256 operationPool, uint256 stakeRatio) public pure {
         // case 2: receives full tax rewards
-        uint256 operationPool = minDeposit;
-        uint256 stakeRatio;
-        vm.assume(stakeRatio < 25);
+        operationPool = bound(operationPool, 10000 ether, 20000 ether); // operation pool < 10000 ether
+        stakeRatio = bound(stakeRatio, 1, 25);
 
         uint256 stakingPool = operationPool * stakeRatio;
 
@@ -1510,19 +1001,17 @@ contract StakingTest is CommonTest, IERC721Errors {
             rewards,
             taxRateBasisPoints,
             operationPool,
-            stakingPool,
-            _staking.MIN_DEPOSIT(),
-            _staking.STAKE_RATIO()
+            stakingPool
         );
 
         assertEq(tax, partialTax);
     }
 
-    function testCalcTax3(uint256 stakingPool) public view {
+    function testCalcTax3(uint256 stakingPool) public pure {
         // case 2: receives partial tax rewards
-        uint256 operationPool = minDeposit;
+        uint256 operationPool = Const.MIN_DEPOSIT;
 
-        vm.assume(stakingPool > 25 * operationPool && _cfg.stakeRatio() < 100 * operationPool);
+        vm.assume(stakingPool > 25 * operationPool && Const.STAKE_RATIO < 100 * operationPool);
 
         uint256 rewards = 10000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
@@ -1531,9 +1020,7 @@ contract StakingTest is CommonTest, IERC721Errors {
             rewards,
             taxRateBasisPoints,
             operationPool,
-            stakingPool,
-            _staking.MIN_DEPOSIT(),
-            _staking.STAKE_RATIO()
+            stakingPool
         );
 
         // partialTax has precision 1
@@ -1564,14 +1051,14 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
 
         // check status
-        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
         assertEq(req.owner, bob);
         assertEq(req.nodeAddr, nodeAddr);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.unstakeAmount, amount);
 
         // check node info
-        DataTypes.Node memory node = _staking.getNode(nodeAddr);
+        Node memory node = _staking.getNode(nodeAddr);
         assertEq(node.stakingPoolTokens, 0);
         assertEq(node.totalShares, 0);
     }
@@ -1598,14 +1085,14 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 requestId = _staking.requestUnstake(nodeAddr, array(tokenId));
 
         // check status
-        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
         assertEq(req.owner, bob);
         assertEq(req.nodeAddr, nodeAddr);
         assertEq(req.timestamp, block.timestamp);
         assertEq(req.unstakeAmount, amount);
 
         // check node info
-        DataTypes.Node memory node = isPublicGood ? _staking.getPublicPool() : _staking.getNode(nodeAddr);
+        Node memory node = isPublicGood ? _staking.getPublicPool() : _staking.getNode(nodeAddr);
         assertEq(node.stakingPoolTokens, 0);
         assertEq(node.totalShares, 0);
     }
@@ -1633,25 +1120,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 requestId = _staking.requestUnstake(nodeAddr, singleTokenId);
         // check status
         _checkUnstakeOneChip(nodeAddr, requestId, amount, amount, isPublicGood);
-    }
-
-    function _checkUnstakeOneChip(
-        address nodeAddr,
-        uint256 requestId,
-        uint256 stakedAmount,
-        uint256 unstakedAmount,
-        bool isPublicGood
-    ) internal {
-        // check status
-        DataTypes.UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
-        assertEq(req.owner, bob);
-        assertEq(req.timestamp, block.timestamp);
-        assertEq(req.unstakeAmount, unstakedAmount);
-
-        // check node info
-        DataTypes.Node memory node = isPublicGood ? _staking.getPublicPool() : _staking.getNode(nodeAddr);
-
-        assertEq(node.stakingPoolTokens, stakedAmount - unstakedAmount);
     }
 
     function _unstakeAndCheckAmount(
@@ -1682,61 +1150,22 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.stopPrank();
     }
 
-    function _setUpNodes(uint256 depositedTokens, uint256 stakedTokens) internal {
-        _createNode(alice);
-        _createNode(bob);
-
-        _deposit(alice, depositedTokens);
-        _deposit(bob, depositedTokens);
-
-        _staking.stake{value: stakedTokens}(alice);
-        _staking.stake{value: stakedTokens}(bob);
-    }
-
-    function _createSlashings(
-        address[] memory nodeAddrs,
-        uint256[] memory epochIds
-    ) internal pure returns (DataTypes.Slashing[] memory) {
-        DataTypes.Slashing[] memory slashings = new DataTypes.Slashing[](nodeAddrs.length);
-
-        for (uint i = 0; i < nodeAddrs.length; i++) {
-            slashings[i] = DataTypes.Slashing(nodeAddrs[i], epochIds[i]);
-        }
-
-        return slashings;
-    }
-
-    function _recordSlashingWithReasons(DataTypes.Slashing[] memory slashings, address[] memory reporters) internal {
-        string[] memory reasons = new string[](slashings.length);
-        for (uint i = 0; i < slashings.length; i++) {
-            reasons[i] = "";
-        }
-
-        _staking.recordSlashing(slashings, reporters, reasons);
-    }
-
-    function _checkNodeProfile(address nodeAddr, string memory name, string memory description) internal {
-        DataTypes.Node memory node = _staking.getNode(nodeAddr);
-        assertEq(node.name, name);
-        assertEq(node.description, description);
-    }
-
-    function _checkNode(
+    function _checkUnstakeOneChip(
         address nodeAddr,
-        uint256 nodeId,
-        string memory name,
-        string memory description,
-        uint64 taxRateBasisPoints,
-        uint256 operationPoolTokens,
-        bool publicGood,
-        bool alpha
-    ) internal {
-        DataTypes.Node memory node = _staking.getNode(nodeAddr);
-        _checkNodeProfile(nodeAddr, name, description);
-        assertEq(node.nodeId, nodeId);
-        assertEq(node.taxRateBasisPoints, taxRateBasisPoints);
-        assertEq(node.operationPoolTokens, operationPoolTokens);
-        assertEq(node.publicGood, publicGood);
-        assertEq(node.alpha, alpha);
+        uint256 requestId,
+        uint256 stakedAmount,
+        uint256 unstakedAmount,
+        bool isPublicGood
+    ) internal view {
+        // check status
+        UnstakeRequest memory req = _staking.getPendingUnstake(requestId);
+        assertEq(req.owner, bob);
+        assertEq(req.timestamp, block.timestamp);
+        assertEq(req.unstakeAmount, unstakedAmount);
+
+        // check node info
+        Node memory node = isPublicGood ? _staking.getPublicPool() : _staking.getNode(nodeAddr);
+
+        assertEq(node.stakingPoolTokens, stakedAmount - unstakedAmount);
     }
 }

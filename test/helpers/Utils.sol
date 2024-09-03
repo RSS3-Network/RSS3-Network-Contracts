@@ -2,8 +2,8 @@
 // solhint-disable comprehensive-interface
 pragma solidity 0.8.20;
 
-import "forge-std/Vm.sol";
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
+import {NodeStatus} from "../../src/libraries/DataTypes.sol";
 
 contract Utils is Test {
     uint8 public constant CheckTopic1 = 0x1;
@@ -46,6 +46,12 @@ contract Utils is Test {
         return arr;
     }
 
+    function array(string memory a) public pure returns (string[] memory) {
+        string[] memory arr = new string[](1);
+        arr[0] = a;
+        return arr;
+    }
+
     function array(uint256 a, uint256 b) public pure returns (uint256[] memory) {
         uint256[] memory arr = new uint256[](2);
         arr[0] = a;
@@ -62,6 +68,13 @@ contract Utils is Test {
 
     function array(bytes32 a, bytes32 b) public pure returns (bytes32[] memory) {
         bytes32[] memory arr = new bytes32[](2);
+        arr[0] = a;
+        arr[1] = b;
+        return arr;
+    }
+
+    function array(string memory a, string memory b) public pure returns (string[] memory) {
+        string[] memory arr = new string[](2);
         arr[0] = a;
         arr[1] = b;
         return arr;
@@ -85,6 +98,14 @@ contract Utils is Test {
 
     function array(bytes32 a, bytes32 b, bytes32 c) public pure returns (bytes32[] memory) {
         bytes32[] memory arr = new bytes32[](3);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        return arr;
+    }
+
+    function array(string memory a, string memory b, string memory c) public pure returns (string[] memory) {
+        string[] memory arr = new string[](3);
         arr[0] = a;
         arr[1] = b;
         arr[2] = c;
@@ -115,6 +136,136 @@ contract Utils is Test {
         arr[1] = b;
         arr[2] = c;
         arr[3] = d;
+        return arr;
+    }
+
+    function array(NodeStatus a) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](1);
+        arr[0] = a;
+        return arr;
+    }
+
+    function array(NodeStatus a, NodeStatus b) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](2);
+        arr[0] = a;
+        arr[1] = b;
+        return arr;
+    }
+
+    function array(NodeStatus a, NodeStatus b, NodeStatus c) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](3);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        return arr;
+    }
+
+    function array(NodeStatus a, NodeStatus b, NodeStatus c, NodeStatus d) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](4);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        arr[3] = d;
+        return arr;
+    }
+
+    function array(
+        NodeStatus a,
+        NodeStatus b,
+        NodeStatus c,
+        NodeStatus d,
+        NodeStatus e
+    ) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](5);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        arr[3] = d;
+        arr[4] = e;
+        return arr;
+    }
+
+    function array(
+        NodeStatus a,
+        NodeStatus b,
+        NodeStatus c,
+        NodeStatus d,
+        NodeStatus e,
+        NodeStatus f
+    ) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](6);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        arr[3] = d;
+        arr[4] = e;
+        arr[5] = f;
+        return arr;
+    }
+
+    function array(
+        NodeStatus a,
+        NodeStatus b,
+        NodeStatus c,
+        NodeStatus d,
+        NodeStatus e,
+        NodeStatus f,
+        NodeStatus g
+    ) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](7);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        arr[3] = d;
+        arr[4] = e;
+        arr[5] = f;
+        arr[6] = g;
+        return arr;
+    }
+
+    function array(
+        NodeStatus a,
+        NodeStatus b,
+        NodeStatus c,
+        NodeStatus d,
+        NodeStatus e,
+        NodeStatus f,
+        NodeStatus g,
+        NodeStatus h
+    ) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](8);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        arr[3] = d;
+        arr[4] = e;
+        arr[5] = f;
+        arr[6] = g;
+        arr[7] = h;
+        return arr;
+    }
+
+    function array(
+        NodeStatus a,
+        NodeStatus b,
+        NodeStatus c,
+        NodeStatus d,
+        NodeStatus e,
+        NodeStatus f,
+        NodeStatus g,
+        NodeStatus h,
+        NodeStatus j
+    ) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](9);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        arr[3] = d;
+        arr[4] = e;
+        arr[5] = f;
+        arr[6] = g;
+        arr[7] = h;
+        arr[8] = j;
         return arr;
     }
 }

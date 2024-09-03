@@ -2,23 +2,22 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.20;
 
-import {CommonTest} from "test/helpers/CommonTest.sol";
-import {Events} from "../src/libraries/Events.sol";
-import {Settlement} from "../src/Settlement.sol";
+import {Const} from "../src/libraries/Const.sol";
+import {Node, Demotion, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
     SubmissionIntervalNotElapsed,
     RewardsAlreadyDistributed,
     OperationRewardsExceed,
-    TaxRateBasisPointsTooLarge
+    TaxRateBasisPointsTooLarge,
+    CommitEpochNotElapsed
 } from "../src/libraries/Errors.sol";
+import {Events} from "../src/libraries/Events.sol";
+import {Settlement} from "../src/Settlement.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 
 contract SettlementTest is CommonTest {
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
-
     receive() external payable {}
 
     function setUp() public {
@@ -30,21 +29,6 @@ contract SettlementTest is CommonTest {
         vm.deal(dave, 1000000 ether);
         vm.deal(address(_settlement), 390000000 ether);
         vm.deal(oracleAccount, 30000000 ether);
-    }
-
-    function invariantTreasuryBalance() public {
-        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = _staking
-            .getPoolInfo();
-        assertTrue(
-            address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens - totalSlashingPoolTokens >= 0
-        );
-    }
-
-    function testCheckSetupStatus() public {
-        assertEq(_settlement.stakingContract(), address(_staking));
-        assertEq(_settlement.currentEpoch(), 0);
-        assertEq(_settlement.EPOCH_DURATION(), 18 hours);
-        assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
     }
 
     function testInitialize() public {
@@ -59,8 +43,9 @@ contract SettlementTest is CommonTest {
         assertEq(opRewards, totalStakingRewardsPerEpoch);
     }
 
-    function testSetTaxRateBasisPoints4PublicPool(uint64 taxRate) public {
-        vm.assume(taxRate >= 0 && taxRate <= 10000);
+    function testSetTaxRateBasisPoints4PublicPool(uint256 x) public {
+        x = bound(x, 0, 10000);
+        uint64 taxRate = uint64(x);
 
         vm.prank(oracleAccount);
         _settlement.setTaxRateBasisPoints4PublicPool(taxRate);
@@ -808,7 +793,7 @@ contract SettlementTest is CommonTest {
     }
 
     function testStakingRewards(uint256 stakingAmount) public {
-        vm.assume(stakingAmount > 5000 && stakingAmount < 10000);
+        stakingAmount = bound(stakingAmount, 500, 10000);
         stakingAmount = stakingAmount * 1 ether;
 
         _createNode(alice);
@@ -840,5 +825,142 @@ contract SettlementTest is CommonTest {
         }
 
         assertApproxEqAbs(sum, _internalSettlementTest.getTotalStakingRewardsPerEpoch(), nodeRewards.length);
+    }
+
+    function testSubmitDemotions() public {
+        _createNode(alice);
+        _createNode(bob);
+
+        _presetCurrentEpoch(1);
+
+        // submit demotion
+        vm.prank(oracleAccount);
+        _settlement.submitDemotions(array(alice, bob), array(REASON1, REASON2), array(REPORTER, address(0xffff)));
+
+        // check demotions
+        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
+        assertEq(demotions.length, 1);
+        _checkDemotion(demotions[0], uint256(1), alice, uint256(1), REASON1, REPORTER);
+
+        demotions = _staking.getDemotions(bob, uint256(1));
+        assertEq(demotions.length, 1);
+        _checkDemotion(demotions[0], uint256(2), bob, uint256(1), REASON2, address(0xffff));
+    }
+
+    function testRevokeDemotions() public {
+        uint256 epoch = 1;
+
+        _createNode(alice);
+        _presetCurrentEpoch(epoch);
+
+        // submit demotion
+        vm.prank(oracleAccount);
+        _settlement.submitDemotions(array(alice), array(REASON1), array(REPORTER));
+
+        // check demotion
+        Demotion[] memory demotions = _staking.getDemotions(alice, epoch);
+        assertEq(demotions.length, 1);
+        _checkDemotion(demotions[0], uint256(1), alice, epoch, REASON1, REPORTER);
+
+        // revoke demotion
+        vm.prank(oracleAccount);
+        _settlement.revokeDemotions(alice, epoch, array(uint256(1)));
+
+        // check demotion
+        demotions = _staking.getDemotions(alice, epoch);
+        assertEq(demotions.length, 0);
+    }
+
+    function testCommitSlashing() public {
+        _createNode(alice);
+        vm.prank(alice);
+        _staking.deposit{value: 10000 ether}();
+
+        _presetCurrentEpoch(uint256(1));
+
+        // submit demotion
+        for (uint256 i = 0; i < 4; i++) {
+            vm.prank(oracleAccount);
+            _settlement.submitDemotions(array(alice), array(REASON1), array(REPORTER));
+        }
+
+        skip(Const.SLASHING_COMMIT_PERIOD_IN_EPOCH * 18 hours);
+        _presetCurrentEpoch(uint256(4));
+
+        vm.prank(oracleAccount);
+        _settlement.commitSlashing(array(alice), array(uint256(1)));
+
+        // check demotions
+        Demotion[] memory demotions = _staking.getDemotions(alice, uint256(1));
+        assertEq(demotions.length, 4);
+
+        // check node
+        Node memory node = _staking.getNode(alice);
+        assertEq(node.slashedOperationPoolTokens, 0);
+        assertEq(node.slashedStakingPoolTokens, 0);
+        assertEq(uint256(node.status), uint256(NodeStatus.Slashed));
+        // check slashing pool
+        (, , uint256 totalSlashingPoolTokens) = _staking.getPoolInfo();
+        assertEq(totalSlashingPoolTokens, 0);
+    }
+
+    function testCommitSlashingFail() public {
+        // case 1: caller has no `ORACLE_ROLE` permission
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _settlement.commitSlashing(array(alice), array(uint256(0)));
+
+        // case 2: epoch not reached
+        _presetCurrentEpoch(uint256(3));
+        vm.expectRevert(abi.encodeWithSelector(CommitEpochNotElapsed.selector, uint256(1), uint256(3)));
+        vm.prank(oracleAccount);
+        _settlement.commitSlashing(array(alice), array(uint256(1)));
+    }
+
+    function testSetNodeStatusSucceeds() public {
+        _createNode(alice);
+        vm.prank(alice);
+        _staking.deposit{value: 10000 ether}();
+
+        // Registered -> Initializing
+        vm.prank(oracleAccount);
+        _settlement.setNodeStatus(array(alice), array(NodeStatus.Initializing));
+        // check status
+        Node memory node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(NodeStatus.Initializing));
+
+        //  Initializing -> Online
+        vm.prank(oracleAccount);
+        _settlement.setNodeStatus(array(alice), array(NodeStatus.Online));
+        // check status
+        node = _staking.getNode(alice);
+        assertEq(uint256(node.status), uint256(NodeStatus.Online));
+    }
+
+    function testSetNodeStatusFail() public {
+        address[] memory nodeAddrs = array(alice, bob, carol);
+        NodeStatus[] memory status = array(NodeStatus.Online, NodeStatus.Offline, NodeStatus.Initializing);
+
+        vm.expectRevert(abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE));
+        _settlement.setNodeStatus(nodeAddrs, status);
+    }
+
+    function invariantTreasuryBalance() public view {
+        (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens) = _staking
+            .getPoolInfo();
+        assertTrue(
+            address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens - totalSlashingPoolTokens >= 0
+        );
+    }
+
+    function testCheckSetupStatus() public view {
+        assertEq(_settlement.stakingContract(), address(_staking));
+        assertEq(_settlement.currentEpoch(), 0);
+        assertEq(_settlement.EPOCH_DURATION(), 18 hours);
+        assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
+    }
+
+    function _presetCurrentEpoch(uint256 epoch) internal {
+        uint256 currentEpochSlot = 5;
+        vm.store(address(_settlement), bytes32(uint256(currentEpochSlot)), bytes32(uint256(epoch)));
     }
 }

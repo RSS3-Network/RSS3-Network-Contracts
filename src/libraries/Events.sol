@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
+import {NodeStatus} from "./DataTypes.sol";
+
 library Events {
     /**
      * @dev Emitted on createNode()
@@ -110,6 +112,14 @@ library Events {
     );
 
     /**
+     * @dev Emitted on setNodesStatus()
+     * @param nodeAddr Address of node operator.
+     * @param curStatus The current status of node operator.
+     * @param newStatus The new status of node operator to set.
+     */
+    event NodeStatusChanged(address indexed nodeAddr, NodeStatus indexed curStatus, NodeStatus indexed newStatus);
+
+    /**
      * @dev Emitted on claimWithdrawal()
      * @param requestId The withdrawal request id.
      * @param nodeAddr The address of node to withdraw.
@@ -164,17 +174,37 @@ library Events {
     );
 
     /**
+     * @dev Emitted on submitDemotions()
+     * @param epoch The epoch number.
+     * @param nodeAddr The address of node.
+     * @param demotionId The new id of demotion.
+     * @param reason The reason of demotion.
+     * @param reporter The address of the reporter.
+     */
+    event DemotionSubmitted(
+        uint256 indexed epoch,
+        address indexed nodeAddr,
+        uint256 indexed demotionId,
+        string reason,
+        address reporter
+    );
+
+    /**
+     * @dev Emitted on revokeDemotions()
+     * @param demotionId The id of demotion revoked.
+     */
+    event DemotionRevoked(uint256 indexed demotionId);
+
+    /**
      * @dev Emitted on recordSlashing()
      * @param nodeAddr The address of node to slash.
      * @param epoch The epoch number.
-     * @param reporter The address of the reporter.
      * @param slashedOperationPool Amount of operation pool tokens slashed.
      * @param slashedStakingPool Amount of staking pool tokens slashed.
      */
     event SlashRecorded(
         address indexed nodeAddr,
         uint256 indexed epoch,
-        address reporter,
         uint256 slashedOperationPool,
         uint256 slashedStakingPool
     );

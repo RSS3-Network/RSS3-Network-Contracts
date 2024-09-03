@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/ERC721.sol)
-
+// solhint-disable ordering,no-inline-assembly
 pragma solidity 0.8.20;
 
-import {IERC721Errors} from "../interfaces/IERC721Errors.sol";
+import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {IERC721Errors} from "../interfaces/IERC721Errors.sol";
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
@@ -25,11 +25,11 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     // Token symbol
     string private _symbol;
 
-    mapping(uint256 tokenId => address) private _owners;
+    mapping(uint256 tokenId => address owner) private _owners;
 
-    mapping(address owner => uint256) private _balances;
+    mapping(address owner => uint256 balance) private _balances;
 
-    mapping(uint256 tokenId => address) private _tokenApprovals;
+    mapping(uint256 tokenId => address tokenApproval) private _tokenApprovals;
 
     mapping(address owner => mapping(address operator => bool)) private _operatorApprovals;
 

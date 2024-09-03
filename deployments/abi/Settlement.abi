@@ -1,7 +1,31 @@
 [
   {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "checkEpochInterval",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
     "type": "receive",
     "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "CHECK_EPOCH_INTERVAL",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -60,21 +84,14 @@
     "name": "commitSlashing",
     "inputs": [
       {
-        "name": "epochIds",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
+        "name": "nodeAddrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "epochs",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
       }
     ],
     "outputs": [],
@@ -278,37 +295,21 @@
   },
   {
     "type": "function",
-    "name": "recordSlashing",
+    "name": "multicall",
     "inputs": [
       {
-        "name": "slashings",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
-      },
-      {
-        "name": "reporters",
-        "type": "address[]",
-        "internalType": "address[]"
-      },
-      {
-        "name": "reasons",
-        "type": "string[]",
-        "internalType": "string[]"
+        "name": "data",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
       }
     ],
-    "outputs": [],
+    "outputs": [
+      {
+        "name": "results",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
     "stateMutability": "nonpayable"
   },
   {
@@ -324,6 +325,29 @@
         "name": "callerConfirmation",
         "type": "address",
         "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeDemotions",
+    "inputs": [
+      {
+        "name": "nodeAddr",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "epoch",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "demotionIds",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
       }
     ],
     "outputs": [],
@@ -349,24 +373,17 @@
   },
   {
     "type": "function",
-    "name": "revokeSlashing",
+    "name": "setNodeStatus",
     "inputs": [
       {
-        "name": "epochIds",
-        "type": "tuple[]",
-        "internalType": "struct DataTypes.Slashing[]",
-        "components": [
-          {
-            "name": "nodeAddr",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "epoch",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
+        "name": "nodeAddrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "status",
+        "type": "uint8[]",
+        "internalType": "enum NodeStatus[]"
       }
     ],
     "outputs": [],
@@ -397,6 +414,29 @@
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "submitDemotions",
+    "inputs": [
+      {
+        "name": "nodeAddrs",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "reasons",
+        "type": "string[]",
+        "internalType": "string[]"
+      },
+      {
+        "name": "reporters",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -538,6 +578,38 @@
         "internalType": "bytes32"
       }
     ]
+  },
+  {
+    "type": "error",
+    "name": "AddressEmptyCode",
+    "inputs": [
+      {
+        "name": "target",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "CommitEpochNotElapsed",
+    "inputs": [
+      {
+        "name": "recordedEpoch",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "currentEpoch",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "FailedInnerCall",
+    "inputs": []
   },
   {
     "type": "error",

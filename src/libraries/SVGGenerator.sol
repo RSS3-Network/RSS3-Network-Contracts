@@ -2,13 +2,13 @@
 // solhint-disable quotes,max-line-length
 pragma solidity 0.8.20;
 
-import {DataTypes} from "./DataTypes.sol";
-import {Eyes} from "./SVGs/Eyes.sol";
+import {NodeTraits, ChipTraits} from "./DataTypes.sol";
 import {ChipDetail} from "./SVGs/ChipDetail.sol";
+import {Corners} from "./SVGs/Corners.sol";
+import {Eyes} from "./SVGs/Eyes.sol";
+import {Frame} from "./SVGs/Frame.sol";
 import {Head} from "./SVGs/Head.sol";
 import {Mouths} from "./SVGs/Mouths.sol";
-import {Corners} from "./SVGs/Corners.sol";
-import {Frame} from "./SVGs/Frame.sol";
 
 library SVGGenerator {
     string public constant baseSVGHead =
@@ -52,8 +52,8 @@ library SVGGenerator {
     }
 
     function generateSVGAndAttributes(
-        DataTypes.NodeTraits calldata nodeTraits,
-        DataTypes.ChipTraits calldata chipTraits
+        NodeTraits calldata nodeTraits,
+        ChipTraits calldata chipTraits
     ) external pure returns (string memory, string memory) {
         string memory styleSVG = getSVGStyle(
             nodeTraits.frameColor,
@@ -72,7 +72,7 @@ library SVGGenerator {
     }
 
     function getNodeTraitsInnerSVGAndAttributes(
-        DataTypes.NodeTraits memory nodeTraits
+        NodeTraits memory nodeTraits
     ) internal pure returns (string memory, string memory) {
         (string memory corner, string memory cornerTrait) = nodeTraits.pg
             ? (Corners.pgSVG, "Public Good Node")
@@ -102,7 +102,7 @@ library SVGGenerator {
     }
 
     function getChipTraitsInnerSVGAndAttributes(
-        DataTypes.ChipTraits memory chipTraits
+        ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
         (string memory svgParts, string memory headShapeTrait) = getHeadShape(chipTraits.headShapeId % 3);
 
@@ -124,7 +124,7 @@ library SVGGenerator {
     function addEyes(
         string memory svgs,
         string memory attrs,
-        DataTypes.ChipTraits memory chipTraits
+        ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
         (string memory eyesSVG, string memory eyesTrait) = Eyes.getEyes(chipTraits.eyesId);
 
@@ -137,7 +137,7 @@ library SVGGenerator {
     function addMouth(
         string memory svgs,
         string memory attrs,
-        DataTypes.ChipTraits memory chipTraits
+        ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
         (string memory mouthSVG, string memory mouthTrait) = Mouths.getMouth(chipTraits.mouthId);
 
@@ -150,7 +150,7 @@ library SVGGenerator {
     function addHeadDetail(
         string memory svgs,
         string memory attrs,
-        DataTypes.ChipTraits memory chipTraits
+        ChipTraits memory chipTraits
     ) internal pure returns (string memory, string memory) {
         (string memory headSVG, string memory headTraits) = Head.getHead(chipTraits.headDetailId);
 

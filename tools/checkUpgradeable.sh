@@ -47,7 +47,7 @@ slither-check-upgradeability . Chips \
 --exclude "initialize-target,missing-init-modifier" \
 2>>"$file3" 1>&2
 
-# output43
+# output
 lines1=$(sed -n '$=' "$file1")
 lines2=$(sed -n '$=' "$file2")
 lines3=$(sed -n '$=' "$file3")

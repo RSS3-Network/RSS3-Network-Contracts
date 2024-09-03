@@ -2,11 +2,13 @@
 // solhint-disable comprehensive-interface,no-console,max-line-length,quotes,code-complexity
 pragma solidity 0.8.20;
 
-import "forge-std/Script.sol";
 import {LibZip} from "@solady/utils/LibZip.sol";
+import {console2 as console} from "forge-std/console2.sol";
+import {Script} from "forge-std/Script.sol";
 
 contract CompressSVG is Script {
-    function run() public view {
+    // solhint-disable-next-line function-max-lines
+    function run() public pure {
         string[18] memory eyesSVGs = [
             '<path d="M36 46v2h2v-2zM36 54v2h2v-2zM38 54v2h2v-2zM40 54v2h4v-2zM42 50v-2h-4v2zM44 52v-2h-8v2zM34 48v6h2v-6zM38 46v2h2v-2zM40 46v2h4v-2zM44 48v2h2v-2zM44 50v4h2v-4zM56 46v2h2v-2zM56 54v2h2v-2zM58 54v2h2v-2zM60 54v2h4v-2zM62 50v-2h-4v2zM64 52v-2h-8v2zM54 48v6h2v-6zM58 46v2h2v-2zM60 46v2h4v-2zM64 48v2h2v-2zM64 50v4h2v-4zM50 56v2h-.5v-2zM49.5 56v2H49v-2zM49 56v2h-1v-2z" fill="#000"/><path d="M38 50v-2h-.5v2zM37.5 50v-2H37v2zM37 50v-2h-1v2zM58 50v-2h-.5v2zM57.5 50v-2H57v2zM57 50v-2h-1v2zM44 50v-2h-.5v2zM43.5 50v-2H43v2zM43 50v-2h-1v2zM64 50v-2h-.5v2zM63.5 50v-2H63v2zM63 50v-2h-1v2z" fill="#DEE5D9"/><path d="M50 56v2h.5v-2zM50.5 56v2h.5v-2zM51 56v2h1v-2zM46 46v2h.5v-2zM46.5 46v2h.5v-2zM47 46v2h1v-2zM44 44v2h.5v-2zM44.5 44v2h.5v-2zM45 44v2h1v-2zM54 46v2h-.5v-2zM53.5 46v2H53v-2zM53 46v2h-1v-2zM56 44v2h-.5v-2zM55.5 44v2H55v-2zM55 44v2h-1v-2z" fill="#000"/>',
             '<path d="M36 56v-2h2v2zM36 48v-2h2v2zM38 48v-2h2v2zM40 48v-2h4v2zM42 52v2h-4v-2zM42 50v2h-4v-2zM42 48v2h-4v-2zM34 56v-8h2v8zM38 56v-2h2v2zM40 56v-2h4v2zM44 56v-4h2v4zM44 52v-4h2v4zM54 51v2h2v-2zM56 51v2h2v-2zM58 51v2h4v-2zM52 54v2h-.5v-2zM51.5 54v2H51v-2zM51 54v2h-1v-2zM50 56v2h-.5v-2zM49.5 56v2H49v-2zM49 56v2h-1v-2z" fill="#000"/><path d="M40 50v2h-.5v-2zM39.5 50v2H39v-2zM39 50v2h-1v-2zM38 48v6h-.5v-6zM37.5 48v6H37v-6zM37 48v6h-1v-6zM44 48v6h-.5v-6zM43.5 48v6H43v-6zM43 48v6h-1v-6z" fill="#DEE5D9"/><path d="M62 53v2h.5v-2zM62.5 53v2h.5v-2zM63 53v2h1v-2zM64 55v2h.5v-2zM64.5 55v2h.5v-2zM65 55v2h1v-2zM50 56v2h.5v-2zM50.5 56v2h.5v-2zM51 56v2h1v-2zM64 47v2h.5v-2zM64.5 47v2h.5v-2zM65 47v2h1v-2zM62 49v2h.5v-2zM62.5 49v2h.5v-2zM63 49v2h1v-2z" fill="#000"/>',
@@ -114,49 +116,49 @@ contract CompressSVG is Script {
             '<rect fill="url(#a)" height="170" rx="2" width="112"/><rect fill="url(#b)" height="170" rx="2" width="112"/><rect fill="#000" height="100" rx="2" width="100" x="6" y="35"/><rect fill="#000" height="16" rx="2" width="87" x="19" y="140"/><rect fill="#000" height="7" rx="2" width="42" x="19" y="158"/><rect fill="#000" height="7" rx="2" width="43" x="63" y="158"/><rect fill="#000" height="25" rx="2" width="11" x="6" y="140"/><path d="M10.6 148v-2.8h.452l.968.968v-.968h.38v2.8h-.38v-1.5h-.204l-.836-.836V148zm0 3.576v-1.952l.14-.14h.14v-.144l.144-.14h.948l.144.14v.144h.14l.144.14v1.952l-.144.14h-.14v.14l-.144.144h-.948l-.144-.144v-.14h-.14zm.38.044h1.04v-2.04h-1.04zm-.38 1.58h1.372l.144.14v.144h.14l.144.14v1.952l-.144.14h-.14v.14l-.144.144H10.6zm.38 2.42h1.04v-2.04h-1.04zM10.6 160v-2.8h1.8v.38h-1.42v.772h1.228v.38H10.98v.888h1.42v.38z" fill="url(#c)"/><rect fill="#000" height="10" rx="2" width="100" x="6" y="20"/><path d="M15.414 5.093H6.306A.305.305 0 0 0 6 5.4v9.26c0 .17.138.308.306.308h9.108a.31.31 0 0 0 .307-.308V5.4a.31.31 0 0 0-.307-.308m-.986 8.263a.2.2 0 0 1-.163.092h-1.44a.19.19 0 0 1-.17-.108l-.816-1.655a.33.33 0 0 0-.292-.18H9.06a.09.09 0 0 0-.092.093v1.665a.19.19 0 0 1-.19.19H7.64a.19.19 0 0 1-.19-.19V10.17a.19.19 0 0 1 .19-.19h3.83a.257.257 0 0 0 .256-.257V8.407a.257.257 0 0 0-.255-.257H7.64a.19.19 0 0 1-.19-.19V6.814a.19.19 0 0 1 .19-.19h4.01a.19.19 0 0 1 .188.19v.91c0 .138.113.256.256.256h.96a.19.19 0 0 1 .19.19V9.96a.19.19 0 0 1-.19.19h-.96a.257.257 0 0 0-.255.257v.658c0 .18.143.323.321.323h1.267c.072 0 .138.042.169.108l.832 1.68a.18.18 0 0 1-.01.186z" fill="#000"/><defs><linearGradient gradientUnits="userSpaceOnUse" id="a" x1="14.933" x2="125.438" y1="29.75" y2="103.415"><stop stop-color="#D4A041"/><stop offset=".15" stop-color="#FFFAEB"/><stop offset=".325" stop-color="#FBE67B"/><stop offset=".465" stop-color="#FCFBE7"/><stop offset=".645" stop-color="#FFFDF3"/><stop offset=".77" stop-color="#F7D14E"/><stop offset="1" stop-color="#D4A041"/></linearGradient><linearGradient gradientUnits="userSpaceOnUse" id="b" x1="14.933" x2="125.438" y1="29.75" y2="103.415"><stop stop-color="#D4A041"/><stop offset=".15" stop-color="#FFFAEB"/><stop offset=".325" stop-color="#FBE67B"/><stop offset=".465" stop-color="#FCFBE7"/><stop offset=".645" stop-color="#FFFDF3"/><stop offset=".77" stop-color="#F7D14E"/><stop offset="1" stop-color="#D4A041"/></linearGradient><linearGradient gradientUnits="userSpaceOnUse" id="c" x1="9.3" x2="16.647" y1="147.625" y2="150.599"><stop stop-color="#D4A041"/><stop offset=".15" stop-color="#FFFAEB"/><stop offset=".325" stop-color="#FBE67B"/><stop offset=".465" stop-color="#FCFBE7"/><stop offset=".645" stop-color="#FFFDF3"/><stop offset=".77" stop-color="#F7D14E"/><stop offset="1" stop-color="#D4A041"/></linearGradient></defs>'
         ];
         console.log("string[", eyesSVGs.length, "] memory eyesSVGs = [");
-        for (uint i = 0; i < eyesSVGs.length; i++) {
+        for (uint256 i = 0; i < eyesSVGs.length; i++) {
             bytes memory result = LibZip.flzCompress(bytes(eyesSVGs[i]));
             console.logBytes(result);
         }
         console.log("];");
         console.log("string[", mouthsSVGs.length, "] memory mouthsSVGs = [");
-        for (uint i = 0; i < mouthsSVGs.length; i++) {
+        for (uint256 i = 0; i < mouthsSVGs.length; i++) {
             bytes memory result = LibZip.flzCompress(bytes(mouthsSVGs[i]));
             console.logBytes(result);
         }
         console.log("];");
         console.log("string[", chipCornersSVGs.length, "] memory chipCornersSVGs = [");
-        for (uint i = 0; i < chipCornersSVGs.length; i++) {
+        for (uint256 i = 0; i < chipCornersSVGs.length; i++) {
             bytes memory result = LibZip.flzCompress(bytes(chipCornersSVGs[i]));
             console.logBytes(result);
         }
         console.log("];");
         console.log("string[", chipFramesSVGs.length, "] memory chipFramesSVGs = [");
-        for (uint i = 0; i < chipFramesSVGs.length; i++) {
+        for (uint256 i = 0; i < chipFramesSVGs.length; i++) {
             bytes memory result = LibZip.flzCompress(bytes(chipFramesSVGs[i]));
             console.logBytes(result);
         }
         console.log("];");
         console.log("string[", chipDetailsSVGs.length, "] memory chipDetailsSVGs = [");
-        for (uint i = 0; i < chipDetailsSVGs.length; i++) {
+        for (uint256 i = 0; i < chipDetailsSVGs.length; i++) {
             bytes memory result = LibZip.flzCompress(bytes(chipDetailsSVGs[i]));
             console.logBytes(result);
         }
         console.log("];");
         console.log("string[", headShapesSVGs.length, "] memory headShapesSVGs = [");
-        for (uint i = 0; i < headShapesSVGs.length; i++) {
+        for (uint256 i = 0; i < headShapesSVGs.length; i++) {
             bytes memory result = LibZip.flzCompress(bytes(headShapesSVGs[i]));
             console.logBytes(result);
         }
         console.log("];");
         console.log("string[", headDetailsSVGs.length, "] memory headDetailsSVGs = [");
-        for (uint i = 0; i < headDetailsSVGs.length; i++) {
+        for (uint256 i = 0; i < headDetailsSVGs.length; i++) {
             bytes memory result = LibZip.flzCompress(bytes(headDetailsSVGs[i]));
             console.logBytes(result);
         }
         console.log("];");
         console.log("string[", nftCardsSVGs.length, "] memory nftCardsSVGs = [");
-        for (uint i = 0; i < nftCardsSVGs.length; i++) {
+        for (uint256 i = 0; i < nftCardsSVGs.length; i++) {
             bytes memory result = LibZip.flzCompress(bytes(nftCardsSVGs[i]));
             console.logBytes(result);
         }

@@ -2,8 +2,8 @@
 // solhint-disable private-vars-leading-underscore,no-console
 pragma solidity 0.8.20;
 
-import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
+import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 
 /// @title DeployConfig
@@ -18,11 +18,6 @@ contract DeployConfig is Script {
     address public oracleAccount;
     uint256 public depositUnbondingPeriod;
     uint256 public stakeUnbondingPeriod;
-    uint256 public nodeSlashRateBasisPoints;
-    uint256 public userSlashRateBasisPoints;
-    uint256 public stakeRatio;
-    uint256 public depositBaseline;
-    uint256 public taxRateBasisPointsBaseline;
     address public treasury;
     string public chipsName;
     string public chipsSymbol;
@@ -45,13 +40,8 @@ contract DeployConfig is Script {
         proxyAdminOwner = stdJson.readAddress(_json, "$.proxyAdminOwner");
         pauseAccount = stdJson.readAddress(_json, "$.pauseAccount");
         oracleAccount = stdJson.readAddress(_json, "$.oracleAccount");
-        depositUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
+        depositUnbondingPeriod = stdJson.readUint(_json, "$.depositUnbondingPeriod");
         stakeUnbondingPeriod = stdJson.readUint(_json, "$.stakeUnbondingPeriod");
-        nodeSlashRateBasisPoints = stdJson.readUint(_json, "$.nodeSlashRateBasisPoints");
-        userSlashRateBasisPoints = stdJson.readUint(_json, "$.userSlashRateBasisPoints");
-        stakeRatio = stdJson.readUint(_json, "$.stakeRatio");
-        depositBaseline = stdJson.readUint(_json, "$.depositBaseline");
-        taxRateBasisPointsBaseline = stdJson.readUint(_json, "$.taxRateBasisPointsBaseline");
         treasury = stdJson.readAddress(_json, "$.treasury");
         chipsName = stdJson.readString(_json, "$.chipsName");
         chipsSymbol = stdJson.readString(_json, "$.chipsSymbol");

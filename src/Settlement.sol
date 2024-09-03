@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {ISettlement} from "./interfaces/ISettlement.sol";
-import {IStaking} from "./interfaces/IStaking.sol";
-import {DataTypes} from "./libraries/DataTypes.sol";
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
+import {ISettlement} from "./interfaces/ISettlement.sol";
+import {IStaking} from "./interfaces/IStaking.sol";
+import {Const} from "./libraries/Const.sol";
+import {NodeStatus, RewardsData} from "./libraries/DataTypes.sol";
 import {
     InvalidArrayLength,
     InvalidEpochNumber,
     SubmissionIntervalNotElapsed,
     RewardsAlreadyDistributed,
-    OperationRewardsExceed
+    OperationRewardsExceed,
+    CommitEpochNotElapsed
 } from "./libraries/Errors.sol";
 
-contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
+contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnumerable {
     using Math for uint256;
     using SafeCast for uint256;
 
@@ -52,9 +55,6 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     // rewarded node addresses
     mapping(uint256 epoch => mapping(address nodeAddr => bool rewarded)) internal _rewardedAddresses;
 
-    // solhint-disable-next-line comprehensive-interface
-    receive() external payable {}
-
     /**
      * @notice constructor.
      * @param checkEpochInterval Whether to check the epoch interval when updating the epoch.
@@ -63,13 +63,16 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
         CHECK_EPOCH_INTERVAL = checkEpochInterval;
     }
 
+    // solhint-disable-next-line comprehensive-interface
+    receive() external payable {}
+
     /// @inheritdoc ISettlement
     function initialize(
         address staking,
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
-    ) external override reinitializer(4) {
+    ) external override reinitializer(5) {
         if (staking != address(0)) {
             _staking = staking;
         }
@@ -104,7 +107,7 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
         _checkRewards(epoch, nodeAddrs, operationRewards);
 
         /// @dev we use a temp struct here to avoid `stack too deep`
-        DataTypes.RewardsData memory data;
+        RewardsData memory data;
         if (epoch == _currentEpoch + 1) {
             _updateEpochInfo(epoch);
 
@@ -139,22 +142,46 @@ contract Settlement is ISettlement, Initializable, AccessControlEnumerable {
     }
 
     /// @inheritdoc ISettlement
-    function recordSlashing(
-        DataTypes.Slashing[] calldata slashings,
-        address[] calldata reporters,
-        string[] calldata reasons
+    function submitDemotions(
+        address[] calldata nodeAddrs,
+        string[] calldata reasons,
+        address[] calldata reporters
     ) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).recordSlashing(slashings, reporters, reasons);
+        IStaking(_staking).submitDemotions(_currentEpoch, nodeAddrs, reasons, reporters);
     }
 
     /// @inheritdoc ISettlement
-    function revokeSlashing(DataTypes.Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).revokeSlashing(epochIds);
+    function revokeDemotions(
+        address nodeAddr,
+        uint256 epoch,
+        uint256[] calldata demotionIds
+    ) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).revokeDemotions(nodeAddr, epoch, demotionIds);
     }
 
     /// @inheritdoc ISettlement
-    function commitSlashing(DataTypes.Slashing[] calldata epochIds) external override onlyRole(ORACLE_ROLE) {
-        IStaking(_staking).commitSlashing(epochIds);
+    function commitSlashing(
+        address[] calldata nodeAddrs,
+        uint256[] calldata epochs
+    ) external override onlyRole(ORACLE_ROLE) {
+        if (nodeAddrs.length != epochs.length) {
+            revert InvalidArrayLength();
+        }
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            if (_currentEpoch < epochs[i] + Const.SLASHING_COMMIT_PERIOD_IN_EPOCH)
+                revert CommitEpochNotElapsed(epochs[i], _currentEpoch);
+
+            IStaking(_staking).commitSlashing(nodeAddrs[i], epochs[i]);
+        }
+    }
+
+    /// @inheritdoc ISettlement
+    function setNodeStatus(
+        address[] calldata nodeAddrs,
+        NodeStatus[] calldata status
+    ) external override onlyRole(ORACLE_ROLE) {
+        IStaking(_staking).setNodeStatus(nodeAddrs, status);
     }
 
     /// @inheritdoc ISettlement

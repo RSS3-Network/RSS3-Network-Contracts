@@ -11,8 +11,11 @@ error NodeExists();
 /// @dev Node staked or deposited.
 error NodeStakedOrDeposited();
 
+/// @dev Node deposit is below the minimum amount
+error NodeDepositBelowMinimum();
+
 /// @dev Node not exists.
-error NodeNotExists();
+error NodeNotExists(address nodeAddr);
 
 error TaxRateBasisPointsTooSmall();
 
@@ -24,6 +27,15 @@ error InvalidEpochNumber(uint256 current, uint256 got);
 
 /// @dev Submission interval has not elapsed.
 error SubmissionIntervalNotElapsed();
+
+/// @dev Invalid node status transition
+error InvalidNodeStatusTransition(uint256 curStatus, uint256 newStatus);
+
+/// @dev Can't request exit in current state
+error CurStateCantExit(uint256 curStatus);
+
+/// @dev Can't set status to online in current state
+error CurStatusCantOnline(uint256 curStatus);
 
 /// @dev Request already claimed.
 error AlreadyClaimed();
@@ -37,6 +49,9 @@ error ClaimIdNotExists(uint256 claimId);
 /// @dev Staking amount is less than 500 ethers.
 error StakeAmountTooSmall();
 
+/// @dev Node is in exit status
+error NodeInExitStatus();
+
 /// @dev Not chips owner or approver.
 error ChipNotAuthorized(uint256 tokenId);
 
@@ -44,7 +59,7 @@ error ChipNotAuthorized(uint256 tokenId);
 error EmptyChipIds();
 
 /// @dev ChipIds array length is too short.
-error ChipIdsLengthTooShort();
+error ChipIdsArrayTooSmall(uint256 length);
 
 /// @dev Chips are not same owner.
 error ChipsNotSameOwner();
@@ -64,8 +79,14 @@ error NodeAlreadyPublicGood(address nodeAddr);
 /// @dev Excess withdrawal amount.
 error ExcessWithdrawalAmount();
 
+/// @dev Withdrawal amount exceeds operationPoolTokens
+error WithdrawalAmountExceedsOperationPoolTokens();
+
+/// @dev Node is not in an exit status
+error NodeNotInExitStatus(uint256 curStatus);
+
 /// @dev Deposit is not allowed for public good node.
-error PublicGoodNodeNotDeposited();
+error DepositForPublicGoodNode();
 
 /// @dev Public good node cannot be staked.
 error StakeToPublicGoodNode(address nodeAddr);
@@ -85,12 +106,6 @@ error EmptyNodeList();
 /// @dev Chips id overflow.
 error ChipsIdOverflow();
 
-/// @dev Insufficient value to stake.
-error InsufficientValue();
-
-/// @dev Transfer failed.
-error TransferFailed();
-
 /// @dev Distributed staking rewards exceed limit.
 error StakingRewardsExceed();
 
@@ -106,26 +121,17 @@ error RewardsAlreadyDistributed(address nodeAddr);
 /// @dev Settlement phase, stake/requestUnstakce is not allowed.
 error SettlementPhase();
 
-/// @dev Slash is not able to be revoked.
-error UnableToRevoke(uint256 id);
-
-/// @dev Slash is non-existent.
-error SlashRecordNotExists(address nodeAddr, uint256 epochId);
-
 /// @dev Slash is not able to be committed or revoked.
-error SlashStatusNotRecorded(address nodeAddr, uint256 epochId);
-
-/// @dev Slash Public Good node.
-error SlashPublicGoodNode(address);
-
-/// @dev Slash more than once in one epoch for nodeAddr
-error SlashMoreThanOnce(address nodeAddr, uint256 epoch);
+error SlashingNotExist(address nodeAddr, uint256 epochId);
 
 /// @dev Basis points of tax rate too large.
 error TaxRateBasisPointsTooLarge();
 
 /// @dev Can't set tax for public good node
-error NodeIsPublicGood();
+error NodeIsPublicGood(address nodeAddr);
 
-/// @dev Create node to zero address.
-error CreateNodeToZeroAddress();
+/// @dev Epoch not elapsed.
+error CommitEpochNotElapsed(uint256 recordedEpoch, uint256 currentEpoch);
+
+/// @dev Node has no demotions
+error NodeHasNoDemotions(address nodeAddr, uint256 epoch);

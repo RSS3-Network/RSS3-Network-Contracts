@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {DataTypes} from "../libraries/DataTypes.sol";
+import {Node, Demotion, NodeStatus, WithdrawalRequest, UnstakeRequest} from "../libraries/DataTypes.sol";
 
 interface IStaking {
     /**
@@ -129,14 +129,6 @@ interface IStaking {
     function stakeToPublicPool(address nodeAddr) external payable returns (uint256 tokenId);
 
     /**
-     * @notice Merges chips tokens into a new one.
-     * @dev This will burn the chips tokens and mint a new one, and emits the `ChipsMerged` event.
-     * @param chipIds The chips token ids to merge.
-     * @return newTokenId The new minted chips token id.
-     */
-    function mergeChips(uint256[] calldata chipIds) external returns (uint256 newTokenId);
-
-    /**
      * @notice Updates accounting stats and distribute rewards.
      * @dev periodically called.
      * Requirements:
@@ -161,37 +153,85 @@ interface IStaking {
     ) external payable;
 
     /**
-     * @notice Record slashing nodes.
-     * Requirements:
-     * - The caller must have the `ORACLE_ROLE`.
-     * @param slashings The addresses of nodes and epochIds to slash.
-     * @param reporters The addresses of reporters.
-     * @param reasons The reasons of slashing.
+     * @notice Merges chips tokens into a new one.
+     * @dev This will burn the chips tokens and mint a new one, and emits the `ChipsMerged` event.
+     * @param chipIds The chips token ids to merge.
+     * @return newTokenId The new minted chips token id.
      */
-    function recordSlashing(
-        DataTypes.Slashing[] calldata slashings,
-        address[] calldata reporters,
-        string[] calldata reasons
+    function mergeChips(uint256[] calldata chipIds) external returns (uint256 newTokenId);
+
+    /**
+     * @dev Submits demotions for a given epoch and node addresses.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`
+     * If the domiton count in the same epoch is greater than the threshold, the node will be in a slashing status.
+     * @dev Emits the `DemotionSubmitted` event.
+     * @param epoch Current epoch number.
+     * @param nodeAddrs Addresses of node operator to demote.
+     * @param reasons The reasons of demotion.
+     * @param reporters The reporters of demotion.
+     */
+    function submitDemotions(
+        uint256 epoch,
+        address[] calldata nodeAddrs,
+        string[] calldata reasons,
+        address[] calldata reporters
     ) external;
 
     /**
-     * @notice Commit slashing nodes.
+     * @dev Revoke demotions for a specific node in a given epoch.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param slashings The ids of slashes to commit.
+     * @dev Emits the `DemotionRevoked` event.
+     * @param nodeAddr The address of node to revoke.
+     * @param epoch The epoch number.
+     * @param demotionIdsToRevoke The ids of demotions to revoke.
      */
-    function commitSlashing(DataTypes.Slashing[] calldata slashings) external;
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToRevoke) external;
 
     /**
-     * @notice Revoke slashing nodes.
+     * @notice Commits slashing for a specific node and epoch.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
-     * @param slashings The addresses of nodes to revoke.
+     * @dev Emits the `SlashCommitted` event.
+     * @param nodeAddr The address of node to commit.
+     * @param epoch The epoch number.
      */
-    function revokeSlashing(DataTypes.Slashing[] calldata slashings) external;
+    function commitSlashing(address nodeAddr, uint256 epoch) external;
 
     /**
-     * @notice Sets the settlement phase.
+     * @dev Sets the status for nodes.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @dev Emits a `NodeStatusChanged` event with the updated status.
+     * @param nodeAddrs Addresses of node operator to set.
+     * @param status Status to set.
+     */
+    function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
+
+    /**
+     * @notice Allows a node to exit from the network.
+     * @dev Emits the `NodeStatusChanged` event with the updated status.
+     * @dev The caller must be the owner of node operator.
+     */
+    function exit() external;
+
+    /**
+     * @notice Registers a node by setting its status to "Registered".
+     * @dev Emits a `NodeStatusChanged` event with the updated status.
+     * @dev The caller must be the owner of node operator.
+     */
+    function register() external;
+
+    /**
+     * @notice Transition a node to online status.
+     * @dev Emits a `NodeStatusChanged` event with the updated status.
+     * @dev The caller must be the owner of node operator.
+     */
+    function online() external;
+
+    /**
+     * @notice Sets the settlement phase when rewards are distributing.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @param enabled Enable/disable the settlement phase.
@@ -209,6 +249,14 @@ interface IStaking {
     function withdraw2Treasury() external;
 
     /**
+     * @notice Returns the demotions for a specific node address and epoch.
+     * @param nodeAddr Node address to query.
+     * @param epoch The epoch number to query.
+     * @return demotions An array of demotions.
+     */
+    function getDemotions(address nodeAddr, uint256 epoch) external view returns (Demotion[] memory demotions);
+
+    /**
      * @notice Returns whether the current time is in settlement phase.
      * @return bool Whether the current time is in settlement phase.
      */
@@ -223,16 +271,16 @@ interface IStaking {
     /**
      * @notice Returns the pending withdrawal request by `requestId`.
      * @param requestId The id of withdrawal request.
-     * @return DataTypes.WithdrawalRequest The pending withdrawal request.
+     * @return WithdrawalRequest The pending withdrawal request.
      */
-    function getPendingWithdrawal(uint256 requestId) external view returns (DataTypes.WithdrawalRequest memory);
+    function getPendingWithdrawal(uint256 requestId) external view returns (WithdrawalRequest memory);
 
     /**
      * @notice Returns the pending unstake request by `requestId`.
      * @param requestId The id of unstake request.
-     * @return DataTypes.UnstakeRequest The pending unstake request.
+     * @return UnstakeRequest The pending unstake request.
      */
-    function getPendingUnstake(uint256 requestId) external view returns (DataTypes.UnstakeRequest memory);
+    function getPendingUnstake(uint256 requestId) external view returns (UnstakeRequest memory);
 
     /**
      * @notice Gets chip info by `tokenId`.
@@ -244,32 +292,10 @@ interface IStaking {
     function getChipInfo(uint256 tokenId) external view returns (address nodeAddr, uint256 tokens, uint256 shares);
 
     /**
-     * @notice Gets slashing records info by `slashings`.
-     * @param slashings IDs of slashing records
-     * @return records DataTypes.SlashRecord[] slashing records info
-     */
-    function getSlashingRecords(
-        DataTypes.Slashing[] calldata slashings
-    ) external view returns (DataTypes.SlashRecord[] memory records);
-
-    /**
-     * @notice Gets public pool info.
-     * @return DataTypes.Node public pool info.
-     */
-    function getPublicPool() external pure returns (DataTypes.Node memory);
-
-    /**
      * @notice Gets total count of nodes.
      * @return uint256 Total count of nodes.
      */
     function getNodeCount() external view returns (uint256);
-
-    /**
-     * @notice Gets node info by node address.
-     * @param nodeAddr Node address to query.
-     * @return DataTypes.Node Node info.
-     */
-    function getNode(address nodeAddr) external view returns (DataTypes.Node memory);
 
     /**
      * @notice Gets node avatar data by node address.
@@ -277,20 +303,6 @@ interface IStaking {
      * @return string Node avatar info in json.
      */
     function getNodeAvatar(address nodeAddr) external view returns (string memory);
-
-    /**
-     * @notice Gets nodes info by node addresses.
-     * @param nodeAddrs Node addresses to query.
-     * @return DataTypes.Node[] Nodes info.
-     */
-    function getNodes(address[] calldata nodeAddrs) external view returns (DataTypes.Node[] memory);
-
-    /**
-     * @notice Gets nodes info by offset and limit.
-     * @param offset The offset of nodes to query.
-     * @param limit The limit of nodes to query.
-     */
-    function getNodesWithPagination(uint256 offset, uint256 limit) external view returns (DataTypes.Node[] memory);
 
     /**
      * @notice Gets the pool info.
@@ -303,8 +315,28 @@ interface IStaking {
         returns (uint256 totalOperationPoolTokens, uint256 totalStakingPoolTokens, uint256 totalSlashingPoolTokens);
 
     /**
+     * @notice Gets node info by node address.
+     * @param nodeAddr Node address to query.
+     * @return Node Node info.
+     */
+    function getNode(address nodeAddr) external view returns (Node memory);
+
+    /**
+     * @notice Gets nodes info by node addresses.
+     * @param nodeAddrs Node addresses to query.
+     * @return Node[] Nodes info.
+     */
+    function getNodes(address[] calldata nodeAddrs) external view returns (Node[] memory);
+
+    /**
      * @notice Returns the address of the chips contract.
      * @return address The address of the chips contract.
      */
     function chipsContract() external view returns (address);
+
+    /**
+     * @notice Gets public pool info.
+     * @return Node public pool info.
+     */
+    function getPublicPool() external pure returns (Node memory);
 }

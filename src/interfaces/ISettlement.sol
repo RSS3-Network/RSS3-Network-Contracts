@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
-import {DataTypes} from "../libraries/DataTypes.sol";
+
+import {NodeStatus} from "../libraries/DataTypes.sol";
 
 interface ISettlement {
     /**
@@ -44,30 +45,42 @@ interface ISettlement {
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 
     /**
-     * @notice Slashes nodes.
+     * @dev Submits demotions for nodes.
      * Requirements:
-     * - The caller must have the `ORACLE_ROLE`.
-     * @param slashings The addresses of nodes and epoch ids to slash.
-     * @param reporters The addresses of reporters.
-     * @param reasons The reasons for slashing.
+     * - The caller must have the `ORACLE_ROLE`
+     * @param nodeAddrs Addresses of node operator to demote.
+     * @param reasons The reasons of demotion.
+     * @param reporters The reporters of demotion.
      */
-    function recordSlashing(
-        DataTypes.Slashing[] calldata slashings,
-        address[] calldata reporters,
-        string[] calldata reasons
+    function submitDemotions(
+        address[] calldata nodeAddrs,
+        string[] calldata reasons,
+        address[] calldata reporters
     ) external;
 
     /**
-     * @notice Revokes slashing.
-     * @param epochIds The epoch numbers to revoke slashing.
+     * @dev Revoke demotions for a specific node in a given epoch.
+     * Requirements:
+     * - The caller must have the `ORACLE_ROLE`.
+     * @param nodeAddr The address of node to revoke.
+     * @param epoch The epoch number.
+     * @param demotionIds The ids of demotions to revoke.
      */
-    function revokeSlashing(DataTypes.Slashing[] calldata epochIds) external;
+    function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIds) external;
 
     /**
-     * @notice Commit slashing.
-     * @param epochIds The epoch numbers to commit slashing.
+     * @notice Commits slashing for a specific node and epoch.
+     * @param nodeAddrs The addresses of nodes to commit slashing.
+     * @param epochs The epoch number to commit slashing.
      */
-    function commitSlashing(DataTypes.Slashing[] calldata epochIds) external;
+    function commitSlashing(address[] calldata nodeAddrs, uint256[] calldata epochs) external;
+
+    /**
+     * @dev Sets the status for nodes.
+     * @param nodeAddrs Addresses of node operator to set.
+     * @param status Status to set.
+     */
+    function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
 
     /**
      * @notice  Returns the address of the Staking contract.

@@ -2,14 +2,14 @@
 // solhint-disable no-console,ordering,custom-errors
 pragma solidity 0.8.20;
 
-import {Deployer} from "./Deployer.sol";
-import {DeployConfig} from "./DeployConfig.s.sol";
-import {Staking} from "../src/Staking.sol";
-import {Chips} from "../src/Chips.sol";
-import {Settlement} from "../src/Settlement.sol";
-import {NetworkParams} from "../src/NetworkParams.sol";
 import {console2 as console} from "forge-std/console2.sol";
+import {Chips} from "../src/Chips.sol";
+import {NetworkParams} from "../src/NetworkParams.sol";
+import {Settlement} from "../src/Settlement.sol";
+import {Staking} from "../src/Staking.sol";
 import {TransparentUpgradeableProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
+import {DeployConfig} from "./DeployConfig.s.sol";
+import {Deployer} from "./Deployer.sol";
 
 contract Deploy is Deployer {
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
@@ -100,13 +100,8 @@ contract Deploy is Deployer {
     function deployStaking() public broadcast returns (address addr_) {
         Staking staking = new Staking(
             cfg.treasury(),
-            cfg.stakeRatio(),
             cfg.stakeUnbondingPeriod(),
             cfg.depositUnbondingPeriod(),
-            cfg.nodeSlashRateBasisPoints(),
-            cfg.userSlashRateBasisPoints(),
-            cfg.depositBaseline(),
-            cfg.taxRateBasisPointsBaseline(),
             cfg.paymentProcessor()
         );
 

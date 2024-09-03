@@ -3,7 +3,7 @@
 pragma solidity 0.8.20;
 
 import {NetworkParams} from "../src/NetworkParams.sol";
-import {CommonTest} from "test/helpers/CommonTest.sol";
+import {CommonTest} from "./helpers/CommonTest.sol";
 
 contract NetworkParamsTest is CommonTest {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -11,8 +11,6 @@ contract NetworkParamsTest is CommonTest {
     NetworkParams internal _params;
 
     event ParamsSet(uint64 indexed epoch, string params);
-
-    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
     function setUp() public {
         _params = new NetworkParams();
@@ -33,6 +31,7 @@ contract NetworkParamsTest is CommonTest {
         assertEq(_params.getParams(100), paramsStr);
     }
 
+    // solhint-disable-next-line function-max-lines
     function testGetCurrentParams() public {
         vm.prank(alice);
         _params.grantRole(ADMIN_ROLE, bob);
@@ -103,7 +102,7 @@ contract NetworkParamsTest is CommonTest {
         _params.setParams(100, "hello world");
     }
 
-    function testEmptyParams() public {
+    function testEmptyParams() public view {
         assertEq(_params.getParams(100), "");
     }
 }
