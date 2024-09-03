@@ -178,7 +178,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="istaking"><a class="header" href="#istaking">IStaking</a></h1>
-<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/86dd5f56d5e4686b0505b0b83e24b0caf52983f4/src/interfaces/IStaking.sol">Git Source</a></p>
+<p><a href="https://github.com/NaturalSelectionLabs/RSS3-Network-Contracts/blob/97e0d7d7ec207e33fabc533d28d0f378578e4a63/src/interfaces/IStaking.sol">Git Source</a></p>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <h3 id="initialize"><a class="header" href="#initialize">initialize</a></h3>
 <p>Initializes the Staking contract.</p>
@@ -263,19 +263,18 @@ msg.value carries the amount of tokens to deposit.</em></p>
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>taxRateBasisPoints</code></td><td><code>uint64</code></td><td>The basis points of tax rate to set for the node. Each basis point represents 0.01%.</td></tr>
+<tr><td><code>taxRateBasisPoints</code></td><td><code>uint64</code></td><td>The basis points of tax rate to set for the node. Each basis point represents 0.01%. The tax rate must be in the range of 500 to 10000.</td></tr>
 </tbody></table>
 </div>
 <h3 id="settaxratebasispoints4publicpool"><a class="header" href="#settaxratebasispoints4publicpool">setTaxRateBasisPoints4PublicPool</a></h3>
 <p>Sets tax rate for public pool.
-Requirements:
 The caller must have the <code>ORACLE_ROLE</code>.</p>
 <p><em>Emits the <code>PublicPoolTaxRateBasisPointsSet</code> event.</em></p>
 <pre><code class="language-solidity">function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external;
 </code></pre>
 <p><strong>Parameters</strong></p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead><tbody>
-<tr><td><code>taxRateBasisPoints</code></td><td><code>uint64</code></td><td>The basis points of the tax rate to set for the public pool. Each basis point represents 0.01%.</td></tr>
+<tr><td><code>taxRateBasisPoints</code></td><td><code>uint64</code></td><td>The basis points of the tax rate to set for the public pool. Each basis point represents 0.01%. The tax rate must be in the range of 500 to 10000.</td></tr>
 </tbody></table>
 </div>
 <h3 id="claimwithdrawal"><a class="header" href="#claimwithdrawal">claimWithdrawal</a></h3>
@@ -346,7 +345,7 @@ The caller must have the <code>ORACLE_ROLE</code>.</p>
 </div>
 <h3 id="distributerewards"><a class="header" href="#distributerewards">distributeRewards</a></h3>
 <p>Updates accounting stats and distribute rewards.</p>
-<p>*periodically called.
+<p>*This function is periodically called every epoch.
 Requirements:</p>
 <ul>
 <li>The caller must have the <code>ORACLE_ROLE</code>.*</li>
@@ -386,11 +385,11 @@ Requirements:</p>
 </tbody></table>
 </div>
 <h3 id="submitdemotions"><a class="header" href="#submitdemotions">submitDemotions</a></h3>
-<p>*Submits demotions for a given epoch and node addresses.
+<p>Submits demotions for a given epoch and node addresses.
 Requirements:</p>
 <ul>
 <li>The caller must have the <code>ORACLE_ROLE</code>
-If the domiton count in the same epoch is greater than the threshold, the node will be in a slashing status.*</li>
+If the domiton count in the same epoch is greater than the threshold, the node will be in a slashing status.</li>
 </ul>
 <p><em>Emits the <code>DemotionSubmitted</code> event.</em></p>
 <pre><code class="language-solidity">function submitDemotions(
@@ -409,10 +408,10 @@ If the domiton count in the same epoch is greater than the threshold, the node w
 </tbody></table>
 </div>
 <h3 id="revokedemotions"><a class="header" href="#revokedemotions">revokeDemotions</a></h3>
-<p>*Revoke demotions for a specific node in a given epoch.
+<p>Revokes demotions for a specific node in a given epoch.
 Requirements:</p>
 <ul>
-<li>The caller must have the <code>ORACLE_ROLE</code>.*</li>
+<li>The caller must have the <code>ORACLE_ROLE</code>.</li>
 </ul>
 <p><em>Emits the <code>DemotionRevoked</code> event.</em></p>
 <pre><code class="language-solidity">function revokeDemotions(address nodeAddr, uint256 epoch, uint256[] calldata demotionIdsToRevoke) external;
@@ -440,10 +439,10 @@ Requirements:</p>
 </tbody></table>
 </div>
 <h3 id="setnodestatus"><a class="header" href="#setnodestatus">setNodeStatus</a></h3>
-<p>*Sets the status for nodes.
+<p>Sets the status for nodes.
 Requirements:</p>
 <ul>
-<li>The caller must have the <code>ORACLE_ROLE</code>.*</li>
+<li>The caller must have the <code>ORACLE_ROLE</code>.</li>
 </ul>
 <p><em>Emits a <code>NodeStatusChanged</code> event with the updated status.</em></p>
 <pre><code class="language-solidity">function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
