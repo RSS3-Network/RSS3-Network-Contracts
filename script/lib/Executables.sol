@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable private-vars-leading-underscore
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 /// @notice The executables used in ffi commands. These are set here
 ///         to have a single source of truth in case absolute paths

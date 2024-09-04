@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable var-name-mixedcase,no-empty-blocks
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {IChips} from "../interfaces/IChips.sol";
 import {Const} from "./Const.sol";
@@ -286,11 +286,13 @@ library StakingLib {
     }
 
     /// @dev get node by address, if the node is public good, return public pool
-    function _getStakingNode(address nodeAddr) internal view returns (Node storage _node) {
-        Node storage node = StorageLib.getNode(nodeAddr);
-        Node storage publicPool = StorageLib.publicPool();
+    function _getStakingNode(address nodeAddr) internal view returns (Node storage node) {
+        node = StorageLib.getNode(nodeAddr);
 
-        _node = node.publicGood ? publicPool : node;
+        // if the node is public good, return public pool
+        if (node.publicGood) {
+            node = StorageLib.publicPool();
+        }
     }
 
     /// @dev returns chip info: node address, tokens, shares

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {
     Demotion,
@@ -251,6 +251,7 @@ interface IStaking {
 
     /**
      * @notice Sets the settlement phase when rewards are distributing.
+     * Users can't stake/unstake during the settlement phase.
      * Requirements:
      * - The caller must have the `ORACLE_ROLE`.
      * @param enabled Enable/disable the settlement phase.

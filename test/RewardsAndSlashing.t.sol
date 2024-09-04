@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable comprehensive-interface,no-console,function-max-lines
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Const} from "../src/libraries/Const.sol";
 import {Demotion, Node, NodeStatus} from "../src/libraries/DataTypes.sol";

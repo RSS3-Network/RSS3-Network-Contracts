@@ -8,7 +8,7 @@ analyze:
   async: true
   create-group: true
   group-name: "@rss3/rss3-network-contracts"
-  solc: 0.8.20
+  solc: 0.8.24
   remappings:
     - "@openzeppelin/=node_modules/@openzeppelin/"
     - "ds-test/=lib/forge-std/lib/ds-test/src/"

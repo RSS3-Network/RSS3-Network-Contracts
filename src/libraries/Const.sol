@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 library Const {
     uint256 public constant SHARES_PER_CHIP = 500 ether;

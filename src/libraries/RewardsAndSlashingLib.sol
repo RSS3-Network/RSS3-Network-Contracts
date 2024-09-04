@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable var-name-mixedcase
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Const} from "./Const.sol";
 import {Demotion, Node, NodeStatus, PoolStatData} from "./DataTypes.sol";

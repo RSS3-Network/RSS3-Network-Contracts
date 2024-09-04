@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable comprehensive-interface,no-console,max-line-length
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {ChipTraits, NodeTraits, NodeTraits} from "../src/libraries/DataTypes.sol";
 import {BatchSizeZero} from "../src/libraries/Errors.sol";

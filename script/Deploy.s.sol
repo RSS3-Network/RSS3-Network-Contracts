@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable no-console,ordering,custom-errors
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Chips} from "../src/Chips.sol";
 import {NetworkParams} from "../src/NetworkParams.sol";

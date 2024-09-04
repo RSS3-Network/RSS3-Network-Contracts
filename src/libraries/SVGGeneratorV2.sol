@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable quotes,max-line-length
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {ChipTraits, NftCardTraits, NodeTraits} from "./DataTypes.sol";
 import {Fonts1} from "./Fonts/Fonts1.sol";

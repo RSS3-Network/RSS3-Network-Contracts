@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
@@ -56,6 +56,13 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     // rewarded node addresses
     mapping(uint256 epoch => mapping(address nodeAddr => bool rewarded)) internal _rewardedAddresses;
 
+    modifier validEpoch(uint256 epoch) {
+        if (epoch < _currentEpoch || epoch > _currentEpoch + 1) {
+            revert InvalidEpochNumber(_currentEpoch, epoch);
+        }
+        _;
+    }
+
     /**
      * @notice constructor.
      * @param checkEpochInterval Whether to check the epoch interval when updating the epoch.
@@ -97,37 +104,19 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         uint256[] calldata operationRewards,
         uint256[] calldata requestCounts,
         bool isFinal
-    ) external override onlyRole(ORACLE_ROLE) {
+    ) external override onlyRole(ORACLE_ROLE) validEpoch(epoch) {
         if (nodeAddrs.length != operationRewards.length || nodeAddrs.length != requestCounts.length)
         {
             revert InvalidArrayLength();
         }
 
-        // check epoch number
-        _checkEpoch(epoch);
-        // check operation rewards
-        _checkRewards(epoch, nodeAddrs, operationRewards);
-
         /// @dev we use a temp struct here to avoid `stack too deep`
-        RewardsData memory data;
-        if (epoch == _currentEpoch + 1) {
-            _updateEpochInfo(epoch);
+        RewardsData memory data = _prepareRewardsData(epoch, nodeAddrs, operationRewards);
 
-            // amount of rewards sent to staking contract at the start of each epoch
-            data.rewardsToSend += _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch;
-
-            // public pool rewards will be settled only at the start of each epoch
-            data.publicPoolRewards = _getPublicPoolStakingRewards();
-
-            // save totalStaking snapshot
-            _saveTotalStakingSnapshot();
-        }
-
-        // settlement phase
+        // if it's the final distribution of the epoch, should set the phase to false
         IStaking(_staking).setSettlementPhase(!isFinal);
 
-        data.epochInfo = [epoch, _startTimestamp, _endTimestamp];
-        data.stakingRewards = _getStakingRewards(nodeAddrs);
+        // distribute rewards
         IStaking(_staking).distributeRewards{value: data.rewardsToSend}(
             data.epochInfo,
             nodeAddrs,
@@ -216,7 +205,7 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         ) / (100 * 365 days);
     }
 
-    /// @dev check distributed operationRewards and stakingRewards not exceeds the max rewards per
+    /// @dev check distributed operationRewards not exceeds the max rewards per
     /// epoch
     function _checkRewards(
         uint256 epoch,
@@ -225,12 +214,14 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     ) internal {
         uint256 distributedOperationRewards = _distributedOperationRewards[epoch];
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            // check if the node has been rewarded
             if (_isRewarded(epoch, nodeAddrs[i])) revert RewardsAlreadyDistributed(nodeAddrs[i]);
             _rewardedAddresses[epoch][nodeAddrs[i]] = true;
 
             distributedOperationRewards += operationRewards[i];
         }
 
+        // check if the distributed operation rewards exceeds the max rewards per epoch
         if (distributedOperationRewards > _totalOperationRewardsPerEpoch) {
             revert OperationRewardsExceed();
         }
@@ -238,10 +229,21 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         _distributedOperationRewards[epoch] = distributedOperationRewards;
     }
 
-    function _saveTotalStakingSnapshot() internal {
-        (, _totalStakingSnapshot[_currentEpoch],) = IStaking(_staking).getPoolInfo();
-    }
-
+    /**
+     * @dev Updates the epoch information.
+     * @param epoch The new epoch number to set.
+     *
+     * This function performs the following tasks:
+     * 1. Updates the current epoch to the provided epoch number.
+     * 2. Updates the epoch timestamps:
+     *    - Sets the start timestamp to the previous end timestamp (if it exists).
+     *    - Sets the end timestamp to the current block timestamp.
+     * 3. If CHECK_EPOCH_INTERVAL is true, it checks if the submission interval has elapsed:
+     *    - The submission interval is defined as EPOCH_DURATION minus 1 hour.
+     *    - If the time between start and end timestamps is less than or equal to the submission
+     * interval,
+     *      it reverts with a SubmissionIntervalNotElapsed error.
+     */
     function _updateEpochInfo(uint256 epoch) internal {
         // update current epoch
         _currentEpoch = epoch;
@@ -261,13 +263,44 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         }
     }
 
-    /// @dev check epoch number
-    function _checkEpoch(uint256 epoch) internal view {
-        // epoch number must be the current epoch or the next epoch
-        uint256 curEpoch = _currentEpoch;
-        if (epoch < curEpoch || epoch > curEpoch + 1) {
-            revert InvalidEpochNumber(curEpoch, epoch);
+    /**
+     * @dev Prepares the rewards data for distribution.
+     * @param epoch The epoch number for which rewards are being prepared.
+     * @param nodeAddrs An array of node addresses to receive rewards.
+     * @param operationRewards An array of operation rewards corresponding to each node address.
+     * @return data A RewardsData struct containing the prepared rewards information.
+     *
+     * This function performs the following tasks:
+     * 1. Checks and updates the operation rewards for the given epoch.
+     * 2. If it's a new epoch, updates the epoch information and calculates additional rewards:
+     *    - Adds staking and operation rewards to be sent to the staking contract.
+     *    - Calculates public pool rewards.
+     * 3. Sets the epoch info (epoch number, start and end timestamps).
+     * 4. Calculates staking rewards for the provided node addresses.
+     *
+     * Note: This function has side effects, including updating epoch information.
+     */
+    function _prepareRewardsData(
+        uint256 epoch,
+        address[] calldata nodeAddrs,
+        uint256[] calldata operationRewards
+    ) internal returns (RewardsData memory data) {
+        // check operation rewards
+        _checkRewards(epoch, nodeAddrs, operationRewards);
+
+        // update epoch info if it's the next epoch
+        if (epoch == _currentEpoch + 1) {
+            _updateEpochInfo(epoch);
+
+            // amount of rewards sent to staking contract at the start of each epoch
+            data.rewardsToSend += _totalStakingRewardsPerEpoch + _totalOperationRewardsPerEpoch;
+
+            // public pool rewards will be settled only at the start of each epoch
+            data.publicPoolRewards = _getPublicPoolStakingRewards();
         }
+
+        data.epochInfo = [epoch, _startTimestamp, _endTimestamp];
+        data.stakingRewards = _getStakingRewards(nodeAddrs);
     }
 
     /// @dev Returns staking rewards per epoch for public pool
@@ -279,10 +312,20 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         return (publicPoolTokens * _totalStakingRewardsPerEpoch) / totalStaking;
     }
 
-    /// @dev returns staking rewards
+    /**
+     * @dev Calculates the staking rewards for a list of node addresses.
+     * @param nodeAddrs An array of node addresses to calculate rewards for.
+     * @return nodeRewards An array of calculated staking rewards corresponding to each node
+     * address.
+     * The reward for each node is calculated as:
+     * (node's staking tokens * total staking rewards per epoch) / total staking
+     *
+     * Note: This function has a side effect of potentially updating the total staking snapshot
+     * for the current epoch through the _getTotalStaking() call. As we need a snapshot of
+     * totalStaking to calculate the staking rewards of each node at the start of each epoch.
+     */
     function _getStakingRewards(address[] calldata nodeAddrs)
         internal
-        view
         returns (uint256[] memory nodeRewards)
     {
         uint256 len = nodeAddrs.length;
@@ -299,10 +342,12 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     }
 
     /// @dev returns amount of total staking tokens
-    function _getTotalStaking() internal view returns (uint256 totalStaking) {
+    function _getTotalStaking() internal returns (uint256 totalStaking) {
         totalStaking = _totalStakingSnapshot[_currentEpoch];
         if (totalStaking == 0) {
             (, totalStaking,) = IStaking(_staking).getPoolInfo();
+
+            _totalStakingSnapshot[_currentEpoch] = totalStaking;
         }
     }
 

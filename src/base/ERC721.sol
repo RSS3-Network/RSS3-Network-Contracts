@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v5.0.0) (token/ERC721/ERC721.sol)
 // solhint-disable ordering,no-inline-assembly
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {IERC721Errors} from "../interfaces/IERC721Errors.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";

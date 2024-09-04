@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable private-vars-leading-underscore,no-console,no-empty-blocks,ordering,quotes
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Chains} from "./lib/Chains.sol";
 import {Executables} from "./lib/Executables.sol";

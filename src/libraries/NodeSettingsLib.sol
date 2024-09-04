@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable private-vars-leading-underscore,var-name-mixedcase
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Const} from "./Const.sol";
 import {Node, NodeStatus} from "./DataTypes.sol";
