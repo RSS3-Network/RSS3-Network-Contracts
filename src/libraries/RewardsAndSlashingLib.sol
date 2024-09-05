@@ -235,7 +235,7 @@ library RewardsAndSlashingLib {
         taxCollected = receivedTax;
 
         // update node pool
-        // taxCollected is sent to operation pool for node oeprator
+        // taxCollected is sent to operation pool for node operator
         StakingCommonLib.increaseOperationPool(node, taxCollected);
         // all after-tax rewards are sent to the staking pool for stakers
         StakingCommonLib.increaseStakingPool(node, rewards - fullTax);
