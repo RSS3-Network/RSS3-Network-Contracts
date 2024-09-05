@@ -131,9 +131,9 @@ contract SettlementTest is CommonTest {
         depositAmount = bound(depositAmount, Const.MIN_DEPOSIT, 100000 ether);
         stakeAmount = bound(stakeAmount, Const.MIN_STAKE, depositAmount * 6);
 
-        // create nodes
+        // create 4 nodes with different stake amounts: alice(stakeAmount), bob(stakeAmount*2),
+        // carol(stakeAmount*3), dave(stakeAmount*4)
         address[] memory nodes = array(alice, bob, carol, dave);
-
         for (uint256 i = 0; i < nodes.length; i++) {
             _createNode(nodes[i]);
             _deposit(nodes[i], depositAmount);
@@ -143,7 +143,7 @@ contract SettlementTest is CommonTest {
         (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
             _settlement.getBonusInfo();
         uint256 operationReward = operationRewardsPerEpoch / nodes.length;
-        uint256 stakingReward = totalStakingRewardsPerEpoch / nodes.length;
+        uint256 stakingReward = totalStakingRewardsPerEpoch / 10;
 
         vm.startPrank(oracleAccount);
         skip(18 hours);
@@ -173,24 +173,29 @@ contract SettlementTest is CommonTest {
         }
         vm.stopPrank();
 
-        uint256 tax = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
-
         // Prepare arrays for _checkDistribution
         uint256[] memory deposits =
             array(depositAmount, depositAmount, depositAmount, depositAmount);
-        uint256[] memory stakes = array(stakeAmount, stakeAmount, stakeAmount, stakeAmount);
-        uint256[] memory taxes = array(tax, tax * 2, tax * 3, tax * 4);
+        uint256[] memory stakes =
+            array(stakeAmount, stakeAmount * 2, stakeAmount * 3, stakeAmount * 4);
         uint256[] memory opRewards =
             array(operationReward, operationReward, operationReward, operationReward);
         uint256[] memory stakingRewards =
             array(stakingReward, stakingReward * 2, stakingReward * 3, stakingReward * 4);
+        uint256[] memory taxes = array(
+            _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints),
+            _getFullTax(operationReward + stakingReward * 2, _defaultTaxRateBasisPoints),
+            _getFullTax(operationReward + stakingReward * 3, _defaultTaxRateBasisPoints),
+            _getFullTax(operationReward + stakingReward * 4, _defaultTaxRateBasisPoints)
+        );
 
         // check status
-        // _checkDistribution(deposits, stakes, nodes, taxes, opRewards, stakingRewards);
+        _checkDistribution(deposits, stakes, nodes, taxes, opRewards, stakingRewards);
 
         // check treasury amount
-        // uint256 treasuryAmount = _getTreasuryAmount();
-        // assertApproxEqAbs(treasuryAmount, 0, 2); // 2 is the max diff
+        // all the nodes have collected full tax, so treasury amount should be 0
+        uint256 treasuryAmount = _getTreasuryAmount();
+        assertApproxEqAbs(treasuryAmount, 0, 2); // 2 is the max diff
     }
 
     // solhint-disable-next-line function-max-lines
@@ -419,8 +424,12 @@ contract SettlementTest is CommonTest {
         // stake
         _staking.stake{value: stakeAmount}(alice);
 
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+        (uint256 totalOperationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
             _settlement.getBonusInfo();
+
+        uint256 expectedFullTax = _getFullTax(
+            totalOperationRewardsPerEpoch + totalStakingRewardsPerEpoch, _defaultTaxRateBasisPoints
+        );
 
         skip(18 hours);
 
@@ -428,18 +437,22 @@ contract SettlementTest is CommonTest {
         _settlement.distributeRewards(
             1,
             array(alice), // node addresses
-            array(operationRewardsPerEpoch), // operation rewards
+            array(totalOperationRewardsPerEpoch), // operation rewards
             array(uint256(100)),
             true
         );
 
-        // operation pool and staking pool of alice is not changed
-        assertEq(_staking.getNode(alice).stakingPoolTokens, stakeAmount);
+        assertEq(
+            _staking.getNode(alice).stakingPoolTokens,
+            stakeAmount + totalOperationRewardsPerEpoch + totalStakingRewardsPerEpoch
+                - expectedFullTax
+        );
+        // operation pool of alice will not change
         assertEq(_staking.getNode(alice).operationPoolTokens, depositAmount);
 
-        // all rewards should be added to treasury
+        // check treasury
         uint256 treasuryAmount = _getTreasuryAmount();
-        assertEq(treasuryAmount, operationRewardsPerEpoch + totalStakingRewardsPerEpoch);
+        assertEq(treasuryAmount, expectedFullTax);
     }
 
     function testDistributeRewardsWithFullTax() public {

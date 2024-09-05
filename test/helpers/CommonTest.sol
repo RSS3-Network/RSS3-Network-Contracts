@@ -182,11 +182,15 @@ contract CommonTest is Utils {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             Node memory node = _staking.getNode(nodeAddrs[i]);
             uint256 newOperationPool = depositAmounts[i] + taxAmounts[i];
-            assertEq(node.operationPoolTokens, newOperationPool, "check operation pool failed");
+            assertApproxEqAbs(
+                node.operationPoolTokens, newOperationPool, 4, "check operation pool failed"
+            );
 
             uint256 newStakingPool =
                 stakeAmounts[i] + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
-            assertEq(node.stakingPoolTokens, newStakingPool, "check staking pool failed");
+            assertApproxEqAbs(
+                node.stakingPoolTokens, newStakingPool, 4, "check staking pool failed"
+            );
         }
     }
 

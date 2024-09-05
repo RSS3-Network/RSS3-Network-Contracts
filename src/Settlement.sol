@@ -303,15 +303,6 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         data.stakingRewards = _getStakingRewards(nodeAddrs);
     }
 
-    /// @dev Returns staking rewards per epoch for public pool
-    function _getPublicPoolStakingRewards() internal view returns (uint256) {
-        (, uint256 totalStaking,) = IStaking(_staking).getPoolInfo();
-        if (totalStaking == 0) return 0;
-
-        uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
-        return (publicPoolTokens * _totalStakingRewardsPerEpoch) / totalStaking;
-    }
-
     /**
      * @dev Calculates the staking rewards for a list of node addresses.
      * @param nodeAddrs An array of node addresses to calculate rewards for.
@@ -349,6 +340,15 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
 
             _totalStakingSnapshot[_currentEpoch] = totalStaking;
         }
+    }
+
+    /// @dev Returns staking rewards per epoch for public pool
+    function _getPublicPoolStakingRewards() internal view returns (uint256) {
+        (, uint256 totalStaking,) = IStaking(_staking).getPoolInfo();
+        if (totalStaking == 0) return 0;
+
+        uint256 publicPoolTokens = IStaking(_staking).getPublicPool().stakingPoolTokens;
+        return (publicPoolTokens * _totalStakingRewardsPerEpoch) / totalStaking;
     }
 
     function _isRewarded(uint256 epoch, address nodeAddr) internal view returns (bool) {

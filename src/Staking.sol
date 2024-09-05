@@ -16,14 +16,12 @@ import {
 } from "./libraries/DataTypes.sol";
 import {
     ExcessWithdrawalAmount,
-    InvalidArrayLength,
     NodeNotExists,
     NodeNotPublicGood,
     SettlementPhase,
     StakeToPublicGoodNode,
     WithdrawalAmountExceedsOperationPoolTokens
 } from "./libraries/Errors.sol";
-import {Events} from "./libraries/Events.sol";
 import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
 import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
 import {StakingLib} from "./libraries/StakingLib.sol";
@@ -331,34 +329,8 @@ contract Staking is
         uint256[] calldata requestCounts,
         uint256 publicPoolRewards
     ) external payable override onlyRole(ORACLE_ROLE) {
-        if (
-            nodeAddrs.length != operationRewards.length || nodeAddrs.length != stakingRewards.length
-        ) {
-            revert InvalidArrayLength();
-        }
-
-        // distribute rewards for public pool
-        if (publicPoolRewards > 0) {
-            uint256 tax = RewardsAndSlashingLib.distributePublicPoolRewards(publicPoolRewards);
-            emit Events.PublicGoodRewardDistributed(
-                epochInfo[0], epochInfo[1], epochInfo[2], publicPoolRewards, tax
-            );
-        }
-
-        // distribute rewards for other nodes
-        uint256[] memory taxCollected = RewardsAndSlashingLib.distributeNodesRewards(
-            nodeAddrs, operationRewards, stakingRewards
-        );
-
-        emit Events.RewardDistributed(
-            epochInfo[0],
-            epochInfo[1],
-            epochInfo[2],
-            nodeAddrs,
-            operationRewards,
-            stakingRewards,
-            taxCollected,
-            requestCounts
+        RewardsAndSlashingLib.distributeRewards(
+            epochInfo, nodeAddrs, operationRewards, stakingRewards, requestCounts, publicPoolRewards
         );
     }
 

@@ -34,6 +34,7 @@ library RewardsAndSlashingLib {
         string[] calldata reasons,
         address[] calldata reporters
     ) external {
+        // check if the lengths of the arrays are equal
         if (nodeAddrs.length != reasons.length || nodeAddrs.length != reporters.length) {
             revert InvalidArrayLength();
         }
@@ -97,51 +98,51 @@ library RewardsAndSlashingLib {
     }
 
     /**
-     * @dev Distributes public pool rewards to the staking pool and calculates the tax amount.
-     * @param publicPoolRewards The amount of public pool rewards to be distributed.
-     * @return The tax amount deducted from the public pool rewards.
+     * @notice Distributes rewards to nodes and the public pool
+     * @param epochInfo An array containing epoch information [epochId, startTime, endTime]
+     * @param nodeAddrs An array of node addresses to receive rewards
+     * @param operationRewards An array of operation rewards corresponding to each node
+     * @param stakingRewards An array of staking rewards corresponding to each node
+     * @param requestCounts An array of request counts for each node
+     * @param publicPoolRewards The amount of rewards for the public pool
      */
-    function distributePublicPoolRewards(uint256 publicPoolRewards) external returns (uint256) {
-        Node storage publicPool = StorageLib.publicPool();
-        // rewards for public pool
-        uint256 tax = _getFullTax(publicPoolRewards, publicPool.taxRateBasisPoints);
-
-        StakingCommonLib.increaseStakingPool(publicPool, publicPoolRewards - tax);
-
-        return tax;
-    }
-
-    function distributeNodesRewards(
+    function distributeRewards(
+        uint256[3] calldata epochInfo,
         address[] calldata nodeAddrs,
         uint256[] calldata operationRewards,
-        uint256[] calldata stakingRewards
-    ) external returns (uint256[] memory taxCollected) {
-        taxCollected = new uint256[](nodeAddrs.length);
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            Node storage node = StorageLib.getNode(nodeAddrs[i]);
-            if (
-                node.account == address(0) || node.publicGood
-                    || node.operationPoolTokens < Const.MIN_DEPOSIT
-            ) {
-                continue;
-            }
-
-            // operation rewards and staking rewards are sent to staking pool
-            uint256 rewards = operationRewards[i] + stakingRewards[i];
-            (uint256 fullTax, uint256 receivedTax) = _getTax(
-                rewards, node.taxRateBasisPoints, node.operationPoolTokens, node.stakingPoolTokens
-            );
-
-            taxCollected[i] = receivedTax;
-
-            // update node pool
-            // receivedTax is sent to operation pool
-            StakingCommonLib.increaseOperationPool(node, receivedTax);
-            // all after-tax rewards are sent to the staking pool
-            StakingCommonLib.increaseStakingPool(node, rewards - fullTax);
-            // the remaining tax is sent to the treasury
+        uint256[] calldata stakingRewards,
+        uint256[] calldata requestCounts,
+        uint256 publicPoolRewards
+    ) external {
+        // check if the lengths of the arrays are equal
+        if (
+            nodeAddrs.length != operationRewards.length || nodeAddrs.length != stakingRewards.length
+                || nodeAddrs.length != requestCounts.length
+        ) {
+            revert InvalidArrayLength();
         }
+
+        // distribute rewards for public pool
+        if (publicPoolRewards > 0) {
+            uint256 tax = _distributePublicPoolRewards(publicPoolRewards);
+            emit Events.PublicGoodRewardDistributed(
+                epochInfo[0], epochInfo[1], epochInfo[2], publicPoolRewards, tax
+            );
+        }
+
+        // distribute rewards for non public good nodes
+        uint256[] memory taxCollected =
+            _distributeNodesRewards(nodeAddrs, operationRewards, stakingRewards);
+        emit Events.RewardDistributed(
+            epochInfo[0],
+            epochInfo[1],
+            epochInfo[2],
+            nodeAddrs,
+            operationRewards,
+            stakingRewards,
+            taxCollected,
+            requestCounts
+        );
     }
 
     /**
@@ -170,6 +171,75 @@ library RewardsAndSlashingLib {
         returns (Demotion[] memory demotions)
     {
         demotions = _getDemotions(nodeAddr, epoch);
+    }
+
+    /**
+     * @dev Distributes public pool rewards to the staking pool and calculates the tax amount.
+     * @param publicPoolRewards The amount of public pool rewards to be distributed.
+     * @return tax The tax amount deducted from the public pool rewards.
+     */
+    function _distributePublicPoolRewards(uint256 publicPoolRewards)
+        internal
+        returns (uint256 tax)
+    {
+        Node storage publicPool = StorageLib.publicPool();
+        // rewards for public pool
+        tax = _getFullTax(publicPoolRewards, publicPool.taxRateBasisPoints);
+
+        StakingCommonLib.increaseStakingPool(publicPool, publicPoolRewards - tax);
+    }
+
+    /**
+     * @dev Distributes rewards to multiple nodes and calculates the tax collected for each.
+     * @param nodeAddrs An array of node addresses to distribute rewards to.
+     * @param operationRewards An array of operation rewards corresponding to each node.
+     * @param stakingRewards An array of staking rewards corresponding to each node.
+     * @return taxCollected An array of tax amounts collected from each node's rewards.
+     */
+    function _distributeNodesRewards(
+        address[] calldata nodeAddrs,
+        uint256[] calldata operationRewards,
+        uint256[] calldata stakingRewards
+    ) internal returns (uint256[] memory taxCollected) {
+        taxCollected = new uint256[](nodeAddrs.length);
+
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            taxCollected[i] =
+                _distributeSingleNodeRewards(nodeAddrs[i], operationRewards[i], stakingRewards[i]);
+        }
+    }
+
+    /**
+     * @dev Distributes rewards for a single node and calculates the tax collected.
+     * @param nodeAddr The address of the node receiving rewards.
+     * @param operationReward The amount of operation rewards for the node.
+     * @param stakingReward The amount of staking rewards for the node.
+     * @return taxCollected The amount of tax collected from the node's rewards.
+     */
+    function _distributeSingleNodeRewards(
+        address nodeAddr,
+        uint256 operationReward,
+        uint256 stakingReward
+    ) internal returns (uint256 taxCollected) {
+        Node storage node = StorageLib.getNode(nodeAddr);
+        // skip non-exist node
+        if (node.account == address(0) || node.publicGood) {
+            return 0;
+        }
+
+        uint256 rewards = operationReward + stakingReward;
+        (uint256 fullTax, uint256 receivedTax) = _getTax(
+            rewards, node.taxRateBasisPoints, node.operationPoolTokens, node.stakingPoolTokens
+        );
+
+        taxCollected = receivedTax;
+
+        // update node pool
+        // taxCollected is sent to operation pool for node oeprator
+        StakingCommonLib.increaseOperationPool(node, taxCollected);
+        // all after-tax rewards are sent to the staking pool for stakers
+        StakingCommonLib.increaseStakingPool(node, rewards - fullTax);
+        // the remaining tax is sent to the treasury
     }
 
     /**
