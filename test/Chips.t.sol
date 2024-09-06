@@ -79,7 +79,7 @@ contract ChipsTest is CommonTest {
     function testTokenURI() public {
         _createNode(alice);
 
-        vm.deal(alice, 100000 ether);
+        vm.deal(alice, 100_000 ether);
 
         vm.prank(alice);
         _staking.stake{value: 5000 ether}(alice);

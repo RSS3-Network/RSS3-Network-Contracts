@@ -7,6 +7,6 @@ library Chains {
     uint256 internal constant Mainnet = 1;
     uint256 internal constant OPMainnet = 10;
     uint256 internal constant Goerli = 5;
-    uint256 internal constant Sepolia = 11155111;
-    uint256 internal constant LocalDevNet = 31337;
+    uint256 internal constant Sepolia = 11_155_111;
+    uint256 internal constant LocalDevNet = 31_337;
 }

@@ -30,7 +30,7 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     uint256 public constant EPOCH_DURATION = 18 hours;
 
     /// @dev Total rewards of the first year.
-    uint256 public constant TOTAL_REWARDS_PER_YEAR = 30000000 * 10 ** 18;
+    uint256 public constant TOTAL_REWARDS_PER_YEAR = 30_000_000 ether;
 
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
 

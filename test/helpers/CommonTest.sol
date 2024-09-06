@@ -38,7 +38,7 @@ contract CommonTest is Utils {
     uint256 public constant stakeUnbondingPeriod = 22.5 days;
     uint256 public constant depositUnbondingPeriod = 22.5 days;
 
-    uint256 internal _initialAmount = 100000000 ether;
+    uint256 internal _initialAmount = 100_000_000 ether;
 
     string public constant chipsName = "Open Chips";
     string public constant chipsSymbol = "Chips";

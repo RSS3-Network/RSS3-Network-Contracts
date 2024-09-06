@@ -108,11 +108,7 @@ library NodeSettingsLib {
 
         // validate node exit status
         NodeStatus curStatus = _getNodeStatus(node);
-        if (
-            curStatus == NodeStatus.None || curStatus == NodeStatus.Registered
-                || curStatus == NodeStatus.Initializing || curStatus == NodeStatus.Outdated
-                || curStatus == NodeStatus.Slashed
-        ) {
+        if (_canExitImmediately(curStatus)) {
             node.status = NodeStatus.Exited;
         } else if (curStatus == NodeStatus.Online) {
             node.status = NodeStatus.Exiting;
@@ -307,6 +303,5 @@ library NodeSettingsLib {
         } else {
             transitionStatus = new NodeStatus[](0);
         }
-        return transitionStatus;
     }
 }
