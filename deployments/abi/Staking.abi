@@ -1404,11 +1404,6 @@
   },
   {
     "type": "error",
-    "name": "ExcessWithdrawalAmount",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "ExpectedPause",
     "inputs": []
   },
@@ -1469,10 +1464,5 @@
         "internalType": "address"
       }
     ]
-  },
-  {
-    "type": "error",
-    "name": "WithdrawalAmountExceedsOperationPoolTokens",
-    "inputs": []
   }
 ]

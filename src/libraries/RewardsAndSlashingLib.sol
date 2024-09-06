@@ -159,17 +159,18 @@ library RewardsAndSlashingLib {
     }
 
     /**
-     * @dev Retrieves the demotions for a specific node address and epoch.
-     * @param nodeAddr The address of the node.
-     * @param epoch The epoch number.
-     * @return demotions An array of demotions.
+     * @notice Retrieves the demotions for a specific node at a given epoch.
+     * @param nodeAddr The address of the node for which to retrieve demotions.
+     * @param epoch The epoch at which to retrieve the demotions.
+     * @return An array of Demotion structs representing the demotions for the specified node and
+     * epoch.
      */
     function getDemotions(address nodeAddr, uint256 epoch)
         external
         view
-        returns (Demotion[] memory demotions)
+        returns (Demotion[] memory)
     {
-        demotions = _getDemotions(nodeAddr, epoch);
+        return _getDemotions(nodeAddr, epoch);
     }
 
     /**
@@ -208,13 +209,7 @@ library RewardsAndSlashingLib {
         }
     }
 
-    /**
-     * @dev Distributes rewards for a single node and calculates the tax collected.
-     * @param nodeAddr The address of the node receiving rewards.
-     * @param operationReward The amount of operation rewards for the node.
-     * @param stakingReward The amount of staking rewards for the node.
-     * @return taxCollected The amount of tax collected from the node's rewards.
-     */
+    /// @dev Distributes rewards for a single node and calculates the tax collected.
     function _distributeSingleNodeRewards(
         address nodeAddr,
         uint256 operationReward,
@@ -241,13 +236,7 @@ library RewardsAndSlashingLib {
         // the remaining tax is sent to the treasury
     }
 
-    /**
-     * @dev Submits a single demotion for a node.
-     * @param epoch The epoch for which the demotion is being submitted.
-     * @param nodeAddr The address of the node being demoted.
-     * @param reason The reason for the demotion.
-     * @param reporter The address of the account reporting the demotion.
-     */
+    /// @dev Submits a single demotion for a node.
     function _submitSingleDemotion(
         uint256 epoch,
         address nodeAddr,
@@ -288,11 +277,7 @@ library RewardsAndSlashingLib {
         emit Events.DemotionSubmitted(epoch, nodeAddr, demotionId, reason, reporter);
     }
 
-    /**
-     * @dev  Records the slashing of a node.
-     * @param node The node being slashed.
-     * @param epoch The epoch for which slashing is being recorded.
-     */
+    /// @dev Records the slashing of a node in a specific epoch.
     function _recordSlashing(Node storage node, uint256 epoch) internal {
         // slash operation pool tokens
         uint256 slashedOperationPool =
@@ -312,11 +297,7 @@ library RewardsAndSlashingLib {
         emit Events.SlashRecorded(node.account, epoch, slashedOperationPool, slashedStakingPool);
     }
 
-    /**
-     * @dev Revoke slashing for a specific node and epoch.
-     * @param node The node being slashed.
-     * @param epoch The epoch for which slashing is being revoked.
-     */
+    /// @dev Revoke slashing for a specific node and epoch.
     function _revokeSlashing(Node storage node, uint256 epoch) internal {
         // revoke slashing amount
         StakingCommonLib.increaseOperationPool(node, node.slashedOperationPoolTokens);
@@ -331,37 +312,30 @@ library RewardsAndSlashingLib {
         emit Events.SlashRevoked(node.account, epoch);
     }
 
+    /// @dev Commits the slashing of a node, distributing the slashed amount.
     function _commitSlashing(Node storage node, uint256 epoch, address paymentProcessor) internal {
-        // commit slashing amount, distributes the amount to reporter and treasury
         uint256 slashedAmount = node.slashedOperationPoolTokens + node.slashedStakingPoolTokens;
         uint256 reporterAmount =
             (slashedAmount * Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS) / Const.DENOMINATOR;
         uint256 burnAmount =
             (slashedAmount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
-        // update
         StakingCommonLib.decreaseSlashingPool(slashedAmount);
         delete node.slashedStakingPoolTokens;
         delete node.slashedOperationPoolTokens;
 
-        // distribute slashed tokens to reporters
+        // distribute the reporter's share of the slashed tokens
         _transferToReporters(reporterAmount, node.account, epoch, paymentProcessor);
-        // burn slashed tokens
+        // burn the calculated amount of slashed tokens
         _transfer(address(0x0), burnAmount);
-        // remaining amount is in this contract for the treasury
+        // The remaining amount stays in the contract for the treasury
 
         emit Events.SlashCommitted(node.account, epoch);
     }
 
-    /**
-     * @dev Transfers a specified amount of tokens to reporters based on demotions.
-     *  It will divide the total amount of tokens by the number of demotions,
-     * and the tokens will be transferred to the payment processor if the reporter is address(0).
-     * @param amount The total amount of tokens to be transferred.
-     * @param nodeAddr The address of the node to get demotions.
-     * @param epoch The epoch number to get demotions.
-     * @param paymentProcessor The address of the payment processor contract.
-     */
+    /// @dev Transfers a specified amount of tokens to reporters based on demotions.
+    ///  It will divide the total amount of tokens by the number of demotions,
+    /// and the tokens will be transferred to the payment processor if the reporter is address(0).
     function _transferToReporters(
         uint256 amount,
         address nodeAddr,
