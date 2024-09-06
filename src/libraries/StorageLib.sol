@@ -9,6 +9,7 @@ import {
     UnstakeRequest,
     WithdrawalRequest
 } from "../libraries/DataTypes.sol";
+import {NodeNotExists} from "./Errors.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -84,6 +85,12 @@ library StorageLib {
             newCounter := add(currentCounter, 1)
             sstore(DEMOTION_ID_COUNTER_SLOT, newCounter)
         }
+    }
+
+    /// @dev Returns the node information or reverts if the node does not exist.
+    function getNodeOrRevert(address nodeAddr) internal view returns (Node storage node) {
+        node = StorageLib.getNode(nodeAddr);
+        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
     }
 
     function getChipsContract() internal view returns (address chips) {

@@ -8,7 +8,6 @@ import {
     InvalidArrayLength,
     NodeHasNoDemotions,
     NodeIsPublicGood,
-    NodeNotExists,
     SlashingNotExist
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
@@ -255,8 +254,7 @@ library RewardsAndSlashingLib {
         string calldata reason,
         address reporter
     ) internal {
-        Node storage node = StorageLib.getNode(nodeAddr);
-        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
+        Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
         // public good node can't be demoted
         if (node.publicGood) revert NodeIsPublicGood(nodeAddr);
 

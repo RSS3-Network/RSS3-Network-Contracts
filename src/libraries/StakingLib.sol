@@ -14,8 +14,9 @@ import {
     ClaimTimeNotReady,
     DepositForPublicGoodNode,
     EmptyChipIds,
-    NodeNotExists,
-    StakeAmountTooSmall
+    ExcessWithdrawalAmount,
+    StakeAmountTooSmall,
+    WithdrawalAmountExceedsOperationPoolTokens
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {NodeSettingsLib} from "./NodeSettingsLib.sol";
@@ -29,9 +30,7 @@ library StakingLib {
 
     /// @dev deposit tokens to a node
     function deposit(address nodeAddr, uint256 amount) external {
-        Node storage node = StorageLib.getNode(nodeAddr);
-
-        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
+        Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
         if (node.publicGood) revert DepositForPublicGoodNode();
 
         StakingCommonLib.increaseOperationPool(node, amount);
@@ -109,22 +108,32 @@ library StakingLib {
         emit Events.UnstakeRequested(owner, nodeAddr, requestId, unstakeAmount, chipIds);
     }
 
-    function requestWithdrawal(Node storage node, uint256 amount)
+    function requestWithdrawal(address nodeAddr, uint256 amount)
         external
         returns (uint256 requestId)
     {
+        Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
+
+        //  withdrawal amount should not exceed the operation pool tokens
+        if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
+
+        // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
+        NodeStatus status = NodeSettingsLib._getNodeStatus(node);
+        if (NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT) {
+            revert ExcessWithdrawalAmount();
+        }
+
         StakingCommonLib.decreaseOperationPool(node, amount);
 
         requestId = StorageLib.nextPendingWithdrawalId();
 
+        // save withdrawal request
         WithdrawalRequest storage req = StorageLib.getPendingWithdrawal()[requestId];
         req.timestamp = uint40(block.timestamp);
         req.owner = node.account;
         req.amount = amount;
 
         emit Events.WithdrawRequested(node.account, amount, requestId);
-
-        return requestId;
     }
 
     /// @dev claim withdrawal request

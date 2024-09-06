@@ -4,7 +4,6 @@ pragma solidity 0.8.24;
 
 import {IChips} from "./interfaces/IChips.sol";
 import {IStaking} from "./interfaces/IStaking.sol";
-import {Const} from "./libraries/Const.sol";
 import {
     Demotion,
     Node,
@@ -14,14 +13,7 @@ import {
     UnstakeRequest,
     WithdrawalRequest
 } from "./libraries/DataTypes.sol";
-import {
-    ExcessWithdrawalAmount,
-    NodeNotExists,
-    NodeNotPublicGood,
-    SettlementPhase,
-    StakeToPublicGoodNode,
-    WithdrawalAmountExceedsOperationPoolTokens
-} from "./libraries/Errors.sol";
+import {NodeNotPublicGood, SettlementPhase, StakeToPublicGoodNode} from "./libraries/Errors.sol";
 import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
 import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
 import {StakingLib} from "./libraries/StakingLib.sol";
@@ -221,19 +213,7 @@ contract Staking is
         whenNotPaused
         returns (uint256 requestId)
     {
-        Node storage node = _nodes[msg.sender];
-        if (node.account == address(0)) revert NodeNotExists(msg.sender);
-
-        //  withdrawal amount should not exceed the operation pool tokens
-        if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
-
-        // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
-        NodeStatus status = NodeSettingsLib.getNodeStatus(node);
-        if (NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT) {
-            revert ExcessWithdrawalAmount();
-        }
-
-        return StakingLib.requestWithdrawal(node, amount);
+        requestId = StakingLib.requestWithdrawal(msg.sender, amount);
     }
 
     /// @inheritdoc IStaking
@@ -257,9 +237,8 @@ contract Staking is
         whenNotSettlementPhase
         returns (uint256 tokenId)
     {
-        Node storage node = StorageLib.getNode(nodeAddr);
+        Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
         if (node.publicGood) revert StakeToPublicGoodNode(nodeAddr);
-        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
 
         tokenId = StakingLib.stakeToNode(node, msg.value, nodeAddr, msg.sender);
     }
@@ -477,17 +456,14 @@ contract Staking is
         )
     {
         PoolStatData storage pool = StorageLib.poolStatStorage();
-
-        totalOperationPoolTokens = pool.totalOperationPoolTokens;
-        totalStakingPoolTokens = pool.totalStakingPoolTokens;
-        totalSlashingPoolTokens = pool.totalSlashingPoolTokens;
+        return (
+            pool.totalOperationPoolTokens, pool.totalStakingPoolTokens, pool.totalSlashingPoolTokens
+        );
     }
 
     /// @inheritdoc IStaking
     function getNode(address nodeAddr) external view override returns (Node memory) {
-        Node memory node = StorageLib.getNode(nodeAddr);
-        node.status = NodeSettingsLib.getNodeStatus(node);
-        return node;
+        return NodeSettingsLib.getNode(nodeAddr);
     }
 
     /// @inheritdoc IStaking
