@@ -183,15 +183,6 @@ library NodeSettingsLib {
         }
     }
 
-    /**
-     * @dev Returns the status of a node.
-     * @param node The node to get the status of.
-     * @return The status of the node.
-     */
-    function getNodeStatus(Node calldata node) external view returns (NodeStatus) {
-        return _getNodeStatus(node);
-    }
-
     /// @dev Returns the information of a node.
     function getNode(address nodeAddr) external view returns (Node memory) {
         Node memory node = StorageLib.getNode(nodeAddr);
