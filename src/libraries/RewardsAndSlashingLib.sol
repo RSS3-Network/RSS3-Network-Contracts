@@ -289,10 +289,7 @@ library RewardsAndSlashingLib {
         // record slashing amount
         StakingCommonLib.decreaseOperationPool(node, slashedOperationPool);
         StakingCommonLib.decreaseStakingPool(node, slashedStakingPool);
-        StakingCommonLib.increaseSlashingPool(slashedOperationPool + slashedStakingPool);
-        // update slashed tokens
-        node.slashedOperationPoolTokens = slashedOperationPool;
-        node.slashedStakingPoolTokens = slashedStakingPool;
+        StakingCommonLib.increaseSlashingPool(node, slashedOperationPool, slashedStakingPool);
 
         emit Events.SlashRecorded(node.account, epoch, slashedOperationPool, slashedStakingPool);
     }
@@ -303,11 +300,8 @@ library RewardsAndSlashingLib {
         StakingCommonLib.increaseOperationPool(node, node.slashedOperationPoolTokens);
         StakingCommonLib.increaseStakingPool(node, node.slashedStakingPoolTokens);
         StakingCommonLib.decreaseSlashingPool(
-            node.slashedOperationPoolTokens + node.slashedStakingPoolTokens
+            node, node.slashedOperationPoolTokens, node.slashedStakingPoolTokens
         );
-        // update slashed tokens
-        delete node.slashedOperationPoolTokens;
-        delete node.slashedStakingPoolTokens;
 
         emit Events.SlashRevoked(node.account, epoch);
     }
@@ -320,9 +314,9 @@ library RewardsAndSlashingLib {
         uint256 burnAmount =
             (slashedAmount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
-        StakingCommonLib.decreaseSlashingPool(slashedAmount);
-        delete node.slashedStakingPoolTokens;
-        delete node.slashedOperationPoolTokens;
+        StakingCommonLib.decreaseSlashingPool(
+            node, node.slashedOperationPoolTokens, node.slashedStakingPoolTokens
+        );
 
         // distribute the reporter's share of the slashed tokens
         _transferToReporters(reporterAmount, node.account, epoch, paymentProcessor);
