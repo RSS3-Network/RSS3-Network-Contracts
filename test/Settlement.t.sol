@@ -7,7 +7,6 @@ import {Const} from "../src/libraries/Const.sol";
 import {Demotion, Node, NodeStatus} from "../src/libraries/DataTypes.sol";
 import {
     CommitEpochNotElapsed,
-    CommitEpochNotElapsed,
     InvalidArrayLength,
     InvalidEpochNumber,
     OperationRewardsExceed,

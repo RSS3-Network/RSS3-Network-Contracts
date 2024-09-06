@@ -3,7 +3,7 @@
 
 pragma solidity 0.8.24;
 
-import {Node, PoolStatData} from "./DataTypes.sol";
+import {Node} from "./DataTypes.sol";
 import {StorageLib} from "./StorageLib.sol";
 
 library NodePoolLib {

@@ -14,7 +14,6 @@ import {
     NodeIsPublicGood,
     NodeNotExists,
     NodeNotInExitStatus,
-    PublicGoodNodeTaxNotZero,
     TaxRateBasisPointsOutOfRange
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
@@ -62,11 +61,6 @@ contract NodeSettingTest is CommonTest {
         // check node info
         _checkNode(alice, 1, name, description, 0, 0, true, false);
         assertEq(_staking.getNodeCount(), 1);
-    }
-
-    function testCreatePGNodeFail() public {
-        vm.expectRevert(abi.encodeWithSelector(PublicGoodNodeTaxNotZero.selector));
-        _staking.createNode("Alice", "Alice's node", 1, true);
     }
 
     function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {

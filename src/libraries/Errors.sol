@@ -89,9 +89,6 @@ error DepositForPublicGoodNode();
 /// @dev Public good node cannot be staked.
 error StakeToPublicGoodNode(address nodeAddr);
 
-/// @dev Tax rate is not zero for public good node.
-error PublicGoodNodeTaxNotZero();
-
 /// @dev Batch size is zero.
 error BatchSizeZero();
 

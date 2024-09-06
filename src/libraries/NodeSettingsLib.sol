@@ -8,17 +8,12 @@ import {
     CurStateCantExit,
     CurStatusCantOnline,
     InvalidArrayLength,
-    InvalidArrayLength,
     InvalidNodeStatusTransition,
-    InvalidNodeStatusTransition,
-    NodeDepositBelowMinimum,
     NodeDepositBelowMinimum,
     NodeExists,
     NodeInExitStatus,
     NodeIsPublicGood,
     NodeNotInExitStatus,
-    PublicGoodNodeTaxNotZero,
-    PublicGoodNodeTaxNotZero,
     TaxRateBasisPointsOutOfRange
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
@@ -42,8 +37,7 @@ library NodeSettingsLib {
     function setTaxRateBasisPoints4PublicPool(uint64 taxRateBasisPoints) external {
         _validateTaxRateBasisPoints(taxRateBasisPoints);
 
-        Node storage publicPool = StorageLib.publicPool();
-        publicPool.taxRateBasisPoints = taxRateBasisPoints;
+        StorageLib.publicPool().taxRateBasisPoints = taxRateBasisPoints;
 
         emit Events.PublicPoolTaxRateBasisPointsSet(taxRateBasisPoints);
     }
@@ -67,9 +61,7 @@ library NodeSettingsLib {
         uint64 taxRateBasisPoints,
         bool publicGood
     ) external {
-        if (publicGood) {
-            if (taxRateBasisPoints > 0) revert PublicGoodNodeTaxNotZero();
-        } else {
+        if (!publicGood) {
             _validateTaxRateBasisPoints(taxRateBasisPoints);
         }
 
@@ -82,7 +74,7 @@ library NodeSettingsLib {
         node.account = nodeAddr;
         node.name = name;
         node.description = description;
-        node.taxRateBasisPoints = taxRateBasisPoints;
+        node.taxRateBasisPoints = publicGood ? 0 : taxRateBasisPoints;
         node.publicGood = publicGood;
         node.alpha = isAlphaPhase;
 
@@ -106,7 +98,6 @@ library NodeSettingsLib {
     function exit(address nodeAddr) external {
         Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
 
-        // validate node exit status
         NodeStatus curStatus = _getNodeStatus(node);
         if (_canExitImmediately(curStatus)) {
             node.status = NodeStatus.Exited;
@@ -153,10 +144,7 @@ library NodeSettingsLib {
 
         // if the current status is not Offline, Slashed, or Outdated, it reverts with an error
         NodeStatus curStatus = _getNodeStatus(node);
-        if (
-            NodeStatus.Offline != curStatus && NodeStatus.Slashed != curStatus
-                && NodeStatus.Outdated != curStatus
-        ) {
+        if (!_canOnline(curStatus)) {
             revert CurStatusCantOnline(uint256(curStatus));
         }
 
@@ -237,6 +225,12 @@ library NodeSettingsLib {
         return status == NodeStatus.None || status == NodeStatus.Registered
             || status == NodeStatus.Initializing || status == NodeStatus.Outdated
             || status == NodeStatus.Slashed;
+    }
+
+    /// @dev Returns true if a node can online based on its current status.
+    function _canOnline(NodeStatus status) internal pure returns (bool) {
+        return status == NodeStatus.Offline || status == NodeStatus.Slashed
+            || status == NodeStatus.Outdated;
     }
 
     /// @dev Validates the tax rate basis points is in the range of [500,10000].
