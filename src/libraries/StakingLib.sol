@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable var-name-mixedcase,no-empty-blocks
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {IChips} from "../interfaces/IChips.sol";
 import {Const} from "./Const.sol";
@@ -14,12 +14,13 @@ import {
     ClaimTimeNotReady,
     DepositForPublicGoodNode,
     EmptyChipIds,
-    NodeNotExists,
-    StakeAmountTooSmall
+    ExcessWithdrawalAmount,
+    StakeAmountTooSmall,
+    WithdrawalAmountExceedsOperationPoolTokens
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
+import {NodePoolLib} from "./NodePoolLib.sol";
 import {NodeSettingsLib} from "./NodeSettingsLib.sol";
-import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
@@ -29,12 +30,10 @@ library StakingLib {
 
     /// @dev deposit tokens to a node
     function deposit(address nodeAddr, uint256 amount) external {
-        Node storage node = StorageLib.getNode(nodeAddr);
-
-        if (node.account == address(0)) revert NodeNotExists(nodeAddr);
+        Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
         if (node.publicGood) revert DepositForPublicGoodNode();
 
-        StakingCommonLib.increaseOperationPool(node, amount);
+        NodePoolLib.increaseOperationPool(node, amount);
 
         // set node status
         if (node.operationPoolTokens >= Const.MIN_DEPOSIT) {
@@ -61,7 +60,7 @@ library StakingLib {
         uint256 sharesToMint = _tokensToShares(amount, nodeAddr);
 
         // update staking pool
-        StakingCommonLib.increaseStakingPool(node, amount);
+        NodePoolLib.increaseStakingPool(node, amount);
         // update pool shares
         _increaseTotalShares(node, sharesToMint);
 
@@ -94,7 +93,7 @@ library StakingLib {
             _burnChipWithShares(tokenId);
         }
         Node storage node = _getStakingNode(nodeAddr);
-        StakingCommonLib.decreaseStakingPool(node, unstakeAmount);
+        NodePoolLib.decreaseStakingPool(node, unstakeAmount);
         _decreaseTotalShares(node, sharesToBurn);
 
         requestId = StorageLib.nextPendingUnstakeId();
@@ -109,22 +108,32 @@ library StakingLib {
         emit Events.UnstakeRequested(owner, nodeAddr, requestId, unstakeAmount, chipIds);
     }
 
-    function requestWithdrawal(Node storage node, uint256 amount)
+    function requestWithdrawal(address nodeAddr, uint256 amount)
         external
         returns (uint256 requestId)
     {
-        StakingCommonLib.decreaseOperationPool(node, amount);
+        Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
+
+        //  withdrawal amount should not exceed the operation pool tokens
+        if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
+
+        // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
+        NodeStatus status = NodeSettingsLib._getNodeStatus(node);
+        if (NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT) {
+            revert ExcessWithdrawalAmount();
+        }
+
+        NodePoolLib.decreaseOperationPool(node, amount);
 
         requestId = StorageLib.nextPendingWithdrawalId();
 
+        // save withdrawal request
         WithdrawalRequest storage req = StorageLib.getPendingWithdrawal()[requestId];
         req.timestamp = uint40(block.timestamp);
         req.owner = node.account;
         req.amount = amount;
 
         emit Events.WithdrawRequested(node.account, amount, requestId);
-
-        return requestId;
     }
 
     /// @dev claim withdrawal request
@@ -286,11 +295,13 @@ library StakingLib {
     }
 
     /// @dev get node by address, if the node is public good, return public pool
-    function _getStakingNode(address nodeAddr) internal view returns (Node storage _node) {
-        Node storage node = StorageLib.getNode(nodeAddr);
-        Node storage publicPool = StorageLib.publicPool();
+    function _getStakingNode(address nodeAddr) internal view returns (Node storage node) {
+        node = StorageLib.getNode(nodeAddr);
 
-        _node = node.publicGood ? publicPool : node;
+        // if the node is public good, return public pool
+        if (node.publicGood) {
+            node = StorageLib.publicPool();
+        }
     }
 
     /// @dev returns chip info: node address, tokens, shares

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable comprehensive-interface,no-console,function-max-lines
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Const} from "../src/libraries/Const.sol";
 import {Demotion, Node, NodeStatus} from "../src/libraries/DataTypes.sol";
@@ -23,7 +23,7 @@ contract RewardsAndSlashingTest is CommonTest {
         vm.deal(carol, _initialAmount);
         vm.deal(dave, _initialAmount);
 
-        vm.deal(address(_settlement), 30000000 ether);
+        vm.deal(address(_settlement), 30_000_000 ether);
     }
 
     function testSubmitDemotions() public {
@@ -112,8 +112,8 @@ contract RewardsAndSlashingTest is CommonTest {
     }
 
     function testRecordSlashing() public {
-        uint256 stakedTokens = 40000 ether;
-        uint256 depositedTokens = 10000 ether;
+        uint256 stakedTokens = 40_000 ether;
+        uint256 depositedTokens = 10_000 ether;
 
         uint256 expectedSlashedStakingPool =
             (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
@@ -169,8 +169,8 @@ contract RewardsAndSlashingTest is CommonTest {
     // 2. Slashed tokens returned as expected
     // 3. Slashing info updated as expected
     function testRevokeSlashing() public {
-        uint256 stakedTokens = 40000 ether;
-        uint256 depositedTokens = 10000 ether;
+        uint256 stakedTokens = 40_000 ether;
+        uint256 depositedTokens = 10_000 ether;
 
         _createNode(alice);
 
@@ -215,8 +215,8 @@ contract RewardsAndSlashingTest is CommonTest {
     }
 
     function testCommitSlashingSucceeds() public {
-        uint256 stakedTokens = 40000 ether;
-        uint256 depositedTokens = 10000 ether;
+        uint256 stakedTokens = 40_000 ether;
+        uint256 depositedTokens = 10_000 ether;
 
         uint256 expectedSlashedStakingPool =
             (stakedTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
@@ -278,7 +278,7 @@ contract RewardsAndSlashingTest is CommonTest {
     }
 
     function testCommitSlashingWithRewards(uint256 depositedTokens, uint256 stakedTokens) public {
-        depositedTokens = bound(depositedTokens, 10000, 20000);
+        depositedTokens = bound(depositedTokens, 10_000, 20_000);
         stakedTokens = bound(stakedTokens, 500, 1000);
 
         depositedTokens *= 1 ether;

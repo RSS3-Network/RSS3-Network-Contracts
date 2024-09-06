@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable comprehensive-interface,no-console
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Staking} from "../src/Staking.sol";
 import {IERC721Errors} from "../src/interfaces/IERC721Errors.sol";
@@ -45,7 +45,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.deal(carol, _initialAmount);
         vm.deal(dave, _initialAmount);
 
-        vm.deal(address(_settlement), 30000000 ether);
+        vm.deal(address(_settlement), 30_000_000 ether);
     }
 
     function testSetUpState() public {
@@ -213,7 +213,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testDeposit(uint256 amount) public {
-        amount = bound(amount, 10000 ether, _initialAmount);
+        amount = bound(amount, 10_000 ether, _initialAmount);
 
         _createNode(alice);
 
@@ -227,7 +227,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testDepositAfterExit() public {
-        uint256 amount = 10000 ether;
+        uint256 amount = 10_000 ether;
 
         vm.startPrank(alice);
         _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, false);
@@ -263,7 +263,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestWithdrawalSucceeds() public {
-        uint256 depositAmount = 100000 ether;
+        uint256 depositAmount = 100_000 ether;
         uint256 withdrawalAmount = depositAmount / 2 + 1;
 
         vm.startPrank(alice);
@@ -290,7 +290,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestWithdrawalSucceedsWithExit() public {
-        uint256 amount = 100000 ether;
+        uint256 amount = 100_000 ether;
 
         vm.startPrank(alice);
         _staking.createNode{value: amount}("Alice", "Alice's node", uint64(1000), false);
@@ -314,7 +314,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testMultipleDepositAndRequestWithdrawal() public {
-        uint256 amount = 10000 ether;
+        uint256 amount = 10_000 ether;
 
         vm.startPrank(alice);
         _staking.createNode{value: amount}("Alice", "Alice's node", uint64(1000), false);
@@ -335,7 +335,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestWithdrawalFailWithInsufficientTokens() public {
-        uint256 amount = 10000 ether;
+        uint256 amount = 10_000 ether;
 
         _createNode(alice);
 
@@ -360,7 +360,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testClaimWithdrawal() public {
-        uint256 amount = 10000 ether;
+        uint256 amount = 10_000 ether;
 
         _createNode(alice);
 
@@ -392,7 +392,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testMultipleRequestAndClaimWithdrawal() public {
         _createNode(alice);
 
-        uint256 depositAmount = 10000 ether;
+        uint256 depositAmount = 10_000 ether;
 
         vm.startPrank(alice);
         _staking.deposit{value: depositAmount}();
@@ -490,19 +490,19 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.setSettlementPhase(true);
 
         vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
-        _staking.stake{value: 10000 ether}(alice);
+        _staking.stake{value: 10_000 ether}(alice);
     }
 
     function testStakeFailWithNodeInExitStatus() public {
         _createNode(alice);
 
         vm.startPrank(alice);
-        _staking.deposit{value: 10000 ether}();
+        _staking.deposit{value: 10_000 ether}();
         _staking.exit();
         vm.stopPrank();
 
         vm.expectRevert(abi.encodeWithSelector(NodeInExitStatus.selector));
-        _staking.stake{value: 10000 ether}(alice);
+        _staking.stake{value: 10_000 ether}(alice);
     }
 
     function testStakeToPublicPool(uint256 amount) public {
@@ -545,7 +545,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.setSettlementPhase(true);
 
         vm.expectRevert(abi.encodeWithSelector(SettlementPhase.selector));
-        _staking.stakeToPublicPool{value: 10000 ether}(alice);
+        _staking.stakeToPublicPool{value: 10_000 ether}(alice);
     }
 
     function testRequestUnstakeFromPublic() public {
@@ -568,7 +568,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestUnstakeWithTransferChip() public {
-        uint256 amount = 10000 ether;
+        uint256 amount = 10_000 ether;
 
         _createNode(alice);
 
@@ -615,11 +615,11 @@ contract StakingTest is CommonTest, IERC721Errors {
         _createNode(alice);
 
         vm.startPrank(bob);
-        uint256 t1 = _staking.stake{value: 10000 ether}(alice);
+        uint256 t1 = _staking.stake{value: 10_000 ether}(alice);
         _chips.approve(carol, t1);
 
         vm.startPrank(carol);
-        uint256 t2 = _staking.stake{value: 10000 ether}(alice);
+        uint256 t2 = _staking.stake{value: 10_000 ether}(alice);
 
         vm.expectRevert(abi.encodeWithSelector(ChipsNotSameOwner.selector));
         _staking.requestUnstake(alice, array(t1, t2));
@@ -639,7 +639,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestUnstakeFailWithBurnedChip() public {
-        uint256 amount = 10000 ether;
+        uint256 amount = 10_000 ether;
 
         _createNode(alice);
 
@@ -700,7 +700,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.expectRevert(abi.encodeWithSelector(ClaimIdNotExists.selector, uint256(1)));
         _staking.claimUnstake(array(uint256(1)));
 
-        uint256 tokenId = _staking.stake{value: 10000 ether}(alice);
+        uint256 tokenId = _staking.stake{value: 10_000 ether}(alice);
         uint256 requestId = _staking.requestUnstake(alice, array(tokenId));
 
         // case 2: claim time not ready
@@ -711,8 +711,8 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestUnstakeWithMergedChips() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 20_000 ether;
 
         _createNode(bob);
         _deposit(bob, depositAmount);
@@ -748,8 +748,8 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testMergeChips() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 20_000 ether;
 
         _createNode(bob);
         _deposit(bob, depositAmount);
@@ -790,8 +790,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         // case 2: chips are issued by the same node
         _createNode(bob);
         _createNode(carol);
-        _deposit(bob, 10000 ether);
-        _deposit(carol, 10000 ether);
+        _deposit(bob, 10_000 ether);
+        _deposit(carol, 10_000 ether);
 
         vm.startPrank(alice);
         _staking.stake{value: 500 ether}(bob);
@@ -805,7 +805,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     function testMergeChipsFailWithBurnedChips() public {
         // case 3: chips are not existed
         _createNode(bob);
-        _deposit(bob, 10000 ether);
+        _deposit(bob, 10_000 ether);
 
         vm.startPrank(alice);
         _staking.stake{value: 500 ether}(bob);
@@ -824,8 +824,8 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     // solhint-disable-next-line function-max-lines
     function testDistributeRewardsSucceeds() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 20_000 ether;
         uint256 operationRewards = 200 ether;
         uint256 stakingRewards = 800 ether;
 
@@ -908,7 +908,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testWithdraw2Treasury(uint256 amount) public {
-        amount = bound(amount, 0, 10000 ether);
+        amount = bound(amount, 0, 10_000 ether);
 
         vm.deal(address(_staking), amount);
 
@@ -942,9 +942,9 @@ contract StakingTest is CommonTest, IERC721Errors {
         pure
     {
         // Case 1: Node receives no tax rewards (operation pool < 10000 ether)
-        operationPool = bound(operationPool, 1, 10000 ether - 1);
-        rewards = bound(rewards, 1, 1000000 ether);
-        stakingPool = bound(stakingPool, 1, 100000 ether);
+        operationPool = bound(operationPool, 1, 10_000 ether - 1);
+        rewards = bound(rewards, 1, 1_000_000 ether);
+        stakingPool = bound(stakingPool, 1, 100_000 ether);
 
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
@@ -958,11 +958,11 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     function testCalcTaxFullRewards(uint256 operationPool, uint256 stakeRatio) public pure {
         // Case 2: Node receives full tax rewards (operation pool >= 10000 ether)
-        operationPool = bound(operationPool, 10000 ether, 20000 ether);
+        operationPool = bound(operationPool, 10_000 ether, 20_000 ether);
         stakeRatio = bound(stakeRatio, 1, 25);
 
         uint256 stakingPool = operationPool * stakeRatio;
-        uint256 rewards = 10000 ether;
+        uint256 rewards = 10_000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
         (uint256 totalTax, uint256 partialTax) =
@@ -979,7 +979,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         uint256 operationPool = Const.MIN_DEPOSIT;
         stakingPool = bound(stakingPool, 25 * operationPool + 1, 100 * operationPool);
 
-        uint256 rewards = 10000 ether;
+        uint256 rewards = 10_000 ether;
         uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
 
         (uint256 totalTax, uint256 partialTax) =
@@ -998,7 +998,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
     /// @dev stake and then request unstake
     function _testRequestUnstakeFromNode(address nodeAddr, bool isPublicGood) internal {
-        uint256 amount = 10000 ether;
+        uint256 amount = 10_000 ether;
 
         // stake
         vm.startPrank(bob);
@@ -1031,7 +1031,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     function _testRequestUnstakeApprovedChipsFromNode(address nodeAddr, bool isPublicGood)
         internal
     {
-        uint256 amount = 10000 ether;
+        uint256 amount = 10_000 ether;
 
         // stake
         vm.startPrank(bob);
@@ -1067,7 +1067,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     function _testRequestUnstakeApprovedChipFromNode(address nodeAddr, bool isPublicGood)
         internal
     {
-        uint256 amount = 10000 ether;
+        uint256 amount = 10_000 ether;
 
         // stake
         vm.prank(bob);

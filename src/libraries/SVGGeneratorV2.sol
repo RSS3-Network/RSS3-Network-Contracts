@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable quotes,max-line-length
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {ChipTraits, NftCardTraits, NodeTraits} from "./DataTypes.sol";
 import {Fonts1} from "./Fonts/Fonts1.sol";
@@ -14,7 +14,7 @@ import {HeadShapes} from "./SVGsV2/HeadShapes.sol";
 import {Mouths} from "./SVGsV2/Mouths.sol";
 import {NftCards} from "./SVGsV2/NftCards.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {LibString} from "solady/utils/LibString.sol";
+import {LibString} from "@solady/utils/LibString.sol";
 
 library SVGGeneratorV2 {
     using Strings for uint256;

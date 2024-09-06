@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable no-console,ordering,custom-errors
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Chips} from "../src/Chips.sol";
 import {NetworkParams} from "../src/NetworkParams.sol";
@@ -196,7 +196,7 @@ contract Deploy is Deployer {
         require(settlementProxy.currentEpoch() == 0, "check start epoch error");
         require(settlementProxy.EPOCH_DURATION() == 18 hours, "check start epoch error");
         require(
-            settlementProxy.TOTAL_REWARDS_PER_YEAR() == 30000000 ether, "check start epoch error"
+            settlementProxy.TOTAL_REWARDS_PER_YEAR() == 30_000_000 ether, "check start epoch error"
         );
     }
 

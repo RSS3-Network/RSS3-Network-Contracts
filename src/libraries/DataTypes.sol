@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -116,9 +116,13 @@ struct UnstakeRequest {
 }
 
 struct RewardsData {
+    /// @notice epoch number, start timestamp, end timestamp
     uint256[3] epochInfo;
+    /// @notice tokens of rewards to send to staking contract for distribution
     uint256 rewardsToSend;
+    /// @notice tokens of public pool rewards
     uint256 publicPoolRewards;
+    /// @notice tokens of staking rewards for each node
     uint256[] stakingRewards;
 }
 

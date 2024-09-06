@@ -1279,98 +1279,6 @@
   },
   {
     "type": "event",
-    "name": "PublicGoodRewardDistributed",
-    "inputs": [
-      {
-        "name": "epoch",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "startTimestamp",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "endTimestamp",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "publicPoolRewards",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "publicPoolTax",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "RewardDistributed",
-    "inputs": [
-      {
-        "name": "epoch",
-        "type": "uint256",
-        "indexed": true,
-        "internalType": "uint256"
-      },
-      {
-        "name": "startTimestamp",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "endTimestamp",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "nodeAddrs",
-        "type": "address[]",
-        "indexed": false,
-        "internalType": "address[]"
-      },
-      {
-        "name": "operationRewards",
-        "type": "uint256[]",
-        "indexed": false,
-        "internalType": "uint256[]"
-      },
-      {
-        "name": "stakingRewards",
-        "type": "uint256[]",
-        "indexed": false,
-        "internalType": "uint256[]"
-      },
-      {
-        "name": "taxCollected",
-        "type": "uint256[]",
-        "indexed": false,
-        "internalType": "uint256[]"
-      },
-      {
-        "name": "requestCounts",
-        "type": "uint256[]",
-        "indexed": false,
-        "internalType": "uint256[]"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
     "name": "RoleAdminChanged",
     "inputs": [
       {
@@ -1496,22 +1404,12 @@
   },
   {
     "type": "error",
-    "name": "ExcessWithdrawalAmount",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "ExpectedPause",
     "inputs": []
   },
   {
     "type": "error",
     "name": "FailedInnerCall",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "InvalidArrayLength",
     "inputs": []
   },
   {
@@ -1566,10 +1464,5 @@
         "internalType": "address"
       }
     ]
-  },
-  {
-    "type": "error",
-    "name": "WithdrawalAmountExceedsOperationPoolTokens",
-    "inputs": []
   }
 ]

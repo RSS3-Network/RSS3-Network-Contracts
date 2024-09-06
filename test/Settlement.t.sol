@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable comprehensive-interface,no-console,function-max-lines
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Settlement} from "../src/Settlement.sol";
 import {Const} from "../src/libraries/Const.sol";
@@ -24,12 +24,12 @@ contract SettlementTest is CommonTest {
     function setUp() public {
         _setUp();
 
-        vm.deal(alice, 1000000 ether);
-        vm.deal(bob, 1000000 ether);
-        vm.deal(carol, 1000000 ether);
-        vm.deal(dave, 1000000 ether);
-        vm.deal(address(_settlement), 390000000 ether);
-        vm.deal(oracleAccount, 30000000 ether);
+        vm.deal(alice, 1_000_000 ether);
+        vm.deal(bob, 1_000_000 ether);
+        vm.deal(carol, 1_000_000 ether);
+        vm.deal(dave, 1_000_000 ether);
+        vm.deal(address(_settlement), 390_000_000 ether);
+        vm.deal(oracleAccount, 30_000_000 ether);
     }
 
     function testInitialize() public {
@@ -61,14 +61,14 @@ contract SettlementTest is CommonTest {
                 AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
             )
         );
-        _settlement.setTaxRateBasisPoints4PublicPool(10001);
+        _settlement.setTaxRateBasisPoints4PublicPool(10_001);
 
         // case 2: TaxRateBasisPointsOutOfRange, tax rate is greater than 10000
         vm.expectRevert(
-            abi.encodeWithSelector(TaxRateBasisPointsOutOfRange.selector, uint64(10001))
+            abi.encodeWithSelector(TaxRateBasisPointsOutOfRange.selector, uint64(10_001))
         );
         vm.prank(oracleAccount);
-        _settlement.setTaxRateBasisPoints4PublicPool(10001);
+        _settlement.setTaxRateBasisPoints4PublicPool(10_001);
 
         // case 3: TaxRateBasisPointsOutOfRange, tax rate is less than 500
         vm.expectRevert(abi.encodeWithSelector(TaxRateBasisPointsOutOfRange.selector, uint64(400)));
@@ -77,8 +77,8 @@ contract SettlementTest is CommonTest {
     }
 
     function testDistributeRewards() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 10000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 10_000 ether;
 
         _createNode(alice);
         _createNode(bob);
@@ -126,76 +126,82 @@ contract SettlementTest is CommonTest {
     }
 
     // solhint-disable-next-line function-max-lines
-    function testDistributeRewardsMultiple() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 30000 ether;
+    function testDistributeRewardsMultiple(uint256 depositAmount, uint256 stakeAmount) public {
+        // Bound the input values to reasonable ranges
+        depositAmount = bound(depositAmount, Const.MIN_DEPOSIT, 100_000 ether);
+        stakeAmount = bound(stakeAmount, Const.MIN_STAKE, depositAmount * 6);
 
-        // create node
-        _createNode(alice);
-        _createNode(bob);
-        _createNode(carol);
-        _createNode(dave);
-
-        // deposit
-        _deposit(alice, depositAmount);
-        _deposit(bob, depositAmount);
-        _deposit(carol, depositAmount);
-        _deposit(dave, depositAmount);
-
-        // stake
-        _staking.stake{value: stakeAmount}(alice);
-        _staking.stake{value: stakeAmount}(bob);
-        _staking.stake{value: stakeAmount}(carol);
-        _staking.stake{value: stakeAmount}(dave);
+        // create 4 nodes with different stake amounts: alice(stakeAmount), bob(stakeAmount*2),
+        // carol(stakeAmount*3), dave(stakeAmount*4)
+        address[] memory nodes = array(alice, bob, carol, dave);
+        for (uint256 i = 0; i < nodes.length; i++) {
+            _createNode(nodes[i]);
+            _deposit(nodes[i], depositAmount);
+            _staking.stake{value: stakeAmount * (i + 1)}(nodes[i]);
+        }
 
         (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
             _settlement.getBonusInfo();
-        uint256 operationReward = operationRewardsPerEpoch / 4;
-        uint256 stakingReward = totalStakingRewardsPerEpoch / 4;
+        uint256 operationReward = operationRewardsPerEpoch / nodes.length;
+        uint256 stakingReward = totalStakingRewardsPerEpoch / 10;
 
         vm.startPrank(oracleAccount);
         skip(18 hours);
-        _settlement.distributeRewards(
-            1,
-            array(alice, bob), // node addresses
-            array(operationReward, operationReward), // operation rewards
-            array(uint256(100), uint256(200)),
-            false
-        );
-        assertEq(_staking.isSettlementPhase(), true);
 
-        _settlement.distributeRewards(
-            1,
-            array(carol, dave), // node addresses
-            array(operationReward, operationReward), // operation rewards
-            array(uint256(100), uint256(200)),
-            true
-        );
-        assertEq(_staking.isSettlementPhase(), false);
+        // Distribute rewards in two batches
+        for (uint256 i = 0; i < 2; i++) {
+            address[] memory batchNodes = new address[](2);
+            uint256[] memory batchOperationRewards = new uint256[](2);
+            uint256[] memory batchPerformance = new uint256[](2);
+
+            for (uint256 j = 0; j < 2; j++) {
+                batchNodes[j] = nodes[i * 2 + j];
+                batchOperationRewards[j] = operationReward;
+                batchPerformance[j] = 100 + j * 100; // 100, 200
+            }
+
+            _settlement.distributeRewards(
+                1,
+                batchNodes,
+                batchOperationRewards,
+                batchPerformance,
+                i == 1 // set to true for the last batch
+            );
+
+            // Check settlement phase
+            assertEq(_staking.isSettlementPhase(), i == 0);
+        }
         vm.stopPrank();
 
-        uint256 tax = _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints);
-
-        // check status
-        _checkDistribution(
-            array(depositAmount, depositAmount, depositAmount, depositAmount),
-            array(stakeAmount, stakeAmount, stakeAmount, stakeAmount),
-            array(alice, bob, carol, dave),
-            array(tax, tax, tax, tax),
-            array(operationReward, operationReward, operationReward, operationReward),
-            array(stakingReward, stakingReward, stakingReward, stakingReward)
+        // Prepare arrays for _checkDistribution
+        uint256[] memory deposits =
+            array(depositAmount, depositAmount, depositAmount, depositAmount);
+        uint256[] memory stakes =
+            array(stakeAmount, stakeAmount * 2, stakeAmount * 3, stakeAmount * 4);
+        uint256[] memory opRewards =
+            array(operationReward, operationReward, operationReward, operationReward);
+        uint256[] memory stakingRewards =
+            array(stakingReward, stakingReward * 2, stakingReward * 3, stakingReward * 4);
+        uint256[] memory taxes = array(
+            _getFullTax(operationReward + stakingReward, _defaultTaxRateBasisPoints),
+            _getFullTax(operationReward + stakingReward * 2, _defaultTaxRateBasisPoints),
+            _getFullTax(operationReward + stakingReward * 3, _defaultTaxRateBasisPoints),
+            _getFullTax(operationReward + stakingReward * 4, _defaultTaxRateBasisPoints)
         );
 
+        // check status
+        _checkDistribution(deposits, stakes, nodes, taxes, opRewards, stakingRewards);
+
         // check treasury amount
-        // treasury amount should be 0
+        // all the nodes have collected full tax, so treasury amount should be 0
         uint256 treasuryAmount = _getTreasuryAmount();
         assertApproxEqAbs(treasuryAmount, 0, 2); // 2 is the max diff
     }
 
     // solhint-disable-next-line function-max-lines
     function testDistributeRewardsWithPartialNodeOffline() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 10000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 10_000 ether;
 
         // create node
         _createNode(alice);
@@ -259,8 +265,8 @@ contract SettlementTest is CommonTest {
     }
 
     function testStakingBalanceWithDistributeRewards() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 10000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 10_000 ether;
 
         // create node
         _createNode(alice);
@@ -325,8 +331,8 @@ contract SettlementTest is CommonTest {
     }
 
     function testDistributeRewardsToPGN() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 20_000 ether;
 
         // create node
         _createNode(alice);
@@ -374,8 +380,8 @@ contract SettlementTest is CommonTest {
     }
 
     function testDistributeRewardsToNonExistentNode() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 20_000 ether;
 
         // create node
         _createNode(alice);
@@ -407,7 +413,7 @@ contract SettlementTest is CommonTest {
 
     function testDistributeRewardsWithNodeInsufficientDeposit() public {
         uint256 depositAmount = 1000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 stakeAmount = 20_000 ether;
 
         // create node
         _createNode(alice);
@@ -418,8 +424,12 @@ contract SettlementTest is CommonTest {
         // stake
         _staking.stake{value: stakeAmount}(alice);
 
-        (uint256 operationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
+        (uint256 totalOperationRewardsPerEpoch, uint256 totalStakingRewardsPerEpoch) =
             _settlement.getBonusInfo();
+
+        uint256 expectedFullTax = _getFullTax(
+            totalOperationRewardsPerEpoch + totalStakingRewardsPerEpoch, _defaultTaxRateBasisPoints
+        );
 
         skip(18 hours);
 
@@ -427,23 +437,27 @@ contract SettlementTest is CommonTest {
         _settlement.distributeRewards(
             1,
             array(alice), // node addresses
-            array(operationRewardsPerEpoch), // operation rewards
+            array(totalOperationRewardsPerEpoch), // operation rewards
             array(uint256(100)),
             true
         );
 
-        // operation pool and staking pool of alice is not changed
-        assertEq(_staking.getNode(alice).stakingPoolTokens, stakeAmount);
+        assertEq(
+            _staking.getNode(alice).stakingPoolTokens,
+            stakeAmount + totalOperationRewardsPerEpoch + totalStakingRewardsPerEpoch
+                - expectedFullTax
+        );
+        // operation pool of alice will not change
         assertEq(_staking.getNode(alice).operationPoolTokens, depositAmount);
 
-        // all rewards should be added to treasury
+        // check treasury
         uint256 treasuryAmount = _getTreasuryAmount();
-        assertEq(treasuryAmount, operationRewardsPerEpoch + totalStakingRewardsPerEpoch);
+        assertEq(treasuryAmount, expectedFullTax);
     }
 
     function testDistributeRewardsWithFullTax() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 20_000 ether;
 
         // create node
         _createNode(alice);
@@ -481,8 +495,8 @@ contract SettlementTest is CommonTest {
     }
 
     function testDistributeRewardsWithPartialTax() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 300000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 300_000 ether;
 
         // create node
         _createNode(alice);
@@ -640,8 +654,8 @@ contract SettlementTest is CommonTest {
     }
 
     function testDistributeRewardsFailWithOperationRewardsExceedsLimit() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 20_000 ether;
 
         for (uint256 i = 1; i <= 10; i++) {
             address user = vm.addr(i);
@@ -677,8 +691,8 @@ contract SettlementTest is CommonTest {
     }
 
     function testDistributeRewardsFailWithDuplicatedNodeAddr() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 10000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 10_000 ether;
 
         // create node
         _createNode(alice);
@@ -718,8 +732,8 @@ contract SettlementTest is CommonTest {
     }
 
     function testDistributeRewardsWithEmptyEpoch() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 20_000 ether;
 
         for (uint256 i = 1; i <= 10; i++) {
             address user = vm.addr(i);
@@ -770,8 +784,8 @@ contract SettlementTest is CommonTest {
     }
 
     function testDistributeRewardsWithPGNWithEmptyEpoch() public {
-        uint256 depositAmount = 10000 ether;
-        uint256 stakeAmount = 20000 ether;
+        uint256 depositAmount = 10_000 ether;
+        uint256 stakeAmount = 20_000 ether;
 
         for (uint256 i = 1; i <= 10; i++) {
             address user = vm.addr(i);
@@ -782,7 +796,7 @@ contract SettlementTest is CommonTest {
         }
 
         _createPublicGoodNode(carol);
-        _staking.stakeToPublicPool{value: 10000 ether}(carol);
+        _staking.stakeToPublicPool{value: 10_000 ether}(carol);
 
         // distribute rewards
         uint256 startTime = block.timestamp;
@@ -819,7 +833,7 @@ contract SettlementTest is CommonTest {
     }
 
     function testStakingRewards(uint256 stakingAmount) public {
-        stakingAmount = bound(stakingAmount, 500, 10000);
+        stakingAmount = bound(stakingAmount, 500, 10_000);
         stakingAmount = stakingAmount * 1 ether;
 
         _createNode(alice);
@@ -830,7 +844,7 @@ contract SettlementTest is CommonTest {
         _staking.stakeToPublicPool{value: stakingAmount}(carol);
 
         vm.prank(bob);
-        _staking.stake{value: 10000 ether}(alice);
+        _staking.stake{value: 10_000 ether}(alice);
 
         vm.prank(carol);
         _staking.stake{value: 8000 ether}(alice);
@@ -904,7 +918,7 @@ contract SettlementTest is CommonTest {
     function testCommitSlashing() public {
         _createNode(alice);
         vm.prank(alice);
-        _staking.deposit{value: 10000 ether}();
+        _staking.deposit{value: 10_000 ether}();
 
         _presetCurrentEpoch(uint256(1));
 
@@ -955,7 +969,7 @@ contract SettlementTest is CommonTest {
     function testSetNodeStatusSucceeds() public {
         _createNode(alice);
         vm.prank(alice);
-        _staking.deposit{value: 10000 ether}();
+        _staking.deposit{value: 10_000 ether}();
 
         // Registered -> Initializing
         vm.prank(oracleAccount);
@@ -1001,7 +1015,7 @@ contract SettlementTest is CommonTest {
         assertEq(_settlement.stakingContract(), address(_staking));
         assertEq(_settlement.currentEpoch(), 0);
         assertEq(_settlement.EPOCH_DURATION(), 18 hours);
-        assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30000000 ether);
+        assertEq(_settlement.TOTAL_REWARDS_PER_YEAR(), 30_000_000 ether);
     }
 
     function _presetCurrentEpoch(uint256 epoch) internal {

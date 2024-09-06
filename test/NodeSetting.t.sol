@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable comprehensive-interface,no-console
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {Const} from "../src/libraries/Const.sol";
 import {Node, NodeStatus} from "../src/libraries/DataTypes.sol";
@@ -29,12 +29,12 @@ contract NodeSettingTest is CommonTest {
         vm.deal(carol, _initialAmount);
         vm.deal(dave, _initialAmount);
 
-        vm.deal(address(_settlement), 30000000 ether);
+        vm.deal(address(_settlement), 30_000_000 ether);
     }
 
     function testCreateNode(uint64 taxRateBasisPoints) public {
         taxRateBasisPoints =
-            uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10000));
+            uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10_000));
 
         string memory name = "Alice";
         string memory description = "Alice's node";
@@ -71,7 +71,7 @@ contract NodeSettingTest is CommonTest {
 
     function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
         taxRateBasisPoints =
-            uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10000));
+            uint64(bound(taxRateBasisPoints, Const.MIN_TAX_RATE_BASIS_POINTS, 10_000));
         amount = bound(amount, 1, _initialAmount);
 
         string memory name = "Alice";
@@ -142,7 +142,7 @@ contract NodeSettingTest is CommonTest {
     }
 
     function testCreateNodeFailWithTaxRateOutOfRange(uint64 taxRateBasisPoints) public {
-        vm.assume(taxRateBasisPoints > 10000 || taxRateBasisPoints < 500);
+        vm.assume(taxRateBasisPoints > 10_000 || taxRateBasisPoints < 500);
 
         vm.expectRevert(
             abi.encodeWithSelector(TaxRateBasisPointsOutOfRange.selector, taxRateBasisPoints)
@@ -222,7 +222,7 @@ contract NodeSettingTest is CommonTest {
     function testExitSucceeds() public {
         vm.startPrank(alice);
         // create node and deposit
-        _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
+        _staking.createNode{value: 10_000 ether}("Alice", "Alice's node", uint64(1000), false);
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
         // node in these status can initiate exit
@@ -267,7 +267,7 @@ contract NodeSettingTest is CommonTest {
         _staking.exit();
 
         vm.startPrank(alice);
-        _staking.createNode{value: 10000 ether}("Alice", "Alice's node", uint64(1000), false);
+        _staking.createNode{value: 10_000 ether}("Alice", "Alice's node", uint64(1000), false);
 
         // case 2: CurStateCantExit
         // node in these status can't initiate exit
@@ -314,7 +314,7 @@ contract NodeSettingTest is CommonTest {
         _createNode(alice);
 
         vm.startPrank(alice);
-        _staking.deposit{value: 10000 ether}();
+        _staking.deposit{value: 10_000 ether}();
 
         NodeStatus[] memory status = array(NodeStatus.Exiting, NodeStatus.Exited);
         for (uint256 i = 0; i < status.length; i++) {
@@ -420,7 +420,7 @@ contract NodeSettingTest is CommonTest {
     function testSetNodesStatusSucceeds() public {
         _createNode(alice);
         vm.prank(alice);
-        _staking.deposit{value: 10000 ether}();
+        _staking.deposit{value: 10_000 ether}();
 
         // Online -> Offline
         _setAndCheckNodeStatus(alice, NodeStatus.Online, NodeStatus.Offline);

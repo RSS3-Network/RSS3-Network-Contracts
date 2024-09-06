@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 library Const {
     uint256 public constant SHARES_PER_CHIP = 500 ether;
@@ -7,7 +7,7 @@ library Const {
 
     /// @dev the minimal tokens for deposit, 10,000 by default.
     /// node operator can receive tax if it stakes at least 10,000 tokens, otherwise nothing
-    uint256 public constant MIN_DEPOSIT = 10000 ether;
+    uint256 public constant MIN_DEPOSIT = 10_000 ether;
 
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
     /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by
@@ -39,5 +39,5 @@ library Const {
     uint256 public constant NODE_EXIT_PERIOD = 18 hours;
 
     // denominator
-    uint256 public constant DENOMINATOR = 10000;
+    uint256 public constant DENOMINATOR = 10_000;
 }

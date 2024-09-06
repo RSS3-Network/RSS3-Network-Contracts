@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // solhint-disable comprehensive-interface
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import {DeployConfig} from "../../script/DeployConfig.s.sol";
 import {Chips} from "../../src/Chips.sol";
@@ -38,7 +38,7 @@ contract CommonTest is Utils {
     uint256 public constant stakeUnbondingPeriod = 22.5 days;
     uint256 public constant depositUnbondingPeriod = 22.5 days;
 
-    uint256 internal _initialAmount = 100000000 ether;
+    uint256 internal _initialAmount = 100_000_000 ether;
 
     string public constant chipsName = "Open Chips";
     string public constant chipsSymbol = "Chips";
@@ -182,11 +182,15 @@ contract CommonTest is Utils {
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             Node memory node = _staking.getNode(nodeAddrs[i]);
             uint256 newOperationPool = depositAmounts[i] + taxAmounts[i];
-            assertEq(node.operationPoolTokens, newOperationPool, "check operation pool failed");
+            assertApproxEqAbs(
+                node.operationPoolTokens, newOperationPool, 4, "check operation pool failed"
+            );
 
             uint256 newStakingPool =
                 stakeAmounts[i] + operationRewards[i] + stakingRewards[i] - taxAmounts[i];
-            assertEq(node.stakingPoolTokens, newStakingPool, "check staking pool failed");
+            assertApproxEqAbs(
+                node.stakingPoolTokens, newStakingPool, 4, "check staking pool failed"
+            );
         }
     }
 

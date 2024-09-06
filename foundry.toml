@@ -6,7 +6,7 @@
 [profile.default]
 # Sets the concrete solc version to use
 # This overrides the `auto_detect_solc` value
-solc_version = '0.8.20'
+solc_version = '0.8.24'
 auto_detect_solc = false
 
 # Increase optimizer_runs
@@ -42,7 +42,7 @@ bracket_spacing = false
 int_types = "long"
 multiline_func_header = "attributes_first"
 quote_style = "preserve"
-number_underscore = "preserve"
+number_underscore = "thousands"
 hex_underscore = "remove"
 single_line_statement_blocks = "preserve"
 override_spacing = false
