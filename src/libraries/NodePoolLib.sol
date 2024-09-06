@@ -6,7 +6,7 @@ pragma solidity 0.8.24;
 import {Node, PoolStatData} from "./DataTypes.sol";
 import {StorageLib} from "./StorageLib.sol";
 
-library StakingCommonLib {
+library NodePoolLib {
     /// @dev increase staking pool tokens of a node, and total staking pool tokens
     function increaseStakingPool(Node storage node, uint256 amount) internal {
         node.stakingPoolTokens += amount;

@@ -11,7 +11,7 @@ import {
     SlashingNotExist
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
-import {StakingCommonLib} from "./StakingCommonLib.sol";
+import {NodePoolLib} from "./NodePoolLib.sol";
 import {StorageLib} from "./StorageLib.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -183,10 +183,10 @@ library RewardsAndSlashingLib {
         returns (uint256 tax)
     {
         Node storage publicPool = StorageLib.publicPool();
-        // rewards for public pool
+        // public pool always collects full tax
         tax = _getFullTax(publicPoolRewards, publicPool.taxRateBasisPoints);
 
-        StakingCommonLib.increaseStakingPool(publicPool, publicPoolRewards - tax);
+        NodePoolLib.increaseStakingPool(publicPool, publicPoolRewards - tax);
     }
 
     /**
@@ -230,9 +230,9 @@ library RewardsAndSlashingLib {
 
         // update node pool
         // taxCollected is sent to operation pool for node operator
-        StakingCommonLib.increaseOperationPool(node, taxCollected);
+        NodePoolLib.increaseOperationPool(node, taxCollected);
         // all after-tax rewards are sent to the staking pool for stakers
-        StakingCommonLib.increaseStakingPool(node, rewards - fullTax);
+        NodePoolLib.increaseStakingPool(node, rewards - fullTax);
         // the remaining tax is sent to the treasury
     }
 
@@ -287,9 +287,9 @@ library RewardsAndSlashingLib {
             (node.stakingPoolTokens * Const.USER_SLASH_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
         // record slashing amount
-        StakingCommonLib.decreaseOperationPool(node, slashedOperationPool);
-        StakingCommonLib.decreaseStakingPool(node, slashedStakingPool);
-        StakingCommonLib.increaseSlashingPool(node, slashedOperationPool, slashedStakingPool);
+        NodePoolLib.decreaseOperationPool(node, slashedOperationPool);
+        NodePoolLib.decreaseStakingPool(node, slashedStakingPool);
+        NodePoolLib.increaseSlashingPool(node, slashedOperationPool, slashedStakingPool);
 
         emit Events.SlashRecorded(node.account, epoch, slashedOperationPool, slashedStakingPool);
     }
@@ -297,9 +297,9 @@ library RewardsAndSlashingLib {
     /// @dev Revoke slashing for a specific node and epoch.
     function _revokeSlashing(Node storage node, uint256 epoch) internal {
         // revoke slashing amount
-        StakingCommonLib.increaseOperationPool(node, node.slashedOperationPoolTokens);
-        StakingCommonLib.increaseStakingPool(node, node.slashedStakingPoolTokens);
-        StakingCommonLib.decreaseSlashingPool(
+        NodePoolLib.increaseOperationPool(node, node.slashedOperationPoolTokens);
+        NodePoolLib.increaseStakingPool(node, node.slashedStakingPoolTokens);
+        NodePoolLib.decreaseSlashingPool(
             node, node.slashedOperationPoolTokens, node.slashedStakingPoolTokens
         );
 
@@ -314,7 +314,7 @@ library RewardsAndSlashingLib {
         uint256 burnAmount =
             (slashedAmount * Const.SLASH_BURN_RATE_BASIS_POINTS) / Const.DENOMINATOR;
 
-        StakingCommonLib.decreaseSlashingPool(
+        NodePoolLib.decreaseSlashingPool(
             node, node.slashedOperationPoolTokens, node.slashedStakingPoolTokens
         );
 

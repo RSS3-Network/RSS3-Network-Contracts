@@ -19,8 +19,8 @@ import {
     WithdrawalAmountExceedsOperationPoolTokens
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
+import {NodePoolLib} from "./NodePoolLib.sol";
 import {NodeSettingsLib} from "./NodeSettingsLib.sol";
-import {StakingCommonLib} from "./StakingCommonLib.sol";
 import {StorageLib} from "./StorageLib.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
@@ -33,7 +33,7 @@ library StakingLib {
         Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
         if (node.publicGood) revert DepositForPublicGoodNode();
 
-        StakingCommonLib.increaseOperationPool(node, amount);
+        NodePoolLib.increaseOperationPool(node, amount);
 
         // set node status
         if (node.operationPoolTokens >= Const.MIN_DEPOSIT) {
@@ -60,7 +60,7 @@ library StakingLib {
         uint256 sharesToMint = _tokensToShares(amount, nodeAddr);
 
         // update staking pool
-        StakingCommonLib.increaseStakingPool(node, amount);
+        NodePoolLib.increaseStakingPool(node, amount);
         // update pool shares
         _increaseTotalShares(node, sharesToMint);
 
@@ -93,7 +93,7 @@ library StakingLib {
             _burnChipWithShares(tokenId);
         }
         Node storage node = _getStakingNode(nodeAddr);
-        StakingCommonLib.decreaseStakingPool(node, unstakeAmount);
+        NodePoolLib.decreaseStakingPool(node, unstakeAmount);
         _decreaseTotalShares(node, sharesToBurn);
 
         requestId = StorageLib.nextPendingUnstakeId();
@@ -123,7 +123,7 @@ library StakingLib {
             revert ExcessWithdrawalAmount();
         }
 
-        StakingCommonLib.decreaseOperationPool(node, amount);
+        NodePoolLib.decreaseOperationPool(node, amount);
 
         requestId = StorageLib.nextPendingWithdrawalId();
 
