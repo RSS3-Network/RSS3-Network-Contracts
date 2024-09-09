@@ -890,6 +890,18 @@ contract SettlementTest is CommonTest {
         _checkDemotion(demotions[0], uint256(2), bob, uint256(1), REASON2, address(0xffff));
     }
 
+    function testSubmitDemotionsFail() public {
+        // case 1: caller is not ORACLE_ROLE
+        _createNode(alice);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
+        _settlement.submitDemotions(array(alice), array(REASON1), array(REPORTER));
+    }
+
     function testRevokeDemotions() public {
         uint256 epoch = 1;
 
@@ -912,6 +924,18 @@ contract SettlementTest is CommonTest {
         // check demotion
         demotions = _staking.getDemotions(alice, epoch);
         assertEq(demotions.length, 0);
+    }
+
+    function testRevokeDemotionsFail() public {
+        // case 1: caller is not ORACLE_ROLE
+        _createNode(alice);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
+        _settlement.revokeDemotions(alice, 1, array(uint256(1)));
     }
 
     function testCommitSlashing() public {
@@ -956,7 +980,12 @@ contract SettlementTest is CommonTest {
         );
         _settlement.commitSlashing(array(alice), array(uint256(0)));
 
-        // case 2: epoch not reached
+        // case 2: InvalidArrayLength
+        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
+        vm.prank(oracleAccount);
+        _settlement.commitSlashing(array(alice), array(uint256(1), uint256(2)));
+
+        // case 3: epoch not reached
         _presetCurrentEpoch(uint256(3));
         vm.expectRevert(
             abi.encodeWithSelector(CommitEpochNotElapsed.selector, uint256(1), uint256(3))
@@ -986,6 +1015,7 @@ contract SettlementTest is CommonTest {
     }
 
     function testSetNodeStatusFail() public {
+        // case 1: caller is not ORACLE_ROLE
         address[] memory nodeAddrs = array(alice, bob, carol);
         NodeStatus[] memory status =
             array(NodeStatus.Online, NodeStatus.Offline, NodeStatus.Initializing);
