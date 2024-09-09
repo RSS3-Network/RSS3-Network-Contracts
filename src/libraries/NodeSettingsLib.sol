@@ -112,16 +112,16 @@ library NodeSettingsLib {
     }
 
     /**
-     * @notice Register a node that has exited or is in the process of exiting.
-     * @dev The node must be in "Exiting" or "Exited" status and have a sufficient deposit amount.
+     * @notice Register a node that has exited
+     * @dev The node must be in "Exited" status and have a sufficient deposit amount.
      * @param nodeAddr The address of the node to be registered.
      */
     function register(address nodeAddr) external {
         Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
 
         NodeStatus curStatus = _getNodeStatus(node);
-        // throws a `NodeNotInExitStatus` error if the node is not in "Exiting" or "Exited" status.
-        if (NodeStatus.Exiting != curStatus && NodeStatus.Exited != curStatus) {
+        // throws a `NodeNotInExitStatus` error if the node is not in "Exited" status.
+        if (curStatus != NodeStatus.Exited) {
             revert NodeNotInExitStatus(uint256(curStatus));
         }
 

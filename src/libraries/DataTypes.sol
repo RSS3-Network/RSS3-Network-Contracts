@@ -72,27 +72,28 @@ struct Demotion {
 }
 
 /// @notice Enum representing the various states a node can be in
+/// @param None Default state, node not yet registered
+/// @param Registered Node has been registered but not yet initialized
+/// @param Initializing Node is in the process of initializing
+/// @param Outdated Node's software or configuration is outdated
+/// @param Online Node is online and functioning normally
+/// @param Offline Node is currently offline or unreachable
+/// @param Slashing Node is in the process of being slashed (penalized)
+/// @param Slashed Node has been slashed (penalized)
+/// @param Exiting Node is in the process of exiting the network
+/// @param Exited Node has successfully exited the network
 enum NodeStatus {
-    /// @notice Default state, node not yet registered
-    None,
-    /// @notice Node has been registered but not yet initialized
-    Registered,
-    /// @notice Node is in the process of initializing
-    Initializing,
-    /// @notice Node's software or configuration is outdated
-    Outdated,
-    /// @notice Node is online and functioning normally
-    Online,
-    /// @notice Node is currently offline or unreachable
-    Offline,
-    /// @notice Node is in the process of being slashed (penalized)
-    Slashing,
-    /// @notice Node has been slashed (penalized)
-    Slashed,
-    /// @notice Node is in the process of exiting the network
-    Exiting,
-    /// @notice Node has successfully exited the network
-    Exited
+    None, // 0
+    Registered, // 1
+    Initializing, // 2
+    Outdated, // 3
+    Online, // 4
+    Offline, // 5
+    Slashing, // 6
+    Slashed, // 7
+    Exiting, // 8
+    Exited // 9
+
 }
 
 struct WithdrawalRequest {

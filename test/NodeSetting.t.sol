@@ -310,7 +310,7 @@ contract NodeSettingTest is CommonTest {
         vm.startPrank(alice);
         _staking.deposit{value: 10_000 ether}();
 
-        NodeStatus[] memory status = array(NodeStatus.Exiting, NodeStatus.Exited);
+        NodeStatus[] memory status = array(NodeStatus.Exited);
         for (uint256 i = 0; i < status.length; i++) {
             // preset node status
             _presetNodeStatus(alice, status[i]);
@@ -335,7 +335,7 @@ contract NodeSettingTest is CommonTest {
         _createNode(alice);
         vm.startPrank(alice);
 
-        // case 2: node not in exit status
+        // case 2: node not in exited status
         NodeStatus[] memory status = array(
             NodeStatus.None,
             NodeStatus.Registered,
@@ -344,7 +344,8 @@ contract NodeSettingTest is CommonTest {
             NodeStatus.Online,
             NodeStatus.Offline,
             NodeStatus.Slashing,
-            NodeStatus.Slashed
+            NodeStatus.Slashed,
+            NodeStatus.Exiting
         );
         for (uint256 i = 0; i < status.length; i++) {
             // preset node status
@@ -357,7 +358,7 @@ contract NodeSettingTest is CommonTest {
         }
 
         // case 3: node deposit is below minimum
-        _presetNodeStatus(alice, NodeStatus.Exiting);
+        _presetNodeStatus(alice, NodeStatus.Exited);
         vm.expectRevert(abi.encodeWithSelector(NodeDepositBelowMinimum.selector));
         _staking.register();
         vm.stopPrank();
