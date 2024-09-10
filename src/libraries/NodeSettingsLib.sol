@@ -287,15 +287,16 @@ library NodeSettingsLib {
             transitionStatus[2] = NodeStatus.Slashed;
             transitionStatus[3] = NodeStatus.Outdated;
         } else if (newStatus == NodeStatus.Outdated) {
-            // Initializing -> Outdated
-            transitionStatus = new NodeStatus[](1);
+            // Initializing, Online -> Outdated
+            transitionStatus = new NodeStatus[](2);
             transitionStatus[0] = NodeStatus.Initializing;
+            transitionStatus[1] = NodeStatus.Online;
         } else if (newStatus == NodeStatus.Initializing) {
-            // Registered -> Initializing
-            transitionStatus = new NodeStatus[](1);
+            // Registered, Online, Outdated -> Initializing
+            transitionStatus = new NodeStatus[](3);
             transitionStatus[0] = NodeStatus.Registered;
-        } else {
-            transitionStatus = new NodeStatus[](0);
+            transitionStatus[2] = NodeStatus.Online;
+            transitionStatus[1] = NodeStatus.Outdated;
         }
     }
 }

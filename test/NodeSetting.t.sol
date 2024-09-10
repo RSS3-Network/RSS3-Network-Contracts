@@ -465,13 +465,11 @@ contract NodeSettingTest is CommonTest {
         status = array(
             NodeStatus.None,
             NodeStatus.Initializing,
-            NodeStatus.Online,
             NodeStatus.Offline,
             NodeStatus.Slashing,
             NodeStatus.Slashed,
             NodeStatus.Exiting,
-            NodeStatus.Exited,
-            NodeStatus.Outdated
+            NodeStatus.Exited
         );
         for (uint256 i = 0; i < status.length; i++) {
             _invalidNodeStatusTransition(alice, status[i], NodeStatus.Initializing);
@@ -513,7 +511,6 @@ contract NodeSettingTest is CommonTest {
             NodeStatus.None,
             NodeStatus.Registered,
             NodeStatus.Outdated,
-            NodeStatus.Online,
             NodeStatus.Offline,
             NodeStatus.Slashing,
             NodeStatus.Slashed,
