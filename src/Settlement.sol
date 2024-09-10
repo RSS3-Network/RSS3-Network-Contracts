@@ -17,13 +17,8 @@ import {AccessControlEnumerable} from
     "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
-import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnumerable {
-    using Math for uint256;
-    using SafeCast for uint256;
-
     string public constant version = "2.0.0";
 
     /// @dev Duration of an epoch.

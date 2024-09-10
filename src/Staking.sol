@@ -24,8 +24,6 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -37,8 +35,6 @@ contract Staking is
     AccessControlEnumerable,
     ReentrancyGuard
 {
-    using Math for uint256;
-    using SafeCast for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.UintSet;
     using Checkpoints for Checkpoints.Trace160;
