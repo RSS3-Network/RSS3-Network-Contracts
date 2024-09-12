@@ -15,13 +15,17 @@ interface IStaking {
      * @param chips Address of the chips contract.
      * @param pauseAccount Address who can pause/unpause the Staking contract.
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
+     * @param operatorAccount Address who can do operator-related operations.
      * @param isAlphaPhase_ Flag indicating if the contract is in alpha phase.
+     * @param migrate Flag indicating whether to migrate public pool and pool stat info.
      */
     function initialize(
         address chips,
         address pauseAccount,
         address oracleAccount,
-        bool isAlphaPhase_
+        address operatorAccount,
+        bool isAlphaPhase_,
+        bool migrate
     ) external;
 
     /**
@@ -227,6 +231,17 @@ interface IStaking {
      * @param status Status to set.
      */
     function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
+
+    /**
+     * @notice Sets the status for nodes.
+     * Requirements:
+     * - The caller must have the `OPERATOR_ROLE`.
+     * @dev Emits a `NodeStatusChanged` event with the updated status.
+     * @param nodeAddrs Addresses of node operator to set.
+     * @param status Status to set.
+     */
+    function setNodesStatusByOperator(address[] calldata nodeAddrs, NodeStatus[] calldata status)
+        external;
 
     /**
      * @notice Allows a node to exit from the network.

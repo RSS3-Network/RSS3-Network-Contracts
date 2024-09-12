@@ -98,6 +98,7 @@ contract Staking is
     /// ACL
     bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
+    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
     /// @dev demotion
     uint256 internal _demotionIdCounter; // slot 26
@@ -137,8 +138,10 @@ contract Staking is
         address chips,
         address pauseAccount,
         address oracleAccount,
-        bool isAlphaPhase_
-    ) external override reinitializer(3) {
+        address operatorAccount,
+        bool isAlphaPhase_,
+        bool migrate
+    ) external override reinitializer(4) {
         if (chips != address(0)) {
             _chips = chips;
         }
@@ -153,13 +156,20 @@ contract Staking is
             _grantRole(ORACLE_ROLE, oracleAccount);
         }
 
+        // grant `OPERATOR_ROLE`
+        if (operatorAccount != address(0)) {
+            _grantRole(OPERATOR_ROLE, operatorAccount);
+        }
+
         _isAlphaPhase = isAlphaPhase_;
 
         /// TODO: should be removed in next version
-        // migrate public pool
-        _migratePublicPool();
-        // migrate pool stat info
-        _migratePoolStatInfo();
+        if (migrate) {
+            // migrate public pool
+            _migratePublicPool();
+            // migrate pool stat info
+            _migratePoolStatInfo();
+        }
     }
 
     /// @inheritdoc IStaking
@@ -353,6 +363,15 @@ contract Staking is
         onlyRole(ORACLE_ROLE)
     {
         NodeSettingsLib.setNodesStatus(nodeAddrs, status);
+    }
+
+    /// @inheritdoc IStaking
+    function setNodesStatusByOperator(address[] calldata nodeAddrs, NodeStatus[] calldata status)
+        external
+        override
+        onlyRole(OPERATOR_ROLE)
+    {
+        NodeSettingsLib.setNodesStatusByOperator(nodeAddrs, status);
     }
 
     /// @inheritdoc IStaking

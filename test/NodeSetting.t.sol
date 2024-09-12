@@ -431,6 +431,17 @@ contract NodeSettingTest is CommonTest {
         vm.stopPrank();
     }
 
+    function testSetNodesStatusByOperator() public {
+        _createNode(alice);
+        vm.prank(operatorAccount);
+        _staking.setNodesStatusByOperator(array(alice), array(NodeStatus.Registered));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+
+        vm.prank(operatorAccount);
+        _staking.setNodesStatusByOperator(array(alice), array(NodeStatus.Initializing));
+        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Initializing));
+    }
+
     function testSetNodesStatusSucceeds() public {
         _createNode(alice);
         vm.prank(alice);

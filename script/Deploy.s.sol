@@ -157,7 +157,9 @@ contract Deploy is Deployer {
         address chipsProxy = mustGetAddress("ChipsProxy");
         address settlementProxy = mustGetAddress("SettlementProxy");
 
-        stakingProxy.initialize(chipsProxy, cfg.pauseAccount(), settlementProxy, cfg.isAlphaPhase());
+        stakingProxy.initialize(
+            chipsProxy, cfg.pauseAccount(), settlementProxy, address(0), cfg.isAlphaPhase(), false
+        );
         // check states
         require(stakingProxy.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "check pause role error");
         require(stakingProxy.hasRole(ORACLE_ROLE, settlementProxy), "check oracle role error");
