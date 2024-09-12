@@ -240,7 +240,7 @@ interface IStaking {
      * @param nodeAddrs Addresses of node operator to set.
      * @param status Status to set.
      */
-    function setNodesStatusByOperator(address[] calldata nodeAddrs, NodeStatus[] calldata status)
+    function setNodeStatusByOperator(address[] calldata nodeAddrs, NodeStatus[] calldata status)
         external;
 
     /**

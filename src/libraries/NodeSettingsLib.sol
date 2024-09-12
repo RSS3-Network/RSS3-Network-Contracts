@@ -172,7 +172,7 @@ library NodeSettingsLib {
         }
     }
 
-    function setNodesStatusByOperator(address[] calldata nodeAddrs, NodeStatus[] calldata status)
+    function setNodeStatusByOperator(address[] calldata nodeAddrs, NodeStatus[] calldata status)
         external
     {
         if (nodeAddrs.length != status.length) revert InvalidArrayLength();
@@ -305,16 +305,21 @@ library NodeSettingsLib {
             transitionStatus[2] = NodeStatus.Slashed;
             transitionStatus[3] = NodeStatus.Outdated;
         } else if (newStatus == NodeStatus.Outdated) {
-            // Initializing, Online -> Outdated
-            transitionStatus = new NodeStatus[](2);
-            transitionStatus[0] = NodeStatus.Initializing;
-            transitionStatus[1] = NodeStatus.Online;
+            // Registered, Initializing, Online -> Outdated
+            transitionStatus = new NodeStatus[](3);
+            transitionStatus[0] = NodeStatus.Registered;
+            transitionStatus[1] = NodeStatus.Initializing;
+            transitionStatus[2] = NodeStatus.Online;
         } else if (newStatus == NodeStatus.Initializing) {
             // Registered, Online, Outdated -> Initializing
             transitionStatus = new NodeStatus[](3);
             transitionStatus[0] = NodeStatus.Registered;
             transitionStatus[2] = NodeStatus.Online;
             transitionStatus[1] = NodeStatus.Outdated;
+        } else if (newStatus == NodeStatus.Registered) {
+            // Outdated -> Registered
+            transitionStatus = new NodeStatus[](1);
+            transitionStatus[0] = NodeStatus.Outdated;
         }
     }
 }

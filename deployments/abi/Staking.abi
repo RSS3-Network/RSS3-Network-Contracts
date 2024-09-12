@@ -1107,7 +1107,7 @@
   },
   {
     "type": "function",
-    "name": "setNodesStatusByOperator",
+    "name": "setNodeStatusByOperator",
     "inputs": [
       {
         "name": "nodeAddrs",

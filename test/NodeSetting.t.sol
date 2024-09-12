@@ -8,6 +8,7 @@ import {
     CurStateCantExit,
     CurStatusCantOnline,
     DepositForPublicGoodNode,
+    InvalidArrayLength,
     InvalidNodeStatusTransition,
     NodeDepositBelowMinimum,
     NodeExists,
@@ -431,14 +432,14 @@ contract NodeSettingTest is CommonTest {
         vm.stopPrank();
     }
 
-    function testSetNodesStatusByOperator() public {
+    function testsetNodeStatusByOperator() public {
         _createNode(alice);
         vm.prank(operatorAccount);
-        _staking.setNodesStatusByOperator(array(alice), array(NodeStatus.Registered));
+        _staking.setNodeStatusByOperator(array(alice), array(NodeStatus.Registered));
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
         vm.prank(operatorAccount);
-        _staking.setNodesStatusByOperator(array(alice), array(NodeStatus.Initializing));
+        _staking.setNodeStatusByOperator(array(alice), array(NodeStatus.Initializing));
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Initializing));
     }
 
@@ -473,13 +474,27 @@ contract NodeSettingTest is CommonTest {
 
     // solhint-disable-next-line function-max-lines
     function testSetNodesStatusFail() public {
+        // case 1: caller has no ORACLE_ROLE
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
+            )
+        );
+        _staking.setNodeStatus(array(alice), array(NodeStatus.Online));
+
+        // case 2: InvalidArrayLength
+        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
+        vm.prank(address(_settlement));
+        _staking.setNodeStatus(array(alice, bob), array(NodeStatus.Online));
+
+        // case 3: InvalidNodeStatusTransition
+
         _createNode(alice);
 
         // InvalidNodeStatusTransition
         // transitions to these status are not allowed by the `setNodeStatus`
         NodeStatus[] memory status = array(
             NodeStatus.None,
-            NodeStatus.Registered,
             NodeStatus.Offline,
             NodeStatus.Slashing,
             NodeStatus.Slashed,
@@ -487,85 +502,108 @@ contract NodeSettingTest is CommonTest {
             NodeStatus.Exited
         );
         for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, NodeStatus.None, status[i]);
+            _invalidNodeStatusTransition(alice, array(NodeStatus.None), status[i]);
         }
 
         // -> Initializing
-        // these status can't be set to Initializing
-        status = array(
-            NodeStatus.None,
-            NodeStatus.Initializing,
-            NodeStatus.Offline,
-            NodeStatus.Slashing,
-            NodeStatus.Slashed,
-            NodeStatus.Exiting,
-            NodeStatus.Exited
+        // these curStatus can't be set to Initializing
+        _invalidNodeStatusTransition(
+            alice,
+            array(
+                NodeStatus.None,
+                NodeStatus.Initializing,
+                NodeStatus.Offline,
+                NodeStatus.Slashing,
+                NodeStatus.Slashed,
+                NodeStatus.Exiting,
+                NodeStatus.Exited
+            ),
+            NodeStatus.Initializing
         );
-        for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Initializing);
-        }
 
         // -> Online
-        // these status can't be set to Online
-        status = array(
-            NodeStatus.None,
-            NodeStatus.Registered,
-            NodeStatus.Online,
-            NodeStatus.Slashing,
-            NodeStatus.Exiting,
-            NodeStatus.Exited
+        // these curStatus can't be set to Online
+        _invalidNodeStatusTransition(
+            alice,
+            array(
+                NodeStatus.None,
+                NodeStatus.Registered,
+                NodeStatus.Online,
+                NodeStatus.Slashing,
+                NodeStatus.Exiting,
+                NodeStatus.Exited
+            ),
+            NodeStatus.Online
         );
-        for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Online);
-        }
 
         // -> Offline
-        // these status can't be set to Offline
-        status = array(
-            NodeStatus.None,
-            NodeStatus.Registered,
-            NodeStatus.Initializing,
-            NodeStatus.Outdated,
-            NodeStatus.Offline,
-            NodeStatus.Slashing,
-            NodeStatus.Slashed,
-            NodeStatus.Exited
+        // these curStatus can't be set to Offline
+        _invalidNodeStatusTransition(
+            alice,
+            array(
+                NodeStatus.None,
+                NodeStatus.Registered,
+                NodeStatus.Initializing,
+                NodeStatus.Outdated,
+                NodeStatus.Offline,
+                NodeStatus.Slashing,
+                NodeStatus.Slashed,
+                NodeStatus.Exited
+            ),
+            NodeStatus.Offline
         );
-        for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Offline);
-        }
 
         // -> Outdated
-        // these status can't be set to Outdated
-        status = array(
-            NodeStatus.None,
-            NodeStatus.Registered,
-            NodeStatus.Outdated,
-            NodeStatus.Offline,
-            NodeStatus.Slashing,
-            NodeStatus.Slashed,
-            NodeStatus.Exited,
+        // these curStatus can't be set to Outdated
+        _invalidNodeStatusTransition(
+            alice,
+            array(
+                NodeStatus.None,
+                NodeStatus.Outdated,
+                NodeStatus.Offline,
+                NodeStatus.Slashing,
+                NodeStatus.Slashed,
+                NodeStatus.Exited,
+                NodeStatus.Outdated
+            ),
             NodeStatus.Outdated
         );
-        for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Outdated);
-        }
+
+        // -> Registered
+        // these curStatus can't be set to Registered
+        _invalidNodeStatusTransition(
+            alice,
+            array(
+                NodeStatus.None,
+                NodeStatus.Registered,
+                NodeStatus.Initializing,
+                NodeStatus.Online,
+                NodeStatus.Offline,
+                NodeStatus.Slashing,
+                NodeStatus.Slashed,
+                NodeStatus.Exiting,
+                NodeStatus.Exited
+            ),
+            NodeStatus.Registered
+        );
     }
 
     function _invalidNodeStatusTransition(
         address nodeAddr,
-        NodeStatus curStatus,
+        NodeStatus[] memory curStatus,
         NodeStatus newStatus
     ) internal {
-        _presetNodeStatus(nodeAddr, curStatus);
+        for (uint256 i = 0; i < curStatus.length; i++) {
+            _presetNodeStatus(nodeAddr, curStatus[i]);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                InvalidNodeStatusTransition.selector, uint256(curStatus), uint256(newStatus)
-            )
-        );
-        vm.prank(address(_settlement));
-        _staking.setNodeStatus(array(nodeAddr), array(newStatus));
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    InvalidNodeStatusTransition.selector, uint256(curStatus[i]), uint256(newStatus)
+                )
+            );
+            vm.prank(address(_settlement));
+            _staking.setNodeStatus(array(nodeAddr), array(newStatus));
+        }
     }
 
     function _setAndCheckNodeStatus(address nodeAddr, NodeStatus curStatus, NodeStatus newStatus)
