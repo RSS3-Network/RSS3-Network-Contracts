@@ -213,7 +213,7 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testDeposit(uint256 amount) public {
-        amount = bound(amount, 10_000 ether, _initialAmount);
+        amount = bound(amount, 1 ether, 100_000 ether);
 
         _createNode(alice);
 
@@ -224,6 +224,11 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         Node memory node = _staking.getNode(alice);
         assertEq(node.operationPoolTokens, amount);
+
+        // check node status
+        NodeStatus expectedStatus =
+            amount >= Const.MIN_DEPOSIT ? NodeStatus.Registered : NodeStatus.None;
+        assertEq(uint256(_staking.getNode(alice).status), uint256(expectedStatus));
     }
 
     function testDepositAfterExit() public {

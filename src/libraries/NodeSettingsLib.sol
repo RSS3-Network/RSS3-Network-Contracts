@@ -77,6 +77,10 @@ library NodeSettingsLib {
         node.taxRateBasisPoints = publicGood ? 0 : taxRateBasisPoints;
         node.publicGood = publicGood;
         node.alpha = isAlphaPhase;
+        // public good node will be registered automatically
+        if (publicGood) {
+            node.status = NodeStatus.Registered;
+        }
 
         // add to node list
         StorageLib.nodeAddrs().add(nodeAddr);
@@ -125,9 +129,10 @@ library NodeSettingsLib {
             revert NodeNotInExitStatus(uint256(curStatus));
         }
 
-        // check if the node's operation pool tokens are below the minimum deposit amount.
-        uint256 operationPoolTokens = StorageLib.getNode(nodeAddr).operationPoolTokens;
-        if (operationPoolTokens < Const.MIN_DEPOSIT) revert NodeDepositBelowMinimum();
+        // checks if the node's operation pool tokens are below the minimum deposit amount.
+        if (!node.publicGood && node.operationPoolTokens < Const.MIN_DEPOSIT) {
+            revert NodeDepositBelowMinimum();
+        }
 
         // set node status
         node.status = NodeStatus.Registered;
