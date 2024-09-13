@@ -317,9 +317,10 @@ library NodeSettingsLib {
             transitionStatus[2] = NodeStatus.Online;
             transitionStatus[1] = NodeStatus.Outdated;
         } else if (newStatus == NodeStatus.Registered) {
-            // Outdated -> Registered
-            transitionStatus = new NodeStatus[](1);
-            transitionStatus[0] = NodeStatus.Outdated;
+            // Initializing, Outdated -> Registered
+            transitionStatus = new NodeStatus[](2);
+            transitionStatus[0] = NodeStatus.Initializing;
+            transitionStatus[1] = NodeStatus.Outdated;
         }
     }
 }

@@ -576,7 +576,6 @@ contract NodeSettingTest is CommonTest {
             array(
                 NodeStatus.None,
                 NodeStatus.Registered,
-                NodeStatus.Initializing,
                 NodeStatus.Online,
                 NodeStatus.Offline,
                 NodeStatus.Slashing,
