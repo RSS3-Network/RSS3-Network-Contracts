@@ -19,6 +19,7 @@ import {
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
+import {console2 as console} from "forge-std/console2.sol";
 
 contract NodeSettingTest is CommonTest {
     function setUp() public {
@@ -251,15 +252,6 @@ contract NodeSettingTest is CommonTest {
             // check new status
             Node memory node = _staking.getNode(alice);
             assertEq(uint256(node.status), uint256(expectedStatus));
-
-            // check exit time if node is in Exiting status
-            if (node.status == NodeStatus.Exiting) {
-                assertEq(node.exitTime, block.timestamp + Const.NODE_EXIT_PERIOD);
-
-                // skip the exit period, node should be in Exited status
-                skip(Const.NODE_EXIT_PERIOD);
-                assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
-            }
         }
         vm.stopPrank();
     }
@@ -302,11 +294,8 @@ contract NodeSettingTest is CommonTest {
         _staking.exit();
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
 
-        // Exiting -> Exited
-        skip(Const.NODE_EXIT_PERIOD);
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
-
         // Exited -> Registered
+        _presetNodeStatus(alice, NodeStatus.Exited);
         _staking.register();
         assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
 
@@ -424,6 +413,7 @@ contract NodeSettingTest is CommonTest {
         );
         for (uint256 i = 0; i < status.length; i++) {
             _presetNodeStatus(alice, status[i]);
+            console.log("status[i]", uint256(status[i]));
             vm.expectRevert(
                 abi.encodeWithSelector(CurStatusCantOnline.selector, uint256(status[i]))
             );
@@ -448,28 +438,32 @@ contract NodeSettingTest is CommonTest {
         vm.prank(alice);
         _staking.deposit{value: 10_000 ether}();
 
-        // Online -> Offline
-        _setAndCheckNodeStatus(alice, NodeStatus.Online, NodeStatus.Offline);
-        // Exiting -> Offline
-        _setAndCheckNodeStatus(alice, NodeStatus.Exiting, NodeStatus.Offline);
+        NodeStatus[] memory curStatus = array(
+            NodeStatus.None,
+            NodeStatus.Registered,
+            NodeStatus.Initializing,
+            NodeStatus.Outdated,
+            NodeStatus.Online,
+            NodeStatus.Offline,
+            NodeStatus.Slashing,
+            NodeStatus.Slashed,
+            NodeStatus.Exiting,
+            NodeStatus.Exited
+        );
 
-        // Registered -> Initializing
-        _setAndCheckNodeStatus(alice, NodeStatus.Registered, NodeStatus.Initializing);
-
-        //  Initializing -> Online
-        _setAndCheckNodeStatus(alice, NodeStatus.Initializing, NodeStatus.Online);
-        // Offline -> Online
-        _setAndCheckNodeStatus(alice, NodeStatus.Offline, NodeStatus.Online);
-        // Slashed -> Online
-        _setAndCheckNodeStatus(alice, NodeStatus.Slashed, NodeStatus.Online);
-        // Outdated -> Online
-        _setAndCheckNodeStatus(alice, NodeStatus.Outdated, NodeStatus.Online);
-
-        // Initializing -> Outdated
-        _setAndCheckNodeStatus(alice, NodeStatus.Initializing, NodeStatus.Outdated);
-
-        // Registered -> Initializing
-        _setAndCheckNodeStatus(alice, NodeStatus.Registered, NodeStatus.Initializing);
+        NodeStatus[] memory newStatus = array(
+            NodeStatus.Registered,
+            NodeStatus.Initializing,
+            NodeStatus.Outdated,
+            NodeStatus.Online,
+            NodeStatus.Offline,
+            NodeStatus.Exited
+        );
+        for (uint256 i = 0; i < curStatus.length; i++) {
+            for (uint256 j = 0; j < newStatus.length; j++) {
+                _setAndCheckNodeStatus(alice, curStatus[i], newStatus[j]);
+            }
+        }
     }
 
     // solhint-disable-next-line function-max-lines
@@ -492,13 +486,8 @@ contract NodeSettingTest is CommonTest {
         _createNode(alice);
 
         // set to these status are not allowed
-        NodeStatus[] memory status = array(
-            NodeStatus.None,
-            NodeStatus.Slashing,
-            NodeStatus.Slashed,
-            NodeStatus.Exiting,
-            NodeStatus.Exited
-        );
+        NodeStatus[] memory status =
+            array(NodeStatus.None, NodeStatus.Slashing, NodeStatus.Slashed, NodeStatus.Exiting);
         for (uint256 i = 0; i < status.length; i++) {
             vm.expectRevert(abi.encodeWithSelector(StatusNotAllowed.selector, uint256(status[i])));
             vm.prank(address(_settlement));

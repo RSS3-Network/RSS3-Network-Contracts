@@ -10,7 +10,6 @@ import {
     InvalidArrayLength,
     NodeDepositBelowMinimum,
     NodeExists,
-    NodeInExitStatus,
     NodeIsPublicGood,
     NodeNotInExitStatus,
     StatusNotAllowed,
@@ -94,20 +93,18 @@ library NodeSettingsLib {
      * @notice Allows a node to exit from the network.
      * @dev The node must be in a valid state to exit.
      * If the node is registered, initializing, or slashed, its status will be set to "Exited".
-     * If the node is online, its status will be set to "Exiting",
-     * and the exit time will be set to the current block timestamp plus the node exit period.
+     * If the node is online, its status will be set to "Exiting".
      * If the node is in any other state, a revert will occur with the corresponding error message.
      * @param nodeAddr The address of the node to exit.
      */
     function exit(address nodeAddr) external {
         Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
 
-        NodeStatus curStatus = _getNodeStatus(node);
+        NodeStatus curStatus = node.status;
         if (_canExitImmediately(curStatus)) {
             node.status = NodeStatus.Exited;
         } else if (curStatus == NodeStatus.Online) {
             node.status = NodeStatus.Exiting;
-            node.exitTime = block.timestamp + Const.NODE_EXIT_PERIOD;
         } else {
             revert CurStateCantExit(uint256(curStatus));
         }
@@ -123,7 +120,7 @@ library NodeSettingsLib {
     function register(address nodeAddr) external {
         Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
 
-        NodeStatus curStatus = _getNodeStatus(node);
+        NodeStatus curStatus = node.status;
         // throws a `NodeNotInExitStatus` error if the node is not in "Exited" status.
         if (curStatus != NodeStatus.Exited) {
             revert NodeNotInExitStatus(uint256(curStatus));
@@ -148,7 +145,7 @@ library NodeSettingsLib {
         Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
 
         // if the current status is not Offline, Slashed, or Outdated, it reverts with an error
-        NodeStatus curStatus = _getNodeStatus(node);
+        NodeStatus curStatus = node.status;
         if (!_canOnline(curStatus)) {
             revert CurStatusCantOnline(uint256(curStatus));
         }
@@ -179,27 +176,24 @@ library NodeSettingsLib {
 
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             Node storage node = StorageLib.getNodeOrRevert(nodeAddrs[i]);
-            NodeStatus curStatus = _getNodeStatus(node);
+            NodeStatus curStatus = node.status;
             node.status = status[i];
             emit Events.NodeStatusChanged(nodeAddrs[i], curStatus, status[i]);
         }
     }
 
     /// @dev Returns the information of a node.
-    function getNode(address nodeAddr) external view returns (Node memory) {
-        Node memory node = StorageLib.getNode(nodeAddr);
-        node.status = _getNodeStatus(node);
-        return node;
+    function getNode(address nodeAddr) external pure returns (Node memory) {
+        return StorageLib.getNode(nodeAddr);
     }
 
     /// @dev Returns the information of multiple nodes.
-    function getNodes(address[] calldata nodeAddrs) external view returns (Node[] memory nodes) {
+    function getNodes(address[] calldata nodeAddrs) external pure returns (Node[] memory nodes) {
         nodes = new Node[](nodeAddrs.length);
         for (uint256 i = 0; i < nodeAddrs.length; i++) {
             address nodeAddr = nodeAddrs[i];
 
             nodes[i] = StorageLib.getNode(nodeAddr);
-            nodes[i].status = _getNodeStatus(nodes[i]);
         }
     }
 
@@ -214,26 +208,9 @@ library NodeSettingsLib {
         }
 
         Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
-        NodeStatus curStatus = _getNodeStatus(node);
+        NodeStatus curStatus = node.status;
         node.status = newStatus;
         emit Events.NodeStatusChanged(nodeAddr, curStatus, newStatus);
-    }
-
-    /// @dev Returns the current status of a node
-    function _getNodeStatus(Node memory node) internal view returns (NodeStatus) {
-        //  An Exiting node transitions to Exited state after 1 Epoch.
-        if (node.status == NodeStatus.Exiting && node.exitTime <= block.timestamp) {
-            return NodeStatus.Exited;
-        }
-
-        return node.status;
-    }
-
-    /// @dev Validates that a node is not in an exit status (Exiting or Exited).
-    function _validateNodeNotInExitStatus(address nodeAddr) internal view {
-        Node storage node = StorageLib.getNode(nodeAddr);
-        NodeStatus status = _getNodeStatus(node);
-        if (NodeStatus.Exiting == status || NodeStatus.Exited == status) revert NodeInExitStatus();
     }
 
     /// @dev Returns true if a node can exit immediately based on its current status.
@@ -252,7 +229,7 @@ library NodeSettingsLib {
     function _isStatusAllowed(NodeStatus status) internal pure returns (bool) {
         return status == NodeStatus.Registered || status == NodeStatus.Initializing
             || status == NodeStatus.Outdated || status == NodeStatus.Online
-            || status == NodeStatus.Offline;
+            || status == NodeStatus.Offline || status == NodeStatus.Exited;
     }
 
     /// @dev Returns true if a node can online based on its current status.

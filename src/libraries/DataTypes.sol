@@ -31,8 +31,6 @@ struct Node {
     uint256 slashedOperationPoolTokens;
     /// @notice slashed tokens of staking pool
     uint256 slashedStakingPoolTokens;
-    /// @notice the time node can safely exit
-    uint256 exitTime;
     /// @notice the status of the node
     NodeStatus status;
 }

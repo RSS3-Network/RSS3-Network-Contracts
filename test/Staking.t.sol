@@ -79,7 +79,6 @@ contract StakingTest is CommonTest, IERC721Errors {
                     totalShares: 0,
                     slashedStakingPoolTokens: 0,
                     slashedOperationPoolTokens: 0,
-                    exitTime: 0,
                     status: NodeStatus.None
                 })
             )

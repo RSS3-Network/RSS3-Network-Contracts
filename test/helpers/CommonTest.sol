@@ -148,18 +148,9 @@ contract CommonTest is Utils {
     function _presetNodeStatus(address nodeAddr, NodeStatus status) internal {
         bytes32 slot =
             keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
-        // node.status is at offset 10 of struct Node
-        slot = bytes32(uint256(slot) + 10);
+        // node.status is at offset 9 of struct Node
+        slot = bytes32(uint256(slot) + 9);
         vm.store(address(_staking), slot, bytes32(uint256(status)));
-
-        if (status == NodeStatus.Exiting) {
-            slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
-            // node.exitTime is at offset 9 of struct Node
-            slot = bytes32(uint256(slot) + 9);
-            vm.store(
-                address(_staking), slot, bytes32(uint256(block.timestamp + Const.NODE_EXIT_PERIOD))
-            );
-        }
     }
 
     function _getTreasuryAmount() internal returns (uint256) {

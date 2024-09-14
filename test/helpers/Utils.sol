@@ -290,4 +290,30 @@ contract Utils is Test {
         arr[8] = j;
         return arr;
     }
+
+    function array(
+        NodeStatus a,
+        NodeStatus b,
+        NodeStatus c,
+        NodeStatus d,
+        NodeStatus e,
+        NodeStatus f,
+        NodeStatus g,
+        NodeStatus h,
+        NodeStatus j,
+        NodeStatus k
+    ) public pure returns (NodeStatus[] memory) {
+        NodeStatus[] memory arr = new NodeStatus[](10);
+        arr[0] = a;
+        arr[1] = b;
+        arr[2] = c;
+        arr[3] = d;
+        arr[4] = e;
+        arr[5] = f;
+        arr[6] = g;
+        arr[7] = h;
+        arr[8] = j;
+        arr[9] = k;
+        return arr;
+    }
 }
