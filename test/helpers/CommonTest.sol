@@ -11,10 +11,10 @@ import {Const} from "../../src/libraries/Const.sol";
 import {Demotion, Node, NodeStatus} from "../../src/libraries/DataTypes.sol";
 import {StorageLib} from "../../src/libraries/StorageLib.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
-import {TransparentUpgradeableProxy as Proxy} from
-    "../../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {InternalSettlement} from "./InternalSettlement.sol";
 import {Utils} from "./Utils.sol";
+import {TransparentUpgradeableProxy as Proxy} from
+    "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract CommonTest is Utils {
     address public constant alice = address(0x111);

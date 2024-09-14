@@ -6,9 +6,10 @@ import {Chips} from "../src/Chips.sol";
 import {NetworkParams} from "../src/NetworkParams.sol";
 import {Settlement} from "../src/Settlement.sol";
 import {Staking} from "../src/Staking.sol";
-import {TransparentUpgradeableProxy} from "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {DeployConfig} from "./DeployConfig.s.sol";
 import {Deployer} from "./Deployer.sol";
+import {TransparentUpgradeableProxy} from
+    "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
 contract Deploy is Deployer {
@@ -86,7 +87,7 @@ contract Deploy is Deployer {
         address logic = mustGetAddress(_stripSemver(_name));
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy({
             _logic: logic,
-            admin_: cfg.proxyAdminOwner(),
+            initialOwner: cfg.proxyAdminOwner(),
             _data: ""
         });
 
