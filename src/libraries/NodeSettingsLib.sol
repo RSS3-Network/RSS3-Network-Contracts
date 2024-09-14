@@ -8,12 +8,12 @@ import {
     CurStateCantExit,
     CurStatusCantOnline,
     InvalidArrayLength,
-    InvalidNodeStatusTransition,
     NodeDepositBelowMinimum,
     NodeExists,
     NodeInExitStatus,
     NodeIsPublicGood,
     NodeNotInExitStatus,
+    StatusNotAllowed,
     TaxRateBasisPointsOutOfRange
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
@@ -209,14 +209,12 @@ library NodeSettingsLib {
      * @param newStatus The new status to set for the node.
      */
     function _setNodeStatus(address nodeAddr, NodeStatus newStatus) internal {
-        Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
-        NodeStatus curStatus = _getNodeStatus(node);
-
-        // throws a `InvalidNodeStatusTransition` error if the transition is invalid.
-        if (!_isValidStatusTransition(curStatus, newStatus)) {
-            revert InvalidNodeStatusTransition(uint256(curStatus), uint256(newStatus));
+        if (!_isStatusAllowed(newStatus)) {
+            revert StatusNotAllowed(uint256(newStatus));
         }
 
+        Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
+        NodeStatus curStatus = _getNodeStatus(node);
         node.status = newStatus;
         emit Events.NodeStatusChanged(nodeAddr, curStatus, newStatus);
     }
@@ -245,6 +243,18 @@ library NodeSettingsLib {
             || status == NodeStatus.Slashed;
     }
 
+    /**
+     * @dev Checks if the given status is allowed to set by the global indexer through
+     * `setNodesStatus`.
+     * @param status The status to check.
+     * @return bool True if the status is allowed, false otherwise.
+     */
+    function _isStatusAllowed(NodeStatus status) internal pure returns (bool) {
+        return status == NodeStatus.Registered || status == NodeStatus.Initializing
+            || status == NodeStatus.Outdated || status == NodeStatus.Online
+            || status == NodeStatus.Offline;
+    }
+
     /// @dev Returns true if a node can online based on its current status.
     function _canOnline(NodeStatus status) internal pure returns (bool) {
         return status == NodeStatus.Offline || status == NodeStatus.Slashed
@@ -258,69 +268,6 @@ library NodeSettingsLib {
                 || taxRateBasisPoints > Const.DENOMINATOR
         ) {
             revert TaxRateBasisPointsOutOfRange(taxRateBasisPoints);
-        }
-    }
-
-    /**
-     * @dev Checks if a transition from curStatus -> newStatus is valid.
-     * @param curStatus The current node status.
-     * @param newStatus The new node status.
-     * @return A boolean indicating whether the transition is valid or not.
-     */
-    function _isValidStatusTransition(NodeStatus curStatus, NodeStatus newStatus)
-        internal
-        pure
-        returns (bool)
-    {
-        // validate that the curStatus must in the validCurStatus
-        NodeStatus[] memory validCurStatus = _getValidTransitionStatus(newStatus);
-        for (uint256 i = 0; i < validCurStatus.length; i++) {
-            if (validCurStatus[i] == curStatus) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @dev Returns an array of valid transition status for a given `newStatus`.
-     * @param newStatus The new status to check valid transitions for.
-     * @return transitionStatus An array of valid transitions for the given `newStatus`.
-     */
-    function _getValidTransitionStatus(NodeStatus newStatus)
-        internal
-        pure
-        returns (NodeStatus[] memory transitionStatus)
-    {
-        if (newStatus == NodeStatus.Offline) {
-            // Online, Exiting -> Offline
-            transitionStatus = new NodeStatus[](2);
-            transitionStatus[0] = NodeStatus.Online;
-            transitionStatus[1] = NodeStatus.Exiting;
-        } else if (newStatus == NodeStatus.Online) {
-            // Initializing, Outdated, Slashed, Offline -> Online
-            transitionStatus = new NodeStatus[](4);
-            transitionStatus[0] = NodeStatus.Initializing;
-            transitionStatus[1] = NodeStatus.Offline;
-            transitionStatus[2] = NodeStatus.Slashed;
-            transitionStatus[3] = NodeStatus.Outdated;
-        } else if (newStatus == NodeStatus.Outdated) {
-            // Registered, Initializing, Online -> Outdated
-            transitionStatus = new NodeStatus[](3);
-            transitionStatus[0] = NodeStatus.Registered;
-            transitionStatus[1] = NodeStatus.Initializing;
-            transitionStatus[2] = NodeStatus.Online;
-        } else if (newStatus == NodeStatus.Initializing) {
-            // Registered, Online, Outdated -> Initializing
-            transitionStatus = new NodeStatus[](3);
-            transitionStatus[0] = NodeStatus.Registered;
-            transitionStatus[2] = NodeStatus.Online;
-            transitionStatus[1] = NodeStatus.Outdated;
-        } else if (newStatus == NodeStatus.Registered) {
-            // Initializing, Outdated -> Registered
-            transitionStatus = new NodeStatus[](2);
-            transitionStatus[0] = NodeStatus.Initializing;
-            transitionStatus[1] = NodeStatus.Outdated;
         }
     }
 }

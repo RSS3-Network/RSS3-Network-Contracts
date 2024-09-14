@@ -26,8 +26,8 @@ error InvalidEpochNumber(uint256 current, uint256 got);
 /// @dev Submission interval has not elapsed.
 error SubmissionIntervalNotElapsed();
 
-/// @dev Invalid node status transition
-error InvalidNodeStatusTransition(uint256 curStatus, uint256 newStatus);
+/// @dev Status not allowed to set.
+error StatusNotAllowed(uint256 newStatus);
 
 /// @dev Can't request exit in current state
 error CurStateCantExit(uint256 curStatus);

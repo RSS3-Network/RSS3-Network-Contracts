@@ -9,12 +9,12 @@ import {
     CurStatusCantOnline,
     DepositForPublicGoodNode,
     InvalidArrayLength,
-    InvalidNodeStatusTransition,
     NodeDepositBelowMinimum,
     NodeExists,
     NodeIsPublicGood,
     NodeNotExists,
     NodeNotInExitStatus,
+    StatusNotAllowed,
     TaxRateBasisPointsOutOfRange
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
@@ -487,121 +487,22 @@ contract NodeSettingTest is CommonTest {
         vm.prank(address(_settlement));
         _staking.setNodeStatus(array(alice, bob), array(NodeStatus.Online));
 
-        // case 3: InvalidNodeStatusTransition
+        // case 3: StatusNotAllowed
 
         _createNode(alice);
 
-        // InvalidNodeStatusTransition
-        // transitions to these status are not allowed by the `setNodeStatus`
+        // set to these status are not allowed
         NodeStatus[] memory status = array(
             NodeStatus.None,
-            NodeStatus.Offline,
             NodeStatus.Slashing,
             NodeStatus.Slashed,
             NodeStatus.Exiting,
             NodeStatus.Exited
         );
         for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, array(NodeStatus.None), status[i]);
-        }
-
-        // -> Initializing
-        // these curStatus can't be set to Initializing
-        _invalidNodeStatusTransition(
-            alice,
-            array(
-                NodeStatus.None,
-                NodeStatus.Initializing,
-                NodeStatus.Offline,
-                NodeStatus.Slashing,
-                NodeStatus.Slashed,
-                NodeStatus.Exiting,
-                NodeStatus.Exited
-            ),
-            NodeStatus.Initializing
-        );
-
-        // -> Online
-        // these curStatus can't be set to Online
-        _invalidNodeStatusTransition(
-            alice,
-            array(
-                NodeStatus.None,
-                NodeStatus.Registered,
-                NodeStatus.Online,
-                NodeStatus.Slashing,
-                NodeStatus.Exiting,
-                NodeStatus.Exited
-            ),
-            NodeStatus.Online
-        );
-
-        // -> Offline
-        // these curStatus can't be set to Offline
-        _invalidNodeStatusTransition(
-            alice,
-            array(
-                NodeStatus.None,
-                NodeStatus.Registered,
-                NodeStatus.Initializing,
-                NodeStatus.Outdated,
-                NodeStatus.Offline,
-                NodeStatus.Slashing,
-                NodeStatus.Slashed,
-                NodeStatus.Exited
-            ),
-            NodeStatus.Offline
-        );
-
-        // -> Outdated
-        // these curStatus can't be set to Outdated
-        _invalidNodeStatusTransition(
-            alice,
-            array(
-                NodeStatus.None,
-                NodeStatus.Outdated,
-                NodeStatus.Offline,
-                NodeStatus.Slashing,
-                NodeStatus.Slashed,
-                NodeStatus.Exited,
-                NodeStatus.Outdated
-            ),
-            NodeStatus.Outdated
-        );
-
-        // -> Registered
-        // these curStatus can't be set to Registered
-        _invalidNodeStatusTransition(
-            alice,
-            array(
-                NodeStatus.None,
-                NodeStatus.Registered,
-                NodeStatus.Online,
-                NodeStatus.Offline,
-                NodeStatus.Slashing,
-                NodeStatus.Slashed,
-                NodeStatus.Exiting,
-                NodeStatus.Exited
-            ),
-            NodeStatus.Registered
-        );
-    }
-
-    function _invalidNodeStatusTransition(
-        address nodeAddr,
-        NodeStatus[] memory curStatus,
-        NodeStatus newStatus
-    ) internal {
-        for (uint256 i = 0; i < curStatus.length; i++) {
-            _presetNodeStatus(nodeAddr, curStatus[i]);
-
-            vm.expectRevert(
-                abi.encodeWithSelector(
-                    InvalidNodeStatusTransition.selector, uint256(curStatus[i]), uint256(newStatus)
-                )
-            );
+            vm.expectRevert(abi.encodeWithSelector(StatusNotAllowed.selector, uint256(status[i])));
             vm.prank(address(_settlement));
-            _staking.setNodeStatus(array(nodeAddr), array(newStatus));
+            _staking.setNodeStatus(array(alice), array(status[i]));
         }
     }
 
