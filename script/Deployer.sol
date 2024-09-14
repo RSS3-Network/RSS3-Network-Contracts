@@ -2,7 +2,6 @@
 // solhint-disable private-vars-leading-underscore,no-console,no-empty-blocks,ordering,quotes
 pragma solidity 0.8.24;
 
-import {Chains} from "./lib/Chains.sol";
 import {Executables} from "./lib/Executables.sol";
 import {Script} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
@@ -483,19 +482,7 @@ abstract contract Deployer is Script {
         }
 
         uint256 chainid = vm.envOr("CHAIN_ID", block.chainid);
-        if (chainid == Chains.Mainnet) {
-            return "mainnet";
-        } else if (chainid == Chains.Goerli) {
-            return "goerli";
-        } else if (chainid == Chains.OPMainnet) {
-            return "optimism-mainnet";
-        } else if (chainid == Chains.Sepolia) {
-            return "sepolia";
-        } else if (chainid == Chains.LocalDevNet) {
-            return "devnet";
-        } else {
-            return vm.toString(chainid);
-        }
+        return vm.toString(chainid);
     }
 
     /// @notice Reads the artifact from the filesystem by name and returns the address.
