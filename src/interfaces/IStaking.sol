@@ -233,17 +233,6 @@ interface IStaking {
     function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
 
     /**
-     * @notice Sets the status for nodes.
-     * Requirements:
-     * - The caller must have the `OPERATOR_ROLE`.
-     * @dev Emits a `NodeStatusChanged` event with the updated status.
-     * @param nodeAddrs Addresses of node operator to set.
-     * @param status Status to set.
-     */
-    function setNodeStatusByOperator(address[] calldata nodeAddrs, NodeStatus[] calldata status)
-        external;
-
-    /**
      * @notice Allows a node to exit from the network.
      * @dev Emits the `NodeStatusChanged` event with the updated status.
      * @dev The caller must be the owner of node operator.

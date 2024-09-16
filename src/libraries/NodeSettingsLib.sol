@@ -169,19 +169,6 @@ library NodeSettingsLib {
         }
     }
 
-    function setNodeStatusByOperator(address[] calldata nodeAddrs, NodeStatus[] calldata status)
-        external
-    {
-        if (nodeAddrs.length != status.length) revert InvalidArrayLength();
-
-        for (uint256 i = 0; i < nodeAddrs.length; i++) {
-            Node storage node = StorageLib.getNodeOrRevert(nodeAddrs[i]);
-            NodeStatus curStatus = node.status;
-            node.status = status[i];
-            emit Events.NodeStatusChanged(nodeAddrs[i], curStatus, status[i]);
-        }
-    }
-
     /// @dev Returns the information of a node.
     function getNode(address nodeAddr) external pure returns (Node memory) {
         return StorageLib.getNode(nodeAddr);

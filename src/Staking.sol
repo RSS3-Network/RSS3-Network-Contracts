@@ -366,15 +366,6 @@ contract Staking is
     }
 
     /// @inheritdoc IStaking
-    function setNodeStatusByOperator(address[] calldata nodeAddrs, NodeStatus[] calldata status)
-        external
-        override
-        onlyRole(OPERATOR_ROLE)
-    {
-        NodeSettingsLib.setNodeStatusByOperator(nodeAddrs, status);
-    }
-
-    /// @inheritdoc IStaking
     function exit() external override {
         NodeSettingsLib.exit(msg.sender);
     }
