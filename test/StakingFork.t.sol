@@ -40,7 +40,7 @@ contract StakingForkTest is CommonTest {
         settlement = Settlement(payable(address(settlementProxy)));
 
         // initialize staking contract
-        staking.initialize(address(0), address(0), address(0), address(0), false, true);
+        staking.initialize(address(0), address(0), address(0), false, true);
     }
 
     function testCreateNodeFork() public {

@@ -53,19 +53,6 @@
   },
   {
     "type": "function",
-    "name": "OPERATOR_ROLE",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "ORACLE_ROLE",
     "inputs": [],
     "outputs": [
@@ -854,11 +841,6 @@
         "internalType": "address"
       },
       {
-        "name": "operatorAccount",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
         "name": "isAlphaPhase_",
         "type": "bool",
         "internalType": "bool"
@@ -1075,24 +1057,6 @@
   {
     "type": "function",
     "name": "setNodeStatus",
-    "inputs": [
-      {
-        "name": "nodeAddrs",
-        "type": "address[]",
-        "internalType": "address[]"
-      },
-      {
-        "name": "status",
-        "type": "uint8[]",
-        "internalType": "enum NodeStatus[]"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "setNodeStatusByOperator",
     "inputs": [
       {
         "name": "nodeAddrs",

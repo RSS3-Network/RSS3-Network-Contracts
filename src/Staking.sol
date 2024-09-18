@@ -98,7 +98,6 @@ contract Staking is
     /// ACL
     bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
-    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
     /// @dev demotion
     uint256 internal _demotionIdCounter; // slot 26
@@ -138,7 +137,6 @@ contract Staking is
         address chips,
         address pauseAccount,
         address oracleAccount,
-        address operatorAccount,
         bool isAlphaPhase_,
         bool migrate
     ) external override reinitializer(4) {
@@ -154,11 +152,6 @@ contract Staking is
         // grants `ORACLE_ROLE`
         if (oracleAccount != address(0)) {
             _grantRole(ORACLE_ROLE, oracleAccount);
-        }
-
-        // grant `OPERATOR_ROLE`
-        if (operatorAccount != address(0)) {
-            _grantRole(OPERATOR_ROLE, operatorAccount);
         }
 
         _isAlphaPhase = isAlphaPhase_;

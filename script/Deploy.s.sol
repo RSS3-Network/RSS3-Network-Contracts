@@ -159,7 +159,7 @@ contract Deploy is Deployer {
         address settlementProxy = mustGetAddress("SettlementProxy");
 
         stakingProxy.initialize(
-            chipsProxy, cfg.pauseAccount(), settlementProxy, address(0), cfg.isAlphaPhase(), false
+            chipsProxy, cfg.pauseAccount(), settlementProxy, cfg.isAlphaPhase(), false
         );
         // check states
         require(stakingProxy.hasRole(PAUSE_ROLE, cfg.pauseAccount()), "check pause role error");

@@ -15,7 +15,6 @@ interface IStaking {
      * @param chips Address of the chips contract.
      * @param pauseAccount Address who can pause/unpause the Staking contract.
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
-     * @param operatorAccount Address who can do operator-related operations.
      * @param isAlphaPhase_ Flag indicating if the contract is in alpha phase.
      * @param migrate Flag indicating whether to migrate public pool and pool stat info.
      */
@@ -23,7 +22,6 @@ interface IStaking {
         address chips,
         address pauseAccount,
         address oracleAccount,
-        address operatorAccount,
         bool isAlphaPhase_,
         bool migrate
     ) external;

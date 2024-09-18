@@ -25,7 +25,6 @@ contract CommonTest is Utils {
 
     address public constant proxyAdmin = address(0x777);
     address public constant pauseAccount = address(0x888);
-    address public constant operatorAccount = address(0x889);
     address public constant oracleAccount = address(0x999);
 
     bytes32 public constant PAUSE_ROLE =
@@ -104,12 +103,7 @@ contract CommonTest is Utils {
 
         // init
         _staking.initialize(
-            address(_chips),
-            pauseAccount,
-            address(_settlement),
-            operatorAccount,
-            _cfg.isAlphaPhase(),
-            false
+            address(_chips), pauseAccount, address(_settlement), _cfg.isAlphaPhase(), false
         );
         _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
         _chips.initialize(chipsName, chipsSymbol, address(_staking));
