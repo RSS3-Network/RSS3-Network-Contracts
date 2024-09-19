@@ -19,7 +19,7 @@ import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.s
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 
 contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnumerable {
-    string public constant version = "2.0.0";
+    string public constant version = "2.1.0";
 
     /// @dev Duration of an epoch.
     uint256 public constant EPOCH_DURATION = 18 hours;
@@ -75,7 +75,7 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
-    ) external override reinitializer(5) {
+    ) external override reinitializer(4) {
         if (staking != address(0)) {
             _staking = staking;
         }

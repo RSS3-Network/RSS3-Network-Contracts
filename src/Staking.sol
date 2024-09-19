@@ -39,7 +39,7 @@ contract Staking is
     using EnumerableSet for EnumerableSet.UintSet;
     using Checkpoints for Checkpoints.Trace160;
 
-    string public constant version = "2.0.0";
+    string public constant version = "2.1.0";
 
     /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
     address public immutable TREASURY;
