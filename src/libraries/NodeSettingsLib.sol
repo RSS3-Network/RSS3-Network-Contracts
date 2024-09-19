@@ -144,16 +144,16 @@ library NodeSettingsLib {
     function online(address nodeAddr) external {
         Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
 
-        // if the current status is not Offline, Slashed, or Outdated, it reverts with an error
+        // if the current status is not Offline or Slashed, it reverts with an error
         NodeStatus curStatus = node.status;
-        if (!_canOnline(curStatus)) {
+        if (curStatus != NodeStatus.Offline && curStatus != NodeStatus.Slashed) {
             revert CurStatusCantOnline(uint256(curStatus));
         }
 
         // set node status
-        node.status = NodeStatus.Online;
+        node.status = NodeStatus.Initializing;
 
-        emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Online);
+        emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Initializing);
     }
 
     /**
@@ -217,12 +217,6 @@ library NodeSettingsLib {
         return status == NodeStatus.Registered || status == NodeStatus.Initializing
             || status == NodeStatus.Outdated || status == NodeStatus.Online
             || status == NodeStatus.Offline || status == NodeStatus.Exited;
-    }
-
-    /// @dev Returns true if a node can online based on its current status.
-    function _canOnline(NodeStatus status) internal pure returns (bool) {
-        return status == NodeStatus.Offline || status == NodeStatus.Slashed
-            || status == NodeStatus.Outdated;
     }
 
     /// @dev Validates the tax rate basis points is in the range of [500,10000].

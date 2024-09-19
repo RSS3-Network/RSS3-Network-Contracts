@@ -376,20 +376,19 @@ contract NodeSettingTest is CommonTest {
     function testOnlineSucceeds() public {
         _createNode(alice);
 
-        NodeStatus[] memory status =
-            array(NodeStatus.Offline, NodeStatus.Slashed, NodeStatus.Outdated);
+        NodeStatus[] memory status = array(NodeStatus.Offline, NodeStatus.Slashed);
         for (uint256 i = 0; i < status.length; i++) {
             // preset node status
             _presetNodeStatus(alice, status[i]);
 
             // online
             expectEmit();
-            emit Events.NodeStatusChanged(alice, status[i], NodeStatus.Online);
+            emit Events.NodeStatusChanged(alice, status[i], NodeStatus.Initializing);
             vm.prank(alice);
             _staking.online();
 
             // check node status
-            assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Online));
+            assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Initializing));
         }
     }
 

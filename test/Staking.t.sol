@@ -48,58 +48,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         vm.deal(address(_settlement), 30_000_000 ether);
     }
 
-    function testSetUpState() public {
-        assertEq(_staking.paused(), false);
-
-        assertEq(_staking.getNodeCount(), 0);
-        assertEq(_staking.chipsContract(), address(_chips));
-
-        assertEq(_staking.isAlphaPhase(), _cfg.isAlphaPhase());
-
-        assertEq(_staking.version(), "2.0.0");
-        assertEq(_staking.TREASURY(), _cfg.treasury());
-        assertEq(_staking.PAYMENT_PROCESSOR(), _cfg.paymentProcessor());
-        assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), _cfg.depositUnbondingPeriod());
-        assertEq(_staking.STAKE_UNBONDING_PERIOD(), _cfg.stakeUnbondingPeriod());
-
-        vm.mockCall(
-            address(_staking),
-            abi.encodeWithSelector(Staking.getPublicPool.selector),
-            abi.encode(
-                Node({
-                    nodeId: 0,
-                    account: address(0),
-                    taxRateBasisPoints: 0,
-                    publicGood: false,
-                    alpha: true,
-                    name: "",
-                    description: "",
-                    operationPoolTokens: 0,
-                    stakingPoolTokens: 0,
-                    totalShares: 0,
-                    slashedStakingPoolTokens: 0,
-                    slashedOperationPoolTokens: 0,
-                    status: NodeStatus.None
-                })
-            )
-        );
-
-        // check an empty chip
-        (address nodeAddr, uint256 tokens, uint256 shares) = _staking.getChipInfo(1);
-        assertEq(nodeAddr, address(0));
-        assertEq(tokens, 0);
-        assertEq(shares, 0);
-
-        // check constants
-        assertLt(
-            Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS,
-            Const.DENOMINATOR
-        );
-        assertLt(Const.NODE_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
-        assertLt(Const.USER_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
-        assertLt(Const.MIN_TAX_RATE_BASIS_POINTS, Const.DENOMINATOR);
-    }
-
     function testPause() public {
         // expect events
         expectEmit(CheckAll);
@@ -294,27 +242,50 @@ contract StakingTest is CommonTest, IERC721Errors {
     }
 
     function testRequestWithdrawalSucceedsWithExit() public {
-        uint256 amount = 100_000 ether;
+        uint256 depositAmount = 20_000 ether;
 
         vm.startPrank(alice);
-        _staking.createNode{value: amount}("Alice", "Alice's node", uint64(1000), false);
+        // create node and deposit
+        _staking.createNode("Alice", "Alice's node", uint64(1000), false);
 
-        _staking.exit();
-        skip(Const.NODE_EXIT_PERIOD);
+        // node in these status can initiate exit
+        NodeStatus[] memory status = array(
+            NodeStatus.None,
+            NodeStatus.Registered,
+            NodeStatus.Initializing,
+            NodeStatus.Online,
+            NodeStatus.Outdated,
+            NodeStatus.Slashed
+        );
+        for (uint256 i = 0; i < status.length; i++) {
+            if (status[i] != NodeStatus.Online) {
+                _staking.deposit{value: depositAmount}();
+            }
 
-        uint256 requestId = _staking.requestWithdrawal(amount);
+            // preset node status
+            _presetNodeStatus(alice, status[i]);
 
-        // check status
-        WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
-        assertEq(req.owner, alice);
-        assertEq(req.timestamp, block.timestamp);
-        assertEq(req.amount, amount);
+            NodeStatus expectedStatus =
+                status[i] == NodeStatus.Online ? NodeStatus.Exiting : NodeStatus.Exited;
+            // exit
+            _staking.exit();
 
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
+            // check new status
+            assertEq(uint256(_staking.getNode(alice).status), uint256(expectedStatus));
 
-        // check node info
-        Node memory node = _staking.getNode(alice);
-        assertEq(node.operationPoolTokens, 0);
+            // request withdrawal
+            if (expectedStatus == NodeStatus.Exited) {
+                uint256 requestId = _staking.requestWithdrawal(depositAmount);
+                WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
+                assertEq(req.owner, alice);
+                assertEq(req.timestamp, block.timestamp);
+                assertEq(req.amount, depositAmount);
+
+                // check node info
+                assertEq(_staking.getNode(alice).operationPoolTokens, 0);
+            }
+        }
+        vm.stopPrank();
     }
 
     function testMultipleDepositAndRequestWithdrawal() public {
@@ -918,6 +889,52 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         _staking.withdraw2Treasury();
         assertEq(_cfg.treasury().balance, amount);
+    }
+
+    function testSetUpState() public view {
+        assertEq(_staking.paused(), false);
+
+        assertEq(_staking.getNodeCount(), 0);
+        assertEq(_staking.chipsContract(), address(_chips));
+
+        assertEq(_staking.isAlphaPhase(), _cfg.isAlphaPhase());
+
+        assertEq(_staking.version(), "2.0.0");
+        assertEq(_staking.TREASURY(), _cfg.treasury());
+        assertEq(_staking.PAYMENT_PROCESSOR(), _cfg.paymentProcessor());
+        assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), _cfg.depositUnbondingPeriod());
+        assertEq(_staking.STAKE_UNBONDING_PERIOD(), _cfg.stakeUnbondingPeriod());
+
+        // check public pool
+        Node memory node = _staking.getPublicPool();
+        assertEq(node.nodeId, 0);
+        assertEq(node.account, address(0));
+        assertEq(node.taxRateBasisPoints, 0);
+        assertEq(node.publicGood, false);
+        assertEq(node.alpha, _cfg.isAlphaPhase());
+        assertEq(node.name, "");
+        assertEq(node.description, "");
+        assertEq(node.operationPoolTokens, 0);
+        assertEq(node.stakingPoolTokens, 0);
+        assertEq(node.totalShares, 0);
+        assertEq(node.slashedStakingPoolTokens, 0);
+        assertEq(node.slashedOperationPoolTokens, 0);
+        assertEq(uint256(node.status), uint256(NodeStatus.None));
+
+        // check an empty chip
+        (address nodeAddr, uint256 tokens, uint256 shares) = _staking.getChipInfo(1);
+        assertEq(nodeAddr, address(0));
+        assertEq(tokens, 0);
+        assertEq(shares, 0);
+
+        // check constants
+        assertLt(
+            Const.SLASH_REPORTER_BONUS_RATE_BASIS_POINTS + Const.SLASH_BURN_RATE_BASIS_POINTS,
+            Const.DENOMINATOR
+        );
+        assertLt(Const.NODE_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
+        assertLt(Const.USER_SLASH_RATE_BASIS_POINTS, Const.DENOMINATOR);
+        assertLt(Const.MIN_TAX_RATE_BASIS_POINTS, Const.DENOMINATOR);
     }
 
     function testNodeAvatar() public view {

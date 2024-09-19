@@ -245,7 +245,7 @@ interface IStaking {
     function register() external;
 
     /**
-     * @notice Transition a node to online status.
+     * @notice Requests to online. The node status will be set as `Initializing`.
      * @dev Emits a `NodeStatusChanged` event with the updated status.
      * @dev The caller must be the owner of node operator.
      */
