@@ -899,7 +899,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         assertEq(_staking.isAlphaPhase(), _cfg.isAlphaPhase());
 
-        assertEq(_staking.version(), "2.0.0");
+        assertEq(_staking.version(), "2.1.0");
         assertEq(_staking.TREASURY(), _cfg.treasury());
         assertEq(_staking.PAYMENT_PROCESSOR(), _cfg.paymentProcessor());
         assertEq(_staking.DEPOSIT_UNBONDING_PERIOD(), _cfg.depositUnbondingPeriod());

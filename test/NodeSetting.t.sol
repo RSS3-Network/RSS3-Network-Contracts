@@ -251,7 +251,7 @@ contract NodeSettingTest is CommonTest {
 
             // check new status
             Node memory node = _staking.getNode(alice);
-            assertEq(uint256(node.status), uint256(expectedStatus));
+            _assertEq(node.status, expectedStatus);
         }
         vm.stopPrank();
     }
@@ -282,22 +282,22 @@ contract NodeSettingTest is CommonTest {
     function testNodeStatus() public {
         _createNode(alice);
         // None
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.None));
+        _assertEq(_getNodeStatus(alice), NodeStatus.None);
 
         // None -> Registered
         vm.startPrank(alice);
         _staking.deposit{value: Const.MIN_DEPOSIT}();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+        _assertEq(_getNodeStatus(alice), NodeStatus.Registered);
 
         // Registered -> Initializing
         _presetNodeStatus(alice, NodeStatus.Online);
         _staking.exit();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
+        _assertEq(_getNodeStatus(alice), NodeStatus.Exiting);
 
         // Exited -> Registered
         _presetNodeStatus(alice, NodeStatus.Exited);
         _staking.register();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+        _assertEq(_getNodeStatus(alice), NodeStatus.Registered);
 
         vm.stopPrank();
     }
@@ -319,20 +319,20 @@ contract NodeSettingTest is CommonTest {
             _staking.register();
 
             // check node status
-            assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+            _assertEq(_getNodeStatus(alice), NodeStatus.Registered);
         }
         vm.stopPrank();
 
         // case 2: node is public good
         _createPublicGoodNode(bob);
-        assertEq(uint256(_getNodeStatus(bob)), uint256(NodeStatus.Registered));
+        _assertEq(_getNodeStatus(bob), NodeStatus.Registered);
 
         vm.startPrank(bob);
         _staking.exit();
-        assertEq(uint256(_getNodeStatus(bob)), uint256(NodeStatus.Exited));
+        _assertEq(_getNodeStatus(bob), NodeStatus.Exited);
 
         _staking.register();
-        assertEq(uint256(_getNodeStatus(bob)), uint256(NodeStatus.Registered));
+        _assertEq(_getNodeStatus(bob), NodeStatus.Registered);
         vm.stopPrank();
     }
 
@@ -388,7 +388,7 @@ contract NodeSettingTest is CommonTest {
             _staking.online();
 
             // check node status
-            assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Initializing));
+            _assertEq(_getNodeStatus(alice), NodeStatus.Initializing);
         }
     }
 
@@ -494,6 +494,6 @@ contract NodeSettingTest is CommonTest {
         _staking.setNodeStatus(array(nodeAddr), array(newStatus));
 
         // check status
-        assertEq(uint256(_getNodeStatus(nodeAddr)), uint256(newStatus));
+        _assertEq(_getNodeStatus(nodeAddr), newStatus);
     }
 }

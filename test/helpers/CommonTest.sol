@@ -235,4 +235,8 @@ contract CommonTest is Utils {
     {
         return (rewards * taxRateBasisPoints) / Const.DENOMINATOR;
     }
+
+    function _assertEq(NodeStatus a, NodeStatus b) internal pure {
+        assertEq(uint256(a), uint256(b));
+    }
 }
