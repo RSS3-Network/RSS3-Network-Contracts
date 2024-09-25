@@ -39,7 +39,7 @@ contract Staking is
     using EnumerableSet for EnumerableSet.UintSet;
     using Checkpoints for Checkpoints.Trace160;
 
-    string public constant version = "2.0.0";
+    string public constant version = "2.1.0";
 
     /// @dev the treasury receives all unqualified rewards, e.g. the exceeding part of the tax
     address public immutable TREASURY;
@@ -137,8 +137,9 @@ contract Staking is
         address chips,
         address pauseAccount,
         address oracleAccount,
-        bool isAlphaPhase_
-    ) external override reinitializer(3) {
+        bool isAlphaPhase_,
+        bool migrate
+    ) external override reinitializer(4) {
         if (chips != address(0)) {
             _chips = chips;
         }
@@ -156,10 +157,12 @@ contract Staking is
         _isAlphaPhase = isAlphaPhase_;
 
         /// TODO: should be removed in next version
-        // migrate public pool
-        _migratePublicPool();
-        // migrate pool stat info
-        _migratePoolStatInfo();
+        if (migrate) {
+            // migrate public pool
+            _migratePublicPool();
+            // migrate pool stat info
+            _migratePoolStatInfo();
+        }
     }
 
     /// @inheritdoc IStaking
@@ -458,21 +461,6 @@ contract Staking is
     }
 
     /// @inheritdoc IStaking
-    function getNode(address nodeAddr) external view override returns (Node memory) {
-        return NodeSettingsLib.getNode(nodeAddr);
-    }
-
-    /// @inheritdoc IStaking
-    function getNodes(address[] calldata nodeAddrs)
-        external
-        view
-        override
-        returns (Node[] memory nodes)
-    {
-        return NodeSettingsLib.getNodes(nodeAddrs);
-    }
-
-    /// @inheritdoc IStaking
     function chipsContract() external view override returns (address) {
         return StorageLib.getChipsContract();
     }
@@ -480,6 +468,21 @@ contract Staking is
     /// @inheritdoc IStaking
     function getPublicPool() external pure override returns (Node memory) {
         return StorageLib.publicPool();
+    }
+
+    /// @inheritdoc IStaking
+    function getNode(address nodeAddr) external pure override returns (Node memory) {
+        return NodeSettingsLib.getNode(nodeAddr);
+    }
+
+    /// @inheritdoc IStaking
+    function getNodes(address[] calldata nodeAddrs)
+        external
+        pure
+        override
+        returns (Node[] memory nodes)
+    {
+        return NodeSettingsLib.getNodes(nodeAddrs);
     }
 
     function _migratePublicPool() internal {

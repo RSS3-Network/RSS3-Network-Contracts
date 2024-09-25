@@ -410,11 +410,6 @@
             "internalType": "uint256"
           },
           {
-            "name": "exitTime",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
             "name": "status",
             "type": "uint8",
             "internalType": "enum NodeStatus"
@@ -422,7 +417,7 @@
         ]
       }
     ],
-    "stateMutability": "view"
+    "stateMutability": "pure"
   },
   {
     "type": "function",
@@ -533,11 +528,6 @@
             "internalType": "uint256"
           },
           {
-            "name": "exitTime",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
             "name": "status",
             "type": "uint8",
             "internalType": "enum NodeStatus"
@@ -545,7 +535,7 @@
         ]
       }
     ],
-    "stateMutability": "view"
+    "stateMutability": "pure"
   },
   {
     "type": "function",
@@ -718,11 +708,6 @@
             "internalType": "uint256"
           },
           {
-            "name": "exitTime",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
             "name": "status",
             "type": "uint8",
             "internalType": "enum NodeStatus"
@@ -857,6 +842,11 @@
       },
       {
         "name": "isAlphaPhase_",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "migrate",
         "type": "bool",
         "internalType": "bool"
       }

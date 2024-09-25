@@ -11,10 +11,10 @@ import {Const} from "../../src/libraries/Const.sol";
 import {Demotion, Node, NodeStatus} from "../../src/libraries/DataTypes.sol";
 import {StorageLib} from "../../src/libraries/StorageLib.sol";
 import {RSS3Token} from "../../src/mocks/RSS3Token.sol";
-import {TransparentUpgradeableProxy as Proxy} from
-    "../../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {InternalSettlement} from "./InternalSettlement.sol";
 import {Utils} from "./Utils.sol";
+import {TransparentUpgradeableProxy as Proxy} from
+    "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract CommonTest is Utils {
     address public constant alice = address(0x111);
@@ -103,7 +103,7 @@ contract CommonTest is Utils {
 
         // init
         _staking.initialize(
-            address(_chips), pauseAccount, address(_settlement), _cfg.isAlphaPhase()
+            address(_chips), pauseAccount, address(_settlement), _cfg.isAlphaPhase(), false
         );
         _settlement.initialize(address(_staking), oracleAccount, block.timestamp, 20);
         _chips.initialize(chipsName, chipsSymbol, address(_staking));
@@ -142,18 +142,9 @@ contract CommonTest is Utils {
     function _presetNodeStatus(address nodeAddr, NodeStatus status) internal {
         bytes32 slot =
             keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
-        // node.status is at offset 10 of struct Node
-        slot = bytes32(uint256(slot) + 10);
+        // node.status is at offset 9 of struct Node
+        slot = bytes32(uint256(slot) + 9);
         vm.store(address(_staking), slot, bytes32(uint256(status)));
-
-        if (status == NodeStatus.Exiting) {
-            slot = keccak256(abi.encode(nodeAddr, StorageLib.NODES_MAPPING_BY_NODE_ADDRESS_SLOT));
-            // node.exitTime is at offset 9 of struct Node
-            slot = bytes32(uint256(slot) + 9);
-            vm.store(
-                address(_staking), slot, bytes32(uint256(block.timestamp + Const.NODE_EXIT_PERIOD))
-            );
-        }
     }
 
     function _getTreasuryAmount() internal returns (uint256) {
@@ -243,5 +234,9 @@ contract CommonTest is Utils {
         returns (uint256)
     {
         return (rewards * taxRateBasisPoints) / Const.DENOMINATOR;
+    }
+
+    function _assertEq(NodeStatus a, NodeStatus b) internal pure {
+        assertEq(uint256(a), uint256(b));
     }
 }

@@ -16,12 +16,14 @@ interface IStaking {
      * @param pauseAccount Address who can pause/unpause the Staking contract.
      * @param oracleAccount Address who can distribute rewards to the Staking contract.
      * @param isAlphaPhase_ Flag indicating if the contract is in alpha phase.
+     * @param migrate Flag indicating whether to migrate public pool and pool stat info.
      */
     function initialize(
         address chips,
         address pauseAccount,
         address oracleAccount,
-        bool isAlphaPhase_
+        bool isAlphaPhase_,
+        bool migrate
     ) external;
 
     /**
@@ -243,7 +245,7 @@ interface IStaking {
     function register() external;
 
     /**
-     * @notice Transition a node to online status.
+     * @notice Requests to online. The node status will be set as `Initializing`.
      * @dev Emits a `NodeStatusChanged` event with the updated status.
      * @dev The caller must be the owner of node operator.
      */

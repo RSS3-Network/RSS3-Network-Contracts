@@ -2,43 +2,55 @@
 // solhint-disable comprehensive-interface,no-console
 pragma solidity 0.8.24;
 
+import {Chips} from "../src/Chips.sol";
 import {Settlement} from "../src/Settlement.sol";
 import {Staking} from "../src/Staking.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, UnstakeRequest} from "../src/libraries/DataTypes.sol";
-import {TransparentUpgradeableProxy as Proxy} from
-    "../src/upgradeability/TransparentUpgradeableProxy.sol";
-import {ITransparentUpgradeableProxy as IProxy} from
-    "../src/upgradeability/TransparentUpgradeableProxy.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
+import {TransparentUpgradeableProxy as Proxy} from
+    "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
+interface IProxy {
+    function upgradeTo(address) external;
+}
+
 contract StakingForkTest is CommonTest {
+    address payable public stakingAddress = payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578);
+    address payable public settlementAddress = payable(0x0cE3159BF19F3C55B648D04E8f0Ae1Ae118D2A0B);
+    address payable public chipsAddress = payable(0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE);
+
+    address public constant proxyAdminOwner = 0x8AC80fa0993D95C9d6B8Cb494E561E6731038941;
     address public constant diygod = 0xC8b960D09C0078c18Dcbe7eB9AB9d816BcCa8944;
-    address public constant chips = 0x849f8F55078dCc69dD857b58Cc04631EBA54E4DE;
 
     Staking public staking;
     Settlement public settlement;
+    Chips public chips;
 
     function setUp() public {
-        vm.createSelectFork("https://rpc.rss3.io", 7_540_074);
+        vm.createSelectFork("https://rpc.rss3.io", 8_437_614);
 
-        Staking st = new Staking(address(1111), 22.5 days, 22.5 days, address(0xbbb));
-        // staking contract on mainnet
-        Proxy stakingProxy = Proxy(payable(0x28F14d917fddbA0c1f2923C406952478DfDA5578));
-        vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);
-        IProxy(address(stakingProxy)).upgradeTo(address(st));
-        staking = Staking(address(stakingProxy));
+        // deploy staking
+        Staking stakingImpl = new Staking(address(1111), 22.5 days, 22.5 days, address(0xbbb));
+        vm.prank(proxyAdminOwner);
+        IProxy(stakingAddress).upgradeTo(address(stakingImpl));
+        staking = Staking(stakingAddress);
 
         // deploy settlement
-        Settlement settlement_ = new Settlement(true);
-        Proxy settlementProxy = Proxy(payable(0x0cE3159BF19F3C55B648D04E8f0Ae1Ae118D2A0B));
-        vm.prank(0x8AC80fa0993D95C9d6B8Cb494E561E6731038941);
-        IProxy(address(settlementProxy)).upgradeTo(address(settlement_));
-        settlement = Settlement(payable(address(settlementProxy)));
+        Settlement settlementImpl_ = new Settlement(true);
+        vm.prank(proxyAdminOwner);
+        IProxy(settlementAddress).upgradeTo(address(settlementImpl_));
+        settlement = Settlement(settlementAddress);
 
-        // initialize staking contract
-        staking.initialize(address(0), address(0), address(0), false);
+        // deploy chips
+        Chips chipsImpl = new Chips();
+        vm.prank(proxyAdminOwner);
+        IProxy(chipsAddress).upgradeTo(address(chipsImpl));
+        chips = Chips(chipsAddress);
+
+        // initialize staking
+        staking.initialize(address(0), address(0), address(0), false, true);
     }
 
     function testCreateNodeFork() public {
@@ -172,24 +184,24 @@ contract StakingForkTest is CommonTest {
             "Henry",
             "Henry's awesome Node",
             1000,
-            uint256(13_469_524_266_418_053_824_302),
-            uint256(170_204_797_962_892_815_044_839),
-            uint256(129_860_104_969_232_393_500_215),
+            uint256(13_681_924_472_668_548_186_301),
+            uint256(148_691_318_047_894_295_870_052),
+            uint256(112_081_880_869_482_220_448_282),
             false,
             true
         );
-        // node 83
-        node = staking.getNode(0xCe56132aB93bfA39241Ad844433b58e926295186);
+        // node 86
+        node = staking.getNode(0xe2438b577bdD335B69ef4f94839d7Ac05bBFf02F);
         _checkNode(
-            0xCe56132aB93bfA39241Ad844433b58e926295186,
-            83,
-            "Money Tree RSS3",
-            "Those who stay here are full of luck\n",
-            600,
-            uint256(10_357_200_000_000_000_000_000),
+            0xe2438b577bdD335B69ef4f94839d7Ac05bBFf02F,
+            86,
+            "21312",
+            "asdasdsadadasdsa",
+            0,
+            uint256(0),
             0,
             0,
-            false,
+            true,
             true
         );
 
@@ -197,10 +209,13 @@ contract StakingForkTest is CommonTest {
         assertEq(staking.getNodeCount(), 86);
 
         // check _pendingWithdrawalCounter, slot 9
-        assertEq(vm.load(address(staking), bytes32(uint256(9))), bytes32(uint256(1)));
+        assertEq(vm.load(address(staking), bytes32(uint256(9))), bytes32(uint256(0x11)));
 
         // check _pendingUnstakeCounter, slot 11
-        assertEq(vm.load(address(staking), bytes32(uint256(11))), bytes32(uint256(11)));
+        assertEq(vm.load(address(staking), bytes32(uint256(11))), bytes32(uint256(0x84)));
+
+        // check _demotionIdCounter, slot 26
+        assertEq(vm.load(address(staking), bytes32(uint256(26))), bytes32(uint256(0x0)));
 
         // check public pool
         node = staking.getPublicPool();
@@ -208,8 +223,8 @@ contract StakingForkTest is CommonTest {
         assertEq(node.name, "Public Good Pool");
         assertEq(node.taxRateBasisPoints, uint64(1166));
         assertEq(node.operationPoolTokens, uint256(0));
-        assertEq(node.stakingPoolTokens, uint256(105_947_834_373_481_785_005_022));
-        assertEq(node.totalShares, uint256(100_000_000_000_000_000_000_000));
+        assertEq(node.stakingPoolTokens, uint256(115_295_369_728_917_494_863_411));
+        assertEq(node.totalShares, uint256(107_537_638_591_157_899_782_190));
         assertEq(node.publicGood, true);
         assertEq(node.alpha, false);
 
@@ -229,30 +244,47 @@ contract StakingForkTest is CommonTest {
             uint256 totalStakingPoolTokens,
             uint256 totalSlashingPoolTokens
         ) = staking.getPoolInfo();
-        assertEq(totalOperationPoolTokens, uint256(3_676_223_372_159_389_130_580_222));
-        assertEq(totalStakingPoolTokens, uint256(99_576_088_009_465_491_532_574_685));
+        assertEq(totalOperationPoolTokens, uint256(3_504_689_749_175_012_701_414_133));
+        assertEq(totalStakingPoolTokens, uint256(123_802_676_919_381_578_897_049_899));
         assertEq(totalSlashingPoolTokens, uint256(0));
 
         // check chip info
         (address nodeAddr, uint256 tokens, uint256 shares) = staking.getChipInfo(1);
         assertEq(nodeAddr, 0x827431510a5D249cE4fdB7F00C83a3353F471848);
-        assertEq(tokens, uint256(655_339_058_917_360_507_379));
+        assertEq(tokens, uint256(663_315_590_773_513_392_274));
         assertEq(shares, 500 ether);
 
         (nodeAddr, tokens, shares) = staking.getChipInfo(139_020);
         assertEq(nodeAddr, 0xc29f2Aec9dC8cdbC58da0bE1b9F612A629c83Ac5);
-        assertEq(tokens, uint256(609_976_588_619_424_481_212));
+        assertEq(tokens, uint256(617_815_996_884_528_043_750));
         assertEq(shares, 500 ether);
 
-        (nodeAddr, tokens, shares) = staking.getChipInfo(144_587);
+        (nodeAddr, tokens, shares) = staking.getChipInfo(144_762);
         assertEq(nodeAddr, 0x69982E017Acc0FDE3d1542205089A8d3EAfcD1B7);
-        assertEq(tokens, uint256(616_866_875_218_838_548_458));
-        assertEq(shares, uint256(483_064_298_787_126_186_988));
+        assertEq(tokens, uint256(2_003_669_168_218_235_315_045_590));
+        assertEq(shares, uint256(1_549_774_898_189_709_147_376_307));
+    }
 
-        (nodeAddr, tokens, shares) = staking.getChipInfo(144_591);
-        assertEq(nodeAddr, 0x69982E017Acc0FDE3d1542205089A8d3EAfcD1B7);
-        assertEq(tokens, uint256(10_239_499_876_952_425_991_041));
-        assertEq(shares, uint256(8_018_483_447_074_598_157_297));
+    /// @dev Should pay more attention if this test fails.
+    function testCheckInitializer() public view {
+        bytes32 initializerSlot = 0xf0c57e16840df040f15088dc2f81fe391c3923bec73e23a9662efc9c229c6a00;
+
+        // check staking is initialized, should be 4 for next version
+        assertEq(
+            vm.load(address(staking), initializerSlot),
+            bytes32(uint256(4)),
+            "check staking initializer"
+        );
+        // check settlement, should be 4 for next version
+        assertEq(
+            vm.load(address(settlement), initializerSlot),
+            bytes32(uint256(4)),
+            "check settlement initializer"
+        );
+        // check chips, should be 2 for next version
+        assertEq(
+            vm.load(address(chips), initializerSlot), bytes32(uint256(2)), "check chips initializer"
+        );
     }
 
     function _checkNode(

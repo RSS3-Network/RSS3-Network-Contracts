@@ -15,12 +15,12 @@ import {
     DepositForPublicGoodNode,
     EmptyChipIds,
     ExcessWithdrawalAmount,
+    NodeInExitStatus,
     StakeAmountTooSmall,
     WithdrawalAmountExceedsOperationPoolTokens
 } from "./Errors.sol";
 import {Events} from "./Events.sol";
 import {NodePoolLib} from "./NodePoolLib.sol";
-import {NodeSettingsLib} from "./NodeSettingsLib.sol";
 import {StorageLib} from "./StorageLib.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
@@ -37,7 +37,7 @@ library StakingLib {
 
         // set node status
         if (node.operationPoolTokens >= Const.MIN_DEPOSIT) {
-            NodeStatus curStatus = NodeSettingsLib._getNodeStatus(node);
+            NodeStatus curStatus = node.status;
             if (curStatus == NodeStatus.None || curStatus == NodeStatus.Exited) {
                 node.status = NodeStatus.Registered;
                 emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Registered);
@@ -55,7 +55,7 @@ library StakingLib {
         if (amount < Const.MIN_STAKE) revert StakeAmountTooSmall();
 
         // node should not in exit status
-        NodeSettingsLib._validateNodeNotInExitStatus(nodeAddr);
+        _validateNodeNotInExitStatus(nodeAddr);
 
         uint256 sharesToMint = _tokensToShares(amount, nodeAddr);
 
@@ -118,7 +118,7 @@ library StakingLib {
         if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
 
         // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
-        NodeStatus status = NodeSettingsLib._getNodeStatus(node);
+        NodeStatus status = node.status;
         if (NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT) {
             revert ExcessWithdrawalAmount();
         }
@@ -350,5 +350,12 @@ library StakingLib {
         // fetch issuer, if not found in families, then fetch from chipIssuers
         address issuer = StorageLib.getIssuerFromFamilies(tokenId);
         return issuer != address(0) ? issuer : StorageLib.chipIssuers()[tokenId];
+    }
+
+    /// @dev Validates that a node is not in an exit status (Exiting or Exited).
+    function _validateNodeNotInExitStatus(address nodeAddr) internal view {
+        Node storage node = StorageLib.getNode(nodeAddr);
+        NodeStatus status = node.status;
+        if (NodeStatus.Exiting == status || NodeStatus.Exited == status) revert NodeInExitStatus();
     }
 }

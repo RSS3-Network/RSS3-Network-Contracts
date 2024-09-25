@@ -8,16 +8,18 @@ import {
     CurStateCantExit,
     CurStatusCantOnline,
     DepositForPublicGoodNode,
-    InvalidNodeStatusTransition,
+    InvalidArrayLength,
     NodeDepositBelowMinimum,
     NodeExists,
     NodeIsPublicGood,
     NodeNotExists,
     NodeNotInExitStatus,
+    StatusNotAllowed,
     TaxRateBasisPointsOutOfRange
 } from "../src/libraries/Errors.sol";
 import {Events} from "../src/libraries/Events.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
+import {console2 as console} from "forge-std/console2.sol";
 
 contract NodeSettingTest is CommonTest {
     function setUp() public {
@@ -47,6 +49,8 @@ contract NodeSettingTest is CommonTest {
         // check node info
         _checkNode(alice, 1, name, description, taxRateBasisPoints, 0, false, false);
         assertEq(_staking.getNodeCount(), 1);
+        // check node status
+        assertEq(uint256(_staking.getNode(alice).status), uint256(NodeStatus.None));
     }
 
     function testCreatePGNode() public {
@@ -61,6 +65,8 @@ contract NodeSettingTest is CommonTest {
         // check node info
         _checkNode(alice, 1, name, description, 0, 0, true, false);
         assertEq(_staking.getNodeCount(), 1);
+        // check node status
+        assertEq(uint256(_staking.getNode(alice).status), uint256(NodeStatus.Registered));
     }
 
     function testCreateNodeWithDeposit(uint64 taxRateBasisPoints, uint256 amount) public {
@@ -81,6 +87,10 @@ contract NodeSettingTest is CommonTest {
         // check node info
         _checkNode(alice, 1, name, description, taxRateBasisPoints, amount, false, false);
         assertEq(_staking.getNodeCount(), 1);
+        // check node status
+        NodeStatus expectedStatus =
+            amount >= Const.MIN_DEPOSIT ? NodeStatus.Registered : NodeStatus.None;
+        assertEq(uint256(_staking.getNode(alice).status), uint256(expectedStatus));
     }
 
     function testGetNodeCount() public {
@@ -241,16 +251,7 @@ contract NodeSettingTest is CommonTest {
 
             // check new status
             Node memory node = _staking.getNode(alice);
-            assertEq(uint256(node.status), uint256(expectedStatus));
-
-            // check exit time if node is in Exiting status
-            if (node.status == NodeStatus.Exiting) {
-                assertEq(node.exitTime, block.timestamp + Const.NODE_EXIT_PERIOD);
-
-                // skip the exit period, node should be in Exited status
-                skip(Const.NODE_EXIT_PERIOD);
-                assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
-            }
+            _assertEq(node.status, expectedStatus);
         }
         vm.stopPrank();
     }
@@ -281,32 +282,29 @@ contract NodeSettingTest is CommonTest {
     function testNodeStatus() public {
         _createNode(alice);
         // None
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.None));
+        _assertEq(_getNodeStatus(alice), NodeStatus.None);
 
         // None -> Registered
         vm.startPrank(alice);
         _staking.deposit{value: Const.MIN_DEPOSIT}();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+        _assertEq(_getNodeStatus(alice), NodeStatus.Registered);
 
         // Registered -> Initializing
         _presetNodeStatus(alice, NodeStatus.Online);
         _staking.exit();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exiting));
-
-        // Exiting -> Exited
-        skip(Const.NODE_EXIT_PERIOD);
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
+        _assertEq(_getNodeStatus(alice), NodeStatus.Exiting);
 
         // Exited -> Registered
+        _presetNodeStatus(alice, NodeStatus.Exited);
         _staking.register();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+        _assertEq(_getNodeStatus(alice), NodeStatus.Registered);
 
         vm.stopPrank();
     }
 
     function testRegisterSucceeds() public {
+        // case 1: node is not public good
         _createNode(alice);
-
         vm.startPrank(alice);
         _staking.deposit{value: 10_000 ether}();
 
@@ -321,9 +319,20 @@ contract NodeSettingTest is CommonTest {
             _staking.register();
 
             // check node status
-            assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
+            _assertEq(_getNodeStatus(alice), NodeStatus.Registered);
         }
+        vm.stopPrank();
 
+        // case 2: node is public good
+        _createPublicGoodNode(bob);
+        _assertEq(_getNodeStatus(bob), NodeStatus.Registered);
+
+        vm.startPrank(bob);
+        _staking.exit();
+        _assertEq(_getNodeStatus(bob), NodeStatus.Exited);
+
+        _staking.register();
+        _assertEq(_getNodeStatus(bob), NodeStatus.Registered);
         vm.stopPrank();
     }
 
@@ -367,20 +376,19 @@ contract NodeSettingTest is CommonTest {
     function testOnlineSucceeds() public {
         _createNode(alice);
 
-        NodeStatus[] memory status =
-            array(NodeStatus.Offline, NodeStatus.Slashed, NodeStatus.Outdated);
+        NodeStatus[] memory status = array(NodeStatus.Offline, NodeStatus.Slashed);
         for (uint256 i = 0; i < status.length; i++) {
             // preset node status
             _presetNodeStatus(alice, status[i]);
 
             // online
             expectEmit();
-            emit Events.NodeStatusChanged(alice, status[i], NodeStatus.Online);
+            emit Events.NodeStatusChanged(alice, status[i], NodeStatus.Initializing);
             vm.prank(alice);
             _staking.online();
 
             // check node status
-            assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Online));
+            _assertEq(_getNodeStatus(alice), NodeStatus.Initializing);
         }
     }
 
@@ -404,6 +412,7 @@ contract NodeSettingTest is CommonTest {
         );
         for (uint256 i = 0; i < status.length; i++) {
             _presetNodeStatus(alice, status[i]);
+            console.log("status[i]", uint256(status[i]));
             vm.expectRevert(
                 abi.encodeWithSelector(CurStatusCantOnline.selector, uint256(status[i]))
             );
@@ -417,125 +426,61 @@ contract NodeSettingTest is CommonTest {
         vm.prank(alice);
         _staking.deposit{value: 10_000 ether}();
 
-        // Online -> Offline
-        _setAndCheckNodeStatus(alice, NodeStatus.Online, NodeStatus.Offline);
-        // Exiting -> Offline
-        _setAndCheckNodeStatus(alice, NodeStatus.Exiting, NodeStatus.Offline);
+        NodeStatus[] memory curStatus = array(
+            NodeStatus.None,
+            NodeStatus.Registered,
+            NodeStatus.Initializing,
+            NodeStatus.Outdated,
+            NodeStatus.Online,
+            NodeStatus.Offline,
+            NodeStatus.Slashing,
+            NodeStatus.Slashed,
+            NodeStatus.Exiting,
+            NodeStatus.Exited
+        );
 
-        // Registered -> Initializing
-        _setAndCheckNodeStatus(alice, NodeStatus.Registered, NodeStatus.Initializing);
-
-        //  Initializing -> Online
-        _setAndCheckNodeStatus(alice, NodeStatus.Initializing, NodeStatus.Online);
-        // Offline -> Online
-        _setAndCheckNodeStatus(alice, NodeStatus.Offline, NodeStatus.Online);
-        // Slashed -> Online
-        _setAndCheckNodeStatus(alice, NodeStatus.Slashed, NodeStatus.Online);
-        // Outdated -> Online
-        _setAndCheckNodeStatus(alice, NodeStatus.Outdated, NodeStatus.Online);
-
-        // Initializing -> Outdated
-        _setAndCheckNodeStatus(alice, NodeStatus.Initializing, NodeStatus.Outdated);
-
-        // Registered -> Initializing
-        _setAndCheckNodeStatus(alice, NodeStatus.Registered, NodeStatus.Initializing);
+        NodeStatus[] memory newStatus = array(
+            NodeStatus.Registered,
+            NodeStatus.Initializing,
+            NodeStatus.Outdated,
+            NodeStatus.Online,
+            NodeStatus.Offline,
+            NodeStatus.Exited
+        );
+        for (uint256 i = 0; i < curStatus.length; i++) {
+            for (uint256 j = 0; j < newStatus.length; j++) {
+                _setAndCheckNodeStatus(alice, curStatus[i], newStatus[j]);
+            }
+        }
     }
 
     // solhint-disable-next-line function-max-lines
     function testSetNodesStatusFail() public {
-        _createNode(alice);
-
-        // InvalidNodeStatusTransition
-        // transitions to these status are not allowed by the `setNodeStatus`
-        NodeStatus[] memory status = array(
-            NodeStatus.None,
-            NodeStatus.Registered,
-            NodeStatus.Offline,
-            NodeStatus.Slashing,
-            NodeStatus.Slashed,
-            NodeStatus.Exiting,
-            NodeStatus.Exited
-        );
-        for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, NodeStatus.None, status[i]);
-        }
-
-        // -> Initializing
-        // these status can't be set to Initializing
-        status = array(
-            NodeStatus.None,
-            NodeStatus.Initializing,
-            NodeStatus.Offline,
-            NodeStatus.Slashing,
-            NodeStatus.Slashed,
-            NodeStatus.Exiting,
-            NodeStatus.Exited
-        );
-        for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Initializing);
-        }
-
-        // -> Online
-        // these status can't be set to Online
-        status = array(
-            NodeStatus.None,
-            NodeStatus.Registered,
-            NodeStatus.Online,
-            NodeStatus.Slashing,
-            NodeStatus.Exiting,
-            NodeStatus.Exited
-        );
-        for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Online);
-        }
-
-        // -> Offline
-        // these status can't be set to Offline
-        status = array(
-            NodeStatus.None,
-            NodeStatus.Registered,
-            NodeStatus.Initializing,
-            NodeStatus.Outdated,
-            NodeStatus.Offline,
-            NodeStatus.Slashing,
-            NodeStatus.Slashed,
-            NodeStatus.Exited
-        );
-        for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Offline);
-        }
-
-        // -> Outdated
-        // these status can't be set to Outdated
-        status = array(
-            NodeStatus.None,
-            NodeStatus.Registered,
-            NodeStatus.Outdated,
-            NodeStatus.Offline,
-            NodeStatus.Slashing,
-            NodeStatus.Slashed,
-            NodeStatus.Exited,
-            NodeStatus.Outdated
-        );
-        for (uint256 i = 0; i < status.length; i++) {
-            _invalidNodeStatusTransition(alice, status[i], NodeStatus.Outdated);
-        }
-    }
-
-    function _invalidNodeStatusTransition(
-        address nodeAddr,
-        NodeStatus curStatus,
-        NodeStatus newStatus
-    ) internal {
-        _presetNodeStatus(nodeAddr, curStatus);
-
+        // case 1: caller has no ORACLE_ROLE
         vm.expectRevert(
             abi.encodeWithSelector(
-                InvalidNodeStatusTransition.selector, uint256(curStatus), uint256(newStatus)
+                AccessControlUnauthorizedAccount.selector, address(this), ORACLE_ROLE
             )
         );
+        _staking.setNodeStatus(array(alice), array(NodeStatus.Online));
+
+        // case 2: InvalidArrayLength
+        vm.expectRevert(abi.encodeWithSelector(InvalidArrayLength.selector));
         vm.prank(address(_settlement));
-        _staking.setNodeStatus(array(nodeAddr), array(newStatus));
+        _staking.setNodeStatus(array(alice, bob), array(NodeStatus.Online));
+
+        // case 3: StatusNotAllowed
+
+        _createNode(alice);
+
+        // set to these status are not allowed
+        NodeStatus[] memory status =
+            array(NodeStatus.None, NodeStatus.Slashing, NodeStatus.Slashed, NodeStatus.Exiting);
+        for (uint256 i = 0; i < status.length; i++) {
+            vm.expectRevert(abi.encodeWithSelector(StatusNotAllowed.selector, uint256(status[i])));
+            vm.prank(address(_settlement));
+            _staking.setNodeStatus(array(alice), array(status[i]));
+        }
     }
 
     function _setAndCheckNodeStatus(address nodeAddr, NodeStatus curStatus, NodeStatus newStatus)
@@ -549,6 +494,6 @@ contract NodeSettingTest is CommonTest {
         _staking.setNodeStatus(array(nodeAddr), array(newStatus));
 
         // check status
-        assertEq(uint256(_getNodeStatus(nodeAddr)), uint256(newStatus));
+        _assertEq(_getNodeStatus(nodeAddr), newStatus);
     }
 }
