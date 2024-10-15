@@ -11,8 +11,9 @@ contract CompressParams is Script {
     // solhint-disable-next-line function-max-lines
     function run() public view {
         string memory params = _readInput("network_parameter");
-        bytes memory result = LibZip.flzCompress(bytes(params));
-        console.logBytes(result);
+        bytes memory compressed = LibZip.flzCompress(bytes(params));
+        console.log("Compressed:");
+        console.logBytes(compressed);
     }
 
     // read network config params from json file

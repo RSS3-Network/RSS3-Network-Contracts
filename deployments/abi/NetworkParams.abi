@@ -208,8 +208,8 @@
       },
       {
         "name": "params",
-        "type": "string",
-        "internalType": "string"
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
     "outputs": [],
@@ -259,9 +259,9 @@
       },
       {
         "name": "params",
-        "type": "string",
+        "type": "bytes",
         "indexed": false,
-        "internalType": "string"
+        "internalType": "bytes"
       }
     ],
     "anonymous": false
