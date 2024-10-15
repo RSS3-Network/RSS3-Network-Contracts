@@ -75,3 +75,7 @@ set-param-dev:
 	--rpc-url $(RPC_URL) \
 	--private-key $(PRIVATE_KEY) \
 	--broadcast --ffi
+
+# compress network params
+compress-param:
+	forge script script/CompressParams.s.sol:CompressParams
