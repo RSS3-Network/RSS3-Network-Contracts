@@ -11,7 +11,7 @@ contract NetworkParamsTest is CommonTest {
 
     NetworkParams internal _params;
 
-    event ParamsSet(uint64 indexed epoch, string params);
+    event ParamsSet(uint64 indexed epoch, bytes params);
 
     function setUp() public {
         _params = new NetworkParams();
@@ -26,9 +26,9 @@ contract NetworkParamsTest is CommonTest {
         bytes memory compressedParams = LibZip.flzCompress(bytes(paramsStr));
 
         expectEmit();
-        emit ParamsSet(100, string(compressedParams));
+        emit ParamsSet(100, compressedParams);
         vm.prank(bob);
-        _params.setParams(100, string(compressedParams));
+        _params.setParams(100, compressedParams);
 
         assertEq(_params.getParams(100), paramsStr);
     }
@@ -52,19 +52,19 @@ contract NetworkParamsTest is CommonTest {
         bytes memory compressedParams30 = LibZip.flzCompress(bytes(epoch30ParamsStr));
 
         expectEmit();
-        emit ParamsSet(100, string(compressedParams100));
+        emit ParamsSet(100, compressedParams100);
         vm.prank(bob);
-        _params.setParams(100, string(compressedParams100));
+        _params.setParams(100, compressedParams100);
 
         expectEmit();
-        emit ParamsSet(300, string(compressedParams300));
+        emit ParamsSet(300, compressedParams300);
         vm.prank(bob);
-        _params.setParams(300, string(compressedParams300));
+        _params.setParams(300, compressedParams300);
 
         expectEmit();
-        emit ParamsSet(200, string(compressedParams200));
+        emit ParamsSet(200, compressedParams200);
         vm.prank(bob);
-        _params.setParams(200, string(compressedParams200));
+        _params.setParams(200, compressedParams200);
 
         // Below 100
         assertEq(_params.getParams(50), epoch100ParamsStr);
@@ -85,18 +85,18 @@ contract NetworkParamsTest is CommonTest {
 
         // Update existing epoch 200
         expectEmit();
-        emit ParamsSet(200, string(compressedParams200Modified));
+        emit ParamsSet(200, compressedParams200Modified);
         vm.prank(bob);
-        _params.setParams(200, string(compressedParams200Modified));
+        _params.setParams(200, compressedParams200Modified);
 
         // Equal to 200
         assertEq(_params.getParams(200), epoch200ParamsStrModified);
 
         // Update earlier epoch
         expectEmit();
-        emit ParamsSet(30, string(compressedParams30));
+        emit ParamsSet(30, compressedParams30);
         vm.prank(bob);
-        _params.setParams(30, string(compressedParams30));
+        _params.setParams(30, compressedParams30);
 
         // Pass epoch 30
         assertEq(_params.getParams(0), epoch30ParamsStr);

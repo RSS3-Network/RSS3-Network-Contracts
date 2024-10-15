@@ -12,10 +12,10 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     // Mapping from epoch to configuration parameters
-    mapping(uint64 epoch => string params) private _params;
+    mapping(uint64 epoch => bytes params) private _params;
     uint64[] private _orderedEpochs;
 
-    event ParamsSet(uint64 indexed epoch, string params);
+    event ParamsSet(uint64 indexed epoch, bytes params);
 
     /**
      * @notice Initializes the NetworkParams contract.
@@ -30,10 +30,10 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
      * @notice Sets configuration parameters for a specific epoch.
      * @dev Adds the epoch to the sorted list and maps it to the provided parameters.
      * @param epoch The epoch (as a uint64) to which the parameters should be associated.
-     * @param params The configuration parameters (as a string) to be set.
+     * @param params The configuration parameters (as bytes) to be set.
      */
-    function setParams(uint64 epoch, string calldata params) external onlyRole(ADMIN_ROLE) {
-        if (bytes(_params[epoch]).length == 0) {
+    function setParams(uint64 epoch, bytes calldata params) external onlyRole(ADMIN_ROLE) {
+        if (_params[epoch].length == 0) {
             _insertOrderedEpoch(epoch);
         }
 
@@ -54,13 +54,13 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
         }
 
         uint64 nearestEpoch = _findNearestEpoch(epoch);
-        string memory compressedParams = _params[nearestEpoch];
+        bytes memory compressedParams = _params[nearestEpoch];
 
-        if (bytes(compressedParams).length == 0) {
+        if (compressedParams.length == 0) {
             return "";
         }
 
-        bytes memory decompressedParams = LibZip.flzDecompress(bytes(compressedParams));
+        bytes memory decompressedParams = LibZip.flzDecompress(compressedParams);
         return string(decompressedParams);
     }
 
