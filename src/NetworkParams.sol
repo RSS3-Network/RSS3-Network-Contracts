@@ -6,6 +6,7 @@ import {AccessControlEnumerable} from
     "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+import {LibZip} from "@solady/utils/LibZip.sol";
 
 contract NetworkParams is Initializable, AccessControlEnumerable {
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -53,7 +54,14 @@ contract NetworkParams is Initializable, AccessControlEnumerable {
         }
 
         uint64 nearestEpoch = _findNearestEpoch(epoch);
-        return _params[nearestEpoch];
+        string memory compressedParams = _params[nearestEpoch];
+
+        if (bytes(compressedParams).length == 0) {
+            return "";
+        }
+
+        bytes memory decompressedParams = LibZip.flzDecompress(bytes(compressedParams));
+        return string(decompressedParams);
     }
 
     /**
