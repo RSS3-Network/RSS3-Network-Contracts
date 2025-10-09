@@ -5,7 +5,7 @@ pragma solidity 0.8.24;
 import {LibZip} from "@solady/utils/LibZip.sol";
 
 library Frame {
-    //class: f
+    // class: f
 
     function getFrame(uint256 id) external pure returns (string memory, string memory) {
         string[9] memory frameSVGs = [

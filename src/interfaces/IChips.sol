@@ -41,7 +41,7 @@ interface IChips {
     function totalSupply() external view returns (uint256);
 
     /**
-     * @notice  Returns the address of the Staking contract.
+     * @notice Returns the address of the Staking contract.
      * @return Address of the Staking contract.
      */
     function stakingContract() external view returns (address);

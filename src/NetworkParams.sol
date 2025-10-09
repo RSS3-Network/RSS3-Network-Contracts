@@ -2,8 +2,9 @@
 // solhint-disable comprehensive-interface
 pragma solidity 0.8.24;
 
-import {AccessControlEnumerable} from
-    "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {
+    AccessControlEnumerable
+} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {LibZip} from "@solady/utils/LibZip.sol";

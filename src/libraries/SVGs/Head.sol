@@ -5,7 +5,7 @@ pragma solidity 0.8.24;
 import {LibZip} from "@solady/utils/LibZip.sol";
 
 library Head {
-    //h: st-head e:st-head-evenodd
+    // h: st-head e:st-head-evenodd
     function getHead(uint256 id) external pure returns (string memory, string memory) {
         string[16] memory headSVGs = [
             hex"1e3c7061746820636c6173733d22682220643d224d3636203430762d32682d32e014050034e0001d0348333876602e2004003440040332763468603c00372008c012201c003720040134382037127a6d2d382030483432762d326831367a222f3e",

@@ -13,13 +13,14 @@ import {
     RewardsAlreadyDistributed,
     SubmissionIntervalNotElapsed
 } from "./libraries/Errors.sol";
-import {AccessControlEnumerable} from
-    "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {
+    AccessControlEnumerable
+} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 
 contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnumerable {
-    string public constant version = "2.1.0";
+    string public constant version = "2.2.0";
 
     /// @dev Duration of an epoch.
     uint256 public constant EPOCH_DURATION = 18 hours;
@@ -49,7 +50,8 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     // distributed operation rewards for each epoch
     mapping(uint256 epoch => uint256 operationRewards) internal _distributedOperationRewards;
     // rewarded node addresses
-    mapping(uint256 epoch => mapping(address nodeAddr => bool rewarded)) internal _rewardedAddresses;
+    mapping(uint256 epoch => mapping(address nodeAddr => bool rewarded)) internal
+        _rewardedAddresses;
 
     modifier validEpoch(uint256 epoch) {
         if (epoch < _currentEpoch || epoch > _currentEpoch + 1) {
@@ -75,7 +77,7 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         address oracleAccount,
         uint256 startTime,
         uint256 operationRewardsPercent
-    ) external override reinitializer(4) {
+    ) external override reinitializer(5) {
         if (staking != address(0)) {
             _staking = staking;
         }
@@ -89,7 +91,9 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
             _startTimestamp = startTime;
         }
 
-        _updateRewardsRatio(operationRewardsPercent);
+        if (operationRewardsPercent > 0) {
+            _updateRewardsRatio(operationRewardsPercent);
+        }
     }
 
     /// @inheritdoc ISettlement
@@ -112,7 +116,10 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         IStaking(_staking).setSettlementPhase(!isFinal);
 
         // distribute rewards
-        IStaking(_staking).distributeRewards{value: data.rewardsToSend}(
+        IStaking(_staking)
+        .distributeRewards{
+            value: data.rewardsToSend
+        }(
             data.epochInfo,
             nodeAddrs,
             operationRewards,
@@ -195,9 +202,8 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     function _updateRewardsRatio(uint256 operationRewardsPercent) internal {
         _totalOperationRewardsPerEpoch =
             (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) / (100 * 365 days);
-        _totalStakingRewardsPerEpoch = (
-            (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION) * (100 - operationRewardsPercent)
-        ) / (100 * 365 days);
+        _totalStakingRewardsPerEpoch = ((TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION)
+                * (100 - operationRewardsPercent)) / (100 * 365 days);
     }
 
     /// @dev check distributed operationRewards not exceeds the max rewards per

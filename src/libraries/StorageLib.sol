@@ -27,7 +27,7 @@ library StorageLib {
 
     // EnumerableSet.AddressSet internal _nodeAddrs
     uint256 public constant NODES_ADDRESS_SET_SLOT = 5;
-    // mapping(address nodeAddr =>Node) internal  _nodes
+    // mapping(address nodeAddr =>Node) internal _nodes
     uint256 public constant NODES_MAPPING_BY_NODE_ADDRESS_SLOT = 7;
     // uint256 _nodeIdCounter
     uint256 public constant NODE_ID_COUNTER_SLOT = 8;

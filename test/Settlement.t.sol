@@ -1006,7 +1006,7 @@ contract SettlementTest is CommonTest {
         Node memory node = _staking.getNode(alice);
         assertEq(uint256(node.status), uint256(NodeStatus.Initializing));
 
-        //  Initializing -> Online
+        // Initializing -> Online
         vm.prank(oracleAccount);
         _settlement.setNodeStatus(array(alice), array(NodeStatus.Online));
         // check status
@@ -1036,7 +1036,7 @@ contract SettlementTest is CommonTest {
         ) = _staking.getPoolInfo();
         assertTrue(
             address(_staking).balance - totalOperationPoolTokens - totalStakingPoolTokens
-                - totalSlashingPoolTokens >= 0
+                    - totalSlashingPoolTokens >= 0
         );
     }
 

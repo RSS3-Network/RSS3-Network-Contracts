@@ -499,11 +499,7 @@ abstract contract Deployer is Script {
     /// @notice Reads the artifact from the filesystem by name and returns the Deployment.
     /// @param _name The name of the artifact to read.
     /// @return The deployment corresponding to the name.
-    function _getExistingDeployment(string memory _name)
-        internal
-        view
-        returns (Deployment memory)
-    {
+    function _getExistingDeployment(string memory _name) internal view returns (Deployment memory) {
         string memory path = string.concat(deploymentsDir, "/", _name, ".json");
         try vm.readFile(path) returns (string memory json) {
             bytes memory addr = stdJson.parseRaw(json, "$.address");

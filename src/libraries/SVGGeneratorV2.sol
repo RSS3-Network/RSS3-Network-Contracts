@@ -40,9 +40,9 @@ library SVGGeneratorV2 {
     function getChipTraitsCount() external pure returns (uint8, uint8, uint8, uint8, uint8) {
         return (
             18, // uint8(_eyesSVGs.length),
-            17, //uint8(_mouthsSVGs.length),
-            3, //uint8(_baseHeadsSVGs.length),
-            16, //uint8(_headSVGs.length),
+            17, // uint8(_mouthsSVGs.length),
+            3, // uint8(_baseHeadsSVGs.length),
+            16, // uint8(_headSVGs.length),
             5 // uint8(_nftCardsSVGs.length)
         );
     }

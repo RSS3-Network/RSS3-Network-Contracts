@@ -19,7 +19,7 @@ contract Utils is Test {
     function expectEmit(uint8 checks) public {
         require(checks < 16, "Invalid options");
 
-        uint8 mask = 0x1; //0001
+        uint8 mask = 0x1; // 0001
         bool checkTopic1 = (checks & mask) > 0;
         bool checkTopic2 = (checks & (mask << 1)) > 0;
         bool checkTopic3 = (checks & (mask << 2)) > 0;

@@ -93,7 +93,7 @@ interface ISettlement {
     function setNodeStatus(address[] calldata nodeAddrs, NodeStatus[] calldata status) external;
 
     /**
-     * @notice  Returns the address of the Staking contract.
+     * @notice Returns the address of the Staking contract.
      * @return Address of the Staking contract.
      */
     function stakingContract() external view returns (address);
@@ -105,7 +105,7 @@ interface ISettlement {
     function currentEpoch() external view returns (uint256);
 
     /**
-     * @notice  Returns the bonus info.
+     * @notice Returns the bonus info.
      * @return (operationRewardsPerEpoch, stakingRewardsPerEpoch) The amount of request bonus per
      * epoch.
      */

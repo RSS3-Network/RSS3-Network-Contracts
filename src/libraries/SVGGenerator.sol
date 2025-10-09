@@ -36,7 +36,7 @@ library SVGGenerator {
     function getNodeTraitsCount() external pure returns (uint8, uint8, uint8, uint8) {
         return (
             5, // uint8(_colors.length),
-            9, //            uint8(_frameSVGs.length),
+            9, // uint8(_frameSVGs.length),
             7, // uint8(_cornerSVGs.length),
             11 // uint8(_chipDetailSVGs.length)
         );
@@ -45,9 +45,9 @@ library SVGGenerator {
     function getChipTraitsCount() external pure returns (uint8, uint8, uint8, uint8) {
         return (
             18, // uint8(_eyesSVGs.length),
-            19, //uint8(_mouthsSVGs.length),
-            3, //uint8(_baseHeadsSVGs.length),
-            16 //uint8(_headSVGs.length)
+            19, // uint8(_mouthsSVGs.length),
+            3, // uint8(_baseHeadsSVGs.length),
+            16 // uint8(_headSVGs.length)
         );
     }
 

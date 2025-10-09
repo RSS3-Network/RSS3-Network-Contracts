@@ -55,7 +55,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         returns (bool)
     {
         return interfaceId == type(IERC721).interfaceId
-            || interfaceId == type(IERC721Metadata).interfaceId || super.supportsInterface(interfaceId);
+            || interfaceId == type(IERC721Metadata).interfaceId
+            || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -195,9 +196,9 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         returns (bool)
     {
         return spender != address(0)
-            && (
-                owner == spender || isApprovedForAll(owner, spender) || _getApproved(tokenId) == spender
-            );
+            && (owner == spender
+                || isApprovedForAll(owner, spender)
+                || _getApproved(tokenId) == spender);
     }
 
     /**
@@ -238,11 +239,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
      *
      * NOTE: If overriding this function in a way that tracks balances, see also {_increaseBalance}.
      */
-    function _update(address to, uint256 tokenId, address auth)
-        internal
-        virtual
-        returns (address)
-    {
+    function _update(address to, uint256 tokenId, address auth) internal virtual returns (address) {
         address from = _ownerOf(tokenId);
 
         // Perform (optional) operator check
@@ -415,9 +412,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         private
     {
         if (to.code.length > 0) {
-            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, data) returns (
-                bytes4 retval
-            ) {
+            try IERC721Receiver(to)
+                .onERC721Received(_msgSender(), from, tokenId, data) returns (bytes4 retval) {
                 if (retval != IERC721Receiver.onERC721Received.selector) {
                     revert ERC721InvalidReceiver(to);
                 }

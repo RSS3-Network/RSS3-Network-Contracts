@@ -19,15 +19,7 @@ library ChipFrames {
         ];
 
         string[9] memory chipFramesTraits = [
-            "Chip 1",
-            "Chip 2",
-            "Chip 3",
-            "Chip 4",
-            "Chip 5",
-            "Chip 6",
-            "Chip 7",
-            "Chip 8",
-            "Chip 9"
+            "Chip 1", "Chip 2", "Chip 3", "Chip 4", "Chip 5", "Chip 6", "Chip 7", "Chip 8", "Chip 9"
         ];
 
         uint256 idx = id % 9;

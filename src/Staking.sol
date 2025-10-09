@@ -18,8 +18,9 @@ import {NodeSettingsLib} from "./libraries/NodeSettingsLib.sol";
 import {RewardsAndSlashingLib} from "./libraries/RewardsAndSlashingLib.sol";
 import {StakingLib} from "./libraries/StakingLib.sol";
 import {StorageLib} from "./libraries/StorageLib.sol";
-import {AccessControlEnumerable} from
-    "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
+import {
+    AccessControlEnumerable
+} from "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import {Multicall} from "@openzeppelin/contracts/utils/Multicall.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
@@ -85,7 +86,7 @@ contract Staking is
 
     /// @dev total operation pool tokens
     uint256 internal _totalOperationPoolTokens; // deprecated in next version
-    /// @dev total staking pool tokens
+        // / @dev total staking pool tokens
     uint256 internal _totalStakingPoolTokens; // deprecated in next version
 
     /// @dev the issuers of chips
@@ -281,11 +282,7 @@ contract Staking is
     }
 
     /// @inheritdoc IStaking
-    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints)
-        external
-        override
-        whenNotPaused
-    {
+    function setTaxRateBasisPoints4Node(uint64 taxRateBasisPoints) external override whenNotPaused {
         NodeSettingsLib.setTaxRateBasisPoints4Node(taxRateBasisPoints, msg.sender);
     }
 
@@ -313,11 +310,7 @@ contract Staking is
     }
 
     /// @inheritdoc IStaking
-    function mergeChips(uint256[] calldata chipIds)
-        external
-        override
-        returns (uint256 newTokenId)
-    {
+    function mergeChips(uint256[] calldata chipIds) external override returns (uint256 newTokenId) {
         return StakingLib.mergeChips(chipIds);
     }
 
@@ -455,9 +448,12 @@ contract Staking is
         )
     {
         PoolStatData storage pool = StorageLib.poolStatStorage();
-        return (
-            pool.totalOperationPoolTokens, pool.totalStakingPoolTokens, pool.totalSlashingPoolTokens
-        );
+        return
+            (
+                pool.totalOperationPoolTokens,
+                pool.totalStakingPoolTokens,
+                pool.totalSlashingPoolTokens
+            );
     }
 
     /// @inheritdoc IStaking

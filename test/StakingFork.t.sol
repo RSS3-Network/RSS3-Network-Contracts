@@ -8,8 +8,9 @@ import {Staking} from "../src/Staking.sol";
 import {Const} from "../src/libraries/Const.sol";
 import {Node, UnstakeRequest} from "../src/libraries/DataTypes.sol";
 import {CommonTest} from "./helpers/CommonTest.sol";
-import {TransparentUpgradeableProxy as Proxy} from
-    "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {
+    TransparentUpgradeableProxy as Proxy
+} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface IProxy {

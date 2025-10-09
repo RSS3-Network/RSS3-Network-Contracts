@@ -32,7 +32,7 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {Base64} from "solady/utils/Base64.sol";
 import {LibString} from "solady/utils/LibString.sol";
 
-//import {console2 as console} from "forge-std/console2.sol";
+// import {console2 as console} from "forge-std/console2.sol";
 
 contract StakingTest is CommonTest, IERC721Errors {
     using stdJson for string;
@@ -1085,9 +1085,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(node.totalShares, 0);
     }
 
-    function _testRequestUnstakeApprovedChipFromNode(address nodeAddr, bool isPublicGood)
-        internal
-    {
+    function _testRequestUnstakeApprovedChipFromNode(address nodeAddr, bool isPublicGood) internal {
         uint256 amount = 10_000 ether;
 
         // stake

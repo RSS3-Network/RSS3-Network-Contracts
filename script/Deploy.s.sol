@@ -8,8 +8,9 @@ import {Settlement} from "../src/Settlement.sol";
 import {Staking} from "../src/Staking.sol";
 import {DeployConfig} from "./DeployConfig.s.sol";
 import {Deployer} from "./Deployer.sol";
-import {TransparentUpgradeableProxy} from
-    "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import {
+    TransparentUpgradeableProxy
+} from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
 contract Deploy is Deployer {
@@ -86,9 +87,7 @@ contract Deploy is Deployer {
     function deployProxy(string memory _name) public broadcast returns (address addr_) {
         address logic = mustGetAddress(_stripSemver(_name));
         TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy({
-            _logic: logic,
-            initialOwner: cfg.proxyAdminOwner(),
-            _data: ""
+            _logic: logic, initialOwner: cfg.proxyAdminOwner(), _data: ""
         });
 
         // check states

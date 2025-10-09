@@ -81,17 +81,16 @@ struct Demotion {
 /// @param Exiting Node is in the process of exiting the network
 /// @param Exited Node has successfully exited the network
 enum NodeStatus {
-    None, // 0
-    Registered, // 1
-    Initializing, // 2
-    Outdated, // 3
-    Online, // 4
-    Offline, // 5
-    Slashing, // 6
-    Slashed, // 7
-    Exiting, // 8
-    Exited // 9
-
+    None, //0
+    Registered, //1
+    Initializing, //2
+    Outdated, //3
+    Online, //4
+    Offline, //5
+    Slashing, //6
+    Slashed, //7
+    Exiting, //8
+    Exited //9
 }
 
 struct WithdrawalRequest {

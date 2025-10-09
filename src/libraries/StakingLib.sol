@@ -114,7 +114,7 @@ library StakingLib {
     {
         Node storage node = StorageLib.getNodeOrRevert(nodeAddr);
 
-        //  withdrawal amount should not exceed the operation pool tokens
+        // withdrawal amount should not exceed the operation pool tokens
         if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
 
         // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status

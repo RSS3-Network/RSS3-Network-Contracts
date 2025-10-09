@@ -68,7 +68,7 @@ contract NetworkParamsTest is CommonTest {
 
         // Below 100
         assertEq(_params.getParams(50), epoch100ParamsStr);
-        //  Equal to 100
+        // Equal to 100
         assertEq(_params.getParams(100), epoch100ParamsStr);
         // Between 100 and 200
         assertEq(_params.getParams(150), epoch100ParamsStr);
