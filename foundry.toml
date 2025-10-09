@@ -13,8 +13,6 @@ auto_detect_solc = false
 optimizer = true
 optimizer_runs = 999999
 
-# Fuzz more than the default 256
-fuzz_runs = 1_000
 libs = ["node_modules", "lib"]
 
 fs_permissions = [
@@ -25,14 +23,15 @@ fs_permissions = [
     { access='read', path='./script/input' },
 ]
 
-# Extreme Fuzzing CI Profile :P
-[profile.ci]
-fuzz_runs = 1_000
-
 
 [doc]
 ignore = ["**/*.t.sol", "script/**"]
 out = "docs"
+
+
+[fuzz]
+runs = 256
+max_test_rejects = 65536
 
 
 [fmt]

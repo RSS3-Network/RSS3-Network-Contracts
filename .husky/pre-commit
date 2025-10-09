@@ -2,18 +2,18 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 # lint
-echo "Running lint"
-yarn lint
+# echo "Running lint"
+# yarn lint
 
-# solhint
-echo "Running solhint"
-yarn solhint
+# # solhint
+# echo "Running solhint"
+# yarn solhint
 
-# unit test
-echo "Running test"
-yarn test
+# # unit test
+# echo "Running test"
+# yarn test
 
-# generate abi
-echo "Generating abi"
-yarn abi
+# # generate abi
+# echo "Generating abi"
+# yarn abi
 

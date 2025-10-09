@@ -84,6 +84,8 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
 
         // grants `ORACLE_ROLE`
         if (oracleAccount != address(0)) {
+            // for mainnet upgrade
+            _revokeRole(ORACLE_ROLE, 0xb150439406a3798dC253504fcd940c63c3aeab80);
             _grantRole(ORACLE_ROLE, oracleAccount);
         }
 
