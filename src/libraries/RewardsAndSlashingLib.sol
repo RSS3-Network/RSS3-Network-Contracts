@@ -152,9 +152,8 @@ library RewardsAndSlashingLib {
      */
     function withdraw2Treasury(address treasury) external {
         PoolStatData storage pool = StorageLib.poolStatStorage();
-        uint256 amount =
-            address(this).balance - pool.totalOperationPoolTokens - pool.totalStakingPoolTokens
-            - pool.totalSlashingPoolTokens;
+        uint256 amount = address(this).balance - pool.totalOperationPoolTokens
+            - pool.totalStakingPoolTokens - pool.totalSlashingPoolTokens;
 
         _transfer(treasury, amount);
     }
@@ -388,11 +387,6 @@ library RewardsAndSlashingLib {
         uint256 stakingPool
     ) internal pure returns (uint256, uint256) {
         uint256 fullTax = _getFullTax(rewards, taxRateBasisPoints);
-
-        // node will receive no tax if operation pool is below minimum
-        if (operationPool < Const.MIN_DEPOSIT) {
-            return (fullTax, 0);
-        }
 
         // node will receive its full tax if operation pool >= 1/25 of staking pool
         if (operationPool * Const.STAKE_RATIO >= stakingPool) {

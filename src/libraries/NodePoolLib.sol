@@ -40,7 +40,7 @@ library NodePoolLib {
         node.slashedOperationPoolTokens = slashedOperationPool;
         node.slashedStakingPoolTokens = slashedStakingPool;
         StorageLib.poolStatStorage()
-        .totalSlashingPoolTokens += (slashedOperationPool + slashedStakingPool);
+            .totalSlashingPoolTokens += (slashedOperationPool + slashedStakingPool);
     }
 
     /// @dev decrease slashing pool tokens
@@ -52,6 +52,6 @@ library NodePoolLib {
         delete node.slashedOperationPoolTokens;
         delete node.slashedStakingPoolTokens;
         StorageLib.poolStatStorage()
-        .totalSlashingPoolTokens -= (slashedOperationPool + slashedStakingPool);
+            .totalSlashingPoolTokens -= (slashedOperationPool + slashedStakingPool);
     }
 }

@@ -194,13 +194,12 @@ contract Chips is IChips, Initializable, ERC721 {
         Node memory node = IStaking(_staking).getNode(nodeAddr);
 
         (uint8 colorCount, uint8 frameCount, uint8 chipCornerCount, uint8 chipDetailCount) = chipVersion
-                == ChipVersion.V1
+            == ChipVersion.V1
             ? SVGGenerator.getNodeTraitsCount()
             : SVGGeneratorV2.getNodeTraitsCount();
 
-        uint256 nodeTraitCount =
-            uint256(frameCount) * uint256(colorCount) * uint256(chipDetailCount)
-            * uint256(colorCount) * uint256(chipCornerCount);
+        uint256 nodeTraitCount = uint256(frameCount) * uint256(colorCount)
+            * uint256(chipDetailCount) * uint256(colorCount) * uint256(chipCornerCount);
 
         // Chips from the same node will have the same traits
         uint256 nodeTraitId = uint256(keccak256(abi.encodePacked(nodeAddr))) % nodeTraitCount;
@@ -266,9 +265,8 @@ contract Chips is IChips, Initializable, ERC721 {
             (colorCount,,,) = SVGGeneratorV2.getNodeTraitsCount();
         }
 
-        uint256 chipTraitCount =
-            uint256(eyeCount) * (mouthCount) * (headShapeCount) * (colorCount) * (headDetailCount)
-            * (colorCount) * (nftCardCount);
+        uint256 chipTraitCount = uint256(eyeCount) * (mouthCount) * (headShapeCount) * (colorCount)
+            * (headDetailCount) * (colorCount) * (nftCardCount);
 
         uint256 chipTraitId = seed % chipTraitCount;
 
@@ -295,8 +293,7 @@ contract Chips is IChips, Initializable, ERC721 {
         uint8 colorCount,
         uint8 nftCardCount
     ) internal pure returns (ChipTraits memory) {
-        uint256 factor =
-            uint256(mouthCount) * uint256(headShapeCount) * uint256(colorCount)
+        uint256 factor = uint256(mouthCount) * uint256(headShapeCount) * uint256(colorCount)
             * uint256(headDetailCount) * uint256(colorCount) * uint256(nftCardCount);
 
         return (ChipTraits({

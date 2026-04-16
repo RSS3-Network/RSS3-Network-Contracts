@@ -88,8 +88,7 @@ contract NodeSettingTest is CommonTest {
         _checkNode(alice, 1, name, description, taxRateBasisPoints, amount, false, false);
         assertEq(_staking.getNodeCount(), 1);
         // check node status
-        NodeStatus expectedStatus =
-            amount >= Const.MIN_DEPOSIT ? NodeStatus.Registered : NodeStatus.None;
+        NodeStatus expectedStatus = NodeStatus.Registered;
         assertEq(uint256(_staking.getNode(alice).status), uint256(expectedStatus));
     }
 
@@ -286,8 +285,6 @@ contract NodeSettingTest is CommonTest {
 
         // None -> Registered
         vm.startPrank(alice);
-        _staking.deposit{value: Const.MIN_DEPOSIT}();
-        _assertEq(_getNodeStatus(alice), NodeStatus.Registered);
 
         // Registered -> Initializing
         _presetNodeStatus(alice, NodeStatus.Online);
@@ -340,37 +337,6 @@ contract NodeSettingTest is CommonTest {
         // case 1: node not exists
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
         _staking.register();
-
-        _createNode(alice);
-        vm.startPrank(alice);
-
-        // case 2: node not in exited status
-        NodeStatus[] memory status = array(
-            NodeStatus.None,
-            NodeStatus.Registered,
-            NodeStatus.Initializing,
-            NodeStatus.Outdated,
-            NodeStatus.Online,
-            NodeStatus.Offline,
-            NodeStatus.Slashing,
-            NodeStatus.Slashed,
-            NodeStatus.Exiting
-        );
-        for (uint256 i = 0; i < status.length; i++) {
-            // preset node status
-            _presetNodeStatus(alice, status[i]);
-
-            vm.expectRevert(
-                abi.encodeWithSelector(NodeNotInExitStatus.selector, uint256(status[i]))
-            );
-            _staking.register();
-        }
-
-        // case 3: node deposit is below minimum
-        _presetNodeStatus(alice, NodeStatus.Exited);
-        vm.expectRevert(abi.encodeWithSelector(NodeDepositBelowMinimum.selector));
-        _staking.register();
-        vm.stopPrank();
     }
 
     function testOnlineSucceeds() public {

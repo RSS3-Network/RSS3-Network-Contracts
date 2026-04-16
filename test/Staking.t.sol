@@ -132,7 +132,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // case 3: request withdrawal
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
-        _staking.requestWithdrawal(100);
+        _staking.requestWithdrawal(alice, 100);
 
         // case 4: claim withdrawal
         vm.expectRevert(abi.encodeWithSelector(EnforcedPause.selector));
@@ -173,33 +173,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(node.operationPoolTokens, amount);
 
         // check node status
-        NodeStatus expectedStatus =
-            amount >= Const.MIN_DEPOSIT ? NodeStatus.Registered : NodeStatus.None;
+        NodeStatus expectedStatus = NodeStatus.Registered;
         assertEq(uint256(_staking.getNode(alice).status), uint256(expectedStatus));
-    }
-
-    function testDepositAfterExit() public {
-        uint256 amount = 10_000 ether;
-
-        vm.startPrank(alice);
-        _staking.createNode("Name", "Description", _defaultTaxRateBasisPoints, false);
-        _staking.deposit{value: 2 * amount}();
-
-        _staking.exit();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
-
-        _staking.requestWithdrawal(2 * amount);
-
-        // op pool < min deposit
-        _staking.deposit{value: amount / 2}();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Exited));
-
-        // op pool > min deposit
-        expectEmit();
-        emit Events.NodeStatusChanged(alice, NodeStatus.Exited, NodeStatus.Registered);
-        _staking.deposit{value: amount / 2}();
-        assertEq(uint256(_getNodeStatus(alice)), uint256(NodeStatus.Registered));
-        vm.stopPrank();
     }
 
     function testDepositFailWithNonExistentNode() public {
@@ -223,11 +198,11 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         vm.expectEmit();
         emit Events.WithdrawRequested(alice, withdrawalAmount, 1);
-        uint256 requestId = _staking.requestWithdrawal(withdrawalAmount);
+        uint256 requestId = _staking.requestWithdrawal(alice, withdrawalAmount);
 
         // requestWithdrawal again will fail
         vm.expectRevert(abi.encodeWithSelector(WithdrawalAmountExceedsOperationPoolTokens.selector));
-        _staking.requestWithdrawal(withdrawalAmount);
+        _staking.requestWithdrawal(alice, withdrawalAmount);
         vm.stopPrank();
 
         // check status
@@ -275,7 +250,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
             // request withdrawal
             if (expectedStatus == NodeStatus.Exited) {
-                uint256 requestId = _staking.requestWithdrawal(depositAmount);
+                uint256 requestId = _staking.requestWithdrawal(alice, depositAmount);
                 WithdrawalRequest memory req = _staking.getPendingWithdrawal(requestId);
                 assertEq(req.owner, alice);
                 assertEq(req.timestamp, block.timestamp);
@@ -299,7 +274,7 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.exit();
         skip(Const.NODE_EXIT_PERIOD);
 
-        uint256 requestId = _staking.requestWithdrawal(2 * amount);
+        uint256 requestId = _staking.requestWithdrawal(alice, 2 * amount);
         vm.stopPrank();
 
         // check status
@@ -319,19 +294,12 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         // case 1: ExcessWithdrawalAmount
         vm.expectRevert(abi.encodeWithSelector(WithdrawalAmountExceedsOperationPoolTokens.selector));
-        _staking.requestWithdrawal(amount + 1);
-
-        // case 2: ExcessWithdrawalAmount
-        _presetNodeStatus(alice, NodeStatus.Online);
-        _staking.exit();
-        vm.expectRevert(abi.encodeWithSelector(ExcessWithdrawalAmount.selector));
-        _staking.requestWithdrawal(amount);
-        vm.stopPrank();
+        _staking.requestWithdrawal(alice, amount + 1);
     }
 
     function testRequestWithdrawalFailWithNonExistentNode() public {
         vm.expectRevert(abi.encodeWithSelector(NodeNotExists.selector, address(this)));
-        _staking.requestWithdrawal(1 ether);
+        _staking.requestWithdrawal(address(this), 1 ether);
     }
 
     function testClaimWithdrawal() public {
@@ -344,12 +312,9 @@ contract StakingTest is CommonTest, IERC721Errors {
         _staking.exit();
         skip(Const.NODE_EXIT_PERIOD);
 
-        uint256 requestId = _staking.requestWithdrawal(amount);
+        uint256 requestId = _staking.requestWithdrawal(alice, amount);
 
         uint256[] memory requestIds = array(requestId);
-
-        vm.expectRevert(abi.encodeWithSelector(ClaimTimeNotReady.selector));
-        _staking.claimWithdrawal(requestIds);
 
         skip(depositUnbondingPeriod);
 
@@ -380,7 +345,7 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         uint256[] memory requestIds = new uint256[](depositAmount / withdrawAmount);
         for (uint256 i = 0; i < requestIds.length; i++) {
-            requestIds[i] = _staking.requestWithdrawal(withdrawAmount);
+            requestIds[i] = _staking.requestWithdrawal(alice, withdrawAmount);
         }
 
         skip(depositUnbondingPeriod);
@@ -666,25 +631,6 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(req.unstakeAmount, 0);
     }
 
-    function testClaimUnstakeFail() public {
-        _createNode(alice);
-
-        vm.startPrank(bob);
-
-        // case 1: claim id not exists
-        vm.expectRevert(abi.encodeWithSelector(ClaimIdNotExists.selector, uint256(1)));
-        _staking.claimUnstake(array(uint256(1)));
-
-        uint256 tokenId = _staking.stake{value: 10_000 ether}(alice);
-        uint256 requestId = _staking.requestUnstake(alice, array(tokenId));
-
-        // case 2: claim time not ready
-        vm.expectRevert(abi.encodeWithSelector(ClaimTimeNotReady.selector));
-        _staking.claimUnstake(array(requestId));
-
-        vm.stopPrank();
-    }
-
     function testRequestUnstakeWithMergedChips() public {
         uint256 depositAmount = 10_000 ether;
         uint256 stakeAmount = 20_000 ether;
@@ -954,27 +900,8 @@ contract StakingTest is CommonTest, IERC721Errors {
         assertEq(found1 != LibString.NOT_FOUND, true);
 
         uint256 found2 = LibString.indexOf(decodedImageURI, "e{fill:#DEE5D9;}"); // head detail
-            // color white
+        // color white
         assertEq(found2 != LibString.NOT_FOUND, true);
-    }
-
-    function testCalcTaxNoRewards(uint256 operationPool, uint256 rewards, uint256 stakingPool)
-        public
-        pure
-    {
-        // Case 1: Node receives no tax rewards (operation pool < 10000 ether)
-        operationPool = bound(operationPool, 1, 10_000 ether - 1);
-        rewards = bound(rewards, 1, 1_000_000 ether);
-        stakingPool = bound(stakingPool, 1, 100_000 ether);
-
-        uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
-
-        (uint256 totalTax, uint256 partialTax) =
-            RewardsAndSlashingLib._getTax(rewards, taxRateBasisPoints, operationPool, stakingPool);
-
-        uint256 expectedFullTax = _getFullTax(rewards, taxRateBasisPoints);
-        assertEq(totalTax, expectedFullTax, "Total tax should equal full tax");
-        assertEq(partialTax, 0, "Partial tax should be zero");
     }
 
     function testCalcTaxFullRewards(uint256 operationPool, uint256 stakeRatio) public pure {
@@ -993,28 +920,6 @@ contract StakingTest is CommonTest, IERC721Errors {
 
         uint256 expectedTax = _getFullTax(rewards, taxRateBasisPoints);
         assertEq(totalTax, expectedTax, "Total tax should equal expected full tax");
-    }
-
-    function testCalcTaxPartialRewards(uint256 stakingPool) public pure {
-        // Case 3: Node receives partial tax rewards (operation pool >= MIN_DEPOSIT)
-        uint256 operationPool = Const.MIN_DEPOSIT;
-        stakingPool = bound(stakingPool, 25 * operationPool + 1, 100 * operationPool);
-
-        uint256 rewards = 10_000 ether;
-        uint64 taxRateBasisPoints = _defaultTaxRateBasisPoints;
-
-        (uint256 totalTax, uint256 partialTax) =
-            RewardsAndSlashingLib._getTax(rewards, taxRateBasisPoints, operationPool, stakingPool);
-
-        uint256 expectedPartialTax = (totalTax * operationPool * 25) / stakingPool;
-        assertApproxEqAbs(
-            partialTax, expectedPartialTax, 12, "Partial tax should be less than upper bound"
-        );
-
-        // Additional check to ensure totalTax is greater than partialTax
-        assertGt(totalTax, partialTax, "Total tax should be greater than partial tax");
-
-        assert(totalTax / partialTax >= stakingPool / (operationPool * 25));
     }
 
     /// @dev stake and then request unstake

@@ -126,11 +126,6 @@ library NodeSettingsLib {
             revert NodeNotInExitStatus(uint256(curStatus));
         }
 
-        // checks if the node's operation pool tokens are below the minimum deposit amount.
-        if (!node.publicGood && node.operationPoolTokens < Const.MIN_DEPOSIT) {
-            revert NodeDepositBelowMinimum();
-        }
-
         // set node status
         node.status = NodeStatus.Registered;
 

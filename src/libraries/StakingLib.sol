@@ -36,12 +36,10 @@ library StakingLib {
         NodePoolLib.increaseOperationPool(node, amount);
 
         // set node status
-        if (node.operationPoolTokens >= Const.MIN_DEPOSIT) {
-            NodeStatus curStatus = node.status;
-            if (curStatus == NodeStatus.None || curStatus == NodeStatus.Exited) {
-                node.status = NodeStatus.Registered;
-                emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Registered);
-            }
+        NodeStatus curStatus = node.status;
+        if (curStatus == NodeStatus.None || curStatus == NodeStatus.Exited) {
+            node.status = NodeStatus.Registered;
+            emit Events.NodeStatusChanged(nodeAddr, curStatus, NodeStatus.Registered);
         }
 
         emit Events.Deposited(nodeAddr, amount);
@@ -116,12 +114,6 @@ library StakingLib {
 
         // withdrawal amount should not exceed the operation pool tokens
         if (amount > node.operationPoolTokens) revert WithdrawalAmountExceedsOperationPoolTokens();
-
-        // deposit balance must >= MIN_DEPOSIT when node is not in `Exited` status
-        NodeStatus status = node.status;
-        if (NodeStatus.Exited != status && node.operationPoolTokens - amount < Const.MIN_DEPOSIT) {
-            revert ExcessWithdrawalAmount();
-        }
 
         NodePoolLib.decreaseOperationPool(node, amount);
 
@@ -247,9 +239,8 @@ library StakingLib {
     }
 
     /// @dev checks that:
-    /// 1. caller has the authorization to unstake/merge the chips
-    /// 2. chips are issued by the same node
-    /// 3. chips have the same owner
+    /// 1. chips are issued by the same node
+    /// 2. chips have the same owner
     function _checkChipsConditions(address nodeAddr, uint256[] calldata chipIds)
         internal
         view
@@ -263,9 +254,6 @@ library StakingLib {
             address owner = IERC721(chips).ownerOf(tokenId);
             if (lastOwner != address(0) && owner != lastOwner) revert ChipsNotSameOwner();
             lastOwner = owner;
-
-            // check if the caller is authorized to unstake/merge the chips
-            if (!_isAuthorized(owner, tokenId, msg.sender)) revert ChipNotAuthorized(tokenId);
 
             // check if the chip is issued by the node
             if (_issuerOf(tokenId) != nodeAddr) revert ChipNotValid(tokenId, nodeAddr);

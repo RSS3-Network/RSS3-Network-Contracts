@@ -115,7 +115,7 @@ contract ChipsTest is CommonTest {
         );
 
         uint256 found1 = LibString.indexOf(attributes, "Public Good Node"); // head detail color
-            // white
+        // white
 
         assertNotEq(found1, LibString.NOT_FOUND);
 
@@ -124,7 +124,7 @@ contract ChipsTest is CommonTest {
         );
 
         uint256 found2 = LibString.indexOf(attributes2, "Public Good Node"); // head detail color
-            // white
+        // white
 
         assertNotEq(found2, LibString.NOT_FOUND);
 

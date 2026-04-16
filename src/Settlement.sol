@@ -118,10 +118,7 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
         IStaking(_staking).setSettlementPhase(!isFinal);
 
         // distribute rewards
-        IStaking(_staking)
-        .distributeRewards{
-            value: data.rewardsToSend
-        }(
+        IStaking(_staking).distributeRewards{value: data.rewardsToSend}(
             data.epochInfo,
             nodeAddrs,
             operationRewards,
@@ -204,8 +201,9 @@ contract Settlement is ISettlement, Multicall, Initializable, AccessControlEnume
     function _updateRewardsRatio(uint256 operationRewardsPercent) internal {
         _totalOperationRewardsPerEpoch =
             (TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION * operationRewardsPercent) / (100 * 365 days);
-        _totalStakingRewardsPerEpoch = ((TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION)
-                * (100 - operationRewardsPercent)) / (100 * 365 days);
+        _totalStakingRewardsPerEpoch =
+            ((TOTAL_REWARDS_PER_YEAR * EPOCH_DURATION) * (100 - operationRewardsPercent))
+                / (100 * 365 days);
     }
 
     /// @dev check distributed operationRewards not exceeds the max rewards per

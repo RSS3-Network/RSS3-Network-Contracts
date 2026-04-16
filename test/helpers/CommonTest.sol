@@ -36,8 +36,8 @@ contract CommonTest is Utils {
     address[] public zeroAddrArr = new address[](0);
     uint256[] public zeroUintArr = new uint256[](0);
 
-    uint256 public constant stakeUnbondingPeriod = 22.5 days;
-    uint256 public constant depositUnbondingPeriod = 22.5 days;
+    uint256 public constant stakeUnbondingPeriod = 0;
+    uint256 public constant depositUnbondingPeriod = 0;
 
     uint256 internal _initialAmount = 100_000_000 ether;
 

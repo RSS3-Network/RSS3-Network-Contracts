@@ -5,10 +5,6 @@ library Const {
     uint256 public constant SHARES_PER_CHIP = 500 ether;
     uint256 public constant MIN_STAKE = 500 ether;
 
-    /// @dev the minimal tokens for deposit, 10,000 by default.
-    /// node operator can receive tax if it stakes at least 10,000 tokens, otherwise nothing
-    uint256 public constant MIN_DEPOSIT = 10_000 ether;
-
     /// @dev the ratio of total tokens to deposited tokens, 25 by default.
     /// node operator can receive its full tax if it deposits at least 1/25 of the tokens staked by
     /// external delegators

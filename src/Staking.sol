@@ -86,7 +86,7 @@ contract Staking is
 
     /// @dev total operation pool tokens
     uint256 internal _totalOperationPoolTokens; // deprecated in next version
-        // / @dev total staking pool tokens
+    // / @dev total staking pool tokens
     uint256 internal _totalStakingPoolTokens; // deprecated in next version
 
     /// @dev the issuers of chips
@@ -207,13 +207,13 @@ contract Staking is
     }
 
     /// @inheritdoc IStaking
-    function requestWithdrawal(uint256 amount)
+    function requestWithdrawal(address nodeAddr, uint256 amount)
         external
         override
         whenNotPaused
         returns (uint256 requestId)
     {
-        requestId = StakingLib.requestWithdrawal(msg.sender, amount);
+        requestId = StakingLib.requestWithdrawal(nodeAddr, amount);
     }
 
     /// @inheritdoc IStaking
@@ -321,7 +321,7 @@ contract Staking is
         string[] calldata reasons,
         address[] calldata reporters
     ) external override onlyRole(ORACLE_ROLE) {
-        RewardsAndSlashingLib.submitDemotions(epoch, nodeAddrs, reasons, reporters);
+        revert("not implemented");
     }
 
     /// @inheritdoc IStaking
@@ -330,7 +330,7 @@ contract Staking is
         uint256 epoch,
         uint256[] calldata demotionIdsToRevoke
     ) external override onlyRole(ORACLE_ROLE) {
-        RewardsAndSlashingLib.revokeDemotions(nodeAddr, epoch, demotionIdsToRevoke);
+        revert("not implemented");
     }
 
     /// @inheritdoc IStaking
@@ -339,7 +339,7 @@ contract Staking is
         override
         onlyRole(ORACLE_ROLE)
     {
-        RewardsAndSlashingLib.commitSlashing(nodeAddr, epoch, PAYMENT_PROCESSOR);
+        revert("not implemented");
     }
 
     /// @inheritdoc IStaking

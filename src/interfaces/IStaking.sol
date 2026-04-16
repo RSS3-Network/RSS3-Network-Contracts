@@ -76,10 +76,13 @@ interface IStaking {
     /**
      * @notice Requests withdraw tokens from operation pool for node operator.
      * @dev Emits the `WithdrawRequested` event.
+     * @param nodeAddr The address of node to withdraw.
      * @param amount Amount of tokens to withdraw.
      * @return requestId The created withdraw request id
      */
-    function requestWithdrawal(uint256 amount) external returns (uint256 requestId);
+    function requestWithdrawal(address nodeAddr, uint256 amount)
+        external
+        returns (uint256 requestId);
 
     /**
      * @notice Changes tax rate of the node.
