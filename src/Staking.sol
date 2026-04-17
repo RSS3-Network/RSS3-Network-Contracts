@@ -315,30 +315,25 @@ contract Staking is
     }
 
     /// @inheritdoc IStaking
-    function submitDemotions(
-        uint256 epoch,
-        address[] calldata nodeAddrs,
-        string[] calldata reasons,
-        address[] calldata reporters
-    ) external override onlyRole(ORACLE_ROLE) {
-        revert("not implemented");
-    }
-
-    /// @inheritdoc IStaking
-    function revokeDemotions(
-        address nodeAddr,
-        uint256 epoch,
-        uint256[] calldata demotionIdsToRevoke
-    ) external override onlyRole(ORACLE_ROLE) {
-        revert("not implemented");
-    }
-
-    /// @inheritdoc IStaking
-    function commitSlashing(address nodeAddr, uint256 epoch)
+    function submitDemotions(uint256, address[] calldata, string[] calldata, address[] calldata)
         external
         override
         onlyRole(ORACLE_ROLE)
     {
+        revert("not implemented");
+    }
+
+    /// @inheritdoc IStaking
+    function revokeDemotions(address, uint256, uint256[] calldata)
+        external
+        override
+        onlyRole(ORACLE_ROLE)
+    {
+        revert("not implemented");
+    }
+
+    /// @inheritdoc IStaking
+    function commitSlashing(address, uint256) external override onlyRole(ORACLE_ROLE) {
         revert("not implemented");
     }
 
