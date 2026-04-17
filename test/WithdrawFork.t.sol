@@ -44,7 +44,7 @@ contract WithdrawForkTest is CommonTest {
         Node memory nodeBefore = staking.getNode(nodeAddr);
         uint256 balanceBefore = nodeAddr.balance;
 
-        utilizer.withdraw(nodeAddr);
+        utilizer.withdraw(array(nodeAddr));
 
         // check status
         uint256 balanceAfter = nodeAddr.balance;

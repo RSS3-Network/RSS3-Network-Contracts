@@ -23,13 +23,16 @@ contract Utilizer {
         }
     }
 
-    function withdraw(address nodeAddr) public {
-        Node memory node = IStaking(staking).getNode(nodeAddr);
-        uint256 withdrawAmount = node.operationPoolTokens;
+    function withdraw(address[] memory nodeAddrs) public {
+        for (uint256 i = 0; i < nodeAddrs.length; i++) {
+            address nodeAddr = nodeAddrs[i];
+            Node memory node = IStaking(staking).getNode(nodeAddr);
+            uint256 withdrawAmount = node.operationPoolTokens;
 
-        if (withdrawAmount > 0) {
-            uint256 requestId = IStaking(staking).requestWithdrawal(nodeAddr, withdrawAmount);
-            IStaking(staking).claimWithdrawal(_array(requestId));
+            if (withdrawAmount > 0) {
+                uint256 requestId = IStaking(staking).requestWithdrawal(nodeAddr, withdrawAmount);
+                IStaking(staking).claimWithdrawal(_array(requestId));
+            }
         }
     }
 
