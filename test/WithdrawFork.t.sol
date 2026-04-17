@@ -35,7 +35,7 @@ contract WithdrawForkTest is CommonTest {
         IProxy(stakingAddress).upgradeTo(address(stakingImpl));
         staking = Staking(stakingAddress);
 
-        utilizer = new Utilizer(address(staking));
+        utilizer = new Utilizer(address(staking), address(0xbbb));
     }
 
     function testWithdrawFork() public {
